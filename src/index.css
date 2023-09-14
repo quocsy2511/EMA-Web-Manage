@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+:where(.css-dev-only-do-not-override-nnuwmp).ant-btn-primary {
+  background-color: #1677ff;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.ant-layout-sider.ant-layout-sider-dark.ant-layout-sider-has-trigger {
+  min-width: 230px !important;
+}
+.ant-layout-sider.ant-layout-sider-dark.ant-layout-sider-collapsed.ant-layout-sider-has-trigger {
+  min-width: 80px !important;
+}
+.ant-layout .ant-layout-sider-trigger {
+  background-color: transparent;
+}
+
+.anticon.anticon-left {
+  color: #007d71;
+}
+.anticon.anticon-right {
+  color: #975601;
+}
+
+.ant-menu-vertical > .ant-menu-item {
+  height: 38px !important;
+  padding-inline: calc(50% - 8px - 8px);
+}
+.ant-menu-inline-collapsed > .ant-menu-submenu > .ant-menu-submenu-title {
+  height: 38px !important;
+  padding-inline: calc(50% - 8px - 8px);
+}
+.ant-menu-dark .ant-menu-item-selected {
+  background-color: rgb(23 109 248 / 32%);
+}
+.ant-layout-sider.ant-layout-sider-dark {
+  min-width: 230px !important;
+}
+.ant-layout-sider.ant-layout-sider-dark.ant-layout-sider-collapsed {
+  min-width: 80px !important;
+}
