@@ -46,7 +46,7 @@ const Sidebar = ({ collapsed }) => {
     getItem(
       <LabelText text="Trang chủ" />,
       "Trang chủ",
-      "/dashboard",
+      "/",
       <p>
         <HomeIcon className="text-[#2196f3]" />
       </p>,
@@ -144,6 +144,7 @@ const Sidebar = ({ collapsed }) => {
       null
     ),
   ];
+
   return (
     <>
       <Sider
@@ -158,6 +159,7 @@ const Sidebar = ({ collapsed }) => {
                 minWidth: "230px", // Chiều rộng khi mở rộng
               }
         }
+        className="border-r-2"
         collapsible
         collapsed={collapsed}
         // onCollapse={(value) => setCollapsed(value)}
@@ -165,7 +167,8 @@ const Sidebar = ({ collapsed }) => {
       >
         {/* logo here */}
         <div className="demo-logo-vertical flex justify-center items-center p-4 dark:text-white">
-          logo-HREA
+          <p>logo</p>
+          {!collapsed && <p>HREA</p>}
         </div>
 
         {/* sidebar here */}

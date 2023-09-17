@@ -4,6 +4,8 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import LoginPage from "./pages/Login/LoginPage";
 import RootPage from "./pages/RootPage";
 import { queryClient } from "./utils/http";
+import ErrorPage from "./pages/Error/ErrorPage";
+import { checkAuthLoader, tokenLoader } from "./utils/auth";
 
 const DashboardPage = lazy(() => import("./pages/Dashboard/DashboardPage"));
 const EventListPage = lazy(() => import("./pages/Event/EventListPage"));
@@ -23,9 +25,12 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <RootPage />,
+    errorElement: <ErrorPage />,
+    // loader: tokenLoader,
+    // loader: checkAuthLoader, // Is call whenever a new navigation trigger
     children: [
       {
-        path: "/dashboard",
+        index: true,
         element: (
           <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
             <DashboardPage />
@@ -33,7 +38,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/event-list",
+        path: "event-list",
         element: (
           <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
             <EventListPage />
@@ -41,7 +46,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/event-history",
+        path: "event-history",
         element: (
           <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
             <EventHistoryPage />,
@@ -49,7 +54,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/personnel-list",
+        path: "personnel-list",
         element: (
           <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
             <PersonnelListPage />
@@ -57,7 +62,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/personnel-position",
+        path: "personnel-position",
         element: (
           <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
             <PersonnelPositionPage />
@@ -65,7 +70,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/personnel-department",
+        path: "personnel-department",
         element: (
           <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
             <PersonnelDepartmentPage />
@@ -73,7 +78,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/request",
+        path: "request",
         element: (
           <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
             <RequestPage />
@@ -86,29 +91,6 @@ const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage />,
   },
-  // {
-  //   path: "/product",
-  //   element: <ProductPage />,
-  //   errorElement: <ErrorPage />,
-  //   children: [
-  //     {
-  //       // path: "/",
-  //       index: true,
-  //       element: <Ngu />,
-  //       errorElement: <ErrorPage />,
-  //     },
-  //     {
-  //       path: "detail",
-  //       element: <Ngu1 />,
-  //       children: [
-  //         {
-  //           path: "sub-detail",
-  //           element: <Detail1 />
-  //         }
-  //       ],
-  //     },
-  //   ],
-  // },
 ]);
 
 function App() {

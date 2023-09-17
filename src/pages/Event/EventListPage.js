@@ -379,7 +379,7 @@ const EventListPage = () => {
 
   return (
     <>
-      <div className="p-10 min-h-screen bg-blue-300 min-w-full ">
+      <div className="p-10 min-h-screen bg-white min-w-full ">
         <div className="flex-1">
           <HeadingTitle> Danh sách sự kiện</HeadingTitle>
           <div className="mt-10 px-4 ">
