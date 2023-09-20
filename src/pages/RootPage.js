@@ -38,7 +38,7 @@ const RootPage = () => {
 
           {/* Content */}
           <Content>
-            <div className="bg-slate-200 flex items-center ">
+            <div className="bg-slate-200 ">
               <Outlet />
             </div>
           </Content>
