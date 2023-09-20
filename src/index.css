@@ -11,6 +11,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 :where(.css-dev-only-do-not-override-nnuwmp).ant-btn-primary {
+  background-color: #1677ff !important;
+}
+
+:where(.css-dev-only-do-not-override-18iikkb).ant-btn-primary {
   background-color: #1677ff;
 }
 

@@ -115,75 +115,48 @@ const Header = ({ collapsed, setCollapsed }) => {
             height: 64,
           }}
         />
-
-        <Dropdown
-          menu={{
-            notiItems,
-          }}
-        >
-          <a onClick={(e) => e.preventDefault()}>
-            <Space>
-              Hover me
-              <DownOutlined />
-            </Space>
-          </a>
-        </Dropdown>
-
-        {/* <div className="flex items-center">
-          <motion.div
-            whileTap={{ scale: 0.5 }}
-            transition={{ type: "spring", stiffness: 400, damping: 20 }}
-            className="cursor-pointer"
+        <div className="flex items-center">
+          <Dropdown
+            menu={{
+              items: notiItems,
+            }}
+            trigger={["click"]}
+            placement="bottomLeft"
+            arrow
           >
-            <Dropdown
-              menu={{
-                notiItems,
-              }}
-              trigger={["click"]}
-              placement="bottomLeft"
-              arrow
+            <Badge
+              size={"small"}
+              count={5}
+              offset={[-4, 4]}
+              tit le="5 thông báo"
             >
-              <Badge
-                size={"small"}
-                count={5}
-                offset={[-4, 4]}
-                title="5 thông báo"
-              >
-                <BellOutlined size={30} />
-              </Badge>
-            </Dropdown>
-          </motion.div>
+              <BellOutlined className="text-xl"/>
+            </Badge>
+          </Dropdown>
 
           <div className="w-5" />
-
-          <motion.div
-            className="flex items-center cursor-pointer"
-            whileTap={{ scale: 0.75 }}
-            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          <Dropdown
+            menu={{
+              items: userItems,
+            }}
+            trigger={["click"]}
+            placement="bottomLeft"
+            arrow
           >
-            <Dropdown
-              menu={{
-                userItems,
-              }}
-              trigger={["click"]}
-              placement="bottomLeft"
-              arrow
-            >
-              <>
-                <Avatar
-                  size={35}
-                  icon={<p>icon</p>}
-                  alt="user_image"
-                  src={
-                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
-                  }
-                />
-                <div className="w-2" />
-                <p className="text-sm font-normal">User Name</p>
-              </>
-            </Dropdown>
-          </motion.div>
-        </div> */}
+            <div className="flex items-center cursor-pointer">
+              <Avatar
+                size={35}
+                icon={<p>icon</p>}
+                alt="user_image"
+                src={
+                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
+                }
+              />
+              <div className="w-2" />
+              {/* <p className="text-sm font-normal">User Name</p> */}
+            </div>
+          </Dropdown>
+        </div>
       </div>
     </HeaderLayout>
   );
