@@ -7,11 +7,60 @@ import {
   Square2StackIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
-import { ConfigProvider, Menu, Switch } from "antd";
+import { ConfigProvider, Dropdown, Menu, Switch } from "antd";
+import Icon from "@ant-design/icons";
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
+import { SunSvg, MoonSvg } from "../../constants/icon";
+import { AnimatePresence, motion } from "framer-motion";
+
+const items = [
+  {
+    key: "1",
+    label: (
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://www.antgroup.com"
+      >
+        1st menu item
+      </a>
+    ),
+  },
+  {
+    key: "2",
+    label: (
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://www.aliyun.com"
+      >
+        2nd menu item (disabled)
+      </a>
+    ),
+    disabled: true,
+  },
+  {
+    key: "3",
+    label: (
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://www.luohanacademy.com"
+      >
+        3rd menu item (disabled)
+      </a>
+    ),
+    disabled: true,
+  },
+  {
+    key: "4",
+    danger: true,
+    label: "a danger item",
+  },
+];
 
 //label cho than side bar
 const LabelText = ({ text }) => (
@@ -206,15 +255,46 @@ const Sidebar = ({ collapsed }) => {
 
         {/* dark mode here */}
         <div className="flex justify-center items-center mt-20 py-1 flex-col">
-          <div className="w-4/5 rounded-full h-[1px] mb-6 bg-gray-400 "></div>
+          {/* <div className="w-4/5 rounded-full h-[1px] mb-6 bg-gray-400 "></div>
           <Switch
             className="bg-gray-400"
             checked={darkSide}
             onChange={changeTheme}
             checkedChildren="Dark"
             unCheckedChildren="Light"
-          />
+          /> */}
+          <AnimatePresence mode="wait">
+            {darkSide ? (
+              <motion.div
+                key="sun"
+                onClick={() => changeTheme(false)}
+                exit={{ rotate: 360 }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 0.1, type: "spring", stiffness: 400 }}
+              >
+                <Icon component={SunSvg} className="text-white" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="moon"
+                onClick={() => changeTheme(true)}
+                exit={{ rotate: 360 }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 0.1, type: "spring", stiffness: 400 }}
+              >
+                <Icon component={MoonSvg} className="text-[#eb2f96]" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+
+        <Dropdown
+          menu={{
+            items,
+          }}
+        >
+          <a onClick={(e) => e.preventDefault()}>Hover me</a>
+        </Dropdown>
       </Sider>
     </>
   );

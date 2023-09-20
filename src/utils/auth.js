@@ -9,8 +9,7 @@ export function logout() {
   localStorage.removeItem("token");
 }
 
-function calcExpirationTime(token) {
-  const decode = jwt(token);
+function calcExpirationTime(decodedToken) {
   //   const expirationTime =
   const now = new Date();
   // const remainedTime =
@@ -23,11 +22,13 @@ export function getAuthToken() {
 
   if (!token) return null;
 
-  const remainedTime = calcExpirationTime(token);
+  const decodedToken = jwt(token);
+
+  const remainedTime = calcExpirationTime(decodedToken);
 
   if (remainedTime < 0) return "EXPIRED";
 
-  return token;
+  return decodedToken;
 }
 
 // export function tokenLoader() {
@@ -39,6 +40,8 @@ export function checkAuthLoader() {
 
   if (!token) return redirect("/login");
   if (token === "EXPIRED") return redirect("/login");
+
+  // if (token.role === "MANAGER") redirect("manager-task");
 
   return token;
 }

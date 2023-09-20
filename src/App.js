@@ -20,6 +20,7 @@ const PersonnelDepartmentPage = lazy(() =>
   import("./pages/Personnel/PersonnelDepartmentPage")
 );
 const RequestPage = lazy(() => import("./pages/Request/RequestPage"));
+const ManagerTaskPage = lazy(() => import("./pages/Manager/Task"));
 
 const router = createBrowserRouter([
   {
@@ -86,6 +87,14 @@ const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: "/manager-task",
+    element: (
+      <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+        <ManagerTaskPage />
+      </Suspense>
+    ),
   },
   {
     path: "/login",
