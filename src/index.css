@@ -53,3 +53,7 @@ code {
 .ant-layout-sider.ant-layout-sider-dark.ant-layout-sider-collapsed {
   min-width: 80px !important;
 }
+
+.ant-menu.ant-menu-root.ant-menu-inline {
+  border-right: 0;
+}
