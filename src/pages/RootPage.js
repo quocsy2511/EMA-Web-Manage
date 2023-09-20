@@ -21,7 +21,7 @@ const RootPage = () => {
         <Layout>
           {/* header */}
           <Header className="p-0 bg-gray-400">
-            <div className="">
+            <div className="flex items-center justify-between">
               <Button
                 type="text"
                 icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -32,7 +32,6 @@ const RootPage = () => {
                   height: 64,
                 }}
               />
-              header
             </div>
           </Header>
 

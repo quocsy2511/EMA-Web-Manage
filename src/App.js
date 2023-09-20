@@ -86,29 +86,6 @@ const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage />,
   },
-  // {
-  //   path: "/product",
-  //   element: <ProductPage />,
-  //   errorElement: <ErrorPage />,
-  //   children: [
-  //     {
-  //       // path: "/",
-  //       index: true,
-  //       element: <Ngu />,
-  //       errorElement: <ErrorPage />,
-  //     },
-  //     {
-  //       path: "detail",
-  //       element: <Ngu1 />,
-  //       children: [
-  //         {
-  //           path: "sub-detail",
-  //           element: <Detail1 />
-  //         }
-  //       ],
-  //     },
-  //   ],
-  // },
 ]);
 
 function App() {
