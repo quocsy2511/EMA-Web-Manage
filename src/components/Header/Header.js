@@ -9,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
 
-const notiItems = [
+const items = [
   {
     key: "1",
     label: (
@@ -118,7 +118,7 @@ const Header = ({ collapsed, setCollapsed }) => {
 
         <Dropdown
           menu={{
-            notiItems,
+            items,
           }}
         >
           <a onClick={(e) => e.preventDefault()}>
