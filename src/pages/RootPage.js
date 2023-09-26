@@ -23,7 +23,6 @@ const RootPage = () => {
         <Layout>
           {/* header */}
           <Header collapsed={collapsed} setCollapsed={setCollapsed} />
-
           {/* Content */}
           <Content>
             <div className="bg-white flex items-center ">
