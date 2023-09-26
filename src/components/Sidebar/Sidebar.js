@@ -75,6 +75,7 @@ const Sidebar = ({ collapsed }) => {
   const [darkSide, setDarkSide] = useState(
     colorTheme === "light" ? true : false
   );
+
   const changeTheme = (value) => {
     setTheme(value ? "dark" : "light");
     setColorTheme(colorTheme);
@@ -103,31 +104,16 @@ const Sidebar = ({ collapsed }) => {
     ),
     getItem(
       <LabelText text="Sự kiện" />,
-      null,
+      "Sự kiện",
       "event",
       <p>
         <CalendarDaysIcon className="text-[#9c27b0]" />
       </p>,
-      [
-        getItem(
-          <span className=" font-normal text-sm">Danh sách sự kiện</span>,
-          null,
-          "/event-list",
-          null,
-          null
-        ),
-        getItem(
-          <span className="font-normal text-sm">Lịch sử sự kiện</span>,
-          null,
-          "/event-history",
-          null,
-          null
-        ),
-      ]
+      null
     ),
     getItem(
-      <LabelText text="Công việc" />,
-      "Công việc",
+      <LabelText text="Nhân sự" />,
+      "Nhân sự",
       "/task",
       <p>
         <ClipboardIcon className="text-[#3f51b5]" />
@@ -135,35 +121,31 @@ const Sidebar = ({ collapsed }) => {
       null
     ),
     getItem(
-      <LabelText text="Nhân sự" />,
-      null,
+      <LabelText text="Bộ phận" />,
+      "Bộ phận",
       "personnel",
       <p>
         <UserIcon className="text-orange-400" />
       </p>,
-      [
-        getItem(
-          <span className="font-normal text-sm">Danh sách nhân viên</span>,
-          null,
-          "/personnel-list",
-          null,
-          null
-        ),
-        getItem(
-          <span className="font-normal text-sm">Chức vụ</span>,
-          null,
-          "/personnel-position",
-          null,
-          null
-        ),
-        getItem(
-          <span className="font-normal text-sm">Phòng ban</span>,
-          null,
-          "/personnel-department",
-          null,
-          null
-        ),
-      ]
+      null
+    ),
+    getItem(
+      <LabelText text="Chức vụ" />,
+      "Chức vụ",
+      "personnel",
+      <p>
+        <UserIcon className="text-orange-400" />
+      </p>,
+      null
+    ),
+    getItem(
+      <LabelText text="Chấm công" />,
+      "Chấm công",
+      "personnel",
+      <p>
+        <UserIcon className="text-orange-400" />
+      </p>,
+      null
     ),
     getItem(
       <LabelText text="Yêu cầu" />,
@@ -171,15 +153,6 @@ const Sidebar = ({ collapsed }) => {
       "/request",
       <p>
         <Square2StackIcon className="text-[#673ab7]" />
-      </p>,
-      null
-    ),
-    getItem(
-      <p className="pr-24 font-medium text-base">Lương</p>,
-      "Lương",
-      "/salary",
-      <p>
-        <BanknotesIcon className="text-[#009688]" />
       </p>,
       null
     ),

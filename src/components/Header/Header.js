@@ -103,7 +103,7 @@ const userItems = [
 
 const Header = ({ collapsed, setCollapsed }) => {
   return (
-    <HeaderLayout className="p-0 bg-white border-b-2">
+    <HeaderLayout className="p-0 bg-white border-b-2 h-16">
       <div className="flex justify-between items-center pr-8">
         <Button
           type="text"

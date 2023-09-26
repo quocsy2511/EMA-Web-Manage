@@ -6,6 +6,7 @@ import RootPage from "./pages/RootPage";
 import { queryClient } from "./utils/http";
 import ErrorPage from "./pages/Error/ErrorPage";
 import { checkAuthLoader, tokenLoader } from "./utils/auth";
+import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 
 const DashboardPage = lazy(() => import("./pages/Dashboard/DashboardPage"));
 const EventListPage = lazy(() => import("./pages/Event/EventListPage"));
@@ -33,7 +34,7 @@ const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+          <Suspense fallback={<LoadingPageIndicator />}>
             <DashboardPage />
           </Suspense>
         ),
@@ -41,7 +42,7 @@ const router = createBrowserRouter([
       {
         path: "event-list",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+          <Suspense fallback={<LoadingPageIndicator />}>
             <EventListPage />
           </Suspense>
         ),
@@ -49,7 +50,7 @@ const router = createBrowserRouter([
       {
         path: "event-history",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+          <Suspense fallback={<LoadingPageIndicator />}>
             <EventHistoryPage />,
           </Suspense>
         ),
@@ -57,7 +58,7 @@ const router = createBrowserRouter([
       {
         path: "personnel-list",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+          <Suspense fallback={<LoadingPageIndicator />}>
             <PersonnelListPage />
           </Suspense>
         ),
@@ -65,7 +66,7 @@ const router = createBrowserRouter([
       {
         path: "personnel-position",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+          <Suspense fallback={<LoadingPageIndicator />}>
             <PersonnelPositionPage />
           </Suspense>
         ),
@@ -73,7 +74,7 @@ const router = createBrowserRouter([
       {
         path: "personnel-department",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+          <Suspense fallback={<LoadingPageIndicator />}>
             <PersonnelDepartmentPage />
           </Suspense>
         ),
@@ -81,7 +82,7 @@ const router = createBrowserRouter([
       {
         path: "request",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+          <Suspense fallback={<LoadingPageIndicator />}>
             <RequestPage />
           </Suspense>
         ),
@@ -91,7 +92,7 @@ const router = createBrowserRouter([
   {
     path: "/manager-task",
     element: (
-      <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+      <Suspense fallback={<LoadingPageIndicator />}>
         <ManagerTaskPage />
       </Suspense>
     ),
