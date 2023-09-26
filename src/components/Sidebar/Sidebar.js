@@ -10,7 +10,7 @@ import {
 import { ConfigProvider, Dropdown, Menu, Switch } from "antd";
 import Icon from "@ant-design/icons";
 import Sider from "antd/es/layout/Sider";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
 import { SunSvg, MoonSvg } from "../../constants/icon";
@@ -82,13 +82,12 @@ const Sidebar = ({ collapsed }) => {
     setDarkSide(value);
   };
 
-  const getItem = (label, title, key, icon, children) => {
+  const getItem = (label, title, key, icon) => {
     return {
       label,
       title,
       key,
       icon,
-      children,
     };
   };
 
@@ -96,74 +95,67 @@ const Sidebar = ({ collapsed }) => {
     getItem(
       <LabelText text="Trang chủ" />,
       "Trang chủ",
-      "/",
+      "/manager",
       <p>
         <HomeIcon className="text-[#2196f3]" />
-      </p>,
-      null
+      </p>
     ),
     getItem(
       <LabelText text="Sự kiện" />,
       "Sự kiện",
-      "event",
+      "/manager/event",
       <p>
         <CalendarDaysIcon className="text-[#9c27b0]" />
-      </p>,
-      null
+      </p>
     ),
     getItem(
       <LabelText text="Nhân sự" />,
       "Nhân sự",
-      "/task",
+      "/manager/personnel",
       <p>
         <ClipboardIcon className="text-[#3f51b5]" />
-      </p>,
-      null
+      </p>
     ),
     getItem(
       <LabelText text="Bộ phận" />,
       "Bộ phận",
-      "personnel",
+      "/manager/division",
       <p>
         <UserIcon className="text-orange-400" />
-      </p>,
-      null
+      </p>
     ),
     getItem(
       <LabelText text="Chức vụ" />,
       "Chức vụ",
-      "personnel",
+      "/manager/role",
       <p>
         <UserIcon className="text-orange-400" />
-      </p>,
-      null
+      </p>
     ),
     getItem(
       <LabelText text="Chấm công" />,
       "Chấm công",
-      "personnel",
+      "/manager/timekeeping",
       <p>
         <UserIcon className="text-orange-400" />
-      </p>,
-      null
+      </p>
     ),
     getItem(
       <LabelText text="Yêu cầu" />,
       "Yêu cầu",
-      "/request",
+      "/manager/request",
       <p>
         <Square2StackIcon className="text-[#673ab7]" />
-      </p>,
-      null
+      </p>
     ),
     getItem(
       <LabelText text="Khác" />,
       "Khác",
-      "/others",
+      // "/manager/others",
+      "/",
       <p>
         <RectangleGroupIcon className="text-[#795548]" />
-      </p>,
-      null
+      </p>
     ),
   ];
 
@@ -215,10 +207,7 @@ const Sidebar = ({ collapsed }) => {
             <Menu
               theme={theme}
               mode="inline"
-              onClick={({ key }) => {
-                if (!key.includes("/")) return;
-                else navigate(key);
-              }}
+              onClick={({ key }) => navigate(key)}
               defaultSelectedKeys={location.pathname}
               items={sidebarItems}
               inlineIndent={30}
@@ -228,46 +217,32 @@ const Sidebar = ({ collapsed }) => {
 
         {/* dark mode here */}
         <div className="flex justify-center items-center mt-20 py-1 flex-col">
-          {/* <div className="w-4/5 rounded-full h-[1px] mb-6 bg-gray-400 "></div>
-          <Switch
-            className="bg-gray-400"
-            checked={darkSide}
-            onChange={changeTheme}
-            checkedChildren="Dark"
-            unCheckedChildren="Light"
-          /> */}
           <AnimatePresence mode="wait">
             {darkSide ? (
               <motion.div
                 key="sun"
                 onClick={() => changeTheme(false)}
-                exit={{ rotate: 360 }}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 0.1, type: "spring", stiffness: 400 }}
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.05, type: "spring", stiffness: 200 }}
               >
-                <Icon component={SunSvg} className="text-white" />
+                <Icon component={SunSvg} className="text-orange-300" />
               </motion.div>
             ) : (
               <motion.div
                 key="moon"
                 onClick={() => changeTheme(true)}
-                exit={{ rotate: 360 }}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 0.1, type: "spring", stiffness: 400 }}
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.05, type: "spring", stiffness: 200 }}
               >
                 <Icon component={MoonSvg} className="text-[#eb2f96]" />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-
-        <Dropdown
-          menu={{
-            items,
-          }}
-        >
-          <a onClick={(e) => e.preventDefault()}>Hover me</a>
-        </Dropdown>
       </Sider>
     </>
   );

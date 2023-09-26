@@ -32,13 +32,13 @@ const RootPage = () => {
           </Content>
 
           {/* footer */}
-          <Footer
+          {/* <Footer
             style={{
               textAlign: "center",
             }}
           >
             FPT capstone
-          </Footer>
+          </Footer> */}
         </Layout>
       </Layout>
     </Fragment>

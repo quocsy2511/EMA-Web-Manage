@@ -1,34 +1,47 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Suspense, lazy } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import LoginPage from "./pages/Login/LoginPage";
-import RootPage from "./pages/RootPage";
 import { queryClient } from "./utils/http";
-import ErrorPage from "./pages/Error/ErrorPage";
-import { checkAuthLoader, tokenLoader } from "./utils/auth";
+import { checkAuthLoader, loginLoader, tokenLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
+import LoginPage from "./pages/Login/LoginPage";
+import ErrorPage from "./pages/Error/ErrorPage";
 
+// Mana pages
+const RootPage = lazy(() => import("./pages/RootPage"));
 const DashboardPage = lazy(() => import("./pages/Dashboard/DashboardPage"));
-const EventListPage = lazy(() => import("./pages/Event/EventListPage"));
-const EventHistoryPage = lazy(() => import("./pages/Event/EventHistoryPage"));
-const PersonnelListPage = lazy(() =>
-  import("./pages/Personnel/PersonnelListPage")
-);
-const PersonnelPositionPage = lazy(() =>
-  import("./pages/Personnel/PersonnelPositionPage")
-);
-const PersonnelDepartmentPage = lazy(() =>
-  import("./pages/Personnel/PersonnelDepartmentPage")
+const EventPage = lazy(() => import("./pages/Event/EventPage"));
+const PersonnelPage = lazy(() => import("./pages/Personnel/PersonnelPage"));
+const DivisionPage = lazy(() => import("./pages/Division/DivisionPage"));
+const RolePage = lazy(() => import("./pages/Role/RolePage"));
+const TimekeepingPage = lazy(() =>
+  import("./pages/Timekeeping/TimekeepingPage")
 );
 const RequestPage = lazy(() => import("./pages/Request/RequestPage"));
-const ManagerTaskPage = lazy(() => import("./pages/Manager/Task"));
+
+// Staff pages
+const ManagerLayout = lazy(() => import("./pages/ManagerLayout"));
+const EventStaffPage = lazy(() => import("./pages/Event/EventStaffPage"));
+const RequestStaffPage = lazy(() => import("./pages/Request/RequestStaffPage"));
+const TimekeepingStaffPage = lazy(() =>
+  import("./pages/Timekeeping/TimekeepingStaffPage")
+);
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <RootPage />,
+    element: <LoginPage />,
     errorElement: <ErrorPage />,
-    // loader: tokenLoader,
+    // loader: loginLoader,
+  },
+  {
+    path: "/manager",
+    element: (
+      <Suspense fallback={<LoadingPageIndicator />}>
+        <RootPage />
+      </Suspense>
+    ),
+    errorElement: <ErrorPage />,
     // loader: checkAuthLoader, // Is call whenever a new navigation trigger
     children: [
       {
@@ -40,42 +53,42 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "event-list",
+        path: "event",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <EventListPage />
+            <EventPage />
           </Suspense>
         ),
       },
       {
-        path: "event-history",
+        path: "personnel",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <EventHistoryPage />,
+            <PersonnelPage />
           </Suspense>
         ),
       },
       {
-        path: "personnel-list",
+        path: "division",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <PersonnelListPage />
+            <DivisionPage />
           </Suspense>
         ),
       },
       {
-        path: "personnel-position",
+        path: "role",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <PersonnelPositionPage />
+            <RolePage />
           </Suspense>
         ),
       },
       {
-        path: "personnel-department",
+        path: "timekeeping",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <PersonnelDepartmentPage />
+            <TimekeepingPage />
           </Suspense>
         ),
       },
@@ -90,16 +103,40 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/manager-task",
+    path: "/staff",
     element: (
       <Suspense fallback={<LoadingPageIndicator />}>
-        <ManagerTaskPage />
+        <ManagerLayout />
       </Suspense>
     ),
-  },
-  {
-    path: "/login",
-    element: <LoginPage />,
+    errorElement: <ErrorPage />,
+    // loader: checkAuthLoader,
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <EventStaffPage />,
+          </Suspense>
+        ),
+      },
+      {
+        path: "request",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <RequestStaffPage />,
+          </Suspense>
+        ),
+      },
+      {
+        path: "timekeeping",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <TimekeepingStaffPage />,
+          </Suspense>
+        ),
+      },
+    ],
   },
 ]);
 

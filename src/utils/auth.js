@@ -31,9 +31,20 @@ export function getAuthToken() {
   return decodedToken;
 }
 
-// export function tokenLoader() {
-//   return getAuthToken();
-// }
+export function tokenLoader() {
+  console.log("Loaderr");
+
+  return null;
+}
+
+export function loginLoader() {
+  const token = getAuthToken();
+
+  if(token.role === "MANAGER") return redirect("/manager")
+  if(token.role === "STAFF") return redirect("/staff")
+
+  return null;
+}
 
 export function checkAuthLoader() {
   const token = getAuthToken();

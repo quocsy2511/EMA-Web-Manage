@@ -9,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
 
-const items = [
+const notiItems = [
   {
     key: "1",
     label: (
@@ -116,28 +116,11 @@ const Header = ({ collapsed, setCollapsed }) => {
           }}
         />
 
-        <Dropdown
-          menu={{
-            items,
-          }}
-        >
-          <a onClick={(e) => e.preventDefault()}>
-            <Space>
-              Hover me
-              <DownOutlined />
-            </Space>
-          </a>
-        </Dropdown>
-
-        {/* <div className="flex items-center">
-          <motion.div
-            whileTap={{ scale: 0.5 }}
-            transition={{ type: "spring", stiffness: 400, damping: 20 }}
-            className="cursor-pointer"
-          >
+        <div className="flex items-center">
+          <div className="cursor-pointer">
             <Dropdown
               menu={{
-                notiItems,
+                items: notiItems,
               }}
               trigger={["click"]}
               placement="bottomLeft"
@@ -152,24 +135,20 @@ const Header = ({ collapsed, setCollapsed }) => {
                 <BellOutlined size={30} />
               </Badge>
             </Dropdown>
-          </motion.div>
+          </div>
 
           <div className="w-5" />
 
-          <motion.div
-            className="flex items-center cursor-pointer"
-            whileTap={{ scale: 0.75 }}
-            transition={{ type: "spring", stiffness: 400, damping: 20 }}
-          >
+          <div className="cursor-pointer">
             <Dropdown
               menu={{
-                userItems,
+                items: userItems,
               }}
               trigger={["click"]}
               placement="bottomLeft"
               arrow
             >
-              <>
+              <div className="flex items-center">
                 <Avatar
                   size={35}
                   icon={<p>icon</p>}
@@ -180,10 +159,10 @@ const Header = ({ collapsed, setCollapsed }) => {
                 />
                 <div className="w-2" />
                 <p className="text-sm font-normal">User Name</p>
-              </>
+              </div>
             </Dropdown>
-          </motion.div>
-        </div> */}
+          </div>
+        </div>
       </div>
     </HeaderLayout>
   );
