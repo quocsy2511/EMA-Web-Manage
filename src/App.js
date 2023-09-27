@@ -27,6 +27,9 @@ const RequestStaffPage = lazy(() => import("./pages/Request/RequestStaffPage"));
 const TimekeepingStaffPage = lazy(() =>
   import("./pages/Timekeeping/TimekeepingStaffPage")
 );
+const DashboardPageStaff = lazy(() =>
+  import("./pages/Dashboard/DashboardPageStaff")
+);
 
 const router = createBrowserRouter([
   {
@@ -111,6 +114,8 @@ const router = createBrowserRouter([
       },
     ],
   },
+
+  //Staff
   {
     path: "/staff",
     element: (
@@ -142,6 +147,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <TimekeepingStaffPage />,
+          </Suspense>
+        ),
+      },
+      {
+        path: "dashboard",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <DashboardPageStaff />,
           </Suspense>
         ),
       },

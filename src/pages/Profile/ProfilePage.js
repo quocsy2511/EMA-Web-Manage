@@ -2,6 +2,7 @@ import { Avatar } from "antd";
 import React, { Fragment } from "react";
 import { IoMdArrowDropright } from "react-icons/io";
 import { MdArrowForwardIos } from "react-icons/md";
+import defaultImage from "../../assets/images/pngwing.com.png";
 
 const ProfilePage = () => {
   const dummy = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -17,9 +18,7 @@ const ProfilePage = () => {
             <Avatar
               // size={150}
               alt="user_image"
-              src={
-                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
-              }
+              src={defaultImage}
               className="w-32 h-32 m-0.5"
             />
           </div>
