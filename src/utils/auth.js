@@ -1,13 +1,14 @@
 import { redirect } from "react-router-dom";
 import jwt from "jwt-decode";
 
-export function login(token) {
-  localStorage.setItem("token", token);
-}
+// export function login(token) {
+//   localStorage.setItem("token", token);
+// }
 
-export function logout() {
-  localStorage.removeItem("token");
-}
+// export function logout() {
+//   localStorage.removeItem("token");
+//   return redirect("/manager");
+// }
 
 function calcExpirationTime(decodedToken) {
   //   const expirationTime =
@@ -40,8 +41,8 @@ export function tokenLoader() {
 export function loginLoader() {
   const token = getAuthToken();
 
-  if(token.role === "MANAGER") return redirect("/manager")
-  if(token.role === "STAFF") return redirect("/staff")
+  if (token.role === "MANAGER") return redirect("/manager");
+  if (token.role === "STAFF") return redirect("/staff");
 
   return null;
 }
@@ -49,8 +50,8 @@ export function loginLoader() {
 export function checkAuthLoader() {
   const token = getAuthToken();
 
-  if (!token) return redirect("/login");
-  if (token === "EXPIRED") return redirect("/login");
+  if (!token) return redirect("/");
+  if (token === "EXPIRED") return redirect("/");
 
   // if (token.role === "MANAGER") redirect("manager-task");
 

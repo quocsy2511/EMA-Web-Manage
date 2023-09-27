@@ -1,66 +1,18 @@
-import {
-  BanknotesIcon,
-  CalendarDaysIcon,
-  ClipboardIcon,
-  HomeIcon,
-  RectangleGroupIcon,
-  Square2StackIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
 import { ConfigProvider, Dropdown, Menu, Switch } from "antd";
 import Icon from "@ant-design/icons";
 import Sider from "antd/es/layout/Sider";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
 import { SunSvg, MoonSvg } from "../../constants/icon";
 import { AnimatePresence, motion } from "framer-motion";
-
-const items = [
-  {
-    key: "1",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.antgroup.com"
-      >
-        1st menu item
-      </a>
-    ),
-  },
-  {
-    key: "2",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.aliyun.com"
-      >
-        2nd menu item (disabled)
-      </a>
-    ),
-    disabled: true,
-  },
-  {
-    key: "3",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.luohanacademy.com"
-      >
-        3rd menu item (disabled)
-      </a>
-    ),
-    disabled: true,
-  },
-  {
-    key: "4",
-    danger: true,
-    label: "a danger item",
-  },
-];
+import {
+  HiOutlineHome,
+  HiOutlineCalendarDays,
+  HiOutlineUserGroup,
+  HiOutlineUser,
+} from "react-icons/hi2";
+import { BsPersonVcard, BsJournalCheck, BsMailbox } from "react-icons/bs";
 
 //label cho than side bar
 const LabelText = ({ text }) => (
@@ -97,7 +49,7 @@ const Sidebar = ({ collapsed }) => {
       "Trang chủ",
       "/manager",
       <p>
-        <HomeIcon className="text-[#2196f3]" />
+        <HiOutlineHome className="text-[#2196f3]" />
       </p>
     ),
     getItem(
@@ -105,7 +57,7 @@ const Sidebar = ({ collapsed }) => {
       "Sự kiện",
       "/manager/event",
       <p>
-        <CalendarDaysIcon className="text-[#9c27b0]" />
+        <HiOutlineCalendarDays className="text-[#9c27b0]" />
       </p>
     ),
     getItem(
@@ -113,7 +65,7 @@ const Sidebar = ({ collapsed }) => {
       "Nhân sự",
       "/manager/personnel",
       <p>
-        <ClipboardIcon className="text-[#3f51b5]" />
+        <HiOutlineUser className="text-[#3f51b5]" />
       </p>
     ),
     getItem(
@@ -121,7 +73,7 @@ const Sidebar = ({ collapsed }) => {
       "Bộ phận",
       "/manager/division",
       <p>
-        <UserIcon className="text-orange-400" />
+        <HiOutlineUserGroup className="text-[#4CAF50]" />
       </p>
     ),
     getItem(
@@ -129,7 +81,7 @@ const Sidebar = ({ collapsed }) => {
       "Chức vụ",
       "/manager/role",
       <p>
-        <UserIcon className="text-orange-400" />
+        <BsPersonVcard className="text-[#007BFF]" />
       </p>
     ),
     getItem(
@@ -137,7 +89,7 @@ const Sidebar = ({ collapsed }) => {
       "Chấm công",
       "/manager/timekeeping",
       <p>
-        <UserIcon className="text-orange-400" />
+        <BsJournalCheck className="text-[#333333]" />
       </p>
     ),
     getItem(
@@ -145,7 +97,7 @@ const Sidebar = ({ collapsed }) => {
       "Yêu cầu",
       "/manager/request",
       <p>
-        <Square2StackIcon className="text-[#673ab7]" />
+        <BsMailbox className="text-[#FF5722]" />
       </p>
     ),
     getItem(
@@ -154,7 +106,7 @@ const Sidebar = ({ collapsed }) => {
       // "/manager/others",
       "/",
       <p>
-        <RectangleGroupIcon className="text-[#795548]" />
+        <BsPersonVcard className="text-[#795548]" />
       </p>
     ),
   ];

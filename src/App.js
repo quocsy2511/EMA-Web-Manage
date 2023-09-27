@@ -6,6 +6,7 @@ import { checkAuthLoader, loginLoader, tokenLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
+import ProfilePage from "./pages/Profile/ProfilePage";
 
 // Mana pages
 const RootPage = lazy(() => import("./pages/RootPage"));
@@ -97,6 +98,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <RequestPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <ProfilePage />
           </Suspense>
         ),
       },
