@@ -1,4 +1,4 @@
-import { Avatar, Breadcrumb, Layout, Menu, theme } from "antd";
+import { Avatar, Layout, Menu, theme } from "antd";
 import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/images/logo.png";
@@ -7,9 +7,9 @@ const { Header, Content, Footer } = Layout;
 
 const ManagerLayout = () => {
   const navigate = useNavigate();
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
+  // const {
+  //   token: { colorBgContainer },
+  // } = theme.useToken();
 
   const getItem = (label, key) => {
     return {
@@ -58,9 +58,9 @@ const ManagerLayout = () => {
           }}
         >
           <div
-            style={{
-              background: colorBgContainer,
-            }}
+            // style={{
+            //   background: colorBgContainer,
+            // }}
             className="p-6 min-h-screen"
           >
             <Outlet />
