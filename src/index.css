@@ -13,6 +13,9 @@ body {
 :where(.css-dev-only-do-not-override-nnuwmp).ant-btn-primary {
   background-color: #1677ff;
 }
+:where(.css-dev-only-do-not-override-18iikkb).ant-btn-primary {
+  background-color: #1677ff;
+}
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
