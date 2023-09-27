@@ -1,114 +1,152 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Suspense, lazy } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import LoginPage from "./pages/Login/LoginPage";
-import RootPage from "./pages/RootPage";
 import { queryClient } from "./utils/http";
+import { checkAuthLoader, loginLoader, tokenLoader } from "./utils/auth";
+import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
+import LoginPage from "./pages/Login/LoginPage";
+import ErrorPage from "./pages/Error/ErrorPage";
+import ProfilePage from "./pages/Profile/ProfilePage";
 
+// Mana pages
+const RootPage = lazy(() => import("./pages/RootPage"));
 const DashboardPage = lazy(() => import("./pages/Dashboard/DashboardPage"));
-const EventListPage = lazy(() => import("./pages/Event/EventListPage"));
-const EventHistoryPage = lazy(() => import("./pages/Event/EventHistoryPage"));
-const PersonnelListPage = lazy(() =>
-  import("./pages/Personnel/PersonnelListPage")
-);
-const PersonnelPositionPage = lazy(() =>
-  import("./pages/Personnel/PersonnelPositionPage")
-);
-const PersonnelDepartmentPage = lazy(() =>
-  import("./pages/Personnel/PersonnelDepartmentPage")
+const EventPage = lazy(() => import("./pages/Event/EventPage"));
+const PersonnelPage = lazy(() => import("./pages/Personnel/PersonnelPage"));
+const DivisionPage = lazy(() => import("./pages/Division/DivisionPage"));
+const RolePage = lazy(() => import("./pages/Role/RolePage"));
+const TimekeepingPage = lazy(() =>
+  import("./pages/Timekeeping/TimekeepingPage")
 );
 const RequestPage = lazy(() => import("./pages/Request/RequestPage"));
+
+// Staff pages
+const ManagerLayout = lazy(() => import("./pages/ManagerLayout"));
+const EventStaffPage = lazy(() => import("./pages/Event/EventStaffPage"));
+const RequestStaffPage = lazy(() => import("./pages/Request/RequestStaffPage"));
+const TimekeepingStaffPage = lazy(() =>
+  import("./pages/Timekeeping/TimekeepingStaffPage")
+);
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <RootPage />,
+    element: <LoginPage />,
+    errorElement: <ErrorPage />,
+    // loader: loginLoader,
+  },
+  {
+    path: "/manager",
+    element: (
+      <Suspense fallback={<LoadingPageIndicator />}>
+        <RootPage />
+      </Suspense>
+    ),
+    errorElement: <ErrorPage />,
+    // loader: checkAuthLoader, // Is call whenever a new navigation trigger
     children: [
       {
-        path: "/dashboard",
+        index: true,
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+          <Suspense fallback={<LoadingPageIndicator />}>
             <DashboardPage />
           </Suspense>
         ),
       },
       {
-        path: "/event-list",
+        path: "event",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
-            <EventListPage />
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <EventPage />
           </Suspense>
         ),
       },
       {
-        path: "/event-history",
+        path: "personnel",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
-            <EventHistoryPage />,
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <PersonnelPage />
           </Suspense>
         ),
       },
       {
-        path: "/personnel-list",
+        path: "division",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
-            <PersonnelListPage />
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <DivisionPage />
           </Suspense>
         ),
       },
       {
-        path: "/personnel-position",
+        path: "role",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
-            <PersonnelPositionPage />
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <RolePage />
           </Suspense>
         ),
       },
       {
-        path: "/personnel-department",
+        path: "timekeeping",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
-            <PersonnelDepartmentPage />
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <TimekeepingPage />
           </Suspense>
         ),
       },
       {
-        path: "/request",
+        path: "request",
         element: (
-          <Suspense fallback={<p>nguuuuuuuuuuuuuuuuu</p>}>
+          <Suspense fallback={<LoadingPageIndicator />}>
             <RequestPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <ProfilePage />
           </Suspense>
         ),
       },
     ],
   },
   {
-    path: "/login",
-    element: <LoginPage />,
+    path: "/staff",
+    element: (
+      <Suspense fallback={<LoadingPageIndicator />}>
+        <ManagerLayout />
+      </Suspense>
+    ),
+    errorElement: <ErrorPage />,
+    // loader: checkAuthLoader,
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <EventStaffPage />,
+          </Suspense>
+        ),
+      },
+      {
+        path: "request",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <RequestStaffPage />,
+          </Suspense>
+        ),
+      },
+      {
+        path: "timekeeping",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <TimekeepingStaffPage />,
+          </Suspense>
+        ),
+      },
+    ],
   },
-  // {
-  //   path: "/product",
-  //   element: <ProductPage />,
-  //   errorElement: <ErrorPage />,
-  //   children: [
-  //     {
-  //       // path: "/",
-  //       index: true,
-  //       element: <Ngu />,
-  //       errorElement: <ErrorPage />,
-  //     },
-  //     {
-  //       path: "detail",
-  //       element: <Ngu1 />,
-  //       children: [
-  //         {
-  //           path: "sub-detail",
-  //           element: <Detail1 />
-  //         }
-  //       ],
-  //     },
-  //   ],
-  // },
 ]);
 
 function App() {

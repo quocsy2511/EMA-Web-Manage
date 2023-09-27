@@ -1,17 +1,18 @@
-import {
-  BanknotesIcon,
-  CalendarDaysIcon,
-  ClipboardIcon,
-  HomeIcon,
-  RectangleGroupIcon,
-  Square2StackIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
-import { ConfigProvider, Menu, Switch } from "antd";
+import { ConfigProvider, Dropdown, Menu, Switch } from "antd";
+import Icon from "@ant-design/icons";
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
+import { SunSvg, MoonSvg } from "../../constants/icon";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  HiOutlineHome,
+  HiOutlineCalendarDays,
+  HiOutlineUserGroup,
+  HiOutlineUser,
+} from "react-icons/hi2";
+import { BsPersonVcard, BsJournalCheck, BsMailbox } from "react-icons/bs";
 
 //label cho than side bar
 const LabelText = ({ text }) => (
@@ -26,19 +27,19 @@ const Sidebar = ({ collapsed }) => {
   const [darkSide, setDarkSide] = useState(
     colorTheme === "light" ? true : false
   );
+
   const changeTheme = (value) => {
     setTheme(value ? "dark" : "light");
     setColorTheme(colorTheme);
     setDarkSide(value);
   };
 
-  const getItem = (label, title, key, icon, children) => {
+  const getItem = (label, title, key, icon) => {
     return {
       label,
       title,
       key,
       icon,
-      children,
     };
   };
 
@@ -46,104 +47,70 @@ const Sidebar = ({ collapsed }) => {
     getItem(
       <LabelText text="Trang chủ" />,
       "Trang chủ",
-      "/dashboard",
+      "/manager",
       <p>
-        <HomeIcon className="text-[#2196f3]" />
-      </p>,
-      null
+        <HiOutlineHome className="text-[#2196f3]" />
+      </p>
     ),
     getItem(
       <LabelText text="Sự kiện" />,
-      null,
-      "event",
+      "Sự kiện",
+      "/manager/event",
       <p>
-        <CalendarDaysIcon className="text-[#9c27b0]" />
-      </p>,
-      [
-        getItem(
-          <span className=" font-normal text-sm">Danh sách sự kiện</span>,
-          null,
-          "/event-list",
-          null,
-          null
-        ),
-        getItem(
-          <span className="font-normal text-sm">Lịch sử sự kiện</span>,
-          null,
-          "/event-history",
-          null,
-          null
-        ),
-      ]
-    ),
-    getItem(
-      <LabelText text="Công việc" />,
-      "Công việc",
-      "/task",
-      <p>
-        <ClipboardIcon className="text-[#3f51b5]" />
-      </p>,
-      null
+        <HiOutlineCalendarDays className="text-[#9c27b0]" />
+      </p>
     ),
     getItem(
       <LabelText text="Nhân sự" />,
-      null,
-      "personnel",
+      "Nhân sự",
+      "/manager/personnel",
       <p>
-        <UserIcon className="text-orange-400" />
-      </p>,
-      [
-        getItem(
-          <span className="font-normal text-sm">Danh sách nhân viên</span>,
-          null,
-          "/personnel-list",
-          null,
-          null
-        ),
-        getItem(
-          <span className="font-normal text-sm">Chức vụ</span>,
-          null,
-          "/personnel-position",
-          null,
-          null
-        ),
-        getItem(
-          <span className="font-normal text-sm">Phòng ban</span>,
-          null,
-          "/personnel-department",
-          null,
-          null
-        ),
-      ]
+        <HiOutlineUser className="text-[#3f51b5]" />
+      </p>
+    ),
+    getItem(
+      <LabelText text="Bộ phận" />,
+      "Bộ phận",
+      "/manager/division",
+      <p>
+        <HiOutlineUserGroup className="text-[#4CAF50]" />
+      </p>
+    ),
+    getItem(
+      <LabelText text="Chức vụ" />,
+      "Chức vụ",
+      "/manager/role",
+      <p>
+        <BsPersonVcard className="text-[#007BFF]" />
+      </p>
+    ),
+    getItem(
+      <LabelText text="Chấm công" />,
+      "Chấm công",
+      "/manager/timekeeping",
+      <p>
+        <BsJournalCheck className="text-[#333333]" />
+      </p>
     ),
     getItem(
       <LabelText text="Yêu cầu" />,
       "Yêu cầu",
-      "/request",
+      "/manager/request",
       <p>
-        <Square2StackIcon className="text-[#673ab7]" />
-      </p>,
-      null
-    ),
-    getItem(
-      <p className="pr-24 font-medium text-base">Lương</p>,
-      "Lương",
-      "/salary",
-      <p>
-        <BanknotesIcon className="text-[#009688]" />
-      </p>,
-      null
+        <BsMailbox className="text-[#FF5722]" />
+      </p>
     ),
     getItem(
       <LabelText text="Khác" />,
       "Khác",
-      "/others",
+      // "/manager/others",
+      "/",
       <p>
-        <RectangleGroupIcon className="text-[#795548]" />
-      </p>,
-      null
+        <BsPersonVcard className="text-[#795548]" />
+      </p>
     ),
   ];
+
   return (
     <>
       <Sider
@@ -158,6 +125,7 @@ const Sidebar = ({ collapsed }) => {
                 minWidth: "230px", // Chiều rộng khi mở rộng
               }
         }
+        className="border-r-2"
         collapsible
         collapsed={collapsed}
         // onCollapse={(value) => setCollapsed(value)}
@@ -165,7 +133,8 @@ const Sidebar = ({ collapsed }) => {
       >
         {/* logo here */}
         <div className="demo-logo-vertical flex justify-center items-center p-4 dark:text-white">
-          logo-HREA
+          <p>logo</p>
+          {!collapsed && <p>HREA</p>}
         </div>
 
         {/* sidebar here */}
@@ -190,10 +159,7 @@ const Sidebar = ({ collapsed }) => {
             <Menu
               theme={theme}
               mode="inline"
-              onClick={({ key }) => {
-                if (!key.includes("/")) return;
-                else navigate(key);
-              }}
+              onClick={({ key }) => navigate(key)}
               defaultSelectedKeys={location.pathname}
               items={sidebarItems}
               inlineIndent={30}
@@ -203,14 +169,31 @@ const Sidebar = ({ collapsed }) => {
 
         {/* dark mode here */}
         <div className="flex justify-center items-center mt-20 py-1 flex-col">
-          <div className="w-4/5 rounded-full h-[1px] mb-6 bg-gray-400 "></div>
-          <Switch
-            className="bg-gray-400"
-            checked={darkSide}
-            onChange={changeTheme}
-            checkedChildren="Dark"
-            unCheckedChildren="Light"
-          />
+          <AnimatePresence mode="wait">
+            {darkSide ? (
+              <motion.div
+                key="sun"
+                onClick={() => changeTheme(false)}
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.05, type: "spring", stiffness: 200 }}
+              >
+                <Icon component={SunSvg} className="text-orange-300" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="moon"
+                onClick={() => changeTheme(true)}
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.05, type: "spring", stiffness: 200 }}
+              >
+                <Icon component={MoonSvg} className="text-[#eb2f96]" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </Sider>
     </>

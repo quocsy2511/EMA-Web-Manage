@@ -1,11 +1,12 @@
-import { Button, Layout } from "antd";
-import { Content, Footer, Header } from "antd/es/layout/layout";
 import React, { Fragment, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Layout } from "antd";
+import { Content, Footer } from "antd/es/layout/layout";
+import { Outlet, useLoaderData } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
-import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
+import Header from "../components/Header/Header";
 
 const RootPage = () => {
+  // const data = useLoaderData();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -17,40 +18,22 @@ const RootPage = () => {
       >
         {/* sidebar */}
         <Sidebar collapsed={collapsed} />
+
         {/* Main */}
         <Layout>
           {/* header */}
-          <Header className="p-0 bg-gray-400">
-            <div className="">
-              <Button
-                type="text"
-                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                onClick={() => setCollapsed(!collapsed)}
-                style={{
-                  fontSize: "16px",
-                  width: 64,
-                  height: 64,
-                }}
-              />
-              header
-            </div>
-          </Header>
-
+          <Header collapsed={collapsed} setCollapsed={setCollapsed} />
           {/* Content */}
           <Content>
-            <div className="bg-slate-200 ">
+            <div className="bg-white flex items-center ">
               <Outlet />
             </div>
           </Content>
 
           {/* footer */}
-          <Footer
-            style={{
-              textAlign: "center",
-            }}
-          >
-            FPT capstone
-          </Footer>
+          {/* <Footer>
+            <p className="text-center">FPT capstone</p>
+          </Footer> */}
         </Layout>
       </Layout>
     </Fragment>
