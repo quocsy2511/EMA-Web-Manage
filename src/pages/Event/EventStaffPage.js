@@ -1,7 +1,7 @@
 import React from "react";
 
 const EventStaffPage = () => {
-  return <div>EventStaffPage</div>;
+  return <div></div>;
 };
 
 export default EventStaffPage;

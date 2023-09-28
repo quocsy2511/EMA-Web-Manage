@@ -6,7 +6,8 @@ import { checkAuthLoader, loginLoader, tokenLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
-import ProfilePage from "./pages/Profile/ProfilePage";
+
+const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
 // Mana pages
 const RootPage = lazy(() => import("./pages/RootPage"));
@@ -19,6 +20,7 @@ const TimekeepingPage = lazy(() =>
   import("./pages/Timekeeping/TimekeepingPage")
 );
 const RequestPage = lazy(() => import("./pages/Request/RequestPage"));
+const EventTaskPage = lazy(() => import("./pages/Event/EventTaskPage"));
 
 // Staff pages
 const ManagerLayout = lazy(() => import("./pages/ManagerLayout"));
@@ -63,6 +65,10 @@ const router = createBrowserRouter([
             <EventPage />
           </Suspense>
         ),
+      },
+      {
+        path: "event/:eventId",
+        element: <EventTaskPage />,
       },
       {
         path: "personnel",
