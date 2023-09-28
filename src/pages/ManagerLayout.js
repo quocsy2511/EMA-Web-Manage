@@ -9,16 +9,7 @@ const ManagerLayout = () => {
   return (
     <div className="overflow-hidden overflow-y-scroll">
       <Layout>
-        <Header
-          style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 1,
-            width: "100%",
-          }}
-        >
-          <HeaderStaff />
-        </Header>
+        <HeaderStaff />
         <Content
           className="site-layout"
           style={{
