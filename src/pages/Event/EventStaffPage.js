@@ -1,7 +1,11 @@
 import React from "react";
-
+import HeaderEvent from "../../components/Header/HeaderEvent";
 const EventStaffPage = () => {
-  return <div>EventStaffPage</div>;
+  return (
+    <>
+      <HeaderEvent />
+    </>
+  );
 };
 
 export default EventStaffPage;
