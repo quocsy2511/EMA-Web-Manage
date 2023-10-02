@@ -103,10 +103,8 @@ const filter = [
 ];
 
 const HeaderEvent = () => {
-  
-
   return (
-    <div className="p-4 fixed left-0  dark:bg-dark bg-bgSubtask z-50 right-0 ">
+    <div className="p-4 fixed left-0  dark:bg-dark bg-blue-100 z-50 right-0 top-14">
       <div className="flex items-center space-x-2 md:space-x-4">
         <header className="flex justify-between dark:text-white items-center w-full mx-8">
           {/* left header */}
@@ -114,23 +112,19 @@ const HeaderEvent = () => {
             <Select
               defaultValue={boards[0].name}
               style={{
-                width: 350,
+                width: 250,
               }}
               bordered={false}
               options={boards.map((board) => {
                 return {
                   label: (
-                    <div className="p-2 ">
-                      <h3 className="truncate max-w-[350px] text-lg font-semibold md:text-2xl ">
-                        {board.name}
-                      </h3>
-                    </div>
+                    <p className="font-semibold text-gray-600">{board.name}</p>
                   ),
                   value: board.name,
                 };
               })}
               // onChange={handleChange}
-              size="large"
+              size="middle"
             />
           </div>
 
@@ -174,7 +168,11 @@ const HeaderEvent = () => {
               >
                 {boardItem.members.map((member) => {
                   return (
-                    <Tooltip title={member.name} placement="top">
+                    <Tooltip
+                      key={member.name}
+                      title={member.name}
+                      placement="top"
+                    >
                       <Avatar src={member.avatar} />
                     </Tooltip>
                   );

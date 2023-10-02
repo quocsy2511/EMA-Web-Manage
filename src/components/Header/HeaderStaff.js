@@ -16,8 +16,9 @@ const HeaderStaff = () => {
   };
   const topBarItems = [
     getItem("Sự kiện", "/staff"),
-    getItem("Thông kê", "/staff/dashboard"),
+    getItem("Công việc ", "/staff/task"),
     getItem("Yêu cầu", "/staff/request"),
+    getItem("Thông kê", "/staff/dashboard"),
     getItem("Bảng Chấm công", "/staff/timekeeping"),
   ];
 
@@ -47,7 +48,7 @@ const HeaderStaff = () => {
   return (
     <Header
       style={{
-        position: "sticky",
+        position: "fixed",
         top: 0,
         zIndex: 1,
         width: "100%",

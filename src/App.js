@@ -6,6 +6,7 @@ import { checkAuthLoader, loginLoader, tokenLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
+import TaskPageStaff from "./pages/Task/TaskpageStaff";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -136,7 +137,7 @@ const router = createBrowserRouter([
         index: true,
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <EventStaffPage />,
+            <EventStaffPage />
           </Suspense>
         ),
       },
@@ -144,7 +145,7 @@ const router = createBrowserRouter([
         path: "request",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <RequestStaffPage />,
+            <RequestStaffPage />
           </Suspense>
         ),
       },
@@ -152,7 +153,7 @@ const router = createBrowserRouter([
         path: "timekeeping",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <TimekeepingStaffPage />,
+            <TimekeepingStaffPage />
           </Suspense>
         ),
       },
@@ -160,7 +161,15 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <DashboardPageStaff />,
+            <DashboardPageStaff />
+          </Suspense>
+        ),
+      },
+      {
+        path: "task",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <TaskPageStaff />
           </Suspense>
         ),
       },
