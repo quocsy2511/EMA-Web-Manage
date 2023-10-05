@@ -122,7 +122,7 @@ const EventPage = () => {
   const [searchDate, setSearchDate] = useState("");
 
   // console.log(searchText);
-  console.log(searchDate);
+  
 
   return (
     <Fragment>

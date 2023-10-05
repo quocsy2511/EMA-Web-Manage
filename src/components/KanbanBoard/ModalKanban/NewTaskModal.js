@@ -72,7 +72,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask }) => {
   };
 
   const onFinish = (values) => {
-    console.log("Success:", values);
+    // console.log("Success:", values);
   };
 
   return (

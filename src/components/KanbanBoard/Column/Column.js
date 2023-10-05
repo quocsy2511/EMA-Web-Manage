@@ -2,10 +2,33 @@ import React, { useState } from "react";
 import TaskKanbanBoard from "../TaskKanban/TaskKanbanBoard";
 import TaskModal from "../ModalKanban/TaskModal";
 import NewTaskModal from "../ModalKanban/NewTaskModal";
-const Column = () => {
+
+const Column = ({ TaskParentArray }) => {
+  console.log("🚀 ~ file: Column.js:6 ~ Column ~ TaskParent:", TaskParentArray);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [addNewTask, setAddNewTask] = useState(false);
   const [taskParent, setTaskParent] = useState(false);
+
+  let completed = 0;
+  let subtask = TaskParentArray.tasks;
+  subtask.forEach((task) => {
+    if (task.status === "done") {
+      completed++;
+    }
+  });
+
+  const startDate = TaskParentArray.startDate;
+  const endDate = TaskParentArray.endDate;
+  const formattedStartDate = new Date(startDate).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const formattedEndDate = new Date(endDate).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
@@ -18,21 +41,22 @@ const Column = () => {
         <div className=" bg-gray-100 dark:bg-secondaryHover py-3 scrollbar-hide rounded-xl shadow-darkShadow shadow-sm">
           <div
             className="font-semibold flex flex-col items-start gap-2 text-textCol dark:text-white justify-start 
-          w-[250px] mx-auto my-2 rounded-lg hover:bg-white dark:bg-dark  hover:opacity-80 cursor-pointer py-1 px-1"
+          w-[250px] mx-auto my-2 rounded-lg hover:text-secondary dark:bg-dark  hover:opacity-80 cursor-pointer py-1 px-1"
             onClick={() => openTaskModalHandler()}
           >
             <div className="flex items-start gap-2 w-full">
-              <span className={`rounded-full w-4 h-4 bg-red-600`}></span>
+              <span className={`rounded-full w-4 h-4 bg-red-600 `}></span>
               <div className="flex flex-col gap-y-[2px]">
-                <p className=" w-[145px] whitespace-normal">
-                  Thiết kế sân khấu (5)
+                <p className=" w-[215px] whitespace-normal">
+                  {TaskParentArray?.title} ({TaskParentArray?.tasks?.length})
                 </p>
                 <p className="text-xs font-normal tracking-tighter text-gray-500">
-                  1/3 completed
+                  {/* 1/3 completed */}
+                  {completed}/{TaskParentArray?.tasks?.length} completed
                 </p>
-                <p className="text-[7px] font-normal text-gray-500 underline underline-offset-2">
+                <p className="text-[7px] font-semibold text-gray-600 underline underline-offset-2">
                   {/* {col.time} */}
-                  28/07-29/08
+                  {formattedStartDate} - {formattedEndDate}
                 </p>
               </div>
             </div>
@@ -44,10 +68,12 @@ const Column = () => {
             setIsOpenTaskModal={setIsOpenTaskModal}
           />
           <TaskKanbanBoard
+            setTaskParent={setTaskParent}
             isOpenTaskModal={isOpenTaskModal}
             setIsOpenTaskModal={setIsOpenTaskModal}
           />
           <TaskKanbanBoard
+            setTaskParent={setTaskParent}
             isOpenTaskModal={isOpenTaskModal}
             setIsOpenTaskModal={setIsOpenTaskModal}
           />

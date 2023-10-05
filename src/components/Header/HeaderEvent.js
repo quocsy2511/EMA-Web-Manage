@@ -1,40 +1,6 @@
 import { SlidersTwoTone } from "@ant-design/icons";
 import { Avatar, Dropdown, Select, Tooltip } from "antd";
 import React from "react";
-
-const boards = [
-  {
-    manager: "jack",
-    name: "🔥 Sự kiện kỷ niệm 10 năm",
-    members: [
-      {
-        name: "vux",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "syx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "thiepx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Thiepx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-    ],
-  },
-  {
-    manager: "lucy",
-    name: "🔥 Sự kiện kỷ niệm 20 năm",
-  },
-  {
-    manager: "Yiminghe",
-    name: "🔥 Sự kiện kỷ niệm 30 năm",
-  },
-];
-
 const boardItem = {
   manager: "Tung",
   name: "🔥 Sự kiện kỷ niệm 10 năm",
@@ -102,7 +68,12 @@ const filter = [
   },
 ];
 
-const HeaderEvent = () => {
+const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
+  const handleChangeEvent = (value) => {
+    const event = JSON.parse(value);
+    setSelectEvent(event);
+  };
+
   return (
     <div className="p-4 fixed left-0  dark:bg-dark bg-blue-100 z-50 right-0 top-14">
       <div className="flex items-center space-x-2 md:space-x-4">
@@ -110,17 +81,21 @@ const HeaderEvent = () => {
           {/* left header */}
           <div className="flex items-center gap-x-4">
             <Select
-              defaultValue={boards[0].name}
+              defaultValue={{ label: events[0].eventName, value: events }}
               style={{
                 width: 250,
               }}
               bordered={false}
-              options={boards.map((board) => {
+              onChange={handleChangeEvent}
+              options={events.map((event) => {
+                const jsonString = JSON.stringify(event);
                 return {
                   label: (
-                    <p className="font-semibold text-gray-600">{board.name}</p>
+                    <p className="font-semibold text-gray-600">
+                      {event.eventName}
+                    </p>
                   ),
-                  value: board.name,
+                  value: jsonString,
                 };
               })}
               // onChange={handleChange}
@@ -166,7 +141,7 @@ const HeaderEvent = () => {
                   backgroundColor: "#F4D7DA",
                 }}
               >
-                {boardItem.members.map((member) => {
+                {selectEvent.members.map((member) => {
                   return (
                     <Tooltip
                       key={member.name}

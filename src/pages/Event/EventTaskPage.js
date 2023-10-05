@@ -19,9 +19,9 @@ const EventTaskPage = () => {
   const [prioritySelection, setPrioritySelection] = useState();
   const [devisionSelection, setDevisionSelection] = useState();
 
-  console.log(assigneeSelection);
-  console.log(prioritySelection);
-  console.log(devisionSelection);
+  // console.log(assigneeSelection);
+  // console.log(prioritySelection);
+  // console.log(devisionSelection);
 
   const resetFilter = () => {
     setAssigneeSelection();

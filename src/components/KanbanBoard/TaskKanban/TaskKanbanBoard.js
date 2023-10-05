@@ -1,38 +1,7 @@
 import { Avatar, Tooltip } from "antd";
-import React, { useState } from "react";
-import TaskModal from "../ModalKanban/TaskModal";
+import React from "react";
 
-const boardItem = {
-  manager: "Tung",
-  name: "🔥 Sự kiện kỷ niệm 10 năm",
-  members: [
-    {
-      name: "vux",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-    {
-      name: "syx",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-    {
-      name: "Huyx",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-    {
-      name: "Thiepx",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-  ],
-};
-
-const TaskKanbanBoard = ({
-  isOpenTaskModal,
-  setIsOpenTaskModal,
-  taskParent,
-  setTaskParent,
-}) => {
-  // const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
-
+const TaskKanbanBoard = ({ setIsOpenTaskModal, setTaskParent }) => {
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
     setTaskParent(false);
@@ -136,11 +105,6 @@ const TaskKanbanBoard = ({
             {/* {task.attachments.length} */}4
           </span>
         </div>
-
-        {/* <p className="mt-2 text-xs font-normal tracking-tighter text-gray-500">
-          1/8 completed
-        </p> */}
-
         <div className="flex justify-end items-center mt-4">
           {/* <Avatar.Group
             maxCount={3}

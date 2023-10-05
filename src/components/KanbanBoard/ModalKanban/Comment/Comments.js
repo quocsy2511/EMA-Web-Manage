@@ -4,7 +4,6 @@ import React from "react";
 import ReactQuill from "react-quill";
 
 const Comments = ({ isOpenQuill, comment, setComment, seItsOpenQuill }) => {
-  console.log("🚀 ~ file: Comments.js:7 ~ Comments ~ comment:", comment);
 
   return (
     <div className="flex flex-row mt-8 justify-start gap-x-4 ">

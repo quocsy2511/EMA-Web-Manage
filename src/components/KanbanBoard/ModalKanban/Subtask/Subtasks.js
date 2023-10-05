@@ -4,7 +4,7 @@ import {
   PlusCircleOutlined,
 } from "@ant-design/icons";
 import { Avatar, Checkbox, DatePicker, Tooltip } from "antd";
-import React, { useState } from "react";
+import React from "react";
 
 const Subtasks = ({
   onChangeCheckSubTask,
@@ -16,9 +16,11 @@ const Subtasks = ({
   deadline,
   setIsOpenDate,
   Subtask,
-  setIsOpenTaskModal,
+  setSelectedSubTask,
 }) => {
-  const onCLick = () => {};
+  const onCLick = (value) => {
+    setSelectedSubTask(value);
+  };
 
   return (
     <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
@@ -54,7 +56,7 @@ const Subtasks = ({
                 />
                 <DeleteOutlined
                   className="text-red-400"
-                  onClick={() => onCLick()}
+                  onClick={() => onCLick(item)}
                 />
               </div>
               <div

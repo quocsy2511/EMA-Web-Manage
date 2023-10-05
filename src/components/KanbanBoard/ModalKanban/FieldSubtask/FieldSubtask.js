@@ -46,10 +46,8 @@ const FieldSubtask = ({
   isOpenMember,
   seItsOpenMember,
 }) => {
-
-  
   const handleChangeSelect = (value) => {
-    console.log(`selected ${value}`);
+    // console.log(`selected ${value}`);
   };
 
   return (
