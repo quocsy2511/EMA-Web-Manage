@@ -25,11 +25,17 @@ const boardItem = {
   ],
 };
 
-const TaskKanbanBoard = () => {
-  const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
+const TaskKanbanBoard = ({
+  isOpenTaskModal,
+  setIsOpenTaskModal,
+  taskParent,
+  setTaskParent,
+}) => {
+  // const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
 
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
+    setTaskParent(false);
   };
 
   return (
@@ -131,9 +137,9 @@ const TaskKanbanBoard = () => {
           </span>
         </div>
 
-        <p className="mt-2 text-xs font-normal tracking-tighter text-gray-500">
+        {/* <p className="mt-2 text-xs font-normal tracking-tighter text-gray-500">
           1/8 completed
-        </p>
+        </p> */}
 
         <div className="flex justify-end items-center mt-4">
           {/* <Avatar.Group
@@ -161,12 +167,6 @@ const TaskKanbanBoard = () => {
           </Tooltip>
         </div>
       </div>
-      {isOpenTaskModal && (
-        <TaskModal
-          isOpenTaskModal={isOpenTaskModal}
-          setIsOpenTaskModal={setIsOpenTaskModal}
-        />
-      )}
     </>
   );
 };

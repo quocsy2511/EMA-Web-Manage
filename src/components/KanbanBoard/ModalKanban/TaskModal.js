@@ -6,7 +6,7 @@ import "dayjs/locale/zh-cn";
 import TitleSubtask from "./TitleSubtask/TitleSubtask";
 import FieldSubtask from "./FieldSubtask/FieldSubtask";
 import DescriptionSubtask from "./DescriptionSubtask/DescriptionSubtask";
-// import Subtasks from "./Subtask/Subtasks";
+import Subtasks from "./Subtask/Subtasks";
 import CommentInput from "./Comment/CommentInput";
 import Comments from "./Comment/Comments";
 
@@ -33,7 +33,11 @@ const boardItem = {
   ],
 };
 
-const TaskModal = ({ isOpenTaskModal, setIsOpenTaskModal }) => {
+const TaskModal = ({
+  isOpenTaskModal,
+  setIsOpenTaskModal,
+  taskParent = false,
+}) => {
   const [title, setTitle] = useState("Task name");
   const [description, setDescription] = useState("description name");
   const [comment, setComment] = useState("Vu beos ngooooooooooooooooo");
@@ -43,11 +47,11 @@ const TaskModal = ({ isOpenTaskModal, setIsOpenTaskModal }) => {
   const [isOpenQuill, seItsOpenQuill] = useState(false);
   const [isOpenMember, seItsOpenMember] = useState(false);
   const [isOpenDate, setIsOpenDate] = useState(false);
-  // const [Subtask, setSubtask] = useState([
-  //   { title: "Task1", id: 1, checked: true, comment: "alo 123" },
-  //   { title: "Task2", id: 2, checked: false, comment: "alo 123" },
-  //   { title: "Task3", id: 3, checked: false },
-  // ]);
+  const [Subtask, setSubtask] = useState([
+    { title: "Task1", id: 1, checked: true, comment: "alo 123" },
+    { title: "Task2", id: 2, checked: false, comment: "alo 123" },
+    { title: "Task3", id: 3, checked: false },
+  ]);
 
   const onCloseModal = () => {
     console.log("Click");
@@ -65,29 +69,29 @@ const TaskModal = ({ isOpenTaskModal, setIsOpenTaskModal }) => {
     // console.log("onOk: ", value);
   };
 
-  //Subtask
-  // const onChangeCheckSubTask = (id, e) => {
-  //   // console.log(`checked = ${e.target.checked}`);
-  //   // setChecked(e.target.checked);
-  //   let checkedSubtask = e.target.checked;
-  //   const updatedSubtask = Subtask.map((task) => {
-  //     if (task.id === id) {
-  //       return { ...task, checked: checkedSubtask };
-  //     }
-  //     return task;
-  //   });
-  //   setSubtask(updatedSubtask);
-  // };
+  // Subtask
+  const onChangeCheckSubTask = (id, e) => {
+    // console.log(`checked = ${e.target.checked}`);
+    // setChecked(e.target.checked);
+    let checkedSubtask = e.target.checked;
+    const updatedSubtask = Subtask.map((task) => {
+      if (task.id === id) {
+        return { ...task, checked: checkedSubtask };
+      }
+      return task;
+    });
+    setSubtask(updatedSubtask);
+  };
 
-  // const onChangeSubtask = (id, newTitle) => {
-  //   const updatedSubtask = Subtask.map((item) => {
-  //     if (item.id === id) {
-  //       return { ...item, title: newTitle };
-  //     }
-  //     return item;
-  //   });
-  //   setSubtask(updatedSubtask);
-  // };
+  const onChangeSubtask = (id, newTitle) => {
+    const updatedSubtask = Subtask.map((item) => {
+      if (item.id === id) {
+        return { ...item, title: newTitle };
+      }
+      return item;
+    });
+    setSubtask(updatedSubtask);
+  };
 
   //Upload file
   const props = {
@@ -146,17 +150,20 @@ const TaskModal = ({ isOpenTaskModal, setIsOpenTaskModal }) => {
         />
 
         {/* task subTask */}
-        {/* <Subtasks
-          boardItem={boardItem}
-          deadline={deadline}
-          isOpenDate={isOpenDate}
-          onChange={onChange}
-          onChangeCheckSubTask={onChangeCheckSubTask}
-          onChangeSubtask={onChangeSubtask}
-          onOk={onOk}
-          setIsOpenDate={setIsOpenDate}
-          Subtask={Subtask}
-        /> */}
+        {taskParent && (
+          <Subtasks
+            boardItem={boardItem}
+            deadline={deadline}
+            isOpenDate={isOpenDate}
+            onChange={onChange}
+            onChangeCheckSubTask={onChangeCheckSubTask}
+            onChangeSubtask={onChangeSubtask}
+            onOk={onOk}
+            setIsOpenDate={setIsOpenDate}
+            Subtask={Subtask}
+            setIsOpenTaskModal={setIsOpenTaskModal}
+          />
+        )}
 
         {/* comment */}
         <CommentInput
