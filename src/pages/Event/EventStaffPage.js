@@ -97,11 +97,6 @@ const EventStaffPage = () => {
   ]);
   const [selectEvent, setSelectEvent] = useState(events[0]);
 
-  // console.log(
-  //   "🚀 ~ file: EventStaffPage.js:99 ~ EventStaffPage ~ selectEvent:",
-  //   selectEvent
-  // );
-
   return (
     <div className="flex flex-col">
       <HeaderEvent
