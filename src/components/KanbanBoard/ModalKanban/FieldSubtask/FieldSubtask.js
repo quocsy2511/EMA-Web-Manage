@@ -60,28 +60,6 @@ const FieldSubtask = ({
             Member
           </h4>
           <div className="flex justify-start items-center mt-4">
-            {/* <Avatar.Group
-              maxCount={3}
-              maxStyle={{
-                color: "#D25B68",
-                backgroundColor: "#F4D7DA",
-                fontSize: "14px",
-              }}
-              size="default"
-            >
-              {boardItem.members.map((member) => {
-                return (
-                  <Tooltip
-                    key={member.name}
-                    title={member.name}
-                    placement="top"
-                  >
-                    <Avatar src={member.avatar} size="default" />
-                  </Tooltip>
-                );
-              })}
-            </Avatar.Group> */}
-            {/* <PlusCircleOutlined className="text-gray-300 cursor-pointer text-3xl hover:text-secondary" /> */}
             {isOpenMember ? (
               <Select
                 placeholder="Select Member "

@@ -51,9 +51,10 @@ const TaskModal = ({
   const [selectedSubTask, setSelectedSubTask] = useState(null);
 
   const [Subtask, setSubtask] = useState([
-    { title: "Task1", id: 1, checked: true, comment: "alo 123" },
-    { title: "Task2", id: 2, checked: false, comment: "alo 123" },
-    { title: "Task3", id: 3, checked: false },
+    { title: "Task1", id: 1, status: "processing", comment: "alo 123" },
+    { title: "Task2", id: 2, status: "confirmed", comment: "alo 123" },
+    { title: "Task3", id: 3, status: "done" },
+    { title: "Task4", id: 4, status: "pending" },
   ]);
 
   const onCloseModal = () => {

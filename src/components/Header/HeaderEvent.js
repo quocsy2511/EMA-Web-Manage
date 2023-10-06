@@ -75,7 +75,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
   };
 
   return (
-    <div className="p-4 fixed left-0  dark:bg-dark bg-blue-100 z-50 right-0 top-14">
+    <div className="p-4 fixed left-0  dark:bg-dark bg-bgHeader z-50 right-0 top-14">
       <div className="flex items-center space-x-2 md:space-x-4">
         <header className="flex justify-between dark:text-white items-center w-full mx-8">
           {/* left header */}
