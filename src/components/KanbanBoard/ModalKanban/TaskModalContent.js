@@ -1,143 +1,95 @@
-import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TitleSubtask from "./TitleSubtask/TitleSubtask";
 import FieldSubtask from "./FieldSubtask/FieldSubtask";
 import DescriptionSubtask from "./DescriptionSubtask/DescriptionSubtask";
 import Subtasks from "./Subtask/Subtasks";
 import CommentInput from "./Comment/CommentInput";
 import Comments from "./Comment/Comments";
-import { message } from "antd";
+import { OrderedListOutlined } from "@ant-design/icons";
 
 const TaskModalContent = ({
-  setIsOpenTaskModal,
   taskParent,
-  Subtask,
-  setSubtask,
-  boardItem,
   setSelectedSubTask,
   selectedSubTask,
+  taskSelected,
+  setTaskSelected,
 }) => {
-  const [title, setTitle] = useState("Task name");
-  const [description, setDescription] = useState("description name");
-  const [comment, setComment] = useState("Vu beos ngooooooooooooooooo");
-  const [deadline, setDeadline] = useState(
-    dayjs("2023-09-30", "YYYY-MM-DD").hour(12).minute(12).second(46)
-  );
-  const [isOpenQuill, seItsOpenQuill] = useState(false);
-  const [isOpenMember, seItsOpenMember] = useState(false);
-  const [isOpenDate, setIsOpenDate] = useState(false);
+  const [title, setTitle] = useState(taskSelected.title);
+  const [description, setDescription] = useState(taskSelected.description);
+  const [comments, setComments] = useState(taskSelected.comment);
 
-  //Pick deadline
-  const onChange = (value, dateString) => {
-    // console.log("Selected Time: ", value);
-    // console.log("Formatted Selected Time: ", dateString);
-    setDeadline(dateString);
-  };
-  const onOk = (value, dateString) => {
-    // console.log("🚀 ~ file: TaskModal.js:48 ~ onOk ~ dateString:", dateString);
-    // console.log("onOk: ", value);
-  };
+  const [subTasks, setSubTasks] = useState(taskSelected.tasks);
 
   // Subtask
-  const onChangeCheckSubTask = (id, e) => {
-    // console.log(`checked = ${e.target.checked}`);
-    // setChecked(e.target.checked);
-    let checkedSubtask = e.target.checked;
-    const updatedSubtask = Subtask.map((task) => {
-      if (task.id === id) {
-        return { ...task, checked: checkedSubtask };
-      }
-      return task;
-    });
-    setSubtask(updatedSubtask);
-  };
+  const onChangeSubtask = (id, newTitle) => {};
 
-  const onChangeSubtask = (id, newTitle) => {
-    const updatedSubtask = Subtask.map((item) => {
-      if (item.id === id) {
-        return { ...item, title: newTitle };
+  let completed = 0;
+  if (taskParent) {
+    subTasks.forEach((task) => {
+      if (task.status === "confirmed") {
+        completed++;
       }
-      return item;
     });
-    setSubtask(updatedSubtask);
-  };
+  }
 
-  //Upload file
-  const props = {
-    name: "file",
-    action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
-    headers: {
-      authorization: "authorization-text",
-    },
-    onChange(info) {
-      if (info.file.status !== "uploading") {
-        console.log(info.file, info.fileList);
-      }
-      if (info.file.status === "done") {
-        message.success(`${info.file.name} file uploaded successfully`);
-      } else if (info.file.status === "error") {
-        message.error(`${info.file.name} file upload failed.`);
-      }
-    },
-  };
+  useEffect(() => {
+    setTitle(taskSelected.title);
+    setDescription(taskSelected.description);
+    setComments(taskSelected.comment);
+    setSubTasks(taskSelected.tasks);
+  }, [taskSelected]);
 
   return (
     <div>
       <TitleSubtask setTitle={setTitle} title={title} />
 
       {/* field */}
-      <FieldSubtask
-        boardItem={boardItem}
-        deadline={deadline}
-        isOpenDate={isOpenDate}
-        onChange={onChange}
-        onOk={onOk}
-        props={props}
-        setIsOpenDate={setIsOpenDate}
-        isOpenMember={isOpenMember}
-        seItsOpenMember={seItsOpenMember}
-      />
+      <FieldSubtask taskSelected={taskSelected} taskParent={taskParent} />
 
       {/* task description */}
       <DescriptionSubtask
         description={description}
-        isOpenQuill={isOpenQuill}
-        seItsOpenQuill={seItsOpenQuill}
         setDescription={setDescription}
       />
 
       {/* task subTask */}
       {taskParent && (
-        <Subtasks
-          boardItem={boardItem}
-          deadline={deadline}
-          isOpenDate={isOpenDate}
-          onChange={onChange}
-          onChangeCheckSubTask={onChangeCheckSubTask}
-          onChangeSubtask={onChangeSubtask}
-          onOk={onOk}
-          setIsOpenDate={setIsOpenDate}
-          Subtask={Subtask}
-          setIsOpenTaskModal={setIsOpenTaskModal}
-          setSelectedSubTask={setSelectedSubTask}
-        />
+        <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
+          <div className="flex justify-center items-center">
+            <label
+              htmlFor="board-subTask-input" //lấy id :D
+              className="text-sm dark:text-white text-gray-500 cursor-pointer"
+            >
+              <OrderedListOutlined style={{ fontSize: 24 }} />
+            </label>
+          </div>
+          <div className="w-full flex flex-col">
+            <h3 className="text-lg font-bold">
+              Subtask ({completed}/{subTasks.length})
+            </h3>
+            {subTasks.map((subTask) => (
+              <Subtasks
+                key={subTask.id}
+                onChangeSubtask={onChangeSubtask}
+                Subtask={subTask}
+                setSelectedSubTask={setSelectedSubTask}
+              />
+            ))}
+          </div>
+        </div>
       )}
 
       {/* comment */}
-      <CommentInput
-        comment={comment}
-        isOpenQuill={isOpenQuill}
-        seItsOpenQuill={seItsOpenQuill}
-        setComment={setComment}
-      />
+      <CommentInput />
 
       {/* comment of task */}
-      <Comments
-        comment={comment}
-        isOpenQuill={isOpenQuill}
-        seItsOpenQuill={seItsOpenQuill}
-        setComment={setComment}
-      />
+      {comments.map((comment) => (
+        <Comments
+          key={comment.id}
+          comment={comment}
+          // setComment={setComment}
+        />
+      ))}
     </div>
   );
 };

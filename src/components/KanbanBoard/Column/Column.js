@@ -17,14 +17,14 @@ const Column = ({ TaskParentArray }) => {
     "bg-sky-500",
   ];
   const [color, setColor] = useState(null);
-  const subTask = TaskParentArray.tasks;
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [addNewTask, setAddNewTask] = useState(false);
   const [taskParent, setTaskParent] = useState(false);
+  const [taskSelected, setTaskSelected] = useState(null);
 
   let completed = 0;
-  let subtask = TaskParentArray.tasks;
-  subtask.forEach((task) => {
+  let subTask = TaskParentArray.tasks;
+  subTask.forEach((task) => {
     if (task.status === "confirmed") {
       completed++;
     }
@@ -40,9 +40,10 @@ const Column = ({ TaskParentArray }) => {
     return date;
   };
 
-  const openTaskModalHandler = () => {
+  const openTaskParentModal = () => {
     setIsOpenTaskModal(true);
     setTaskParent(true);
+    setTaskSelected(TaskParentArray);
   };
 
   useEffect(() => {
@@ -59,7 +60,7 @@ const Column = ({ TaskParentArray }) => {
           <div
             className=" flex flex-col items-start gap-2  justify-start 
           w-[250px] mx-auto my-2 rounded-lg cursor-pointer py-1 px-1"
-            onClick={() => openTaskModalHandler()}
+            onClick={() => openTaskParentModal()}
           >
             <div className="flex items-start gap-2 w-full">
               <span className={`rounded-full w-4 h-4 ${color} `}></span>
@@ -79,13 +80,13 @@ const Column = ({ TaskParentArray }) => {
 
           {/* subtask */}
           {subTask.length > 0
-            ? subTask.map((task, index) => (
+            ? subTask.map((subTask, index) => (
                 <TaskKanbanBoard
-                  task={task}
+                  setTaskSelected={setTaskSelected}
+                  task={subTask}
                   setTaskParent={setTaskParent}
-                  isOpenTaskModal={isOpenTaskModal}
                   setIsOpenTaskModal={setIsOpenTaskModal}
-                  key={task.id}
+                  key={subTask.id}
                 />
               ))
             : ""}
@@ -100,6 +101,8 @@ const Column = ({ TaskParentArray }) => {
         </div>
         {isOpenTaskModal && (
           <TaskModal
+            setTaskSelected={setTaskSelected}
+            taskSelected={taskSelected}
             taskParent={taskParent}
             isOpenTaskModal={isOpenTaskModal}
             setIsOpenTaskModal={setIsOpenTaskModal}

@@ -4,8 +4,17 @@ import {
   UploadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, DatePicker, Select, Tooltip, Upload } from "antd";
-import React from "react";
+import {
+  Avatar,
+  Button,
+  DatePicker,
+  Select,
+  Tooltip,
+  Upload,
+  message,
+} from "antd";
+import dayjs from "dayjs";
+import React, { useState } from "react";
 
 const user = [
   {
@@ -35,19 +44,51 @@ const user = [
   },
 ];
 
-const FieldSubtask = ({
-  isOpenDate,
-  onOk,
-  deadline,
-  boardItem,
-  setIsOpenDate,
-  props,
-  onChange,
-  isOpenMember,
-  seItsOpenMember,
-}) => {
+const FieldSubtask = ({ taskSelected, taskParent }) => {
   const handleChangeSelect = (value) => {
     // console.log(`selected ${value}`);
+  };
+  const [isOpenDate, setIsOpenDate] = useState(false);
+  const [isOpenMember, seItsOpenMember] = useState(false);
+  const [deadline, setDeadline] = useState(dayjs());
+
+  const formattedDate = (value) => {
+    const date = new Date(value)
+      .toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      .replace(/\//g, "-");
+
+    return date;
+  };
+
+  //Pick deadline
+  const onChange = (value, dateString) => {
+    // console.log("Selected Time: ", value);
+    console.log("Formatted Selected Time: ", dateString);
+    setDeadline(dateString);
+  };
+
+  //Upload file
+  const props = {
+    name: "file",
+    action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
+    headers: {
+      authorization: "authorization-text",
+    },
+    onChange(info) {
+      if (info.file.status !== "uploading") {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === "done") {
+        message.success(`${info.file.name} file uploaded successfully`);
+      } else if (info.file.status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
   };
 
   return (
@@ -57,7 +98,7 @@ const FieldSubtask = ({
         <div className="flex flex-col w-full pl-12 mt-2">
           <h4 className="text-sm font-semibold flex flex-row gap-x-2">
             <UserOutlined />
-            Member
+            {taskParent ? "Leader" : "Member"}
           </h4>
           <div className="flex justify-start items-center mt-4">
             {isOpenMember ? (
@@ -68,6 +109,7 @@ const FieldSubtask = ({
                   width: "80%",
                 }}
                 // value={user}
+
                 onChange={(value) => handleChangeSelect(value)}
               >
                 {user.map((item, index) => {
@@ -94,14 +136,15 @@ const FieldSubtask = ({
                 className="flex flex-row gap-x-2 justify-start items-center bg-slate-50  rounded-md p-1 cursor-pointer"
                 onClick={() => seItsOpenMember(true)}
               >
-                <Tooltip key="avatar" title="Vu Nguyen" placement="top">
-                  <Avatar
-                    src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=2"
-                    size="small"
-                  />
+                <Tooltip
+                  key="avatar"
+                  title={taskSelected.member?.name}
+                  placement="top"
+                >
+                  <Avatar src={taskSelected.member?.avatar} size="small" />
                 </Tooltip>
                 <p className="w-[100px] flex-1  text-sm font-semibold">
-                  Vu Nguyen
+                  {taskSelected.member?.name}
                 </p>
               </div>
             )}
@@ -118,19 +161,21 @@ const FieldSubtask = ({
               <DatePicker
                 showTime
                 onChange={onChange}
-                onOk={onOk}
                 defaultValue={deadline}
               />
             ) : (
               <span
-                // className={`px-[6px] py-[2px] w-fit text-xs font-medium flex justify-start items-center gap-x-1 ${
-                //   task.color === "red"
-                //     ? "bg-red-300 bg-opacity-20 text-red-600 dark:bg-red-600 dark:bg-opacity-40 dark:text-red-400 rounded-md"
-                //     : task.color === "green"
-                //     ? "bg-green-300 bg-opacity-20 text-green-600 dark:bg-green-600 dark:bg-opacity-40 dark:text-green-400 rounded-md"
-                //     : ""
-                // }`}
-                className="px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 bg-green-300 bg-opacity-20 text-green-600 dark:bg-green-600 dark:bg-opacity-40 dark:text-green-400 rounded-md cursor-pointer"
+                className={`px-[6px] py-[2px] w-fit text-xs font-medium flex justify-start items-center gap-x-1 ${
+                  taskSelected.status === "processing"
+                    ? "bg-blue-300 bg-opacity-20 text-blue-600 rounded-md"
+                    : taskSelected.status === "done"
+                    ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
+                    : taskSelected.status === "confirmed"
+                    ? "bg-[#65a9a2] bg-opacity-20 text-[#13676a] rounded-md"
+                    : taskSelected.status === "pending"
+                    ? "bg-[#f9d14c] bg-opacity-20 text-[#faad14] rounded-md"
+                    : ""
+                }`}
                 onClick={() => setIsOpenDate(true)}
               >
                 <svg
@@ -147,8 +192,7 @@ const FieldSubtask = ({
                     d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                {/* {task.time} */}
-                08/27 at 12:32
+                {formattedDate(taskSelected.endDate)}
               </span>
             )}
           </div>

@@ -5,19 +5,22 @@ import React from "react";
 const TaskKanbanBoard = ({
   setIsOpenTaskModal,
   setTaskParent,
-  isOpenTaskModal,
   task,
+  setTaskSelected,
 }) => {
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
     setTaskParent(false);
+    setTaskSelected(task);
   };
 
   const formattedDate = (value) => {
-    const date = new Date(value).toLocaleDateString("en-US", {
-      month: "2-digit",
-      day: "2-digit",
-    });
+    const date = new Date(value)
+      .toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .replace(/\//g, "-");
     return date;
   };
 

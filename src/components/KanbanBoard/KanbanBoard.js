@@ -7,40 +7,50 @@ const TaskParents = [
     title: "Thiết kế sân khâus ",
     name: "🔥 Sự kiện kỷ niệm 10 năm",
     startDate: "2023-10-01 00:00:00",
-    endDate: "2023-10-07 00:00:00",
+    endDate: "2023-10-07 14:00:00",
     priority: "hight",
     status: "processing",
     estimationTime: "3",
     createdBy: "Vu",
     approvedBy: "Vu",
     effort: "3",
-    description:
-      "😽😽😽 Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident",
-    members: [
+    file: [
       {
-        name: "vux",
+        id: 1,
+        title: "file 1",
+      },
+      {
+        id: 2,
+        title: "file 2",
+      },
+    ],
+    comment: [
+      {
+        id: 1,
+        title: "comment 1",
+        createBy: "Nguyễn Quốc Sỹ",
         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
       },
       {
-        name: "syx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Huyx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Thiepx",
+        id: 2,
+        title: "comment 2",
+        createBy: "Nguyễn Quốc Sỹ",
         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
       },
     ],
+    description:
+      "😽😽😽 Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident",
+    member: {
+      name: "vux",
+      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
+    },
     tasks: [
       {
         id: 1,
         title: "mua ban ghe ",
         name: "🔥 Sự kiện kỷ niệm 10 năm",
         startDate: "2023-10-01 00:00:00",
-        endDate: "2023-10-07 00:00:00",
+        endDate: "2023-10-07 11:09:00",
         priority: "hight",
         status: "done",
         estimationTime: "3",
@@ -59,11 +69,15 @@ const TaskParents = [
         comment: [
           {
             id: 1,
-            title: "comment 1",
+            title: "comment 1.1",
+            createBy: "Nguyễn Quốc Sỹ",
+            avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
           },
           {
             id: 2,
-            title: "comment 1",
+            title: "comment 2.1",
+            createBy: "Nguyễn Quốc Sỹ",
+            avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
           },
         ],
         effort: "3",
@@ -164,28 +178,34 @@ const TaskParents = [
     status: "processing",
     estimationTime: "3",
     createdBy: "Vu",
+    file: [
+      {
+        id: 1,
+        title: "file 1",
+      },
+      {
+        id: 2,
+        title: "file 2",
+      },
+    ],
+    comment: [
+      {
+        id: 1,
+        title: "comment 1",
+      },
+      {
+        id: 2,
+        title: "comment 1",
+      },
+    ],
     approvedBy: "Vu",
     effort: "3",
     description:
       "😽😽😽 Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident",
-    members: [
-      {
-        name: "vux",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "syx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Huyx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Thiepx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-    ],
+    member: {
+      name: "vux",
+      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
+    },
     tasks: [
       {
         id: 1,
@@ -317,28 +337,33 @@ const TaskParents = [
     estimationTime: "3",
     createdBy: "Vu",
     approvedBy: "Vu",
-
+    file: [
+      {
+        id: 1,
+        title: "file 1",
+      },
+      {
+        id: 2,
+        title: "file 2",
+      },
+    ],
+    comment: [
+      {
+        id: 1,
+        title: "comment 1",
+      },
+      {
+        id: 2,
+        title: "comment 1",
+      },
+    ],
     effort: "3",
     description:
       "😽😽😽 Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident",
-    members: [
-      {
-        name: "vux",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "syx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Huyx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Thiepx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-    ],
+    member: {
+      name: "vux",
+      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
+    },
     tasks: [
       {
         id: 1,
@@ -467,30 +492,36 @@ const TaskParents = [
     endDate: "2023-10-07 00:00:00",
     priority: "hight",
     status: "processing",
+    file: [
+      {
+        id: 1,
+        title: "file 1",
+      },
+      {
+        id: 2,
+        title: "file 2",
+      },
+    ],
+    comment: [
+      {
+        id: 1,
+        title: "comment 1",
+      },
+      {
+        id: 2,
+        title: "comment 1",
+      },
+    ],
     estimationTime: "3",
     createdBy: "Vu",
     approvedBy: "Vu",
     effort: "3",
     description:
       "😽😽😽 Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident",
-    members: [
-      {
-        name: "vux",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "syx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Huyx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Thiepx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-    ],
+    member: {
+      name: "vux",
+      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
+    },
     tasks: [
       {
         id: 1,
@@ -758,27 +789,15 @@ const TaskParents = [
     estimationTime: "3",
     createdBy: "Vu",
     approvedBy: "Vu",
+    file: [],
+    comment: [],
     effort: "3",
     description:
       "😽😽😽 Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident",
-    members: [
-      {
-        name: "vux",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "syx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Huyx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Thiepx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-    ],
+    member: {
+      name: "vux",
+      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
+    },
     tasks: [],
   },
 ];

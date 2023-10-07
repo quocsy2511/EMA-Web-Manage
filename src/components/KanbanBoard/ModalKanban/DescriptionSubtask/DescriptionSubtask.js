@@ -1,13 +1,9 @@
 import { AlignLeftOutlined } from "@ant-design/icons";
-import React from "react";
+import React, { useState } from "react";
 import ReactQuill from "react-quill";
 
-const DescriptionSubtask = ({
-  isOpenQuill,
-  description,
-  setDescription,
-  seItsOpenQuill,
-}) => {
+const DescriptionSubtask = ({ description, setDescription }) => {
+  const [isOpenQuill, seItsOpenQuill] = useState(false);
   return (
     <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
       <div className="flex justify-center items-center">

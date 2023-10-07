@@ -1,21 +1,23 @@
 import { CloseOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Button } from "antd";
-import React from "react";
+import React, { useState } from "react";
 import ReactQuill from "react-quill";
 
-const Comments = ({ isOpenQuill, comment, setComment, seItsOpenQuill }) => {
+const Comments = ({ comment, setComment }) => {
+  const [input, setInput] = useState(comment.title);
+  const [isOpenQuill, seItsOpenQuill] = useState(false);
 
   return (
-    <div className="flex flex-row mt-8 justify-start gap-x-4 ">
-      <Avatar icon={<UserOutlined />} />
+    <div className="flex flex-row mt-8 justify-start gap-x-4 " key={comment.id}>
+      <Avatar src={comment.avatar} />
       <div className="flex flex-col w-full justify-start gap-y-2">
-        <h3 className="text-sm font-medium text-dark">Nguyễn Quốc Sỹ</h3>
+        <h3 className="text-sm font-medium text-dark">{comment.createBy}</h3>
         {isOpenQuill ? (
           <div>
             <ReactQuill
               theme="snow"
-              value={comment}
-              onChange={setComment}
+              value={input}
+              onChange={setInput}
               className="bg-transparent pb-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-[500px]"
             />
             <div className="flex flex-row flex-x-2">
@@ -32,8 +34,8 @@ const Comments = ({ isOpenQuill, comment, setComment, seItsOpenQuill }) => {
           </div>
         ) : (
           <div className="w-full">
-            <div className="rounded-md text-sm text-black font-normal bg-bgSubtask cursor-pointer w-full bg-transparent px-4 py-2 ">
-              <p className="">{comment}</p>
+            <div className="rounded-md text-sm text-black font-normal bg-slate-50 cursor-pointer w-full  px-4 py-2 ">
+              <p className="">{comment.title}</p>
             </div>
             <div className="flex flex-row gap-x-2 text-text4 cursor-pointer ">
               <p

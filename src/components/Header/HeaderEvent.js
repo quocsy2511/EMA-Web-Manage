@@ -1,28 +1,6 @@
 import { SlidersTwoTone } from "@ant-design/icons";
 import { Avatar, Dropdown, Select, Tooltip } from "antd";
 import React from "react";
-const boardItem = {
-  manager: "Tung",
-  name: "🔥 Sự kiện kỷ niệm 10 năm",
-  members: [
-    {
-      name: "vux",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-    {
-      name: "syx",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-    {
-      name: "Huyx",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-    {
-      name: "Thiepx",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-  ],
-};
 
 const settingHeader = [
   {

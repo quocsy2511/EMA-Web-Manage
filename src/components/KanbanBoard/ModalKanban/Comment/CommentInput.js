@@ -4,10 +4,12 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button } from "antd";
-import React from "react";
+import React, { useState } from "react";
 import ReactQuill from "react-quill";
 
-const CommentInput = ({ isOpenQuill, comment, setComment, seItsOpenQuill }) => {
+const CommentInput = () => {
+  const [isOpenQuill, seItsOpenQuill] = useState(false);
+  const [comment, setComment] = useState("");
   return (
     <>
       <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
