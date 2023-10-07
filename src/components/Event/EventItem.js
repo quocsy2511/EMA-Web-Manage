@@ -59,7 +59,7 @@ const EventItem = ({ event }) => {
 
           <div className="w-2" />
 
-          <p className="text-sm font-medium ">{`${event.tasks.length} đề mục`}</p>
+          <p className="text-sm font-medium ">{`${event.tasks.length} task lớn`}</p>
         </div>
       </div>
     </motion.div>

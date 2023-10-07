@@ -7,19 +7,38 @@ import {
   FcMediumPriority,
 } from "react-icons/fc";
 import { BiDetail } from "react-icons/bi";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
-const TaskItem = ({ task }) => {
+const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
+  const navigate = useNavigate();
+
+  const goToSubTask = () => {
+    navigate(`${task}`);
+  };
+
+  const openSubTaskModal = () => {
+    setSelectedSubTask(task);
+    setIsOpenModal(true);
+  };
+
   return (
-    <div
+    <motion.div
+      layout
+      initial={{ x: -100 }}
+      animate={{ x: 0 }}
+      exit={{ x: 100 }}
+      whileHover={{ x: 5, y: -5 }}
+      onClick={!isSubtask ? goToSubTask : openSubTaskModal}
       className="flex items-center px-10 py-6 rounded-2xl cursor-pointer"
-      style={{ boxShadow: "0px 0px 5px 1px #ccc" }}
+      style={{ boxShadow: "0px 0px 18px 1px rgb(230 230 230)" }}
     >
       <FcLowPriority size={25} />
 
       <div className="w-[2%]" />
 
       <div className="space-y-1">
-        <p className="text-xl font-semibold">Lễ khai giảng</p>
+        <p className="text-xl font-semibold">Lễ chào mừng</p>
         <p className="text-xs">
           Chịu trách nhiệm bởi <span className="font-medium">Quốc Sỹ</span> (
           Thiết kế )
@@ -47,10 +66,10 @@ const TaskItem = ({ task }) => {
         src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
       />
 
-      <div className="w-[4%]" />
+      <div className={`${!isSubtask ? "w-[4%]" : "w-[2%]"}`} />
 
-      <BiDetail size={25} className="text-slate-400" />
-    </div>
+      {!isSubtask && <BiDetail size={25} className="text-slate-400" />}
+    </motion.div>
   );
 };
 
