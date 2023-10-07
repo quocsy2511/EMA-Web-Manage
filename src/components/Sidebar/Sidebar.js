@@ -150,7 +150,7 @@ const Sidebar = ({ collapsed }) => {
           </div>
 
           {/* sidebar here */}
-          <div className="dark:bg-[#001529] bg-white  flex flex-col justify-between">
+          <div className="dark:bg-[#001529] bg-white flex flex-col justify-between">
             <ConfigProvider
               theme={{
                 components: {

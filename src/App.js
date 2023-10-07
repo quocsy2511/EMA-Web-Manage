@@ -1,8 +1,9 @@
 import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Suspense, lazy } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { queryClient } from "./utils/http";
-import { checkAuthLoader, loginLoader, tokenLoader } from "./utils/auth";
+import { checkAuthLoader, loginLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
@@ -12,15 +13,19 @@ const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 // Mana pages
 const RootPage = lazy(() => import("./pages/RootPage"));
 const DashboardPage = lazy(() => import("./pages/Dashboard/DashboardPage"));
+const EventLayout = lazy(() => import("./pages/Event/EventLayout"));
 const EventPage = lazy(() => import("./pages/Event/EventPage"));
 const PersonnelPage = lazy(() => import("./pages/Personnel/PersonnelPage"));
+const EventTaskPage = lazy(() => import("./pages/Event/EventTaskPage"));
+const EventBudgetPage = lazy(() => import("./pages/Event/EventBudgetPage"));
+const EventSubTaskPage = lazy(() => import("./pages/Event/EventSubTaskPage"));
+const EventCreationPage = lazy(() => import("./pages/Event/EventCreationPage"));
 const DivisionPage = lazy(() => import("./pages/Division/DivisionPage"));
-const RolePage = lazy(() => import("./pages/Role/RolePage"));
+const ChatPage = lazy(() => import("./pages/Chat/ChatPage"));
 const TimekeepingPage = lazy(() =>
   import("./pages/Timekeeping/TimekeepingPage")
 );
 const RequestPage = lazy(() => import("./pages/Request/RequestPage"));
-const EventTaskPage = lazy(() => import("./pages/Event/EventTaskPage"));
 
 // Staff pages
 const ManagerLayout = lazy(() => import("./pages/ManagerLayout"));
@@ -38,17 +43,18 @@ const router = createBrowserRouter([
     path: "/",
     element: <LoginPage />,
     errorElement: <ErrorPage />,
-    // loader: loginLoader,
+    loader: loginLoader,
   },
   {
     path: "/manager",
+    id: "manager",
     element: (
       <Suspense fallback={<LoadingPageIndicator />}>
         <RootPage />
       </Suspense>
     ),
     errorElement: <ErrorPage />,
-    // loader: checkAuthLoader, // Is call whenever a new navigation trigger
+    loader: checkAuthLoader, // Is call whenever a new navigation trigger
     children: [
       {
         index: true,
@@ -58,17 +64,52 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
+
       {
         path: "event",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <EventPage />
+            <EventLayout />
           </Suspense>
         ),
-      },
-      {
-        path: "event/:eventId",
-        element: <EventTaskPage />,
+        children: [
+          {
+            index: true,
+            element: <EventPage />,
+          },
+          {
+            path: ":eventId",
+            element: (
+              <Suspense fallback={<LoadingPageIndicator />}>
+                <EventTaskPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: ":eventId/:taskId",
+            element: (
+              <Suspense fallback={<LoadingPageIndicator />}>
+                <EventSubTaskPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: ":eventId/budget",
+            element: (
+              <Suspense fallback={<LoadingPageIndicator />}>
+                <EventBudgetPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "addition",
+            element: (
+              <Suspense fallback={<LoadingPageIndicator />}>
+                <EventCreationPage />
+              </Suspense>
+            ),
+          },
+        ],
       },
       {
         path: "personnel",
@@ -87,10 +128,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "role",
+        path: "chat",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <RolePage />
+            <ChatPage />
           </Suspense>
         ),
       },
@@ -124,19 +165,20 @@ const router = createBrowserRouter([
   //Staff
   {
     path: "/staff",
+    id: "staff",
     element: (
       <Suspense fallback={<LoadingPageIndicator />}>
         <ManagerLayout />
       </Suspense>
     ),
     errorElement: <ErrorPage />,
-    // loader: checkAuthLoader,
+    loader: checkAuthLoader,
     children: [
       {
         index: true,
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <EventStaffPage />,
+            <EventStaffPage />
           </Suspense>
         ),
       },
@@ -144,7 +186,7 @@ const router = createBrowserRouter([
         path: "request",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <RequestStaffPage />,
+            <RequestStaffPage />
           </Suspense>
         ),
       },
@@ -152,7 +194,7 @@ const router = createBrowserRouter([
         path: "timekeeping",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <TimekeepingStaffPage />,
+            <TimekeepingStaffPage />
           </Suspense>
         ),
       },
@@ -160,7 +202,7 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <DashboardPageStaff />,
+            <DashboardPageStaff />
           </Suspense>
         ),
       },
@@ -172,6 +214,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

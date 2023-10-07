@@ -1,13 +1,28 @@
 import React, { Fragment } from "react";
 import videoBg from "../../assets/videos/video-login.mp4";
 import { Button, Checkbox, Form, Input } from "antd";
+import { useMutation } from "@tanstack/react-query";
+import { login } from "../../apis/auths";
+import { useNavigate } from "react-router-dom";
+import jwt from "jwt-decode";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+
+  const { mutate, isLoading } = useMutation(login, {
+    onSuccess: (data) => {
+      const accessToken = data.data.access_token;
+      localStorage.setItem("token", accessToken);
+
+      const role = jwt(accessToken).role;
+
+      if (role === "MANAGER") navigate("/manager");
+      else navigate("/staff");
+    },
+  });
+
   const onFinish = (values) => {
-    console.log("Success:", values);
-  };
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
+    mutate(values);
   };
 
   return (
@@ -27,23 +42,18 @@ const LoginPage = () => {
                 maxWidth: 600,
                 marginTop: 24,
               }}
-              initialValues={{
-                remember: true,
-              }}
               onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-              autoComplete="off"
             >
               <Form.Item
-                name="username"
+                name="email"
                 rules={[
                   {
                     required: true,
-                    message: "Please input your username!",
+                    message: "Please input your email!",
                   },
                 ]}
               >
-                <Input placeholder="Username" className="p-2 rounded-lg " />
+                <Input placeholder="Email" className="p-2 rounded-lg " />
               </Form.Item>
 
               <Form.Item
@@ -56,13 +66,10 @@ const LoginPage = () => {
                 ]}
               >
                 <Input.Password
-                  placeholder="password "
-                  className="p-2 rounded-lg "
+                  placeholder="password"
+                  className="p-2 rounded-lg"
+                  autoComplete="curren-password"
                 />
-              </Form.Item>
-
-              <Form.Item name="remember" valuePropName="checked">
-                <Checkbox>Remember me</Checkbox>
               </Form.Item>
 
               <Form.Item
@@ -74,6 +81,7 @@ const LoginPage = () => {
                   type="primary"
                   className="hover:scale-105 duration-300 w-full"
                   htmlType="submit"
+                  loading={isLoading}
                 >
                   Login
                 </Button>

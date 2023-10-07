@@ -4,16 +4,16 @@ import { motion } from "framer-motion";
 
 const EventTaskSelection = (props) => {
   return (
-    <motion.div layout className="w-[25%] flex items-center">
+    <motion.div layout className="w-[20%] flex items-center">
       <p className="text-base font-medium">{props.title}</p>
       <div className="w-[10%]" />
       <Select
         className="flex-1"
         placeholder={props.placeholder}
         onChange={(value) => {
-          props.setState(value);
+          props.updatevalue(value);
         }}
-        value={props.state ?? null}
+        value={props.value ?? null}
         options={props.options}
         listHeight={props.dropdownHeight ?? 200} // height of dropdown
         {...props}
