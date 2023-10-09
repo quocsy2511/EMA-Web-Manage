@@ -39,14 +39,14 @@ const TimekeepingStaffPage = lazy(() =>
 const DashboardPageStaff = lazy(() =>
   import("./pages/Dashboard/DashboardPageStaff")
 );
-const TaskPageStaff = lazy(() => import("./pages/Task/TaskpageStaff"));
+const TaskPageStaff = lazy(() => import("./pages/Task/TaskPageStaff"));
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <LoginPage />,
     errorElement: <ErrorPage />,
-    loader: loginLoader,
+    // loader: loginLoader,
   },
   {
     path: "/manager",
@@ -57,7 +57,7 @@ const router = createBrowserRouter([
       </Suspense>
     ),
     errorElement: <ErrorPage />,
-    loader: checkAuthLoader, // Is call whenever a new navigation trigger
+    // loader: checkAuthLoader, // Is call whenever a new navigation trigger
     children: [
       {
         index: true,
@@ -197,7 +197,7 @@ const router = createBrowserRouter([
       </Suspense>
     ),
     errorElement: <ErrorPage />,
-    loader: checkAuthLoader,
+    // loader: checkAuthLoader,
     children: [
       {
         index: true,

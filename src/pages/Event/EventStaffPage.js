@@ -98,7 +98,7 @@ const EventStaffPage = () => {
   const [selectEvent, setSelectEvent] = useState(events[0]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col ">
       <HeaderEvent
         events={events}
         setSelectEvent={setSelectEvent}

@@ -2,11 +2,12 @@ import { Avatar, Badge, Dropdown, Menu } from "antd";
 import React from "react";
 import { HiOutlineBellAlert } from "react-icons/hi2";
 import { IoLogOutOutline } from "react-icons/io5";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import { Header } from "antd/es/layout/layout";
 
 const HeaderStaff = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const getItem = (label, key) => {
     return {
@@ -110,7 +111,7 @@ const HeaderStaff = () => {
             }}
             theme="dark"
             mode="horizontal"
-            defaultSelectedKeys={["/staff"]}
+            defaultSelectedKeys={location.pathname}
             items={topBarItems}
           />
         </div>
