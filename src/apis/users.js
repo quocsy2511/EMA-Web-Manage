@@ -1,5 +1,4 @@
 import axios from "axios";
-import { URL, token } from "../constants/api";
 import { authRequest } from "../utils/axios-utils";
 
 export const getAllUser = ({ divisionId, pageSize, currentPage }) =>
@@ -7,6 +6,20 @@ export const getAllUser = ({ divisionId, pageSize, currentPage }) =>
     url: `/user?sizePage=${pageSize}&currentPage=${currentPage}${
       divisionId ? `&divisionId=${divisionId}` : ""
     }`,
+  });
+
+export const createUser = (user) =>
+  authRequest({
+    url: `/auth/sign-up`,
+    method: "post",
+    data: user,
+  });
+
+  // status = ACTIVE or INACTIVE
+export const updateStatusUser = ({ userId, status }) =>
+  authRequest({
+    url: `/user/${userId}/${status}`,
+    method: "put",
   });
 
 export const getAllDivision = ({ pageSize, currentPage }) =>

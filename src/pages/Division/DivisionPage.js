@@ -34,6 +34,7 @@ const DivisionPage = () => {
       },
     }
   );
+  console.log(data);
 
   const [editingRowKey, setEditingRowKey] = useState("");
   const [showDrawer, setShowDrawer] = useState(false);

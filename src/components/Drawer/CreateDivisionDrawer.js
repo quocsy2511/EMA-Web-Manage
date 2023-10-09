@@ -11,8 +11,6 @@ const CreateDivisionDrawer = ({ showDrawer, setShowDrawer }) => {
     (division) => createDivision(division),
     {
       onSuccess: (data, division) => {
-        console.log("success data: ", data);
-        console.log("Params: ", division);
         form.setFieldsValue({ divisionName: "", description: "" });
         queryClient.invalidateQueries("division");
         setShowDrawer(false);
