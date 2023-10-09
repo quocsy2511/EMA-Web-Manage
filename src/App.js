@@ -7,6 +7,7 @@ import { checkAuthLoader, loginLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
+import RolePage from "./pages/Role/RolePage";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -59,7 +60,7 @@ const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
+          <Suspense fallback={<LoadingPageIndicator title="trang chủ" />}>
             <DashboardPage />
           </Suspense>
         ),
@@ -68,7 +69,7 @@ const router = createBrowserRouter([
       {
         path: "event",
         element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
+          <Suspense fallback={<LoadingPageIndicator title="trang sự kiện" />}>
             <EventLayout />
           </Suspense>
         ),
@@ -80,7 +81,9 @@ const router = createBrowserRouter([
           {
             path: ":eventId",
             element: (
-              <Suspense fallback={<LoadingPageIndicator />}>
+              <Suspense
+                fallback={<LoadingPageIndicator title="thông tin sự kiện" />}
+              >
                 <EventTaskPage />
               </Suspense>
             ),
@@ -88,7 +91,11 @@ const router = createBrowserRouter([
           {
             path: ":eventId/:taskId",
             element: (
-              <Suspense fallback={<LoadingPageIndicator />}>
+              <Suspense
+                fallback={
+                  <LoadingPageIndicator title="công việc của sự kiện" />
+                }
+              >
                 <EventSubTaskPage />
               </Suspense>
             ),
@@ -96,7 +103,11 @@ const router = createBrowserRouter([
           {
             path: ":eventId/budget",
             element: (
-              <Suspense fallback={<LoadingPageIndicator />}>
+              <Suspense
+                fallback={
+                  <LoadingPageIndicator title="ngân sách của sự kiện" />
+                }
+              >
                 <EventBudgetPage />
               </Suspense>
             ),
@@ -104,7 +115,11 @@ const router = createBrowserRouter([
           {
             path: "addition",
             element: (
-              <Suspense fallback={<LoadingPageIndicator />}>
+              <Suspense
+                fallback={
+                  <LoadingPageIndicator title="trang tạo mới sự kiện" />
+                }
+              >
                 <EventCreationPage />
               </Suspense>
             ),
@@ -124,6 +139,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <DivisionPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "role",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <RolePage />
           </Suspense>
         ),
       },
