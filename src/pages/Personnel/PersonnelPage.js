@@ -26,10 +26,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllDivision, getAllUser } from "../../apis/users";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import CreateUserDrawer from "../../components/Drawer/CreateUserDrawer";
 
 const PersonnelPage = () => {
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     ["users", page],
     () => getAllUser({ pageSize: 10, currentPage: page }),
     {
@@ -47,7 +49,11 @@ const PersonnelPage = () => {
   );
   console.log("userData: ", data);
 
-  const { data: divisionsData, isLoading: divisionsIsLoading } = useQuery(
+  const {
+    data: divisionsData,
+    isLoading: divisionsIsLoading,
+    isError: divisionIsError,
+  } = useQuery(
     ["division"],
     () => getAllDivision({ pageSize: 20, currentPage: 1 }),
     {
@@ -63,6 +69,7 @@ const PersonnelPage = () => {
   const [searchText, setSearchText] = useState("");
   const [searchColText, setSearchColText] = useState("");
   const [searchedCol, setSearchedCol] = useState(""); // Tracking which col is being searched
+  const [showDrawer, setShowDrawer] = useState(false);
 
   const [filteredData, setFilteredData] = useState(); // Contain the global data after search
 
@@ -584,87 +591,103 @@ const PersonnelPage = () => {
       <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-8">
         <div className="bg-white min-h rounded-xl p-8">
           <p className="text-2xl font-medium mb-5">Quản lý nhân sự</p>
-          <div className="flex gap-x-4 mb-8">
-            <Input
-              className="w-[30%]"
-              placeholder="Tìm kiếm theo tên"
-              value={searchText}
-              onChange={(e) => {
-                setSearchText(e.target.value);
-                if (e.target.value === "") {
-                  // loadData()
-                  setFilteredData();
-                }
-              }}
-              onPressEnter={searchGlobal}
-            />
-            <Button type="primary" onClick={searchGlobal}>
-              Tìm kiếm
-            </Button>
-            <Button danger onClick={handleResetTable}>
-              Đặt lại
-            </Button>
-            <div className="flex-1 text-end">
-              <Button type="primary" className="">
-                Thêm nhân viên
-              </Button>
-            </div>
-          </div>
           {!isLoading && !divisionsIsLoading ? (
-            <>
-              <Form
-                form={form}
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                component={false}
-              >
-                <Table
-                  components={{
-                    body: {
-                      cell: EditableCell,
-                    },
-                  }}
-                  columns={mergedColumns}
-                  dataSource={
-                    filteredData /* && filteredData.length*/
-                      ? filteredData
-                      : data.data
-                  }
-                  onChange={handleTableChange}
-                  pagination={false}
-                  scroll={{
-                    x: "150%",
-                    // y: "100%",
-                    scrollToFirstRowOnChange: true,
-                  }}
-                />
-              </Form>
-              <div className="flex justify-center mt-8">
-                <div className="flex items-center gap-x-3">
-                  <MdOutlineKeyboardArrowLeft
-                    className={`text-slate-500 ${
-                      data.prevPage
-                        ? "cursor-pointer hover:text-blue-600"
-                        : "cursor-not-allowed"
-                    }`}
-                    onClick={() => data.prevPage && setPage((prev) => prev - 1)}
-                    size={25}
+            isError || divisionIsError ? (
+              <AnErrorHasOccured />
+            ) : (
+              <>
+                <div className="flex gap-x-4 mb-8">
+                  <Input
+                    className="w-[30%]"
+                    placeholder="Tìm kiếm theo tên"
+                    value={searchText}
+                    onChange={(e) => {
+                      setSearchText(e.target.value);
+                      if (e.target.value === "") {
+                        // loadData()
+                        setFilteredData();
+                      }
+                    }}
+                    onPressEnter={searchGlobal}
                   />
-                  <div className="px-4 py-2 border border-slate-300 rounded-md text-base font-medium cursor-default">
-                    {page}
+                  <Button type="primary" onClick={searchGlobal}>
+                    Tìm kiếm
+                  </Button>
+                  <Button danger onClick={handleResetTable}>
+                    Đặt lại
+                  </Button>
+                  <div className="flex-1 text-end">
+                    <Button
+                      type="primary"
+                      className=""
+                      onClick={() => setShowDrawer(true)}
+                    >
+                      Thêm nhân viên
+                    </Button>
+                    <CreateUserDrawer
+                      showDrawer={showDrawer}
+                      setShowDrawer={setShowDrawer}
+                    />
                   </div>
-                  <MdOutlineKeyboardArrowRight
-                    className={`text-slate-500 ${
-                      data.nextPage
-                        ? "cursor-pointer hover:text-blue-600"
-                        : "cursor-not-allowed"
-                    }`}
-                    onClick={() => data.nextPage && setPage((prev) => prev + 1)}
-                    size={25}
-                  />
                 </div>
-              </div>
-            </>
+                <Form
+                  form={form}
+                  onFinish={onFinish}
+                  onFinishFailed={onFinishFailed}
+                  component={false}
+                >
+                  <Table
+                    components={{
+                      body: {
+                        cell: EditableCell,
+                      },
+                    }}
+                    columns={mergedColumns}
+                    dataSource={
+                      filteredData /* && filteredData.length*/
+                        ? filteredData
+                        : data.data
+                    }
+                    onChange={handleTableChange}
+                    pagination={false}
+                    scroll={{
+                      x: "150%",
+                      // y: "100%",
+                      scrollToFirstRowOnChange: true,
+                    }}
+                  />
+                </Form>
+                <div className="flex justify-center mt-8">
+                  <div className="flex items-center gap-x-3">
+                    <MdOutlineKeyboardArrowLeft
+                      className={`text-slate-500 ${
+                        data.prevPage
+                          ? "cursor-pointer hover:text-blue-600"
+                          : "cursor-not-allowed"
+                      }`}
+                      onClick={() =>
+                        data.prevPage && setPage((prev) => prev - 1)
+                      }
+                      size={25}
+                    />
+                    <div className="px-4 py-2 border border-slate-300 rounded-md text-base font-medium cursor-default">
+                      {page}
+                    </div>
+                    <MdOutlineKeyboardArrowRight
+                      className={`text-slate-500 ${
+                        data.nextPage
+                          ? "cursor-pointer hover:text-blue-600"
+                          : "cursor-not-allowed"
+                      }`}
+                      onClick={() =>
+                        data.nextPage && setPage((prev) => prev + 1)
+                      }
+                      size={25}
+                    />
+                  </div>
+                </div>
+              </>
+            )
           ) : (
             <LoadingComponentIndicator />
           )}
