@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from "react";
 import { Layout } from "antd";
-import { Content, Footer } from "antd/es/layout/layout";
-import { Outlet, useLoaderData } from "react-router-dom";
+import { Content } from "antd/es/layout/layout";
+import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Header from "../components/Header/Header";
 

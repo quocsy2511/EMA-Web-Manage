@@ -8,6 +8,8 @@ import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
 import RolePage from "./pages/Role/RolePage";
+// import TaskPageStaff from "./pages/Task/TaskpageStaff";
+
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -38,6 +40,7 @@ const TimekeepingStaffPage = lazy(() =>
 const DashboardPageStaff = lazy(() =>
   import("./pages/Dashboard/DashboardPageStaff")
 );
+const TaskPageStaff = lazy(() => import("./pages/Task/TaskpageStaff"));
 
 const router = createBrowserRouter([
   {
@@ -226,6 +229,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <DashboardPageStaff />
+          </Suspense>
+        ),
+      },
+      {
+        path: "task",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <TaskPageStaff />
           </Suspense>
         ),
       },

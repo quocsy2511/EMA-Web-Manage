@@ -2,62 +2,6 @@ import { SlidersTwoTone } from "@ant-design/icons";
 import { Avatar, Dropdown, Select, Tooltip } from "antd";
 import React from "react";
 
-const boards = [
-  {
-    manager: "jack",
-    name: "🔥 Sự kiện kỷ niệm 10 năm",
-    members: [
-      {
-        name: "vux",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "syx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "thiepx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-      {
-        name: "Thiepx",
-        avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-      },
-    ],
-  },
-  {
-    manager: "lucy",
-    name: "🔥 Sự kiện kỷ niệm 20 năm",
-  },
-  {
-    manager: "Yiminghe",
-    name: "🔥 Sự kiện kỷ niệm 30 năm",
-  },
-];
-
-const boardItem = {
-  manager: "Tung",
-  name: "🔥 Sự kiện kỷ niệm 10 năm",
-  members: [
-    {
-      name: "vux",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-    {
-      name: "syx",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-    {
-      name: "Huyx",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-    {
-      name: "Thiepx",
-      avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-    },
-  ],
-};
-
 const settingHeader = [
   {
     key: "1",
@@ -102,35 +46,38 @@ const filter = [
   },
 ];
 
-const HeaderEvent = () => {
-  
+const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
+  const handleChangeEvent = (value) => {
+    const event = JSON.parse(value);
+    setSelectEvent(event);
+  };
 
   return (
-    <div className="p-4 fixed left-0  dark:bg-dark bg-bgSubtask z-50 right-0 ">
+    <div className="p-4 fixed left-0  dark:bg-dark bg-bgHeader z-50 right-0 top-14">
       <div className="flex items-center space-x-2 md:space-x-4">
         <header className="flex justify-between dark:text-white items-center w-full mx-8">
           {/* left header */}
           <div className="flex items-center gap-x-4">
             <Select
-              defaultValue={boards[0].name}
+              defaultValue={{ label: events[0].eventName, value: events }}
               style={{
-                width: 350,
+                width: 250,
               }}
               bordered={false}
-              options={boards.map((board) => {
+              onChange={handleChangeEvent}
+              options={events.map((event) => {
+                const jsonString = JSON.stringify(event);
                 return {
                   label: (
-                    <div className="p-2 ">
-                      <h3 className="truncate max-w-[350px] text-lg font-semibold md:text-2xl ">
-                        {board.name}
-                      </h3>
-                    </div>
+                    <p className="font-semibold text-gray-600">
+                      {event.eventName}
+                    </p>
                   ),
-                  value: board.name,
+                  value: jsonString,
                 };
               })}
               // onChange={handleChange}
-              size="large"
+              size="middle"
             />
           </div>
 
@@ -172,9 +119,13 @@ const HeaderEvent = () => {
                   backgroundColor: "#F4D7DA",
                 }}
               >
-                {boardItem.members.map((member) => {
+                {selectEvent.members.map((member) => {
                   return (
-                    <Tooltip title={member.name} placement="top">
+                    <Tooltip
+                      key={member.name}
+                      title={member.name}
+                      placement="top"
+                    >
                       <Avatar src={member.avatar} />
                     </Tooltip>
                   );
