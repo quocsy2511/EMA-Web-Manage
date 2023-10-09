@@ -16,6 +16,7 @@ export function getAuthToken() {
   const decodedToken = jwt(token);
   const expTime = decodedToken.exp;
   const remainedTime = calcExpirationTime(expTime);
+  console.log("remainedTime: ", remainedTime);
 
   if (remainedTime < 0) return "EXPIRED";
 
