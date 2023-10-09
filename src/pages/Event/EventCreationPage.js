@@ -163,7 +163,6 @@ const EventCreationPage = () => {
               },
             ]}
           >
-            {/* <TextArea rows={3} /> */}
             <ReactQuill
               className="h-36 mb-11"
               theme="snow"
@@ -179,8 +178,6 @@ const EventCreationPage = () => {
               rules={[
                 {
                   validator: (rule, value) => {
-                    console.log(rule);
-                    console.log(value);
                     if (value && value.length > 0) {
                       return Promise.resolve();
                     }
@@ -249,11 +246,27 @@ const EventCreationPage = () => {
                 className="w-full"
                 label={<Title title="Ngày bắt đầu" />}
                 name="startDate"
+                dependencies={["date"]}
                 rules={[
                   {
                     required: true,
                     message: "Chọn 1 ngày để bắt đầu",
                   },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (
+                        !value ||
+                        moment(getFieldValue("date")?.[0].$d).isAfter(
+                          moment(value.$d)
+                        )
+                      ) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(
+                        new Error("Không thể trễ hơn ngày diễn ra!")
+                      );
+                    },
+                  }),
                 ]}
               >
                 <ConfigProvider locale={viVN}>
@@ -261,11 +274,9 @@ const EventCreationPage = () => {
                     onChange={(value) => {
                       form.setFieldsValue({ startDate: value });
                     }}
-                    // disabledDate={(current) => {
-                    //   return current && current < moment().startOf("day");
-                    // }}
+                    disabled={false}
                     disabledDate={(current) => {
-                      const endDate = form.getFieldValue("date")?.[1]; // Get the end date from the range picker
+                      const endDate = form.getFieldValue("date")?.[0]; // Get the end date from the range picker
                       return (
                         current &&
                         (current < moment().startOf("day") ||

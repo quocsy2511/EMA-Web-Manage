@@ -224,7 +224,7 @@ const EventTaskPage = () => {
       <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className="bg-white rounded-2xl px-10 py-8 my-10"
+        className="bg-white rounded-2xl px-10 py-8 mt-10 mb-20"
       >
         <div className="flex items-center gap-x-5">
           <EventTaskSelection
