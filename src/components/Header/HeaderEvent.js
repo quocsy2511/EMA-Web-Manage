@@ -53,9 +53,9 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
   };
 
   return (
-    <div className="p-4 fixed left-0  dark:bg-dark bg-bgHeader z-50 right-0 top-14">
+    <div className="p-4 fixed left-0   bg-bgHeader z-50 right-0 top-14">
       <div className="flex items-center space-x-2 md:space-x-4">
-        <header className="flex justify-between dark:text-white items-center w-full mx-8">
+        <header className="flex justify-between  items-center w-full mx-8">
           {/* left header */}
           <div className="flex items-center gap-x-4">
             <Select
@@ -89,7 +89,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
                   items: filter,
                 }}
               >
-                <div className=" flex justify-center items-center gap-x-2 px-4 py-2 cursor-pointer dark:hover:bg-secondaryHover rounded-lg hover:bg-secondaryHover hover:text-secondary">
+                <div className=" flex justify-center items-center gap-x-2 px-4 py-2 cursor-pointer  rounded-lg hover:bg-secondaryHover hover:text-secondary">
                   <span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

@@ -10,7 +10,6 @@ import ErrorPage from "./pages/Error/ErrorPage";
 import RolePage from "./pages/Role/RolePage";
 // import TaskPageStaff from "./pages/Task/TaskpageStaff";
 
-
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
 // Mana pages

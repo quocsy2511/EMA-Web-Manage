@@ -805,7 +805,7 @@ const TaskParents = [
 const KanbanBoard = ({ selectEvent }) => {
   return (
     <>
-      <div className="bg-bgBoard dark:bg-darkSecondary dark:from-slate-900 dark:to-secondaryHover h-screen overflow-hidden overflow-y-scroll scrollbar-hide">
+      <div className="bg-bgBoard  h-screen overflow-hidden overflow-y-scroll scrollbar-hide">
         <div className="pt-[150px] px-16 text-dark">
           <h2 className="text-4xl font-semibold  mt-6 px-4">
             {selectEvent.eventName}
