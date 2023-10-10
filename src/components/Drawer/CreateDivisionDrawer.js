@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Drawer, Form, Input, message } from "antd";
 import React from "react";
-import { createDivision } from "../../apis/users";
+import { createDivision } from "../../apis/divisions";
 
 const Label = ({ label }) => <p className="text-lg font-medium">{label}</p>;
 

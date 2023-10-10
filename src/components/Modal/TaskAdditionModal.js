@@ -18,11 +18,14 @@ import UploadTask from "../Upload/UploadTask";
 
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
+const CheckboxGroup = Checkbox.Group;
 
 const Title = ({ title }) => <p className="text-base font-medium">{title}</p>;
 
-const TaskAdditionModal = ({ isModalOpen, setIsModalOpen }) => {
+const TaskAdditionModal = ({ isModalOpen, setIsModalOpen, parentTaskId }) => {
   const [isTime, setIsTime] = useState(false);
+  const [checkedList, setCheckedList] = useState([]);
+
   const [form] = Form.useForm();
 
   const handleOk = () => {
@@ -146,6 +149,100 @@ const TaskAdditionModal = ({ isModalOpen, setIsModalOpen }) => {
           />
         </Form.Item>
 
+        {parentTaskId ? (
+          <div className="flex gap-x-8">
+            <Form.Item
+              className="w-[40%]"
+              label={<Title title="Giao cho nhân viên" />}
+              name="assignee"
+              rules={[
+                {
+                  required: true,
+                  message: "Chọn điii!",
+                },
+              ]}
+            >
+              <CheckboxGroup
+                options={[
+                  "Apple",
+                  "Pear",
+                  "Orange",
+                  "Pear",
+                  "Orange",
+                  "Pear",
+                  "Orange",
+                  "Pear",
+                  "Orange",
+                  "Pear",
+                  "Orange",
+                ]}
+                onChange={(value) => {
+                  setCheckedList(value);
+                  form.setFieldsValue({ assignee: value });
+                }}
+              />
+            </Form.Item>
+            <Form.Item
+              className=""
+              label={<Title title="Chịu trách nhiệm bởi" />}
+              name="leader"
+              rules={[
+                {
+                  required: true,
+                  message: "Chọn điii!",
+                },
+              ]}
+            >
+              {/* <Select
+                placeholder="Nhân viên"
+                onChange={(value) => {
+                  console.log(value);
+                  form.setFieldsValue({ assignee: value });
+                }}
+                options={checkedList.map((option, index) => (
+                  <Option key={index} value={option}>
+                    {option}
+                  </Option>
+                ))}
+              /> */}
+            </Form.Item>
+          </div>
+        ) : (
+          <Form.Item
+            className="w-[25%]"
+            label={<Title title="Chịu trách nhiệm bởi" />}
+            name="assignee"
+            rules={[
+              {
+                required: true,
+                message: "Chọn điii!",
+              },
+            ]}
+          >
+            <Select
+              placeholder="Bộ phận"
+              onChange={(value) => {
+                console.log(value);
+                form.setFieldsValue({ assignee: value });
+              }}
+              options={[
+                {
+                  value: 1,
+                  label: "Thiết kế",
+                },
+                {
+                  value: 2,
+                  label: "Hậu cần",
+                },
+                {
+                  value: 3,
+                  label: "Ngu",
+                },
+              ]}
+            />
+          </Form.Item>
+        )}
+
         <div className="flex gap-x-5">
           <Form.Item
             className="w-[15%]"
@@ -166,25 +263,25 @@ const TaskAdditionModal = ({ isModalOpen, setIsModalOpen }) => {
               }}
               options={[
                 {
-                  value: 1,
+                  value: "LOW",
                   label: "Thấp",
                 },
                 {
-                  value: 2,
+                  value: "MEDIUM",
                   label: "Bình thường",
                 },
                 {
-                  value: 3,
+                  value: "HIGH",
                   label: "Cao",
                 },
               ]}
             />
           </Form.Item>
 
-          <Form.Item
+          {/* <Form.Item
             className="w-[15%]"
-            label={<Title title="Giao việc cho" />}
-            name="assignment"
+            label={<Title title="Giao cho trưởng phòng" />}
+            name="assignee"
             rules={[
               {
                 required: true,
@@ -196,7 +293,7 @@ const TaskAdditionModal = ({ isModalOpen, setIsModalOpen }) => {
               placeholder="Bộ phận"
               onChange={(value) => {
                 console.log(value);
-                form.setFieldsValue({ assignment: value });
+                form.setFieldsValue({ assignee: value });
               }}
               options={[
                 {
@@ -213,14 +310,14 @@ const TaskAdditionModal = ({ isModalOpen, setIsModalOpen }) => {
                 },
               ]}
             />
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item label={<Title title="Trạng thái" />} name="status">
             <Input disabled />
           </Form.Item>
         </div>
 
-        <Form.Item
+        {/* <Form.Item
           label={<Title title="Tài liệu đính kèm" />}
           name="attachment"
           valuePropName="fileList"
@@ -260,11 +357,11 @@ const TaskAdditionModal = ({ isModalOpen, setIsModalOpen }) => {
           >
             upload
           </Upload>
-        </Form.Item>
+        </Form.Item> */}
 
-        <Form.Item>
+        {/* <Form.Item>
           <UploadTask />
-        </Form.Item>
+        </Form.Item> */}
       </Form>
     </Modal>
   );

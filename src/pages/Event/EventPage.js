@@ -4,123 +4,30 @@ import { BsSearch } from "react-icons/bs";
 import viVN from "antd/locale/vi_VN";
 import EventItem from "../../components/Event/EventItem";
 import { motion } from "framer-motion";
-import { useLoaderData, useNavigate, useRouteLoaderData } from "react-router-dom";
+import {
+  useLoaderData,
+  useNavigate,
+  useRouteLoaderData,
+} from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getAllEvent } from "../../apis/events";
+import {
+  MdOutlineKeyboardArrowLeft,
+  MdOutlineKeyboardArrowRight,
+} from "react-icons/md";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 
 const EventPage = () => {
-  const dummyEvents = [
-    {
-      title: "Lễ tốt nghiệp",
-      desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim  ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut  aliquip ex ea commodo consequat.",
-      endDate: new Date().toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "long",
-        day: "2-digit",
-      }),
-      status: "Ongoing",
-      users: [{ url: "" }, { url: "" }, { url: "" }, { url: "" }, { url: "" }],
-      tasks: [
-        {
-          id: 1,
-          title: "",
-        },
-        {
-          id: 2,
-          title: "",
-        },
-        {
-          id: 3,
-          title: "",
-        },
-        {
-          id: 3,
-          title: "",
-        },
-        {
-          id: 3,
-          title: "",
-        },
-      ],
-    },
-    {
-      title: "Lễ tốt nghiệp",
-      desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim  ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut  aliquip ex ea commodo consequat.",
-      endDate: new Date().toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "long",
-        day: "2-digit",
-      }),
-      status: "Ongoing",
-      users: [{ url: "" }, { url: "" }, { url: "" }],
-      tasks: [
-        {
-          id: 1,
-          title: "",
-        },
-        {
-          id: 2,
-          title: "",
-        },
-        {
-          id: 3,
-          title: "",
-        },
-      ],
-    },
-    {
-      title: "Lễ tốt nghiệp",
-      desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim  ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut  aliquip ex ea commodo consequat.",
-      endDate: new Date().toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "long",
-        day: "2-digit",
-      }),
-      status: "Ongoing",
-      users: [{ url: "" }, { url: "" }, { url: "" }],
-      tasks: [
-        {
-          id: 1,
-          title: "",
-        },
-        {
-          id: 2,
-          title: "",
-        },
-        {
-          id: 3,
-          title: "",
-        },
-      ],
-    },
-    {
-      title: "Lễ tốt nghiệp",
-      desc: "ris nisi ut  aliquip ex ea commodo consequat.",
-      endDate: new Date().toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "long",
-        day: "2-digit",
-      }),
-      status: "Ongoing",
-      users: [{ url: "" }, { url: "" }, { url: "" }],
-      tasks: [
-        {
-          id: 1,
-          title: "",
-        },
-        {
-          id: 2,
-          title: "",
-        },
-        {
-          id: 3,
-          title: "",
-        },
-      ],
-    },
-  ];
-  const navigate = useNavigate();
-  const data = useRouteLoaderData("manager");
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError } = useQuery(["event", page], () =>
+    getAllEvent({ pageSize: 6, currentPage: page })
+  );
 
-  const [events, setEvents] = useState(dummyEvents);
+  console.log("data: ", data);
+
+  const navigate = useNavigate();
+
   const [searchText, setSearchText] = useState("");
   const [searchDate, setSearchDate] = useState("");
 
@@ -149,54 +56,103 @@ const EventPage = () => {
         </motion.button>
       </div>
 
-      <motion.div
-        initial={{ x: -100 }}
-        animate={{ x: 0 }}
-        className="flex mt-6"
-      >
-        <Input
-          // onChange={(value) => {
-          //   console.log(value)
-          //   clearTimeout(identifier);
-          //   identifier = setTimeout(() => {
-          //     setSearchText(value.nativeEvent.data);
-          //   }, 2000);
-          // }}
-          onPressEnter={(value) => {
-            setSearchText(value.nativeEvent.target.value);
-          }}
-          size="large"
-          placeholder="Tìm tên sự kiện"
-          prefix={<BsSearch className="text-slate-500" />}
-          allowClear
-          className="w-[32%] cursor-pointer"
-          // value={searchText}
-        />
+      <div className="mt-6">
+        {!isLoading ? (
+          isError ? (
+            <AnErrorHasOccured />
+          ) : (
+            <>
+              <motion.div
+                initial={{ x: -100 }}
+                animate={{ x: 0 }}
+                className="flex"
+              >
+                <Input
+                  // onChange={(value) => {
+                  //   console.log(value)
+                  //   clearTimeout(identifier);
+                  //   identifier = setTimeout(() => {
+                  //     setSearchText(value.nativeEvent.data);
+                  //   }, 2000);
+                  // }}
+                  onPressEnter={(value) => {
+                    setSearchText(value.nativeEvent.target.value);
+                  }}
+                  size="large"
+                  placeholder="Tìm tên sự kiện"
+                  prefix={<BsSearch className="text-slate-500" />}
+                  allowClear
+                  className="w-[32%] cursor-pointer"
+                  // value={searchText}
+                />
 
-        <div className="w-[1.8%]" />
+                <div className="w-[1.8%]" />
 
-        <ConfigProvider locale={viVN}>
-          <DatePicker
-            type="year"
-            onChange={(value) => {
-              setSearchDate(value["$d"]);
-            }}
-            size="large"
-            placeholder="Thời gian"
-            className="w-[16%] cursor-pointer"
-          />
-        </ConfigProvider>
-      </motion.div>
+                <ConfigProvider locale={viVN}>
+                  <DatePicker
+                    type="year"
+                    onChange={(value) => {
+                      setSearchDate(value["$d"]);
+                    }}
+                    size="large"
+                    placeholder="Thời gian"
+                    className="w-[16%] cursor-pointer"
+                  />
+                </ConfigProvider>
+              </motion.div>
 
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="mt-5 flex flex-wrap justify-between gap-y-7"
-      >
-        {events.map((event) => (
-          <EventItem event={event} />
-        ))}
-      </motion.div>
+              <motion.div
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+              >
+                <div className="mt-5 flex flex-wrap justify-between gap-y-7">
+                  {data.data.map((event) => (
+                    <EventItem key={event.id} event={event} />
+                  ))}
+
+                  {/* {data.data.map((event) => (
+                  <EventItem key={event.id} event={event} />
+                ))} */}
+                </div>
+                <div className="flex items-center justify-center gap-x-3 mt-8">
+                  <MdOutlineKeyboardArrowLeft
+                    className={`text-slate-500 ${
+                      data.prevPage
+                        ? "cursor-pointer hover:text-blue-600"
+                        : "cursor-not-allowed"
+                    }`}
+                    onClick={() => data.prevPage && setPage((prev) => prev - 1)}
+                    size={25}
+                  />
+                  {Array.from({ length: data.lastPage }, (_, index) => (
+                    <div
+                      key={index}
+                      className={`border border-slate-300 rounded-xl px-4 py-2 text-base font-medium cursor-pointer hover:bg-blue-200 ${
+                        page === index + 1 &&
+                        "text-blue-600 border-blue-800 bg-blue-100"
+                      }`}
+                      onClick={() => setPage(index + 1)}
+                    >
+                      {index + 1}
+                    </div>
+                  ))}
+                  <MdOutlineKeyboardArrowRight
+                    className={`text-slate-500 ${
+                      data.nextPage
+                        ? "cursor-pointer hover:text-blue-600"
+                        : "cursor-not-allowed"
+                    }`}
+                    onClick={() => data.nextPage && setPage((prev) => prev + 1)}
+                    size={25}
+                  />
+                </div>
+              </motion.div>
+            </>
+          )
+        ) : (
+          <LoadingComponentIndicator />
+        )}
+      </div>
     </Fragment>
   );
 };

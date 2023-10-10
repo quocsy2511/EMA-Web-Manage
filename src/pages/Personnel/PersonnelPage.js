@@ -10,6 +10,7 @@ import {
   Space,
   Table,
   Tag,
+  message,
 } from "antd";
 import React, { Fragment, useState } from "react";
 import { PiTrash, PiNotePencilBold } from "react-icons/pi";
@@ -22,8 +23,9 @@ import {
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
 import Highlighter from "react-highlight-words";
-import { useQuery } from "@tanstack/react-query";
-import { getAllDivision, getAllUser } from "../../apis/users";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getAllUser, updateUser } from "../../apis/users";
+import { getAllDivision } from "../../apis/divisions";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
@@ -36,18 +38,17 @@ const PersonnelPage = () => {
     () => getAllUser({ pageSize: 10, currentPage: page }),
     {
       select: (data) => {
-        data.data.result.data = data.data.result.data.map(({ ...item }) => {
+        data.data = data.data.map(({ ...item }) => {
           item.dob = moment(item.dob).format("YYYY-MM-DD");
           return {
             key: item.id,
             ...item,
           };
         });
-        return data.data.result;
+        return data;
       },
     }
   );
-  console.log("userData: ", data);
 
   const {
     data: divisionsData,
@@ -57,11 +58,23 @@ const PersonnelPage = () => {
     ["division"],
     () => getAllDivision({ pageSize: 20, currentPage: 1 }),
     {
-      select: (data) =>
-        data.data.result.data.filter((division) => division.status === 1),
+      select: (data) => data.data.filter((division) => division.status === 1),
     }
   );
-  console.log("divisionsData: ", divisionsData);
+
+  const queryClient = useQueryClient();
+  const { mutate, isLoading: updateUserIsLoading } = useMutation(
+    (user) => updateUser(user),
+    {
+      onSuccess: () => {},
+      onError: () => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
 
   const [editingRowKey, setEditingRowKey] = useState(""); // Tracking which row is editing - contain key of selected row
   const [sortedInfo, setSortedInfo] = useState({}); // Tracking which field (col) is being sorted - contain columnKey and order (asc/desc)
@@ -74,6 +87,7 @@ const PersonnelPage = () => {
   const [filteredData, setFilteredData] = useState(); // Contain the global data after search
 
   const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
 
   // Check if the row is editing or not
   const checkEditing = (record) => {
@@ -126,34 +140,10 @@ const PersonnelPage = () => {
   };
   const onSaveEditing = async (recordKey) => {
     form.submit();
-    // try {
-    //   // Check if all validation is successful => return value of form data => row = { data-of-form }
-    //   const row = await form.validateFields();
-    //   console.log();
-    //   // Get the existed data
-    //   const newData = [...data];
-    //   // Get the item that match the selectedKey / selectedRow
-    //   const index = newData.findIndex((item) => recordKey === item.key);
-
-    //   if (index > -1) {
-    //     const item = newData[index];
-    //     newData.splice(index, 1, {
-    //       ...item,
-    //       ...row,
-    //     });
-    //     setData(newData);
-    //     setEditingRowKey("");
-    //   } else {
-    //     newData.push(row);
-    //     setData(newData);
-    //     setEditingRowKey("");
-    //   }
-    // } catch (error) {
-    //   console.log("Validate Form Failed: ", error);
-    // }
   };
   // Editing mode
   const onEditing = (record) => {
+    console.log("OnEditing: ", record);
     form.setFieldsValue({
       fullName: "",
       phoneNumber: "",
@@ -273,20 +263,13 @@ const PersonnelPage = () => {
       editTable: true,
       ...getColumnSearchProps("fullName"),
       filteredValue: null,
-      render: (_, record) => {
-        return (
-          <div className="flex items-center gap-x-3">
-            <Avatar src={record.avatar} alt="avatar" />
-            <p className="text-sm">{record.fullName}</p>
-          </div>
-        );
-      },
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
       width: 160,
+      editTable: true,
       ...getColumnSearchProps("email"),
       filteredValue: null,
     },
@@ -333,6 +316,7 @@ const PersonnelPage = () => {
       dataIndex: "gender",
       key: "gender",
       width: 80,
+      editTable: true,
       filteredValue: null,
       align: "center",
       render: (_, record) => <p>{record.gender === "MALE" ? "Nam" : "Nữ"}</p>,
@@ -363,14 +347,15 @@ const PersonnelPage = () => {
       width: 100,
       editTable: true,
       filters: [
-        { text: "Hậu Cần", value: "Hậu Cần" },
+        { text: "Hậu cần", value: "Hậu cần" },
         { text: "Kế Toán", value: "Kế Toán" },
       ],
       filteredValue: filteredInfo.divisionName || null,
-      onFilter: (value, record) => record.divisionName?.includes(value),
+      onFilter: (value, record) =>
+        record.divisionName?.toLowerCase().includes(value.toLowerCase()),
       render: (_, record) => (
         <p className={`text-base ${!record.divisionName && "text-red-400"}`}>
-          {record.divisionName ? record.divisionName : "Chưa phân quyền"}
+          {record.divisionName}
         </p>
       ),
     },
@@ -399,7 +384,7 @@ const PersonnelPage = () => {
             color={record.status === "ACTIVE" ? "green" : "volcano"}
             key={record.id}
           >
-            {record.status === "ACTIVE" ? "ACTIVE" : "INACTIVE"}
+            {record.status === "ACTIVE" ? "Kích hoạt" : "Vô hiệu"}
           </Tag>
         </div>
       ),
@@ -494,7 +479,8 @@ const PersonnelPage = () => {
             ? "date"
             : col.dataIndex === "role" ||
               col.dataIndex === "divisionName" ||
-              col.dataIndex === "status"
+              col.dataIndex === "status"||
+              col.dataIndex === "gender"
             ? "selection"
             : "text",
       }),
@@ -511,22 +497,37 @@ const PersonnelPage = () => {
     ...restProps
   }) => {
     // Setup input field type
+    let options;
+    switch (dataIndex) {
+      case "role":
+        options = [
+          { value: "STAFF", label: "Trường phòng" },
+          { value: "EMPLOYEE", label: "Nhân viên" },
+        ];
+        break;
+      case "divisionName":
+        options = divisionsData.map((division) => ({
+          value: division.id,
+          label: division.divisionName,
+        }));
+        break;
+      case "status":
+        options = [
+          { value: "ACTIVE", label: "kích hoạt" },
+          { value: "INACTIVE", label: "vô hiệu" },
+        ];
+        break;
+      case "gender":
+        options = [
+          { value: "MALE", label: "Nam" },
+          { value: "FEMALE", label: "Nữ" },
+        ];
+        break;
 
-    const options =
-      dataIndex === "role"
-        ? [
-            { value: "STAFF", label: "Trường phòng" },
-            { value: "EMPLOYEE", label: "Nhân viên" },
-          ]
-        : dataIndex === "divisionName"
-        ? divisionsData.map((division) => ({
-            value: division.id,
-            label: division.divisionName,
-          })) /*dataDivision*/
-        : [
-            { value: "ACTIVE", label: "kích hoạt" },
-            { value: "INACTIVE", label: "vô hiệu" },
-          ];
+      default:
+        options = [];
+        break;
+    }
 
     // Input field type
     const inputNode =
@@ -535,7 +536,7 @@ const PersonnelPage = () => {
       ) : inputType === "date" ? (
         <ConfigProvider locale={viVN}>
           <DatePicker
-            defaultValue={dayjs(record.dob)}
+            // defaultValue={dayjs(record.dob)}
             onChange={(value) => {
               const formattedDate = value
                 ? dayjs(value).format("YYYY-MM-DD")
@@ -547,7 +548,6 @@ const PersonnelPage = () => {
         </ConfigProvider>
       ) : (
         <Select
-          defaultValue={dataIndex && record[dataIndex]}
           onChange={(value) => {
             form.setFieldsValue({ [dataIndex]: value });
           }}
@@ -589,6 +589,7 @@ const PersonnelPage = () => {
   return (
     <Fragment>
       <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-8">
+        {contextHolder}
         <div className="bg-white min-h rounded-xl p-8">
           <p className="text-2xl font-medium mb-5">Quản lý nhân sự</p>
           {!isLoading && !divisionsIsLoading ? (
