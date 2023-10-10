@@ -10,7 +10,7 @@ import {
   Tag,
 } from "antd";
 import React, { Fragment, useState } from "react";
-import { getAllDivision } from "../../apis/users";
+import { getAllDivision } from "../../apis/divisions";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import { MdOutlineCancel, MdOutlineSave } from "react-icons/md";
 import { PiNotePencilBold, PiTrash } from "react-icons/pi";

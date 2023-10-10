@@ -10,7 +10,8 @@ import {
   message,
 } from "antd";
 import React from "react";
-import { createUser, getAllDivision } from "../../apis/users";
+import { createUser } from "../../apis/users";
+import { getAllDivision } from "../../apis/divisions";
 import viVN from "antd/locale/vi_VN";
 import moment from "moment";
 import dayjs from "dayjs";
@@ -38,13 +39,10 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     () => getAllDivision({ pageSize: 20, currentPage: 1 }),
     {
       select: (data) => {
-        data.data.result.data = data.data.result.data.map(({ ...item }) => {
-          return {
-            key: item.id,
-            ...item,
-          };
-        });
-        return data.data.result;
+        return data.data.map((division) => ({
+          value: division.id,
+          label: division.divisionName,
+        }));
       },
     }
   );
@@ -53,11 +51,18 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = (values) => {
+    // Setup fixed avatar
+    values = {
+      ...values,
+      avatar:
+        "https://hips.hearstapps.com/hmg-prod/images/gettyimages-1061959920.jpg?crop=1xw:1.0xh;center,top&resize=640:*",
+    };
+
     const { divisionId, ...restValues } = values;
 
     values = values.divisionId ? values : restValues;
     console.log("values: ", values);
-    // mutate(values);
+    mutate(values);
   };
 
   return (
@@ -68,6 +73,10 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
         width={580}
         onClose={() => setShowDrawer(false)}
         open={showDrawer}
+        bodyStyle={{
+          padding: 50,
+          paddingTop: 20,
+        }}
       >
         <Form
           form={form}
@@ -140,9 +149,9 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             <Input placeholder="Nhập thông tin ..." />
           </Form.Item>
 
-          <div className="flex justify-between">
+          <div className="flex flex-wrap justify-between">
             <Form.Item
-              className="w-[30%]"
+              className="w-[45%]"
               name="dob"
               label={<Label label="Ngày sinh" />}
               rules={[
@@ -154,6 +163,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             >
               <ConfigProvider locale={viVN}>
                 <DatePicker
+                  className="w-full"
                   onChange={(value) => {
                     const formattedDate = dayjs(value).format(
                       "YYYY-MM-DDTHH:mm:ss.SSS[Z]"
@@ -170,7 +180,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
               </ConfigProvider>
             </Form.Item>
             <Form.Item
-              className="w-[30%]"
+              className="w-[45%]"
               name="gender"
               label={<Label label="Giới tính" />}
               rules={[
@@ -198,7 +208,35 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
               />
             </Form.Item>
             <Form.Item
-              className="w-[30%]"
+              className="w-[45%]"
+              name="role"
+              label={<Label label="Vai trò" />}
+              rules={[
+                {
+                  required: true,
+                  message: `Chưa chọn vai trò!`,
+                },
+              ]}
+            >
+              <Select
+                placeholder="Vai trò"
+                onChange={(value) => {
+                  form.setFieldsValue({ role: value });
+                }}
+                options={[
+                  {
+                    value: "EMPLOYEE",
+                    label: "Nhân viên",
+                  },
+                  {
+                    value: "STAFF",
+                    label: "Trưởng phòng",
+                  },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              className="w-[45%]"
               name="divisionId"
               label={
                 <div className="md:flex md:items-center md:gap-x-1">
@@ -206,6 +244,12 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                   <p className="text-sm text-slate-400">(tùy chọn)</p>
                 </div>
               }
+              rules={[
+                {
+                  required: true,
+                  message: `Chưa chọn bộ phận!`,
+                },
+              ]}
             >
               <Select
                 placeholder="Bộ phận"

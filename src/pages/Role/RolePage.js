@@ -22,7 +22,8 @@ import {
 } from "react-icons/md";
 import Highlighter from "react-highlight-words";
 import { useQuery } from "@tanstack/react-query";
-import { getAllDivision, getAllUser } from "../../apis/users";
+import { getAllUser } from "../../apis/users";
+import { getAllDivision } from "../../apis/divisions";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
 
