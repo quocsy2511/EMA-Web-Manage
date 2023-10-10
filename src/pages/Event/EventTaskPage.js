@@ -18,6 +18,14 @@ import { FcMoneyTransfer } from "react-icons/fc";
 import EventTaskSelection from "../../components/Selection/EventTaskSelection";
 import TaskItem from "../../components/Task/TaskItem";
 import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
+import { useQuery } from "@tanstack/react-query";
+import { getDetailEvent } from "../../apis/events";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import moment from "moment";
+import "moment/locale/vi";
+
+moment.locale("vi"); // Set the locale to Vietnamese
 
 const Tag = ({ icon, text }) => (
   <motion.div
@@ -35,12 +43,21 @@ const color = {
 
 const EventTaskPage = () => {
   const eventId = useParams().eventId;
+  console.log("eventId: ", eventId);
+
+  const { data, isLoading, isError } = useQuery(["event-detail", eventId], () =>
+    getDetailEvent(eventId)
+  );
+
+  console.log("data: ", data);
 
   const [tasks, setTasks] = useState([1, 2, 3]);
   const [assigneeSelection, setAssigneeSelection] = useState();
   const [prioritySelection, setPrioritySelection] = useState();
   const [devisionSelection, setDevisionSelection] = useState();
   const [isOpenModal, setIsOpenModal] = useState(false);
+
+  let status, statusColor, statusBgColor;
 
   const resetFilter = () => {
     setAssigneeSelection();
@@ -51,6 +68,49 @@ const EventTaskPage = () => {
   const handleOpenModal = () => {
     setIsOpenModal((prev) => !prev);
   };
+
+  if (data) {
+    switch (data.status) {
+      case "PENDING":
+        status = "Chờ bắt đầu";
+        statusColor = "text-slate-500";
+        statusBgColor = "bg-slate-100";
+        break;
+      case "PROCESSING":
+        status = "Đang diễn ra";
+        statusColor = "text-orange-500";
+        statusBgColor = "bg-orange-100";
+        break;
+      case "DONE":
+        status = "Đã kết thúc";
+        statusColor = "text-green-500";
+        statusBgColor = "bg-green-100";
+        break;
+      case "CANCEL":
+        status = "Hủy bỏ";
+        statusColor = "text-red-500";
+        statusBgColor = "bg-red-100";
+        break;
+      default:
+        break;
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="h-[calc(100vh-128px)]">
+        <LoadingComponentIndicator />;
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="h-[calc(100vh-128px)]">
+        <AnErrorHasOccured />;
+      </div>
+    );
+  }
 
   return (
     <Fragment>
@@ -63,7 +123,7 @@ const EventTaskPage = () => {
           <Link to=".." relative="path">
             Sự kiện{" "}
           </Link>
-          / Khai giảng
+          / {data.eventName}
         </p>
       </motion.div>
 
@@ -72,7 +132,7 @@ const EventTaskPage = () => {
         animate={{ y: 0 }}
         className="flex items-center"
       >
-        <p className="text-2xl font-semibold">Khai giảng</p>
+        <p className="text-2xl font-semibold">{data.eventName}</p>
 
         <div className="w-5" />
 
@@ -95,9 +155,9 @@ const EventTaskPage = () => {
         <div className="w-5" />
 
         <p
-          className={`text-sm font-medium px-4 py-1.5 bg-green-200 text-green-400 rounded-xl`}
+          className={`text-sm font-medium px-4 py-1.5 ${statusBgColor} ${statusColor} shadow-md shadow-slate-300 rounded-xl`}
         >
-          Ongoing
+          {status}
         </p>
 
         <motion.div
@@ -115,29 +175,9 @@ const EventTaskPage = () => {
           <TaskAdditionModal
             isModalOpen={isOpenModal}
             setIsModalOpen={setIsOpenModal}
+            // parentTaskId="1"
           />
         </motion.div>
-
-        <div className="w-[5%]" />
-
-        {/* <div className="flex justify-end gap-x-6">
-          <div className="text-center">
-            <p className="mb-2 text-sm">Ngày diễn ra</p>
-            <div className="flex items-center px-3 py-1.5 bg-green-200 text-green-400 rounded-xl">
-              <BsHourglassSplit size={15} />
-              <div className="w-4" />
-              <p className="text-sm font-medium">28/9/2023</p>
-            </div>
-          </div>
-          <div className="text-center">
-            <p className="mb-2 text-sm">Ngày kết thúc</p>
-            <div className="flex items-center px-3 py-1.5 bg-green-200 text-green-400 rounded-xl">
-              <BsHourglassBottom size={15} />
-              <div className="w-4" />
-              <p className="text-sm font-medium">28/9/2023</p>
-            </div>
-          </div>
-        </div> */}
       </motion.div>
 
       <motion.div
@@ -145,10 +185,10 @@ const EventTaskPage = () => {
         animate={{ y: 0 }}
         className="bg-white rounded-2xl mt-8 overflow-hidden"
       >
-        <div className="bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center h-40 " />
+        <div className="bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center h-40" />
         <div className="mx-10 my-8">
           <div className="flex items-center gap-x-5">
-            <p className="flex-1 text-3xl font-bold">Khai giảng</p>
+            <p className="flex-1 text-3xl font-bold">{data.eventName}</p>
             <Link to="budget">
               <motion.div
                 whileHover={{ y: -4 }}
@@ -160,24 +200,24 @@ const EventTaskPage = () => {
             <RiEditFill className="cursor-pointer text-slate-400" size={20} />
           </div>
           <p className="w-[60%] text-sm text-slate-400 mt-3">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
+            {data.description}
           </p>
           <div className="flex items-center flex-wrap gap-x-4 gap-y-5 mt-6">
             <Tag
               icon={<MdLocationPin size={20} color={color.green} />}
-              text="Nhà thờ Đức Bà"
+              text={data.location}
             />
-            <Tag icon={<FcMoneyTransfer size={20} />} text="500.000.000 VNĐ" />
+            <Tag
+              icon={<FcMoneyTransfer size={20} />}
+              text={`${data.estBudget.toLocaleString("en-US")} VNĐ`}
+            />
             <Tag
               icon={<BsTagsFill size={20} color={color.green} />}
-              text="5 task lớn"
+              text="5 hạng mục"
             />
             <Tag
               icon={<BsTagFill size={20} color={color.green} />}
-              text="60 task nhỏ"
+              text="60 công việc"
             />
             <Tag
               icon={<BiSolidCommentDetail size={20} color={color.green} />}
@@ -193,7 +233,12 @@ const EventTaskPage = () => {
               <div className="flex items-center gap-x-2">
                 <div className="w-5" />
                 <p className="text-xs text-slate-400">
-                  Thứ 2, 3 tháng 10, 2024
+                  {new Date(data.startDate).toLocaleDateString("vi-VN", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </p>
               </div>
             </div>
@@ -206,7 +251,13 @@ const EventTaskPage = () => {
               <div className="flex items-center gap-x-2">
                 <div className="w-5" />
                 <p className="text-xs text-slate-400">
-                  Thứ 2, 3 tháng 10, 2024
+                  {/* {moment(data.endDate).format("dddd, D [tháng] M, YYYY")} */}
+                  {new Date(data.endDate).toLocaleDateString("vi-VN", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </p>
               </div>
             </div>
