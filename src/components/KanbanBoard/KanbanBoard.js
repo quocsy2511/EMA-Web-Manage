@@ -1,5 +1,6 @@
 import React from "react";
 import Column from "../KanbanBoard/Column/Column.js";
+import { BookOutlined, CalendarOutlined } from "@ant-design/icons";
 
 const TaskParents = [
   {
@@ -821,13 +822,27 @@ const KanbanBoard = ({ selectEvent }) => {
   return (
     <>
       <div className="bg-bgBoard  h-screen overflow-hidden overflow-y-scroll scrollbar-hide">
-        <div className="pt-[150px] px-16 text-dark">
-          <h2 className="text-4xl font-semibold  mt-6 px-4">
+        <div
+          className={`relative mt-[128px] py-3 px-16 text-white  group md:w-[100%] w-[45%] bg-white  cursor-pointer bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center `}
+        >
+          <div className="absolute inset-0 bg-black opacity-60 z-10"></div>
+          <h2 className="relative z-20  text-4xl font-semibold  mt-6 mb-3">
             {selectEvent.eventName}
           </h2>
-          <p className="text-base  mt-3">{selectEvent.description}</p>
+          <span className="relative z-20  flex flex-row justify-start items-center gap-x-2 ">
+            <CalendarOutlined className="text-lg text-orange-500" />
+            <p className="mt-1 px-4 font-medium  text-white  underline underline-offset-2">
+              {selectEvent.startDate} - {selectEvent.endDate}
+            </p>
+          </span>
+          <span className="relative z-20  flex flex-row justify-start items-start gap-x-2 mt-3 mb-6">
+            <BookOutlined className="text-lg text-orange-500" />
+            <p className="text-base w-2/3  px-4 italic text-white ">
+              {selectEvent.description}
+            </p>
+          </span>
         </div>
-        <div className="flex scrollbar-default overflow-x-scroll gap-6 pl-6 py-5">
+        <div className="flex scrollbar-default overflow-x-scroll gap-6 px-16 py-5">
           {TaskParents.map((taskParent) => (
             <Column TaskParentArray={taskParent} key={taskParent.id} />
           ))}

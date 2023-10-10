@@ -109,7 +109,6 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
                   width: "80%",
                 }}
                 // value={user}
-
                 onChange={(value) => handleChangeSelect(value)}
               >
                 {user.map((item, index) => {
@@ -123,7 +122,7 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
                         >
                           <Avatar src={item.avatar} size={18} />
                         </Tooltip>
-                        <p className="text-ellipsis w-[100px] flex-1 overflow-hidden">
+                        <p className="text-ellipsis w-[100px] flex-1 overflow-hidden ">
                           {item.name}
                         </p>
                       </div>

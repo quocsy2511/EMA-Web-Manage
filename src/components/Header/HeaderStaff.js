@@ -96,7 +96,7 @@ const HeaderStaff = () => {
       style={{
         position: "fixed",
         top: 0,
-        zIndex: 1,
+        zIndex: 50,
         width: "100%",
       }}
     >

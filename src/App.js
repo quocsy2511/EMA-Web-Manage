@@ -196,7 +196,7 @@ const router = createBrowserRouter([
       </Suspense>
     ),
     errorElement: <ErrorPage />,
-    // loader: checkAuthLoader,
+    loader: checkAuthLoader,
     children: [
       {
         index: true,
