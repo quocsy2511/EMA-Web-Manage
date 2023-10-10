@@ -1,8 +1,25 @@
 import React, { useState } from "react";
 import HeaderEvent from "../../components/Header/HeaderEvent";
 import KanbanBoard from "../../components/KanbanBoard/KanbanBoard";
+import { useQuery } from "@tanstack/react-query";
+import { getAllEvent } from "../../apis/events";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 
 const EventStaffPage = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const { data, isError, isLoading } = useQuery(
+    ["event", currentPage],
+    () => getAllEvent({ pageSize: 10, currentPage }),
+    { retry: 1 },
+    {
+      select: (data) => {
+        return data.data;
+      },
+    }
+  );
+  console.log("🚀 ~ file: EventStaffPage.js:12 ~ EventStaffPage ~ data:", data);
+
   const [events, setEvents] = useState([
     {
       idEvent: 1,
@@ -95,12 +112,32 @@ const EventStaffPage = () => {
       coverUrl: "https://source.unsplash.com/random",
     },
   ]);
+
+  // const [selectEvent, setSelectEvent] = useState(data?.[0]);
   const [selectEvent, setSelectEvent] = useState(events[0]);
 
   return (
     <div className="flex flex-col ">
+      {/* {!isLoading ? (
+        !isError ? (
+          <>
+            <HeaderEvent
+              events={events}
+              // events={data}
+              setSelectEvent={setSelectEvent}
+              selectEvent={selectEvent}
+            />
+            <KanbanBoard selectEvent={selectEvent} />
+          </>
+        ) : (
+          <AnErrorHasOccured />
+        )
+      ) : (
+        <LoadingComponentIndicator />
+      )} */}
       <HeaderEvent
         events={events}
+        // events={data}
         setSelectEvent={setSelectEvent}
         selectEvent={selectEvent}
       />

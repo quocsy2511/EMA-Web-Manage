@@ -803,6 +803,21 @@ const TaskParents = [
 ];
 
 const KanbanBoard = ({ selectEvent }) => {
+  // const [currentPage, setCurrentPage] = useState(1);
+
+  // const { data, isError, isLoading } = useQuery(
+  //   ["event", currentPage],
+  //   () => getAllEvent({ pageSize: 10, currentPage }),
+  //   {
+  //     select: (data) => {
+  //       console.log(
+  //         "🚀 ~ file: KanbanBoard.js:815 ~ KanbanBoard ~ data:",
+  //         data.data
+  //       );
+  //     },
+  //   }
+  // );
+
   return (
     <>
       <div className="bg-bgBoard  h-screen overflow-hidden overflow-y-scroll scrollbar-hide">

@@ -194,7 +194,7 @@ const priorityFilter = [
   },
 ];
 
-const TaskPageStaff = () => {
+const MyTaskPageStaff = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
@@ -536,4 +536,4 @@ const TaskPageStaff = () => {
   );
 };
 
-export default TaskPageStaff;
+export default MyTaskPageStaff;

@@ -1,6 +1,7 @@
 import { SlidersTwoTone } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import { Avatar, Dropdown, Select, Tooltip } from "antd";
-import React from "react";
+import React, { useState } from "react";
 
 const settingHeader = [
   {
@@ -47,6 +48,18 @@ const filter = [
 ];
 
 const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const { data, isError, isLoading } = useQuery(
+  //   ["division", currentPage],
+  //   () => getAllEvent({ pageSize: 10, currentPage }),
+  //   {
+  //     select: (data) => {
+  //       return data.data;
+  //     },
+  //   }
+  // );
+  // console.log("🚀 ~ file: EventStaffPage.js:12 ~ EventStaffPage ~ data:", data);
+
   const handleChangeEvent = (value) => {
     const event = JSON.parse(value);
     setSelectEvent(event);
