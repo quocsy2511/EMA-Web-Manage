@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import Column from "../KanbanBoard/Column/Column.js";
 import { BookOutlined, CalendarOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import { getTasks } from "../../apis/tasks.js";
 
 const TaskParents = [
   {
@@ -804,20 +806,23 @@ const TaskParents = [
 ];
 
 const KanbanBoard = ({ selectEvent }) => {
-  // const [currentPage, setCurrentPage] = useState(1);
+  const { id } = selectEvent;
+  const [conValue, setConValue] = useState(id);
+  const [fieldName, setFieldName] = useState("eventID");
 
-  // const { data, isError, isLoading } = useQuery(
-  //   ["event", currentPage],
-  //   () => getAllEvent({ pageSize: 10, currentPage }),
-  //   {
-  //     select: (data) => {
-  //       console.log(
-  //         "🚀 ~ file: KanbanBoard.js:815 ~ KanbanBoard ~ data:",
-  //         data.data
-  //       );
-  //     },
-  //   }
-  // );
+  const {
+    data: listTask,
+    isError: isErrorListTask,
+    isLoading: isLoadingListTask,
+  } = useQuery(["tasks", fieldName], () => getTasks({ fieldName, conValue }), {
+    select: (data) => {
+      return data;
+    },
+  });
+
+  useState(() => {
+    setConValue(id);
+  }, [id]);
 
   return (
     <>

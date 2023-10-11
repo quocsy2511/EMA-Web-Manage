@@ -116,10 +116,10 @@ const EventStaffPage = () => {
       return event;
     },
   });
-  console.log(
-    "🚀 ~ file: EventStaffPage.js:108 ~ EventStaffPage ~ events:",
-    listEvent
-  );
+  // console.log(
+  //   "🚀 ~ file: EventStaffPage.js:108 ~ EventStaffPage ~ events:",
+  //   listEvent
+  // );
 
   const [selectEvent, setSelectEvent] = useState({});
 
