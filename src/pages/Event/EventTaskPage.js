@@ -24,8 +24,9 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
 import "moment/locale/vi";
+import { getTasks } from "../../apis/tasks";
 
-moment.locale("vi"); // Set the locale to Vietnamese
+moment.locale("vi"); // Set the locale to Vietnam
 
 const Tag = ({ icon, text }) => (
   <motion.div
@@ -43,15 +44,21 @@ const color = {
 
 const EventTaskPage = () => {
   const eventId = useParams().eventId;
-  console.log("eventId: ", eventId);
-
   const { data, isLoading, isError } = useQuery(["event-detail", eventId], () =>
     getDetailEvent(eventId)
   );
+  console.log("data:", data);
 
-  console.log("data: ", data);
+  const {
+    data: tasks,
+    isLoading: taskIsLoading,
+    isError: taskIsError,
+    error: taskError,
+  } = useQuery(["tasks", eventId], () =>
+    getTasks({ fieldName: "eventID", conValue: eventId })
+  );
+  console.log("tasks: ", tasks);
 
-  const [tasks, setTasks] = useState([1, 2, 3]);
   const [assigneeSelection, setAssigneeSelection] = useState();
   const [prioritySelection, setPrioritySelection] = useState();
   const [devisionSelection, setDevisionSelection] = useState();
@@ -145,11 +152,25 @@ const EventTaskPage = () => {
           maxPopoverTrigger="hover"
           maxStyle={{ color: "#D25B68", backgroundColor: "#F4D7DA" }}
         >
+          {data.listDivision.map((item) => (
+            <Tooltip
+              title={`${item.fullName} - bộ phận ${item.divisionName}`}
+              placement="top"
+            >
+              <Avatar
+                className="bg-slate-300 cursor-pointer"
+                src={
+                  // item.avatar ??
+                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
+                }
+                alt="avatar"
+              />
+            </Tooltip>
+          ))}
+          {/* <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" />
           <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" />
           <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" />
-          <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" />
-          <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" />
-          <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" />
+          <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" /> */}
         </Avatar.Group>
 
         <div className="w-5" />
@@ -176,6 +197,7 @@ const EventTaskPage = () => {
             isModalOpen={isOpenModal}
             setIsModalOpen={setIsOpenModal}
             // parentTaskId="1"
+            eventId={eventId}
           />
         </motion.div>
       </motion.div>
@@ -213,7 +235,7 @@ const EventTaskPage = () => {
             />
             <Tag
               icon={<BsTagsFill size={20} color={color.green} />}
-              text="5 hạng mục"
+              text={`${tasks?.length ?? 0} hạng mục`}
             />
             <Tag
               icon={<BsTagFill size={20} color={color.green} />}
@@ -277,132 +299,150 @@ const EventTaskPage = () => {
         animate={{ y: 0 }}
         className="bg-white rounded-2xl px-10 py-8 mt-10 mb-20"
       >
-        <div className="flex items-center gap-x-5">
-          <EventTaskSelection
-            title="Người giao"
-            placeholder="Chọn nhân viên"
-            options={[
-              {
-                value: "jack",
-                label: "Jack",
-              },
-              {
-                value: "jack1",
-                label: "Jack1",
-              },
-              {
-                value: "lucy",
-                label: "Lucy",
-              },
-              {
-                value: "tom",
-                label: "Tom",
-              },
-            ]}
-            value={assigneeSelection}
-            updatevalue={setAssigneeSelection}
-            showSearch
-            optionFilterProp="children"
-            filterOption={(input, option) =>
-              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-            }
-          />
-          <EventTaskSelection
-            title="Ưu tiên"
-            placeholder="Mức độ"
-            options={[
-              {
-                value: "1",
-                label: "Normal",
-              },
-              {
-                value: "2",
-                label: "High",
-              },
-              {
-                value: "3",
-                label: "Risk",
-              },
-            ]}
-            value={prioritySelection}
-            updatevalue={setPrioritySelection}
-          />
-          <EventTaskSelection
-            title="Bộ phận"
-            placeholder="Chọn bộ phận"
-            options={[
-              {
-                value: "jack",
-                label: "Jack",
-              },
-              {
-                value: "lucy",
-                label: "Lucy",
-              },
-              {
-                value: "jack1",
-                label: "Jack1",
-              },
-              {
-                value: "tom",
-                label: "Tom",
-              },
-            ]}
-            value={devisionSelection}
-            updatevalue={setDevisionSelection}
-            showSearch
-            optionFilterProp="children"
-            filterOption={(input, option) =>
-              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-            }
-            // Sort ascendingly
-            filterSort={(optionA, optionB) =>
-              (optionA?.label ?? "")
-                .toLowerCase()
-                .localeCompare((optionB?.label ?? "").toLowerCase())
-            }
-          />
+        {!taskIsLoading ? (
+          taskIsError ? (
+            <AnErrorHasOccured />
+          ) : (
+            <>
+              <div className="flex items-center gap-x-5">
+                <EventTaskSelection
+                  title="Người giao"
+                  placeholder="Chọn nhân viên"
+                  options={[
+                    {
+                      value: "jack",
+                      label: "Jack",
+                    },
+                    {
+                      value: "jack1",
+                      label: "Jack1",
+                    },
+                    {
+                      value: "lucy",
+                      label: "Lucy",
+                    },
+                    {
+                      value: "tom",
+                      label: "Tom",
+                    },
+                  ]}
+                  value={assigneeSelection}
+                  updatevalue={setAssigneeSelection}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                />
+                <EventTaskSelection
+                  title="Ưu tiên"
+                  placeholder="Mức độ"
+                  options={[
+                    {
+                      value: "LOW",
+                      label: "Thấp",
+                    },
+                    {
+                      value: "MEDIUM",
+                      label: "Trung bình",
+                    },
+                    {
+                      value: "HIGH",
+                      label: "Cao",
+                    },
+                  ]}
+                  value={prioritySelection}
+                  updatevalue={setPrioritySelection}
+                />
+                <EventTaskSelection
+                  title="Bộ phận"
+                  placeholder="Chọn bộ phận"
+                  options={[
+                    {
+                      value: "jack",
+                      label: "Jack",
+                    },
+                    {
+                      value: "lucy",
+                      label: "Lucy",
+                    },
+                    {
+                      value: "jack1",
+                      label: "Jack1",
+                    },
+                    {
+                      value: "tom",
+                      label: "Tom",
+                    },
+                  ]}
+                  value={devisionSelection}
+                  updatevalue={setDevisionSelection}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  // Sort ascendingly
+                  filterSort={(optionA, optionB) =>
+                    (optionA?.label ?? "")
+                      .toLowerCase()
+                      .localeCompare((optionB?.label ?? "").toLowerCase())
+                  }
+                />
 
-          <div className="flex-1" />
+                <div className="flex-1" />
 
-          <motion.button
-            whileHover={{
-              scale: 1.1,
-            }}
-            transition={{ type: "spring", duration: 0.5 }}
-            onClick={resetFilter}
-            className="flex items-center gap-x-2 border hover:bg-red-500 hover:text-white border-red-500 text-red-500 text-base px-3 py-1.5 rounded-lg"
-          >
-            Đặt lại bộ lọc
-            <MdFilterListAlt size={18} />
-          </motion.button>
-        </div>
+                <motion.button
+                  whileHover={{
+                    scale: 1.1,
+                  }}
+                  transition={{ type: "spring", duration: 0.5 }}
+                  onClick={resetFilter}
+                  className="flex items-center gap-x-2 border hover:bg-red-500 hover:text-white border-red-500 text-red-500 text-base px-3 py-1.5 rounded-lg"
+                >
+                  Đặt lại bộ lọc
+                  <MdFilterListAlt size={18} />
+                </motion.button>
+              </div>
 
-        <div className="flex flex-col gap-y-6 mt-8">
-          <AnimatePresence mode="await">
-            {tasks.map((task, index) => (
-              <TaskItem key={index} task={task} isSubtask={false} />
-            ))}
-          </AnimatePresence>
-        </div>
+              <div className="flex flex-col gap-y-6 mt-8">
+                <AnimatePresence mode="await">
+                  {tasks.length === 0 ? (
+                    <p>ngu</p>
+                  ) : (
+                    tasks.map((task, index) => (
+                      <TaskItem key={index} task={task} isSubtask={false} />
+                    ))
+                  )}
+                </AnimatePresence>
+              </div>
 
-        <div className="flex items-center justify-end gap-x-6 mt-8">
-          <div className="flex items-center gap-x-1">
-            <LiaClipboardListSolid size={20} className="text-slate-400" />
-            <p className="text-slate-500">{tasks.length} công việc</p>
-          </div>
-          <div className="flex items-center gap-x-1">
-            <HiOutlineClipboardDocumentList
-              size={20}
-              className="text-slate-400"
-            />
-            <p className="text-slate-500">15 công việc con</p>
-          </div>
-          <div className="flex items-center gap-x-1">
-            <RiAttachment2 size={20} className="text-slate-400" />
-            <p className="text-slate-500">15 tài liệu đính kèm</p>
-          </div>
-        </div>
+              <div className="flex items-center justify-end gap-x-6 mt-8">
+                <div className="flex items-center gap-x-1">
+                  <LiaClipboardListSolid size={20} className="text-slate-400" />
+                  <p className="text-slate-500">{tasks.length} công việc</p>
+                </div>
+                <div className="flex items-center gap-x-1">
+                  <HiOutlineClipboardDocumentList
+                    size={20}
+                    className="text-slate-400"
+                  />
+                  <p className="text-slate-500">15 công việc con</p>
+                </div>
+                <div className="flex items-center gap-x-1">
+                  <RiAttachment2 size={20} className="text-slate-400" />
+                  <p className="text-slate-500">15 tài liệu đính kèm</p>
+                </div>
+              </div>
+            </>
+          )
+        ) : (
+          <LoadingComponentIndicator />
+        )}
       </motion.div>
     </Fragment>
   );

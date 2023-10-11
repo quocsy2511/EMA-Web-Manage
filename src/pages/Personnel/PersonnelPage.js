@@ -24,7 +24,7 @@ import {
 } from "react-icons/md";
 import Highlighter from "react-highlight-words";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllUser, updateUser } from "../../apis/users";
+import { getAllUser, updateStatusUser, updateUser } from "../../apis/users";
 import { getAllDivision } from "../../apis/divisions";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
@@ -66,7 +66,14 @@ const PersonnelPage = () => {
   const { mutate, isLoading: updateUserIsLoading } = useMutation(
     (user) => updateUser(user),
     {
-      onSuccess: () => {},
+      onSuccess: () => {
+        queryClient.invalidateQueries(["users", page]);
+        onCancelEditing();
+        messageApi.open({
+          type: "success",
+          content: "Cập nhật thành công",
+        });
+      },
       onError: () => {
         messageApi.open({
           type: "error",
@@ -75,6 +82,32 @@ const PersonnelPage = () => {
       },
     }
   );
+  const {
+    mutate: updateUserStatusMutate,
+    isLoading: updateUserStatusIsLoading,
+  } = useMutation((user) => updateStatusUser(user), {
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(["users", page], (oldValue) => {
+        console.log("variables: ", variables);
+        console.log("oldValue: ", oldValue);
+
+        const updateOldData = oldValue.data.map((item) => {
+          if (item.id === variables.userId)
+            return { ...item, status: variables.status };
+          return item;
+        });
+        oldValue = { ...oldValue, data: updateOldData };
+
+        return oldValue;
+      });
+    },
+    onError: () => {
+      messageApi.open({
+        type: "error",
+        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+      });
+    },
+  });
 
   const [editingRowKey, setEditingRowKey] = useState(""); // Tracking which row is editing - contain key of selected row
   const [sortedInfo, setSortedInfo] = useState({}); // Tracking which field (col) is being sorted - contain columnKey and order (asc/desc)
@@ -97,15 +130,21 @@ const PersonnelPage = () => {
   // Submit form
   const onFinish = (values) => {
     console.log("Success:", values);
-  };
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
+    // remove : divisionName / status
+    const userId = form.getFieldValue("id");
+    const avatar = form.getFieldValue("avatar");
+    values = { ...values, userId, avatar };
+
+    const { divisionName, ...restValues } = values;
+    mutate(restValues);
   };
 
   // Handle delete 1 record
   const handleDeleteAction = (record) => {
     // record : whole data of 1 selected row
     // setData((prev) => prev.filter((item) => item.id !== record.id));
+    console.log(record);
+    updateUserStatusMutate({ userId: record.id, status: "INACTIVE" });
   };
 
   const handleTableChange = (_, filter, sorter) => {
@@ -135,15 +174,14 @@ const PersonnelPage = () => {
 
   //  =========================================================================
 
-  const onCancelEditing = (record) => {
+  const onCancelEditing = () => {
     setEditingRowKey("");
   };
-  const onSaveEditing = async (recordKey) => {
+  const onSaveEditing = () => {
     form.submit();
   };
   // Editing mode
   const onEditing = (record) => {
-    console.log("OnEditing: ", record);
     form.setFieldsValue({
       fullName: "",
       phoneNumber: "",
@@ -393,7 +431,7 @@ const PersonnelPage = () => {
       title: "Hoạt động",
       dataIndex: "action",
       key: "action",
-      width: 80,
+      width: 120,
       align: "center",
       filteredValue: null,
       fixed: "right",
@@ -406,21 +444,27 @@ const PersonnelPage = () => {
             <div className="flex items-center justify-center">
               {editable ? (
                 <Space size="middle">
-                  <MdOutlineSave
+                  {/* <MdOutlineSave
                     className=" cursor-pointer"
                     size={25}
-                    onClick={() => onSaveEditing(record.key)}
-                  />
+                    onClick={onSaveEditing}
+                  /> */}
+                  <Button type="primary" size="small" onClick={onSaveEditing}>
+                    Cập nhật
+                  </Button>
                   <Popconfirm
                     title="Hủy việc cập nhật ?"
-                    onConfirm={() => onCancelEditing(record)}
+                    onConfirm={onCancelEditing}
                     okText="OK"
                     cancelText="Hủy"
                   >
-                    <MdOutlineCancel
+                    {/* <MdOutlineCancel
                       className="text-red-700 cursor-pointer"
                       size={25}
-                    />
+                    /> */}
+                    <Button danger size="small">
+                      Hủy
+                    </Button>
                   </Popconfirm>
                 </Space>
               ) : (
@@ -433,15 +477,13 @@ const PersonnelPage = () => {
                     }}
                   />
                   <Popconfirm
-                    title="Bạn có thực sự muốn xóa ?"
+                    title="Bạn đang vô hiệu tài khoản này?"
                     onConfirm={() => handleDeleteAction(record)}
                     okText="Có"
                     cancelText="Hủy"
-                    okButtonProps={
-                      {
-                        // loading: confirmLoading,
-                      }
-                    }
+                    okButtonProps={{
+                      loading: updateUserStatusIsLoading,
+                    }}
                   >
                     <PiTrash
                       className="text-[#A30D11] cursor-pointer"
@@ -479,7 +521,7 @@ const PersonnelPage = () => {
             ? "date"
             : col.dataIndex === "role" ||
               col.dataIndex === "divisionName" ||
-              col.dataIndex === "status"||
+              col.dataIndex === "status" ||
               col.dataIndex === "gender"
             ? "selection"
             : "text",
@@ -588,8 +630,8 @@ const PersonnelPage = () => {
 
   return (
     <Fragment>
+      {contextHolder}
       <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-8">
-        {contextHolder}
         <div className="bg-white min-h rounded-xl p-8">
           <p className="text-2xl font-medium mb-5">Quản lý nhân sự</p>
           {!isLoading && !divisionsIsLoading ? (
@@ -631,12 +673,7 @@ const PersonnelPage = () => {
                     />
                   </div>
                 </div>
-                <Form
-                  form={form}
-                  onFinish={onFinish}
-                  onFinishFailed={onFinishFailed}
-                  component={false}
-                >
+                <Form form={form} onFinish={onFinish} component={false}>
                   <Table
                     components={{
                       body: {

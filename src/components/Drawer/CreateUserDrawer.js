@@ -7,28 +7,72 @@ import {
   Form,
   Input,
   Select,
+  Upload,
   message,
 } from "antd";
-import React from "react";
+import React, { useState } from "react";
 import { createUser } from "../../apis/users";
 import { getAllDivision } from "../../apis/divisions";
 import viVN from "antd/locale/vi_VN";
 import moment from "moment";
 import dayjs from "dayjs";
+import { URL } from "../../constants/api";
+import { authRequest } from "../../utils/axios-utils";
+import { uploadFile } from "../../apis/files";
 
 const Label = ({ label }) => <p className="text-lg font-medium">{label}</p>;
 
 const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
   const queryClient = useQueryClient();
-  const { mutate, isLoading } = useMutation((user) => createUser(user), {
-    onSuccess: () => {},
-    onError: () => {
-      messageApi.open({
-        type: "error",
-        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-      });
-    },
-  });
+  const { mutate: createUserMutate, isLoading } = useMutation(
+    (user) => createUser(user),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["users", 1]);
+        setShowDrawer(false);
+        messageApi.open({
+          type: "success",
+          content: "Đã tạo 1 nhân viên",
+        });
+      },
+      onError: (error) => {
+        // console.log(error.response?.data?.message)
+        // console.log(error.response.data.statusCode)
+        if (error.response?.data?.message === "EMAIL_EXIST") {
+          messageApi.open({
+            type: "error",
+            content: "Email đã được sử dụng! Hãy thử lại sau",
+          });
+        } else {
+          messageApi.open({
+            type: "error",
+            content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+          });
+        }
+      },
+    }
+  );
+
+  const { mutate: uploadFileMutate } = useMutation(
+    ({ formData, user }) => uploadFile(formData),
+    {
+      onSuccess: (data, variables) => {
+        console.log("data: ", data);
+        console.log("variables: ", variables.user);
+        const user = variables.user;
+        variables.user = { avatar: data, ...user };
+        console.log("variables new: ", variables.user);
+
+        createUserMutate(variables.user);
+      },
+      onError: () => {
+        messageApi.open({
+          type: "error",
+          content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
+        });
+      },
+    }
+  );
 
   const {
     data: divisionData,
@@ -47,22 +91,29 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     }
   );
 
+  const [fileList, setFileList] = useState();
+  console.log("fileList state: ", fileList);
+
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = (values) => {
+    console.log("FORM DATA: ", values);
+    const { avatar, ...user } = values;
+
+    const formData = new FormData();
+    formData.append("file", fileList);
+    formData.append("folderName", "avatar");
+
+    uploadFileMutate({ formData, user });
+
     // Setup fixed avatar
-    values = {
-      ...values,
-      avatar:
-        "https://hips.hearstapps.com/hmg-prod/images/gettyimages-1061959920.jpg?crop=1xw:1.0xh;center,top&resize=640:*",
-    };
-
-    const { divisionId, ...restValues } = values;
-
-    values = values.divisionId ? values : restValues;
-    console.log("values: ", values);
-    mutate(values);
+    // values = {
+    //   ...values,
+    //   avatar:
+    //     "https://hips.hearstapps.com/hmg-prod/images/gettyimages-1061959920.jpg?crop=1xw:1.0xh;center,top&resize=640:*",
+    // };
+    // mutate(values);
   };
 
   return (
@@ -86,6 +137,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
           requiredMark={false}
           initialValues={{
             gender: "MALE",
+            // dob: "2001-01-01"
           }}
         >
           <Form.Item
@@ -122,7 +174,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
               },
             ]}
           >
-            <Input placeholder="090*******" />
+            <Input type="" placeholder="090*******" />
           </Form.Item>
           <Form.Item
             name="nationalId"
@@ -262,17 +314,71 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             </Form.Item>
           </div>
 
-          <Form.Item>
-            <Button
-              className="mt-5"
-              type="primary"
-              size="large"
-              onClick={() => form.submit()}
-              loading={isLoading}
+          <div className="flex">
+            <Form.Item
+              className=""
+              name="avatar"
+              label={<Label label="Ảnh địa diện" />}
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList}
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn ảnh đại diện",
+                },
+                {
+                  validator(_, fileList) {
+                    return new Promise((resolve, reject) => {
+                      if (fileList && fileList[0].size > 52428800) {
+                        reject("File quá lớn ( <50MB )");
+                      } else {
+                        resolve();
+                      }
+                    });
+                  },
+                },
+              ]}
             >
-              Tạo
-            </Button>
-          </Form.Item>
+              <Upload.Dragger
+                maxCount={1}
+                listType="text"
+                action=""
+                // customRequest={() => {}}
+                showUploadList={{
+                  showPreviewIcon: false,
+                  showRemoveIcon: false,
+                }}
+                // accept=".png,.jpg,.pdf"
+                beforeUpload={(file) => {
+                  console.log("file: ", file);
+                  return new Promise((resolve, reject) => {
+                    if (file && file.size > 52428800) {
+                      reject("File quá lớn ( <50MB )");
+                      return false;
+                    } else {
+                      setFileList(file);
+                      resolve();
+                      return true;
+                    }
+                  });
+                }}
+                fileList
+              >
+                Kéo tập tin vào
+              </Upload.Dragger>
+            </Form.Item>
+            <Form.Item>
+              <Button
+                className="mt-5"
+                type="primary"
+                size="large"
+                onClick={() => form.submit()}
+                loading={isLoading}
+              >
+                Tạo
+              </Button>
+            </Form.Item>
+          </div>
         </Form>
       </Drawer>
     </div>
