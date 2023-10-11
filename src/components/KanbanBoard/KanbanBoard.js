@@ -823,7 +823,7 @@ const KanbanBoard = ({ selectEvent }) => {
     <>
       <div className="bg-bgBoard  h-screen overflow-hidden overflow-y-scroll scrollbar-hide">
         <div
-          className={`relative mt-[128px] py-3 px-16 text-white  group md:w-[100%] w-[45%] bg-white  cursor-pointer bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center `}
+          className={`min-h-[220px] relative mt-[128px] py-3 px-16 text-white  group md:w-[100%] w-[45%] bg-white  cursor-pointer bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center `}
         >
           <div className="absolute inset-0 bg-black opacity-60 z-10"></div>
           <h2 className="relative z-20  text-4xl font-semibold  mt-6 mb-3">

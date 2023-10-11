@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getEventDivisions } from "../../apis/events";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import moment from "moment";
 // const [events, setEvents] = useState([
 //   {
 //     idEvent: 1,
@@ -105,9 +106,20 @@ const EventStaffPage = () => {
     isLoading,
   } = useQuery(["events"], () => getEventDivisions(), {
     select: (data) => {
-      return data;
+      const event = data.map(({ ...item }) => {
+        item.startDate = moment(item.startDate).format("YYYY-MM-DD");
+        item.endDate = moment(item.endDate).format("YYYY-MM-DD");
+        return {
+          ...item,
+        };
+      });
+      return event;
     },
   });
+  console.log(
+    "🚀 ~ file: EventStaffPage.js:108 ~ EventStaffPage ~ events:",
+    listEvent
+  );
 
   const [selectEvent, setSelectEvent] = useState({});
 
