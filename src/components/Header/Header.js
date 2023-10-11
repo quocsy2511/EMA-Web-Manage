@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Avatar, Badge, Button, Dropdown } from "antd";
 import { Header as HeaderLayout } from "antd/es/layout/layout";
 import { HiOutlineBellAlert, HiOutlineBell } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { IoLogOutOutline } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getProfile } from "../../apis/users";
 
 const notiItems = [
   {
@@ -52,7 +54,7 @@ const notiItems = [
   },
 ];
 
-const Header = ({ collapsed, setCollapsed }) => {
+const Header = ({ collapsed, setCollapsed, data }) => {
   const navigate = useNavigate();
 
   const logout = () => {
@@ -132,8 +134,12 @@ const Header = ({ collapsed, setCollapsed }) => {
             >
               <div className="flex items-center">
                 <div className="flex flex-col items-end">
-                  <p className="text-sm font-semibold">User Name</p>
-                  <p className="text-xs font-normal">Manager</p>
+                  <p className="text-sm font-semibold">
+                    {data?.fullName ?? "User Name"}
+                  </p>
+                  <p className="text-xs font-normal">
+                    {data?.role ?? "Manager"}
+                  </p>
                 </div>
                 <div className="w-2" />
                 <Avatar
@@ -141,6 +147,7 @@ const Header = ({ collapsed, setCollapsed }) => {
                   icon={<p>icon</p>}
                   alt="user_image"
                   src={
+                    data?.avatar ??
                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
                   }
                 />

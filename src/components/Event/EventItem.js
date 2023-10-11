@@ -39,7 +39,7 @@ const EventItem = ({ event }) => {
     <motion.div
       whileHover={{ scale: 1.03 }}
       transition={{ type: "spring", duration: 0.5 }}
-      className={`group md:w-[32%] w-[45%] bg-white rounded-md cursor-pointer bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center`}
+      className={`group md:w-[32%] w-[45%] rounded-md cursor-pointer bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center`}
       onClick={() => navigate(`${event.id}`)}
     >
       <div className="p-5 bg-black bg-opacity-20 rounded-md group-hover:bg-opacity-60">
