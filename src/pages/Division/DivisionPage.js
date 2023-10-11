@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Form,
@@ -8,9 +8,10 @@ import {
   Space,
   Table,
   Tag,
+  message,
 } from "antd";
 import React, { Fragment, useState } from "react";
-import { getAllDivision } from "../../apis/divisions";
+import { getAllDivision, updateDivision, updateStatusDivision } from "../../apis/divisions";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import { MdOutlineCancel, MdOutlineSave } from "react-icons/md";
 import { PiNotePencilBold, PiTrash } from "react-icons/pi";
@@ -21,25 +22,73 @@ const DivisionPage = () => {
   const [page, setPage] = useState(1);
   const { data, isLoading, isError } = useQuery(
     ["division"],
-    () => getAllDivision({ pageSize: 10, currentPage: page }),
+    () => getAllDivision({ pageSize: 50, currentPage: page }),
     {
       select: (data) => {
-        data.data.result.data = data.data.result.data.map(({ ...item }) => {
+        data.data = data.data.map(({ ...item }) => {
           return {
             key: item.id,
             ...item,
           };
         });
-        return data.data.result;
+        return data;
       },
     }
   );
   console.log(data);
 
+  const queryClient = useQueryClient();
+  const { mutate, isLoading: updateDivisionIsLoading } = useMutation(
+    (division) => updateDivision(division),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["division"]);
+        onCancelEditing();
+        messageApi.open({
+          type: "success",
+          content: "Cập nhật thành công",
+        });
+      },
+      onError: () => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+  const {
+    mutate: updateDivisionStatusMutate,
+    isLoading: updateDivisionStatusIsLoading,
+  } = useMutation((user) => updateStatusDivision(user), {
+    onSuccess: (data, variables) => {
+      // queryClient.setQueryData(["users", page], (oldValue) => {
+      //   console.log("variables: ", variables);
+      //   console.log("oldValue: ", oldValue);
+
+      //   const updateOldData = oldValue.data.map((item) => {
+      //     if (item.id === variables.userId)
+      //       return { ...item, status: variables.status };
+      //     return item;
+      //   });
+      //   oldValue = { ...oldValue, data: updateOldData };
+
+      //   return oldValue;
+      // });
+    },
+    onError: () => {
+      messageApi.open({
+        type: "error",
+        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+      });
+    },
+  });
+
   const [editingRowKey, setEditingRowKey] = useState("");
   const [showDrawer, setShowDrawer] = useState(false);
 
   const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
 
   const checkEditing = (record) => {
     return record.key === editingRowKey;
@@ -47,6 +96,16 @@ const DivisionPage = () => {
 
   const onFinish = (values) => {
     console.log("Success:", values);
+
+    const divisionId = form.getFieldValue("id");
+    values = {
+      ...values,
+      divisionId,
+      status: values.status === 1 ? true : false,
+    };
+
+    console.log("Modified value: ", values);
+    mutate(values);
   };
 
   const handleDeleteAction = (record) => {
@@ -54,10 +113,10 @@ const DivisionPage = () => {
     // setData((prev) => prev.filter((item) => item.id !== record.id));
   };
 
-  const onCancelEditing = (record) => {
+  const onCancelEditing = () => {
     setEditingRowKey("");
   };
-  const onSaveEditing = async (recordKey) => {
+  const onSaveEditing = () => {
     form.submit();
   };
   const onEditing = (record) => {
@@ -118,11 +177,11 @@ const DivisionPage = () => {
                   <MdOutlineSave
                     className=" cursor-pointer"
                     size={25}
-                    onClick={() => onSaveEditing(record.key)}
+                    onClick={onSaveEditing}
                   />
                   <Popconfirm
                     title="Hủy việc cập nhật ?"
-                    onConfirm={() => onCancelEditing(record)}
+                    onConfirm={onCancelEditing}
                   >
                     <MdOutlineCancel
                       className="text-red-700 cursor-pointer"
@@ -223,6 +282,7 @@ const DivisionPage = () => {
 
   return (
     <Fragment>
+      {contextHolder}
       <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-10">
         <div className="bg-white min-h rounded-xl p-8">
           <div className="flex mb-8">

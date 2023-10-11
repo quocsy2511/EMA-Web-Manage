@@ -38,7 +38,7 @@ const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
       <div className="w-[2%]" />
 
       <div className="space-y-1">
-        <p className="text-xl font-semibold">Lễ chào mừng</p>
+        <p className="text-xl font-semibold">{task.title}</p>
         <p className="text-xs">
           Chịu trách nhiệm bởi <span className="font-medium">Quốc Sỹ</span> (
           Thiết kế )
