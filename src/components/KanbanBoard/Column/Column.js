@@ -55,7 +55,7 @@ const Column = ({ TaskParentArray }) => {
   return (
     <>
       <div className="scrollbar-hide mt-5 min-w-[280px]">
-        <div className=" bg-bgColumn dark:bg-secondaryHover py-3 scrollbar-hide rounded-xl shadow-darkShadow shadow-sm">
+        <div className=" bg-bgColumn  py-3 scrollbar-hide rounded-xl shadow-darkShadow shadow-sm">
           {/* task parent */}
           <div
             className=" flex flex-col items-start gap-2  justify-start 
@@ -91,7 +91,7 @@ const Column = ({ TaskParentArray }) => {
               ))
             : ""}
           <div
-            className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400 dark:hover:text-white dark:hover:bg-secondary  cursor-pointer hover:bg-white"
+            className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400    cursor-pointer hover:bg-white"
             onClick={() => setAddNewTask(true)}
           >
             <p className="text-sm font-semibold tracking-tighter">

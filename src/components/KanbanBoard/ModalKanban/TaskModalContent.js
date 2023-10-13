@@ -58,7 +58,7 @@ const TaskModalContent = ({
           <div className="flex justify-center items-center">
             <label
               htmlFor="board-subTask-input" //lấy id :D
-              className="text-sm dark:text-white text-gray-500 cursor-pointer"
+              className="text-sm  text-gray-500 cursor-pointer"
             >
               <OrderedListOutlined style={{ fontSize: 24 }} />
             </label>

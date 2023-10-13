@@ -29,3 +29,13 @@ export const updateAssignDivisionToEvent = (data) =>
 
 export const updateStatusEvent = (eventId, status) =>
   authRequest({ url: `/event/${eventId}/${status}`, method: "put" });
+
+export const getEventDivisions = () =>
+  authRequest({
+    url: `/event/division`,
+  });
+
+export const getEventDetail = ({ eventId }) =>
+  authRequest({
+    url: `/event/${eventId}`,
+  });

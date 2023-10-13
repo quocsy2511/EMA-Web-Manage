@@ -27,10 +27,10 @@ const TaskKanbanBoard = ({
   return (
     <>
       <div
-        className="w-[250px] mx-auto my-5 rounded-lg bg-white dark:bg-dark shadow-darkShadow py-3 px-3 shadow-lg hover:opacity-60 dark:text-white cursor-pointer"
+        className="w-[250px] mx-auto my-5 rounded-lg bg-white  shadow-darkShadow py-3 px-3 shadow-lg hover:opacity-60  cursor-pointer"
         onClick={() => openTaskModalHandler()}
       >
-        <p className="font-normal text-sm tracking-wide hover:text-secondary dark:hover:text-secondary ">
+        <p className="font-normal text-sm tracking-wide hover:text-secondary ">
           {task?.title}
         </p>
 

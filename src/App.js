@@ -9,7 +9,6 @@ import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
 import RolePage from "./pages/Role/RolePage";
 
-
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
 // Mana pages
@@ -39,7 +38,7 @@ const TimekeepingStaffPage = lazy(() =>
 const DashboardPageStaff = lazy(() =>
   import("./pages/Dashboard/DashboardPageStaff")
 );
-const TaskPageStaff = lazy(() => import("./pages/Task/TaskpageStaff"));
+const TaskPageStaff = lazy(() => import("./pages/Task/MyTaskPageStaff"));
 
 const router = createBrowserRouter([
   {
