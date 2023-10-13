@@ -122,9 +122,6 @@ const EventStaffPage = () => {
   // );
 
   const [selectEvent, setSelectEvent] = useState({});
-
-  // const [selectEvent, setSelectEvent] = useState(events[0]);
-
   useEffect(() => {
     setSelectEvent(listEvent?.[0] ?? {});
   }, [listEvent]);

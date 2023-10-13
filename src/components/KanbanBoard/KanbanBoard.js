@@ -807,22 +807,26 @@ const TaskParents = [
 
 const KanbanBoard = ({ selectEvent }) => {
   const { id } = selectEvent;
-  const [conValue, setConValue] = useState(id);
   const [fieldName, setFieldName] = useState("eventID");
 
   const {
     data: listTask,
     isError: isErrorListTask,
     isLoading: isLoadingListTask,
-  } = useQuery(["tasks", fieldName], () => getTasks({ fieldName, conValue }), {
-    select: (data) => {
-      return data;
-    },
-  });
-
-  useState(() => {
-    setConValue(id);
-  }, [id]);
+  } = useQuery(
+    ["tasks", fieldName],
+    () => getTasks({ fieldName, conValue: id }),
+    {
+      select: (data) => {
+        return data;
+      },
+      enabled: !!id,
+    }
+  );
+  console.log(
+    "🚀 ~ file: KanbanBoard.js:820 ~ KanbanBoard ~ listTask:",
+    listTask
+  );
 
   return (
     <>
