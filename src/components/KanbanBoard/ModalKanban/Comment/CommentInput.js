@@ -18,11 +18,11 @@ const CommentInput = () => {
             htmlFor="board-description-input" //lấy id :D
             className="text-sm dark:text-white text-gray-500 cursor-pointer"
           >
-            <SnippetsOutlined style={{ fontSize: 24 }} />
+            <SnippetsOutlined style={{ fontSize: 24, color: "black" }} />
           </label>
         </div>
         <div className="w-full flex flex-col">
-          <h3 className="text-lg font-bold">Activity</h3>
+          <h3 className="text-lg font-bold">Hoạt động</h3>
         </div>
       </div>
       <div className="flex flex-row mt-4 justify-start gap-x-4 ">
@@ -49,7 +49,7 @@ const CommentInput = () => {
               className="rounded-md text-sm text-black font-normal hover:bg-slate-100 cursor-pointer w-full bg-transparent px-4 py-2 bg-bgSubtask"
               onClick={() => seItsOpenQuill(true)}
             >
-              <p className="text-gray-400 italic">Write comment ...</p>
+              <p className="text-gray-400 italic">Viết bình luận ...</p>
             </div>
           )}
         </div>

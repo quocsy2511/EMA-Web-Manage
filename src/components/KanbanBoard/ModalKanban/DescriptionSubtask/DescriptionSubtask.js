@@ -15,7 +15,7 @@ const DescriptionSubtask = ({ description, setDescription }) => {
         </label>
       </div>
       <div className="w-full">
-        <h3 className="text-lg font-bold">Description</h3>
+        <h3 className="text-lg font-bold">Mô tả</h3>
         {isOpenQuill ? (
           <ReactQuill
             theme="snow"

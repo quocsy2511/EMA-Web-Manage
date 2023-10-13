@@ -95,7 +95,7 @@ const Column = ({ TaskParentArray }) => {
             onClick={() => setAddNewTask(true)}
           >
             <p className="text-sm font-semibold tracking-tighter">
-              + Add a task
+              + Thêm công việc mới
             </p>
           </div>
         </div>

@@ -54,7 +54,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
     {
       key: "1",
       type: "group",
-      label: "Member",
+      label: "Thành viên",
       children: users?.map((item) => {
         return {
           key: item.id,
@@ -130,7 +130,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
                           />
                         </svg>
                       </span>
-                      <p>Filter</p>
+                      <p>Bộ lọc</p>
                     </div>
                   </Dropdown>
                 </div>

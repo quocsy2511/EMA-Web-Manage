@@ -42,10 +42,10 @@ const Comments = ({ comment, setComment }) => {
                 onClick={() => seItsOpenQuill(true)}
                 className="hover:text-secondary underline underline-offset-2"
               >
-                Edit
+                chỉnh sửa
               </p>
               <p className="hover:text-secondary underline underline-offset-2">
-                Delete
+                Xoá
               </p>
             </div>
           </div>

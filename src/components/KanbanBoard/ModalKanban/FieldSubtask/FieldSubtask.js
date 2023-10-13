@@ -98,7 +98,7 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
         <div className="flex flex-col w-full pl-12 mt-2">
           <h4 className="text-sm font-semibold flex flex-row gap-x-2">
             <UserOutlined />
-            {taskParent ? "Leader" : "Member"}
+            {taskParent ? "Trưởng phòng" : "Thành Viên"}
           </h4>
           <div className="flex justify-start items-center mt-4">
             {isOpenMember ? (
@@ -150,10 +150,10 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
           </div>
         </div>
         {/* task date */}
-        <div className="flex flex-col w-full pl-12 mt-2">
+        <div className="flex flex-col w-full pl-12 mt-4">
           <h4 className="text-sm font-semibold flex flex-row gap-x-2">
             <FieldTimeOutlined />
-            Date
+            Thời gian
           </h4>
           <div className="flex justify-start items-center mt-4">
             {isOpenDate ? (
@@ -202,7 +202,7 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
         <div className="flex flex-col w-full pl-12 mt-2">
           <h4 className="text-sm font-semibold flex flex-row gap-x-2">
             <FolderOutlined />
-            File
+            Tài liệu
           </h4>
           <div className="flex justify-start items-center mt-4">
             <Upload {...props}>

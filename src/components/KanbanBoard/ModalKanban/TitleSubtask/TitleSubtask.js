@@ -9,7 +9,7 @@ const TitleSubtask = ({ title, setTitle }) => {
           htmlFor="board-name-input" //lấy id :D
           className="text-sm dark:text-white text-gray-500 cursor-pointer"
         >
-          <ThunderboltOutlined style={{ fontSize: 24 }} />
+          <ThunderboltOutlined style={{ fontSize: 24, color: "black" }} />
         </label>
       </div>
 
