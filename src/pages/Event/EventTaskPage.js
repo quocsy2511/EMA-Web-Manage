@@ -1,13 +1,14 @@
 import React, { Fragment, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Avatar, Progress, Tooltip } from "antd";
+import { Avatar, FloatButton, Progress, Tooltip } from "antd";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import {
   BsHourglassSplit,
   BsHourglassBottom,
   BsTagsFill,
   BsTagFill,
+  BsPlus,
 } from "react-icons/bs";
 import { RiAttachment2, RiEditFill } from "react-icons/ri";
 import { LiaClipboardListSolid } from "react-icons/lia";
@@ -25,6 +26,7 @@ import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
 import "moment/locale/vi";
 import { getTasks } from "../../apis/tasks";
+import EmptyList from "../../components/Error/EmptyList";
 
 moment.locale("vi"); // Set the locale to Vietnam
 
@@ -47,7 +49,7 @@ const EventTaskPage = () => {
   const { data, isLoading, isError } = useQuery(["event-detail", eventId], () =>
     getDetailEvent(eventId)
   );
-  console.log("data:", data);
+  // console.log("data:", data);
 
   const {
     data: tasks,
@@ -57,7 +59,7 @@ const EventTaskPage = () => {
   } = useQuery(["tasks", eventId], () =>
     getTasks({ fieldName: "eventID", conValue: eventId })
   );
-  console.log("tasks: ", tasks);
+  // console.log("tasks: ", tasks);
 
   const [assigneeSelection, setAssigneeSelection] = useState();
   const [prioritySelection, setPrioritySelection] = useState();
@@ -121,6 +123,18 @@ const EventTaskPage = () => {
 
   return (
     <Fragment>
+      <FloatButton
+        onClick={handleOpenModal}
+        icon={<BsPlus />}
+        type="primary"
+        tooltip={<p>Tạo công việc</p>}
+      />
+      <TaskAdditionModal
+        isModalOpen={isOpenModal}
+        setIsModalOpen={setIsOpenModal}
+        eventId={eventId}
+        // parentTaskId="1"
+      />
       <motion.div
         initial={{ y: -75 }}
         animate={{ y: 0 }}
@@ -181,7 +195,7 @@ const EventTaskPage = () => {
           {status}
         </p>
 
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="flex-1 text-end"
@@ -196,10 +210,10 @@ const EventTaskPage = () => {
           <TaskAdditionModal
             isModalOpen={isOpenModal}
             setIsModalOpen={setIsOpenModal}
-            // parentTaskId="1"
             eventId={eventId}
+            // parentTaskId="1"
           />
-        </motion.div>
+        </motion.div> */}
       </motion.div>
 
       <motion.div
@@ -285,7 +299,7 @@ const EventTaskPage = () => {
             </div>
 
             <div className="w-[40%]">
-              <p className="text-base font-semibold">Tiến độ các Task lớn</p>
+              <p className="text-base font-semibold">Tiến độ các hạng mục</p>
               <Tooltip title="3/25 task lớn đã xong">
                 <Progress percent={70} />
               </Tooltip>
@@ -412,10 +426,10 @@ const EventTaskPage = () => {
               <div className="flex flex-col gap-y-6 mt-8">
                 <AnimatePresence mode="await">
                   {tasks.length === 0 ? (
-                    <p>ngu</p>
+                    <EmptyList title="Chưa có công việc nào!" />
                   ) : (
-                    tasks.map((task, index) => (
-                      <TaskItem key={index} task={task} isSubtask={false} />
+                    tasks.map((task) => (
+                      <TaskItem key={task.id} task={task} isSubtask={false} />
                     ))
                   )}
                 </AnimatePresence>

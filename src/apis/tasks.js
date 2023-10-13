@@ -17,6 +17,7 @@ export const createTask = (task) =>
       desc: task.desc,
       priority: task.priority,
       estimationTime: task.estimationTime,
+      assignee: task.assignee,
       leader: task.leader ?? "",
 
       parentTask: task.parentTask ?? undefined,

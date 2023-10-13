@@ -6,22 +6,79 @@ import {
   FcLowPriority,
   FcMediumPriority,
 } from "react-icons/fc";
-import { BsHourglassBottom, BsHourglassSplit } from "react-icons/bs";
-import { Avatar } from "antd";
+import { BsHourglassBottom, BsHourglassSplit, BsPlus } from "react-icons/bs";
+import { Avatar, FloatButton } from "antd";
 import { BiDetail } from "react-icons/bi";
 import TaskItem from "../../components/Task/TaskItem";
 import CommentInTask from "../../components/Comment/CommentInTask";
 import SubTaskModal from "../../components/Modal/SubTaskModal";
+import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
+import { useQuery } from "@tanstack/react-query";
+import { getTasks } from "../../apis/tasks";
+import EmptyList from "../../components/Error/EmptyList";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 
 const EventSubTaskPage = () => {
   const taskId = useParams().taskId;
+  const eventId = useParams().eventId;
+
+  const {
+    data: tasks,
+    isLoading: taskIsLoading,
+    isError: taskIsError,
+    error: taskError,
+  } = useQuery(
+    ["tasks", eventId, taskId],
+    () => getTasks({ fieldName: "id", conValue: taskId }),
+    {
+      select: (data) => {
+        return data[0];
+      },
+    }
+  );
+  console.log("tasks: ", tasks);
 
   const [subtasks, setSubtasks] = useState([1, 2, 3]);
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isOpenCreateTaskModal, setIsOpenCreateTaskModal] = useState(false);
   const [selectedSubTask, setSelectedSubTask] = useState();
+
+  const handleOpenModal = () => {
+    setIsOpenCreateTaskModal((prev) => !prev);
+  };
+
+  if (taskIsLoading) {
+    return (
+      <div className="h-[calc(100vh-128px)]">
+        <LoadingComponentIndicator />;
+      </div>
+    );
+  }
+
+  if (taskIsError) {
+    return (
+      <div className="h-[calc(100vh-128px)]">
+        <AnErrorHasOccured />;
+      </div>
+    );
+  }
 
   return (
     <Fragment>
+      {}
+      <FloatButton
+        onClick={handleOpenModal}
+        icon={<BsPlus />}
+        type="primary"
+        tooltip={<p>Tạo công việc</p>}
+      />
+      <TaskAdditionModal
+        isModalOpen={isOpenCreateTaskModal}
+        setIsModalOpen={setIsOpenCreateTaskModal}
+        eventId={eventId}
+        parentTaskId={taskId}
+      />
       <motion.div
         initial={{ y: -75, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -85,14 +142,18 @@ const EventSubTaskPage = () => {
 
         <div className="flex flex-col gap-y-6 mt-10 mx-10">
           <AnimatePresence mode="await">
-            {subtasks.map((subtask) => (
-              <TaskItem
-                task={subtask}
-                isSubtask={true}
-                setSelectedSubTask={setSelectedSubTask}
-                setIsOpenModal={setIsOpenModal}
-              />
-            ))}
+            {tasks.subTask.length !== 0 ? (
+              tasks.subTask.map((subtask) => (
+                <TaskItem
+                  task={subtask}
+                  isSubtask={true}
+                  setSelectedSubTask={setSelectedSubTask}
+                  setIsOpenModal={setIsOpenModal}
+                />
+              ))
+            ) : (
+              <EmptyList title="Chưa có công việc nào!" />
+            )}
             <SubTaskModal
               isOpenModal={isOpenModal}
               setIsOpenModal={setIsOpenModal}

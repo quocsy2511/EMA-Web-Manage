@@ -14,7 +14,7 @@ const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
   const navigate = useNavigate();
 
   const goToSubTask = () => {
-    navigate(`${task}`);
+    navigate(`${task.id}`);
   };
 
   const openSubTaskModal = () => {
@@ -52,7 +52,7 @@ const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
           <p className="text-sm font-medium">28/9/2023</p>
         </div>
         <div className="w-[4%]" />
-        <div className="flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-xl">
+        <div className="flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-xl">
           <BsHourglassBottom size={15} />
           <div className="w-4" />
           <p className="text-sm font-medium">28/9/2023</p>

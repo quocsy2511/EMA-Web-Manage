@@ -1,6 +1,6 @@
 import React from "react";
 import { Avatar } from "antd";
-import { BsHourglassBottom, BsFolder2Open } from "react-icons/bs";
+import { BsHourglassBottom, BsFolder2Open, BsHourglassSplit } from "react-icons/bs";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -59,15 +59,16 @@ const EventItem = ({ event }) => {
         <div className="w-full bg-slate-200 mt-3 mb-7" style={{ height: 1 }} />
 
         {/* 1 line = 1rem = +4  */}
-        <p className="text-sm text-slate-200 line-clamp-4 h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          {event.description}
-        </p>
+        <p
+          dangerouslySetInnerHTML={{ __html: event.description }}
+          className="text-sm text-slate-200 line-clamp-4 h-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        ></p>
 
         <div className="h-7" />
 
         <div className="flex gap-x-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="flex items-center gap-x-2 text-white bg-white bg-opacity-20 px-2 py-1 rounded-lg">
-            <BsHourglassBottom size={18} />
+            <BsHourglassSplit size={18} />
             <p className="font-semibold">{event.startDate}</p>
           </div>
           <div className="flex items-center gap-x-2 text-white bg-white bg-opacity-20 px-2 py-1 rounded-lg">

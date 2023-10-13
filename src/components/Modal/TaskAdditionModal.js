@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Button,
   Checkbox,
   ConfigProvider,
   DatePicker,
@@ -15,7 +16,7 @@ import moment from "moment";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import UploadTask from "../Upload/UploadTask";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllUser } from "../../apis/users";
 import { createTask } from "../../apis/tasks";
 
@@ -40,12 +41,12 @@ const TaskAdditionModal = ({
     () => getAllUser({ role: "STAFF", pageSize: 50, currentPage: 1 }),
     {
       select: (data) => {
-        console.log(data);
         return data.data;
       },
+      enabled: !parentTaskId,
     }
   );
-  console.log("staffs: ", staffs);
+  // console.log("staffs: ", staffs);
 
   const {
     data: employees,
@@ -62,32 +63,41 @@ const TaskAdditionModal = ({
       }),
     {
       select: (data) => {
-        console.log(data);
         return data.data;
       },
+      enabled: !!parentTaskId,
     }
   );
-  console.log("employees: ", employees);
+  // console.log("employees: ", employees);
 
-  const { mutate } = useMutation((task) => createTask(task), {
+  const queryClient = useQueryClient();
+  const { mutate, isLoading } = useMutation((task) => createTask(task), {
     onSuccess: () => {
-      console.log("SUCCESS")
+      console.log("API SUCCESS");
+      queryClient.invalidateQueries(["tasks", eventId]);
+      messageApi.open({
+        type: "success",
+        content: "Đã tạo 1 đề mục",
+      });
+      form.resetFields();
+      setIsModalOpen(false);
     },
     onError: () => {
-      console.log("ERROR")
+      messageApi.open({
+        type: "error",
+        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+      });
     },
   });
 
   const [isTime, setIsTime] = useState(false);
   const [fileList, setFileList] = useState();
-  console.log("fileList state: ", fileList);
+
   const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
 
   const handleOk = () => {
     form.submit();
-
-    // Close modal when success
-    // setIsModalOpen(false);
   };
 
   const handleCancel = () => {
@@ -105,15 +115,10 @@ const TaskAdditionModal = ({
       ...values,
       startDate: moment(values.date[0]).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
       endDate: moment(values.date[1]).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
-      eventId,
+      eventID: eventId,
+      estimationTime: +values.estimationTime,
       assignee: [values.assignee],
     };
-    // const { date, ...restValue } = values;
-    // restValue = {
-    //   ...restValue,
-    //   startDate: moment(date[0]).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
-    //   endDate: moment(date[1]).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
-    // };
 
     console.log("Transform data: ", values);
     mutate(values);
@@ -128,12 +133,13 @@ const TaskAdditionModal = ({
       open={isModalOpen}
       onOk={handleOk}
       onCancel={handleCancel}
-      //   confirmLoading={loading}
+        // confirmLoading={loading}
       okText="Tạo"
       cancelText="Hủy"
       centered
       width={"70%"}
     >
+      {contextHolder}
       <Form
         className="p-5"
         form={form}
@@ -169,7 +175,7 @@ const TaskAdditionModal = ({
             className="w-[40%]"
             label={
               <div className="flex gap-x-5 items-center">
-                <Title title="Thời gian tổ chức" />
+                <Title title="Thời gian" />
                 <Checkbox
                   checked={isTime}
                   onChange={() => setIsTime((prev) => !prev)}
@@ -182,7 +188,6 @@ const TaskAdditionModal = ({
             rules={[
               {
                 validator: (rule, value) => {
-                  console.log(value);
                   if (value && value[0] && value[1]) {
                     return Promise.resolve();
                   }
@@ -195,7 +200,6 @@ const TaskAdditionModal = ({
               <RangePicker
                 showTime={isTime}
                 onChange={(value) => {
-                  console.log(value);
                   form.setFieldsValue({ date: value });
                 }}
                 disabledDate={(current) => {
@@ -302,7 +306,6 @@ const TaskAdditionModal = ({
                 <Select
                   placeholder="Bộ phận"
                   onChange={(value) => {
-                    console.log(value);
                     form.setFieldsValue({ assignee: value });
                   }}
                   loading={staffIsLoading}
@@ -322,7 +325,7 @@ const TaskAdditionModal = ({
               </Form.Item>
               <Form.Item
                 className="w-[25%]"
-                label={<Title title="estimationTime" />}
+                label={<Title title="Thời gian ước tính" />}
                 name="estimationTime"
                 rules={[
                   {
@@ -352,7 +355,6 @@ const TaskAdditionModal = ({
             <Select
               placeholder="Mức độ"
               onChange={(value) => {
-                console.log(value);
                 form.setFieldsValue({ priority: value });
               }}
               options={[
@@ -373,45 +375,7 @@ const TaskAdditionModal = ({
           </Form.Item>
         </div>
 
-        <div className="flex gap-x-5">
-          {/* <Form.Item
-            className="w-[25%]"
-            label={<Title title="Độ ưu tiên" />}
-            name="priority"
-            rules={[
-              {
-                required: true,
-                message: "Chưa điền !",
-              },
-            ]}
-          >
-            <Select
-              placeholder="Mức độ"
-              onChange={(value) => {
-                console.log(value);
-                form.setFieldsValue({ priority: value });
-              }}
-              options={[
-                {
-                  value: "LOW",
-                  label: "Thấp",
-                },
-                {
-                  value: "MEDIUM",
-                  label: "Bình thường",
-                },
-                {
-                  value: "HIGH",
-                  label: "Cao",
-                },
-              ]}
-            />
-          </Form.Item> */}
-
-          {/* <Form.Item label={<Title title="Trạng thái" />} name="status">
-            <Input disabled />
-          </Form.Item> */}
-        </div>
+        <div className="flex gap-x-5"></div>
       </Form>
     </Modal>
   );
