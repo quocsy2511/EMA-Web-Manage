@@ -1,28 +1,13 @@
-import { Avatar, Badge, Dropdown, Menu } from "antd";
+import { Avatar, Badge, Button, Dropdown } from "antd";
 import React from "react";
 import { HiOutlineBellAlert } from "react-icons/hi2";
 import { IoLogOutOutline } from "react-icons/io5";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import logo from "../../assets/images/logo.png";
+import { Link, useNavigate } from "react-router-dom";
 import { Header } from "antd/es/layout/layout";
+import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 
-const HeaderStaff = () => {
-  const location = useLocation();
+const HeaderStaff = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
-  const getItem = (label, key) => {
-    return {
-      label,
-      key,
-    };
-  };
-  const topBarItems = [
-    getItem("Sự kiện", "/staff"),
-    getItem("Công việc ", "/staff/task"),
-    getItem("Yêu cầu", "/staff/request"),
-    getItem("Thông kê", "/staff/dashboard"),
-    getItem("Bảng Chấm công", "/staff/timekeeping"),
-  ];
-
   const logout = () => {
     localStorage.removeItem("token");
     navigate("/");
@@ -92,30 +77,25 @@ const HeaderStaff = () => {
   ];
 
   return (
-    <Header
-      style={{
-        position: "fixed",
-        top: 0,
-        zIndex: 50,
-        width: "100%",
-      }}
-    >
-      <div className="flex justify-between items-center">
-        <div className="flex justify-center items-center">
-          <div className="demo-logo mr-4">
-            <Avatar size={34} src={logo} />
-          </div>
-          <Menu
-            onClick={({ key }) => {
-              navigate(key);
+    <Header className="p-0 bg-white border-b-2 h-[70px]">
+      <div className="flex justify-between items-center ">
+        <div>
+          <Button
+            type="text"
+            onClick={() => setCollapsed(!collapsed)}
+            style={{
+              fontSize: "16px",
+              width: 64,
+              height: 64,
             }}
-            theme="dark"
-            mode="horizontal"
-            defaultSelectedKeys={location.pathname}
-            items={topBarItems}
-          />
+          >
+            {collapsed ? (
+              <AiOutlineMenuUnfold size={24} />
+            ) : (
+              <AiOutlineMenuFold size={24} />
+            )}
+          </Button>
         </div>
-
         <div>
           <div className="flex justify-center items-center gap-x-8">
             <div className="cursor-pointer flex items-center ">
@@ -132,7 +112,7 @@ const HeaderStaff = () => {
                   count={5}
                   offset={[-2, 2]}
                   title="5 thông báo"
-                  className="text-white"
+                  className="text-black "
                 >
                   {/* <HiOutlineBell size={20} /> */}
                   <HiOutlineBellAlert size={20} />
@@ -150,8 +130,8 @@ const HeaderStaff = () => {
             >
               <div className="flex items-center">
                 <div className="flex flex-col items-end">
-                  <p className="text-sm font-semibold text-white">User Name</p>
-                  <p className="text-xs font-normal text-white">Staff</p>
+                  <p className="text-sm font-semibold text-black">User Name</p>
+                  <p className="text-xs font-normal text-black">Staff</p>
                 </div>
                 <div className="w-2" />
                 <Avatar

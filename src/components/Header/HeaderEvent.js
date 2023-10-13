@@ -43,10 +43,6 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
       },
     }
   );
-  // console.log(
-  //   "🚀 ~ file: EventStaffPage.js:118 ~ EventStaffPage ~ user:",
-  //   users
-  // );
 
   const handleChangeEvent = (value) => {
     const event = JSON.parse(value);
@@ -78,7 +74,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
   ];
 
   return (
-    <div className="p-4 fixed left-0 bg-bgHeader z-50 right-0 top-14">
+    <div className="p-4  left-0 bg-bgHeader z-50 right-0 top-14">
       {!isLoadingUsers ? (
         !isErrorUsers ? (
           <div className="flex items-center space-x-2 md:space-x-4">

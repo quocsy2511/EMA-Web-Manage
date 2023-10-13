@@ -116,10 +116,6 @@ const EventStaffPage = () => {
       return event;
     },
   });
-  // console.log(
-  //   "🚀 ~ file: EventStaffPage.js:108 ~ EventStaffPage ~ events:",
-  //   listEvent
-  // );
 
   const [selectEvent, setSelectEvent] = useState({});
   useEffect(() => {
@@ -144,14 +140,6 @@ const EventStaffPage = () => {
       ) : (
         <LoadingComponentIndicator />
       )}
-
-      {/* <HeaderEvent
-        events={events}
-        // events={data}
-        setSelectEvent={setSelectEvent}
-        selectEvent={selectEvent}
-      />
-      <KanbanBoard selectEvent={selectEvent} /> */}
     </div>
   );
 };

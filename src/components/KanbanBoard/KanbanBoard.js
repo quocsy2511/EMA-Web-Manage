@@ -831,7 +831,7 @@ const KanbanBoard = ({ selectEvent }) => {
   return (
     <>
       <div className="bg-bgBoard  h-screen overflow-hidden overflow-y-scroll scrollbar-hide">
-        <div
+        {/* <div
           className={`min-h-[220px] relative mt-[128px] py-3 px-16 text-white  group md:w-[100%] w-[45%] bg-white  cursor-pointer bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center `}
         >
           <div className="absolute inset-0 bg-black opacity-60 z-10"></div>
@@ -850,7 +850,7 @@ const KanbanBoard = ({ selectEvent }) => {
               {selectEvent.description}
             </p>
           </span>
-        </div>
+        </div> */}
         <div className="flex scrollbar-default overflow-x-scroll gap-6 px-16 py-5">
           {TaskParents.map((taskParent) => (
             <Column TaskParentArray={taskParent} key={taskParent.id} />
