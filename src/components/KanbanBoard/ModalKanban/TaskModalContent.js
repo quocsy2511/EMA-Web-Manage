@@ -7,6 +7,7 @@ import CommentInput from "./Comment/CommentInput";
 import Comments from "./Comment/Comments";
 import { OrderedListOutlined } from "@ant-design/icons";
 
+
 const TaskModalContent = ({
   taskParent,
   setSelectedSubTask,
@@ -14,18 +15,19 @@ const TaskModalContent = ({
   taskSelected,
   setTaskSelected,
 }) => {
+ 
+  // console.log("🚀 ~ file: TaskModalContent.js:17 ~ taskSelected:", taskSelected)
   const [title, setTitle] = useState(taskSelected.title);
   const [description, setDescription] = useState(taskSelected.description);
-  const [comments, setComments] = useState(taskSelected.comment);
-
-  const [subTasks, setSubTasks] = useState(taskSelected.tasks);
+  const [comments, setComments] = useState(taskSelected?.comment);
+  const [subTasks, setSubTasks] = useState(taskSelected.subTask);
 
   // Subtask
   const onChangeSubtask = (id, newTitle) => {};
 
   let completed = 0;
   if (taskParent) {
-    subTasks.forEach((task) => {
+    taskSelected.subTask.forEach((task) => {
       if (task.status === "confirmed") {
         completed++;
       }
@@ -36,7 +38,7 @@ const TaskModalContent = ({
     setTitle(taskSelected.title);
     setDescription(taskSelected.description);
     setComments(taskSelected.comment);
-    setSubTasks(taskSelected.tasks);
+    setSubTasks(taskSelected.subTask);
   }, [taskSelected]);
 
   return (
@@ -83,13 +85,15 @@ const TaskModalContent = ({
       <CommentInput />
 
       {/* comment of task */}
-      {comments.map((comment) => (
-        <Comments
-          key={comment.id}
-          comment={comment}
-          // setComment={setComment}
-        />
-      ))}
+      {!comments
+        ? ""
+        : comments.map((comment) => (
+            <Comments
+              key={comment.id}
+              comment={comment}
+              // setComment={setComment}
+            />
+          ))}
     </div>
   );
 };

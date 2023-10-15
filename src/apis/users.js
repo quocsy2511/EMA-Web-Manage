@@ -26,3 +26,6 @@ export const updateStatusUser = ({ userId, status }) =>
 
 export const updateUser = ({ userId, ...user }) =>
   authRequest({ url: `/user/${userId}`, method: "put", data: user });
+
+export const getMember = ({ userId }) =>
+  authRequest({ url: `/user/${userId}` });

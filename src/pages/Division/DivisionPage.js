@@ -20,6 +20,7 @@ import CreateDivisionDrawer from "../../components/Drawer/CreateDivisionDrawer";
 
 const DivisionPage = () => {
   const [page, setPage] = useState(1);
+  
   const { data, isLoading, isError } = useQuery(
     ["division"],
     () => getAllDivision({ pageSize: 50, currentPage: page }),

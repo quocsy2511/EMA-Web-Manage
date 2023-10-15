@@ -3,8 +3,11 @@ import TaskKanbanBoard from "../TaskKanban/TaskKanbanBoard";
 import TaskModal from "../ModalKanban/TaskModal";
 import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
+import { useQuery } from "@tanstack/react-query";
+import { getTasks } from "../../../apis/tasks";
+import moment from "moment";
 
-const Column = ({ TaskParentArray }) => {
+const Column = ({ TaskParent }) => {
   const colors = [
     "bg-red-500",
     "bg-orange-500",
@@ -19,11 +22,11 @@ const Column = ({ TaskParentArray }) => {
   const [color, setColor] = useState(null);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [addNewTask, setAddNewTask] = useState(false);
-  const [taskParent, setTaskParent] = useState(false);
+  const [isTaskParent, setIsTaskParent] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
 
   let completed = 0;
-  let subTask = TaskParentArray.tasks;
+  let subTask = TaskParent.subTask;
   subTask.forEach((task) => {
     if (task.status === "confirmed") {
       completed++;
@@ -31,19 +34,19 @@ const Column = ({ TaskParentArray }) => {
   });
 
   //format date
-  const formattedDate = (value) => {
-    const date = new Date(value).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-    return date;
-  };
+  // const formattedDate = (value) => {
+  //   const date = new Date(value).toLocaleDateString("en-US", {
+  //     year: "numeric",
+  //     month: "2-digit",
+  //     day: "2-digit",
+  //   });
+  //   return date;
+  // };
 
   const openTaskParentModal = () => {
     setIsOpenTaskModal(true);
-    setTaskParent(true);
-    setTaskSelected(TaskParentArray);
+    setIsTaskParent(true);
+    setTaskSelected(TaskParent);
   };
 
   useEffect(() => {
@@ -66,13 +69,11 @@ const Column = ({ TaskParentArray }) => {
               <span className={`rounded-full w-4 h-4 ${color} `}></span>
               <div className="flex flex-col gap-y-[2px]">
                 <p className=" w-[215px] whitespace-normal italic font-semibold text-darkDropDown hover:text-secondary">
-                  {TaskParentArray?.title} ({completed}/
-                  {TaskParentArray?.tasks?.length})
+                  {TaskParent?.title} ({completed}/{TaskParent?.subTask?.length}
+                  )
                 </p>
                 <p className="text-[7px] font-semibold text-gray-600 underline underline-offset-2">
-                  {/* {col.time} */}
-                  {formattedDate(TaskParentArray.startDate)} -{" "}
-                  {formattedDate(TaskParentArray.endDate)}
+                  {TaskParent.startDate} - {TaskParent.endDate}
                 </p>
               </div>
             </div>
@@ -84,7 +85,7 @@ const Column = ({ TaskParentArray }) => {
                 <TaskKanbanBoard
                   setTaskSelected={setTaskSelected}
                   task={subTask}
-                  setTaskParent={setTaskParent}
+                  setTaskParent={setIsTaskParent}
                   setIsOpenTaskModal={setIsOpenTaskModal}
                   key={subTask.id}
                 />
@@ -103,7 +104,7 @@ const Column = ({ TaskParentArray }) => {
           <TaskModal
             setTaskSelected={setTaskSelected}
             taskSelected={taskSelected}
-            taskParent={taskParent}
+            taskParent={isTaskParent}
             isOpenTaskModal={isOpenTaskModal}
             setIsOpenTaskModal={setIsOpenTaskModal}
           />

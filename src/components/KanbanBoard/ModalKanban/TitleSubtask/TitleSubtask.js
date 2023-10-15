@@ -1,4 +1,5 @@
 import { ThunderboltOutlined } from "@ant-design/icons";
+import TextArea from "antd/es/input/TextArea";
 import React from "react";
 
 const TitleSubtask = ({ title, setTitle }) => {
@@ -13,8 +14,12 @@ const TitleSubtask = ({ title, setTitle }) => {
         </label>
       </div>
 
-      <input
-        className="bg-transparent px-4 py-2 rounded-md text-3xl font-bold border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer"
+      <TextArea
+        autoSize={{
+          minRows: 1,
+          maxRows: 6,
+        }}
+        className="bg-transparent px-4 py-2 rounded-md text-3xl font-bold border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer h-fit"
         placeholder="e.g Web Design"
         value={title}
         onChange={(e) => setTitle(e.target.value)}

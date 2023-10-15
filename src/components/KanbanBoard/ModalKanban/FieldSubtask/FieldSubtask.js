@@ -3,7 +3,9 @@ import {
   FolderOutlined,
   UploadOutlined,
   UserOutlined,
+  UsergroupAddOutlined,
 } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -15,6 +17,10 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import React, { useState } from "react";
+import { getProfile } from "../../../../apis/users";
+import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
+import Members from "./Members";
 
 const user = [
   {
@@ -45,28 +51,41 @@ const user = [
 ];
 
 const FieldSubtask = ({ taskSelected, taskParent }) => {
+  const {
+    data: staff,
+    isError: isErrorStaff,
+    isLoading: isLoadingStaff,
+  } = useQuery(["staff"], () => getProfile(), {
+    select: (data) => {
+      return data;
+    },
+    enabled: taskParent,
+  });
+
+  if (!taskParent && taskSelected.assignTasks.length > 0) {
+  }
+
   const handleChangeSelect = (value) => {
     // console.log(`selected ${value}`);
   };
   const [isOpenDate, setIsOpenDate] = useState(false);
   const [isOpenMember, seItsOpenMember] = useState(false);
+  const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
   const [deadline, setDeadline] = useState(dayjs());
 
   const formattedDate = (value) => {
-    const date = new Date(value)
-      .toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-      .replace(/\//g, "-");
+    const date = new Date(value).toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
     return date;
   };
 
   //Pick deadline
-  const onChange = (value, dateString) => {
+  const onChangeDate = (value, dateString) => {
     // console.log("Selected Time: ", value);
     console.log("Formatted Selected Time: ", dateString);
     setDeadline(dateString);
@@ -100,54 +119,75 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
             <UserOutlined />
             {taskParent ? "Trưởng phòng" : "Thành Viên"}
           </h4>
-          <div className="flex justify-start items-center mt-4">
-            {isOpenMember ? (
-              <Select
-                placeholder="Select Member "
-                bordered={false}
-                style={{
-                  width: "80%",
-                }}
-                // value={user}
-                onChange={(value) => handleChangeSelect(value)}
-              >
-                {user.map((item, index) => {
-                  return (
-                    <Select.Option key={item.id} children={item}>
-                      <div className="flex flex-row gap-x-2 justify-start items-center ">
-                        <Tooltip
-                          key={item.id}
-                          title={item.name}
-                          placement="top"
-                        >
-                          <Avatar src={item.avatar} size={18} />
-                        </Tooltip>
-                        <p className="text-ellipsis w-[100px] flex-1 overflow-hidden ">
-                          {item.name}
-                        </p>
-                      </div>
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            ) : (
-              <div
-                className="flex flex-row gap-x-2 justify-start items-center bg-slate-50  rounded-md p-1 cursor-pointer"
-                onClick={() => seItsOpenMember(true)}
-              >
-                <Tooltip
-                  key="avatar"
-                  title={taskSelected.member?.name}
-                  placement="top"
+          {taskParent ? (
+            <div className="flex justify-start items-center mt-4">
+              {!isLoadingStaff ? (
+                !isErrorStaff ? (
+                  <div className="flex flex-row gap-x-2 justify-start items-center bg-slate-50  rounded-md p-1 cursor-pointer">
+                    <Tooltip
+                      key="avatar"
+                      title={staff.fullName}
+                      placement="top"
+                    >
+                      <Avatar src={staff.avatar} size="small" />
+                    </Tooltip>
+                    <p className="w-[100px] flex-1  text-sm font-semibold">
+                      {staff.fullName}
+                    </p>
+                  </div>
+                ) : (
+                  <AnErrorHasOccured />
+                )
+              ) : (
+                <LoadingComponentIndicator />
+              )}
+            </div>
+          ) : (
+            <div className="flex justify-start items-center mt-4">
+              {isOpenMember ? (
+                <Select
+                  placeholder="Select Member "
+                  bordered={false}
+                  style={{
+                    width: "80%",
+                  }}
+                  // value={user}
+                  onChange={(value) => handleChangeSelect(value)}
                 >
-                  <Avatar src={taskSelected.member?.avatar} size="small" />
-                </Tooltip>
-                <p className="w-[100px] flex-1  text-sm font-semibold">
-                  {taskSelected.member?.name}
-                </p>
-              </div>
-            )}
-          </div>
+                  {user.map((item, index) => {
+                    return (
+                      <Select.Option key={item.id} children={item}>
+                        <div className="flex flex-row gap-x-2 justify-start items-center ">
+                          <Tooltip
+                            key={item.id}
+                            title={item.name}
+                            placement="top"
+                          >
+                            <Avatar src={item.avatar} size={18} />
+                          </Tooltip>
+                          <p className="text-ellipsis w-[100px] flex-1 overflow-hidden ">
+                            {item.name}
+                          </p>
+                        </div>
+                      </Select.Option>
+                    );
+                  })}
+                </Select>
+              ) : (
+                <>
+                  {assignTasks.length > 0 &&
+                    assignTasks.map((item) => (
+                      <Members userId={item.assignee} key={item.assignee} />
+                    ))}
+                  <Avatar
+                    icon={<UsergroupAddOutlined />}
+                    size="default"
+                    onClick={() => seItsOpenMember(true)}
+                  />
+                </>
+              )}
+            </div>
+          )}
         </div>
         {/* task date */}
         <div className="flex flex-col w-full pl-12 mt-4">
@@ -159,7 +199,7 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
             {isOpenDate ? (
               <DatePicker
                 showTime
-                onChange={onChange}
+                onChange={onChangeDate}
                 defaultValue={deadline}
               />
             ) : (

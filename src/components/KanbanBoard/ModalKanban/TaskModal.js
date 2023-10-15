@@ -6,7 +6,7 @@ import TaskModalContent from "./TaskModalContent";
 const TaskModal = ({
   isOpenTaskModal,
   setIsOpenTaskModal,
-  taskParent = false,
+  taskParent,
   taskSelected,
   setTaskSelected,
 }) => {
