@@ -1,4 +1,4 @@
-import { SlidersTwoTone, UserOutlined } from "@ant-design/icons";
+import { SlidersTwoTone } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Dropdown, Select, Tooltip } from "antd";
 import React, { useState } from "react";
