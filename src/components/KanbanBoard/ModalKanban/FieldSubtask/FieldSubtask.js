@@ -11,46 +11,29 @@ import {
   Button,
   DatePicker,
   Select,
+  Space,
   Tooltip,
   Upload,
   message,
 } from "antd";
 import dayjs from "dayjs";
 import React, { useState } from "react";
-import { getProfile } from "../../../../apis/users";
+import { getAllUser, getProfile } from "../../../../apis/users";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
 import Members from "./Members";
-
-const user = [
-  {
-    id: 1,
-    name: "Nguyen Vu",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-  },
-  {
-    id: 2,
-    name: "Nguyen Sy",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-  },
-  {
-    id: 3,
-    name: "Nguyen Tung",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-  },
-  {
-    id: 4,
-    name: "Nguyen Huy",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-  },
-  {
-    id: 5,
-    name: "Nguyen Thiep",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-  },
-];
+import { useRouteLoaderData } from "react-router-dom";
+import moment from "moment";
+const { RangePicker } = DatePicker;
 
 const FieldSubtask = ({ taskSelected, taskParent }) => {
+  // console.log("🚀 ~ file: FieldSubtask.js:30 ~ FieldSubtask ~ taskSelected:", taskSelected)
+  //
+  // console.log(
+  //   "🚀 ~ file: FieldSubtask.js:32 ~ FieldSubtask ~ subTaskIds:",
+  //   subTaskIds
+  // );
+  const { Option } = Select;
   const {
     data: staff,
     isError: isErrorStaff,
@@ -62,17 +45,45 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
     enabled: taskParent,
   });
 
+  const divisionId = useRouteLoaderData("staff").divisionID;
+  const {
+    data: users,
+    isError: isErrorUsers,
+    isLoading: isLoadingUsers,
+  } = useQuery(
+    ["divisions"],
+    () => getAllUser({ divisionId, pageSize: 10, currentPage: 1 }),
+    {
+      select: (data) => {
+        const listUsers = data.data.map(({ ...item }) => {
+          item.dob = moment(item.dob).format("YYYY-MM-DD");
+          return {
+            key: item.id,
+            ...item,
+          };
+        });
+        return listUsers;
+      },
+    }
+  );
+
   if (!taskParent && taskSelected.assignTasks.length > 0) {
   }
 
   const handleChangeSelect = (value) => {
-    // console.log(`selected ${value}`);
+    console.log(`selected ${value}`);
   };
   const [isOpenDate, setIsOpenDate] = useState(false);
   const [isOpenMember, seItsOpenMember] = useState(false);
   const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
   const [deadline, setDeadline] = useState(dayjs());
 
+  const membersInTask = assignTasks.map((item) => item.assignee);
+  console.log(
+    "🚀 ~ file: FieldSubtask.js:86 ~ FieldSubtask ~ membersInTask:",
+    membersInTask
+  );
+  const formatDate = "YYYY/MM/DD hh:mm:ss";
   const formattedDate = (value) => {
     const date = new Date(value).toLocaleDateString("en-US", {
       month: "2-digit",
@@ -111,84 +122,115 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
   };
 
   return (
-    <div className=" flex flex-row gap-x-6">
-      <div className="flex flex-col w-1/2">
-        {/* task member */}
-        <div className="flex flex-col w-full pl-12 mt-2">
-          <h4 className="text-sm font-semibold flex flex-row gap-x-2">
-            <UserOutlined />
-            {taskParent ? "Trưởng phòng" : "Thành Viên"}
-          </h4>
-          {taskParent ? (
-            <div className="flex justify-start items-center mt-4">
-              {!isLoadingStaff ? (
-                !isErrorStaff ? (
-                  <div className="flex flex-row gap-x-2 justify-start items-center bg-slate-50  rounded-md p-1 cursor-pointer">
-                    <Tooltip
-                      key="avatar"
-                      title={staff.fullName}
-                      placement="top"
-                    >
-                      <Avatar src={staff.avatar} size="small" />
-                    </Tooltip>
-                    <p className="w-[100px] flex-1  text-sm font-semibold">
-                      {staff.fullName}
-                    </p>
-                  </div>
+    <div className="flex flex-col ">
+      <div className=" flex flex-row gap-x-6">
+        <div className="flex flex-col w-1/2">
+          {/* task member */}
+          <div className="flex flex-col w-full pl-12 mt-2">
+            <h4 className="text-sm font-semibold flex flex-row gap-x-2">
+              <UserOutlined />
+              {taskParent ? "Trưởng phòng" : "Thành Viên"}
+            </h4>
+            {taskParent ? (
+              <div className="flex justify-start items-center mt-4">
+                {!isLoadingStaff ? (
+                  !isErrorStaff ? (
+                    <div className="flex flex-row gap-x-2 justify-start items-center bg-slate-50  rounded-md p-1 cursor-pointer">
+                      <Tooltip
+                        key="avatar"
+                        title={staff.fullName}
+                        placement="top"
+                      >
+                        <Avatar src={staff.avatar} size="small" />
+                      </Tooltip>
+                      <p className="w-[100px] flex-1  text-sm font-semibold">
+                        {staff.fullName}
+                      </p>
+                    </div>
+                  ) : (
+                    <AnErrorHasOccured />
+                  )
                 ) : (
-                  <AnErrorHasOccured />
-                )
-              ) : (
-                <LoadingComponentIndicator />
-              )}
-            </div>
-          ) : (
-            <div className="flex justify-start items-center mt-4">
-              {isOpenMember ? (
-                <Select
-                  placeholder="Select Member "
-                  bordered={false}
-                  style={{
-                    width: "80%",
-                  }}
-                  // value={user}
-                  onChange={(value) => handleChangeSelect(value)}
-                >
-                  {user.map((item, index) => {
-                    return (
-                      <Select.Option key={item.id} children={item}>
-                        <div className="flex flex-row gap-x-2 justify-start items-center ">
-                          <Tooltip
-                            key={item.id}
-                            title={item.name}
-                            placement="top"
-                          >
-                            <Avatar src={item.avatar} size={18} />
-                          </Tooltip>
-                          <p className="text-ellipsis w-[100px] flex-1 overflow-hidden ">
-                            {item.name}
-                          </p>
-                        </div>
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
-              ) : (
-                <>
-                  {assignTasks.length > 0 &&
-                    assignTasks.map((item) => (
-                      <Members userId={item.assignee} key={item.assignee} />
-                    ))}
-                  <Avatar
-                    icon={<UsergroupAddOutlined />}
-                    size="default"
-                    onClick={() => seItsOpenMember(true)}
-                  />
-                </>
-              )}
-            </div>
-          )}
+                  <LoadingComponentIndicator />
+                )}
+              </div>
+            ) : (
+              <div className="flex justify-start items-center mt-4">
+                {isOpenMember ? (
+                  <Select
+                    autoFocus
+                    allowClear
+                    mode="multiple"
+                    placeholder="Select Member "
+                    bordered={false}
+                    style={{
+                      width: "80%",
+                    }}
+                    defaultValue={membersInTask}
+                    onChange={(value) => handleChangeSelect(value)}
+                    optionLabelProp="label"
+                  >
+                    {!isLoadingUsers ? (
+                      !isErrorUsers ? (
+                        <>
+                          {users?.map((item, index) => {
+                            return (
+                              <Option
+                                value={item.id}
+                                label={item.fullName}
+                                key={item.id}
+                              >
+                                <Space>
+                                  <span role="img" aria-label={item.fullName}>
+                                    <Avatar src={item.avatar} />
+                                  </span>
+                                  {item.fullName}
+                                </Space>
+                              </Option>
+                            );
+                          })}
+                        </>
+                      ) : (
+                        <AnErrorHasOccured />
+                      )
+                    ) : (
+                      <LoadingComponentIndicator />
+                    )}
+                  </Select>
+                ) : (
+                  <>
+                    {assignTasks.length > 0 &&
+                      assignTasks.map((item) => (
+                        <Members userId={item.assignee} key={item.assignee} />
+                      ))}
+                    <Avatar
+                      icon={<UsergroupAddOutlined className="text-black" />}
+                      size="default"
+                      onClick={() => seItsOpenMember(true)}
+                      className="cursor-pointer bg-lite"
+                    />
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
+        <div className=" flex flex-col">
+          {/* upload file */}
+          <div className="flex flex-col w-full pl-12 mt-2">
+            <h4 className="text-sm font-semibold flex flex-row gap-x-2">
+              <FolderOutlined />
+              Tài liệu
+            </h4>
+            <div className="flex justify-start items-center mt-4">
+              <Upload {...props}>
+                <Button icon={<UploadOutlined />}>Click to Upload</Button>
+              </Upload>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className=" flex flex-row gap-x-6">
         {/* task date */}
         <div className="flex flex-col w-full pl-12 mt-4">
           <h4 className="text-sm font-semibold flex flex-row gap-x-2">
@@ -197,57 +239,36 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
           </h4>
           <div className="flex justify-start items-center mt-4">
             {isOpenDate ? (
-              <DatePicker
-                showTime
+              <RangePicker
+                showTime={{
+                  format: "HH:mm:ss",
+                }}
                 onChange={onChangeDate}
-                defaultValue={deadline}
+                defaultValue={[
+                  dayjs(taskSelected.startDate, formatDate),
+                  dayjs(taskSelected.endDate, formatDate),
+                ]}
+                format={formatDate}
               />
             ) : (
               <span
                 className={`px-[6px] py-[2px] w-fit text-xs font-medium flex justify-start items-center gap-x-1 ${
-                  taskSelected.status === "processing"
+                  taskSelected.status === "PROCESSING"
                     ? "bg-blue-300 bg-opacity-20 text-blue-600 rounded-md"
-                    : taskSelected.status === "done"
+                    : taskSelected.status === "DONE"
                     ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
-                    : taskSelected.status === "confirmed"
+                    : taskSelected.status === "CONFIRMED"
                     ? "bg-[#65a9a2] bg-opacity-20 text-[#13676a] rounded-md"
-                    : taskSelected.status === "pending"
+                    : taskSelected.status === "PENDING"
                     ? "bg-[#f9d14c] bg-opacity-20 text-[#faad14] rounded-md"
                     : ""
                 }`}
                 onClick={() => setIsOpenDate(true)}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                {formattedDate(taskSelected.startDate)} -{" "}
                 {formattedDate(taskSelected.endDate)}
               </span>
             )}
-          </div>
-        </div>
-      </div>
-      <div className=" flex flex-col">
-        {/* upload file */}
-        <div className="flex flex-col w-full pl-12 mt-2">
-          <h4 className="text-sm font-semibold flex flex-row gap-x-2">
-            <FolderOutlined />
-            Tài liệu
-          </h4>
-          <div className="flex justify-start items-center mt-4">
-            <Upload {...props}>
-              <Button icon={<UploadOutlined />}>Click to Upload</Button>
-            </Upload>
           </div>
         </div>
       </div>
