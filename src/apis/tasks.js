@@ -6,7 +6,6 @@ import { authRequest } from "../utils/axios-utils";
 // parentTask = id của task lớn
 // ( optional = undefined )
 
-
 export const createTask = (task) =>
   authRequest({
     url: "/task/createTask",
@@ -20,7 +19,7 @@ export const createTask = (task) =>
       priority: task.priority,
       estimationTime: task.estimationTime,
       leader: task.leader ?? "",
-
+      assignee: task.assignee,
       parentTask: task.parentTask ?? undefined,
       fileUrl: task.fileUrl ?? undefined,
     },

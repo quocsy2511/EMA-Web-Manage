@@ -25,15 +25,9 @@ import Members from "./Members";
 import { useRouteLoaderData } from "react-router-dom";
 import moment from "moment";
 const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 const FieldSubtask = ({ taskSelected, taskParent }) => {
-  // console.log("🚀 ~ file: FieldSubtask.js:30 ~ FieldSubtask ~ taskSelected:", taskSelected)
-  //
-  // console.log(
-  //   "🚀 ~ file: FieldSubtask.js:32 ~ FieldSubtask ~ subTaskIds:",
-  //   subTaskIds
-  // );
-  const { Option } = Select;
   const {
     data: staff,
     isError: isErrorStaff,
@@ -67,22 +61,12 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
     }
   );
 
-  if (!taskParent && taskSelected.assignTasks.length > 0) {
-  }
-
-  const handleChangeSelect = (value) => {
-    console.log(`selected ${value}`);
-  };
   const [isOpenDate, setIsOpenDate] = useState(false);
   const [isOpenMember, seItsOpenMember] = useState(false);
   const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
   const [deadline, setDeadline] = useState(dayjs());
 
   const membersInTask = assignTasks.map((item) => item.assignee);
-  console.log(
-    "🚀 ~ file: FieldSubtask.js:86 ~ FieldSubtask ~ membersInTask:",
-    membersInTask
-  );
   const formatDate = "YYYY/MM/DD hh:mm:ss";
   const formattedDate = (value) => {
     const date = new Date(value).toLocaleDateString("en-US", {
@@ -100,6 +84,9 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
     // console.log("Selected Time: ", value);
     console.log("Formatted Selected Time: ", dateString);
     setDeadline(dateString);
+  };
+  const handleChangeSelect = (value) => {
+    console.log(`selected ${value}`);
   };
 
   //Upload file

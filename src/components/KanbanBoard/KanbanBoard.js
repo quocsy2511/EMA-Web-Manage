@@ -810,15 +810,15 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator.js
 
 const KanbanBoard = ({ selectEvent }) => {
   const { id } = selectEvent;
-  const [fieldName, setFieldName] = useState("eventID");
+  // const [fieldName, setFieldName] = useState("eventID");
 
   const {
     data: listTaskParents,
     isError: isErrorListTask,
     isLoading: isLoadingListTask,
   } = useQuery(
-    ["tasks", fieldName],
-    () => getTasks({ fieldName, conValue: id }),
+    ["tasks"],
+    () => getTasks({ fieldName: "eventID", conValue: id }),
     {
       select: (data) => {
         if (data && Array.isArray(data)) {

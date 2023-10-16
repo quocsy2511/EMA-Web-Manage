@@ -1,4 +1,5 @@
 import { UploadOutlined } from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -6,42 +7,24 @@ import {
   Form,
   Input,
   Modal,
+  Segmented,
   Select,
-  Tooltip,
+  Slider,
+  Space,
   Upload,
   message,
 } from "antd";
-import React from "react";
+import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-
-const user = [
-  {
-    id: 1,
-    name: "Nguyen Vu",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-  },
-  {
-    id: 2,
-    name: "Nguyen Sy",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-  },
-  {
-    id: 3,
-    name: "Nguyen Tung",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-  },
-  {
-    id: 4,
-    name: "Nguyen Huy",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-  },
-  {
-    id: 5,
-    name: "Nguyen Thiep",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-  },
-];
+import { useRouteLoaderData } from "react-router-dom";
+import { getAllUser } from "../../../apis/users";
+import moment from "moment";
+import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
+import dayjs from "dayjs";
+import { debounce } from "lodash";
+import { createTask } from "../../../apis/tasks";
 
 const props = {
   name: "file",
@@ -61,18 +44,115 @@ const props = {
   },
 };
 
-const NewTaskModal = ({ addNewTask, setAddNewTask }) => {
+const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
+  const { RangePicker } = DatePicker;
+  const { Option } = Select;
+  const { id, eventID } = TaskParent;
+  const [startDate, setStartDate] = useState("");
+  console.log(
+    "🚀 ~ file: NewTaskModal.js:52 ~ NewTaskModal ~ startDate:",
+    startDate
+  );
+  const [endDate, setEndDate] = useState("");
+  console.log(
+    "🚀 ~ file: NewTaskModal.js:53 ~ NewTaskModal ~ endDate:",
+    endDate
+  );
+  const [description, setDescription] = useState("");
+  const [assignee, setAssignee] = useState([]);
+  const [estimationTime, setEstimationTime] = useState(1);
+  const [priority, setPriority] = useState("LOW");
+  const divisionId = useRouteLoaderData("staff").divisionID;
+  const {
+    data: users,
+    isError: isErrorUsers,
+    isLoading: isLoadingUsers,
+  } = useQuery(
+    ["divisions"],
+    () => getAllUser({ divisionId, pageSize: 10, currentPage: 1 }),
+    {
+      select: (data) => {
+        const listUsers = data.data.map(({ ...item }) => {
+          item.dob = moment(item.dob).format("YYYY-MM-DD");
+          return {
+            key: item.id,
+            ...item,
+          };
+        });
+        return listUsers;
+      },
+    }
+  );
+
+  const queryClient = useQueryClient();
+  const { mutate, isLoading } = useMutation((task) => createTask(task), {
+    onSuccess: (data, division) => {
+      queryClient.invalidateQueries("tasks");
+      setAddNewTask(false);
+    },
+    onError: () => {
+      message.open({
+        type: "error",
+        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+      });
+    },
+  });
+
   const onCloseModal = () => {
-    console.log("Click");
+    console.log("Close");
     setAddNewTask(false);
   };
 
-  const handleChangeSelect = (value) => {
-    console.log(`selected ${value}`);
+  //chọn member
+  const handleChangeSelectMember = (value) => {
+    let listMember = [];
+    if (value.length > 0) {
+      listMember = [...assignee, value];
+    }
+    setAssignee(listMember);
   };
 
+  const onChangeDate = (value, dateString) => {
+    console.log(
+      "🚀 ~ file: NewTaskModal.js:116 ~ onChangeDate ~ dateString:",
+      dateString
+    );
+    // Chuyển đổi thành định dạng ISO 8601
+    const isoStartDate = moment(dateString[0]).toISOString();
+    const isoEndDate = moment(dateString[1]).toISOString();
+    setStartDate(isoStartDate);
+    setEndDate(isoEndDate);
+  };
+
+  //hàm để bắt ko chọn ngày đã  qua
+  const disabledDate = (current) => {
+    return current && current < dayjs().startOf("day");
+  };
+
+  const descriptionDebounced = debounce((value) => {
+    setDescription(value);
+  }, 500); // Thời gian chờ 500ms
+
+  //Render Estimated Time
+  const onChangeEstimatedTime = (newValue) => {
+    setEstimationTime(newValue);
+  };
+  //tooltip estimateEstimationTime
+  const formatter = (value) => `${value} giờ`;
+
   const onFinish = (values) => {
-    // console.log("Success:", values);
+    console.log("Success: ", values);
+    const data = {
+      ...values,
+      eventID: eventID,
+      startDate: startDate,
+      endDate: endDate,
+      parentTask: id,
+      leader: assignee[0].toString(),
+      fileUrl: "",
+    };
+    console.log("🚀 ~ file: NewTaskModal.js:125 ~ onFinish ~ data:", data);
+    mutate(data);
   };
 
   return (
@@ -98,6 +178,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask }) => {
             layout="horizontal"
             autoComplete="off"
           >
+            {/* title */}
             <Form.Item
               label="Title"
               name="title"
@@ -114,31 +195,47 @@ const NewTaskModal = ({ addNewTask, setAddNewTask }) => {
             >
               <Input placeholder="task title ..." />
             </Form.Item>
+            {/* date */}
             <Form.Item
               label="Date"
-              name="date"
               className="text-sm font-medium "
               rules={[
                 {
-                  type: "object",
+                  type: "array",
                   required: true,
                   message: "Please select time!",
                 },
               ]}
+              hasFeedback
             >
-              <DatePicker
-                style={{
-                  width: "50%",
+              <RangePicker
+                disabledDate={disabledDate}
+                showTime={{
+                  format: "HH:mm:ss",
                 }}
-                showTime
-                // onChange={onChange}
-                // onOk={onOk}
-                // defaultValue={deadline}
+                onChange={onChangeDate}
+                formatDate="YYYY/MM/DD HH:mm:ss"
               />
             </Form.Item>
+            {/* Estimated */}
             <Form.Item
-              label="Member"
-              name="member"
+              initialValue={estimationTime}
+              label="Estimated"
+              name="estimationTime"
+              className="text-sm font-medium "
+            >
+              <Slider
+                tooltip={{ formatter }}
+                min={1}
+                max={100}
+                onChange={onChangeEstimatedTime}
+                value={estimationTime}
+              />
+            </Form.Item>
+            {/* member */}
+            <Form.Item
+              label="Assignee"
+              name="assignee"
               className="text-sm font-medium "
               rules={[
                 {
@@ -146,49 +243,81 @@ const NewTaskModal = ({ addNewTask, setAddNewTask }) => {
                   message: "Please select member for task!",
                 },
               ]}
+              hasFeedback
             >
               <Select
-                placeholder="Select Member "
-                // bordered={false}
+                autoFocus
+                allowClear
+                mode="multiple"
+                placeholder="The first Member you choose will be the leader "
                 style={{
-                  width: "50%",
+                  width: "100%",
                 }}
-                // value={user}
-                onChange={(value) => handleChangeSelect(value)}
+                onChange={(value) => handleChangeSelectMember(value)}
+                optionLabelProp="label"
               >
-                {user.map((item, index) => {
-                  return (
-                    <Select.Option key={item.id} children={item}>
-                      <div className="flex flex-row gap-x-2 justify-start items-center ">
-                        <Tooltip
-                          key={item.id}
-                          title={item.name}
-                          placement="top"
-                        >
-                          <Avatar src={item.avatar} size={18} />
-                        </Tooltip>
-                        <p className="text-ellipsis w-[100px] flex-1 overflow-hidden">
-                          {item.name}
-                        </p>
-                      </div>
-                    </Select.Option>
-                  );
-                })}
+                {!isLoadingUsers ? (
+                  !isErrorUsers ? (
+                    <>
+                      {users?.map((item, index) => {
+                        return (
+                          <Option
+                            value={item.id}
+                            label={item.fullName}
+                            key={item.id}
+                          >
+                            <Space>
+                              <span role="img" aria-label={item.fullName}>
+                                <Avatar src={item.avatar} />
+                              </span>
+                              {item.fullName}
+                            </Space>
+                          </Option>
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <AnErrorHasOccured />
+                  )
+                ) : (
+                  <LoadingComponentIndicator />
+                )}
               </Select>
             </Form.Item>
-            <Form.Item label="Description" className="text-sm font-medium ">
+            {/* priority */}
+            <Form.Item
+              label="Priority"
+              name="priority"
+              className="text-sm font-medium "
+              initialValue={priority}
+            >
+              <Segmented
+                // defaultValue="LOW"
+                options={["LOW", "MEDIUM", "HIGHT"]}
+                value={priority}
+                onChange={setPriority}
+              />
+            </Form.Item>
+            {/* description */}
+            <Form.Item
+              label="Description"
+              className="text-sm font-medium "
+              name="desc"
+            >
               <ReactQuill
                 theme="snow"
-                // value={description}
-                // onChange={setDescription}
+                value={description}
+                onChange={(value) => descriptionDebounced(value)}
                 className="bg-transparent  py-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full "
               />
             </Form.Item>
+            {/* file */}
             <Form.Item label="File" className="text-sm font-medium ">
               <Upload {...props}>
                 <Button icon={<UploadOutlined />}>Click to Upload</Button>
               </Upload>
             </Form.Item>
+
             <Form.Item wrapperCol={{ span: 24 }}>
               <Button type="primary" htmlType="submit" block className="mt-9">
                 Submit

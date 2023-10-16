@@ -3,9 +3,6 @@ import TaskKanbanBoard from "../TaskKanban/TaskKanbanBoard";
 import TaskModal from "../ModalKanban/TaskModal";
 import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
-import { useQuery } from "@tanstack/react-query";
-import { getTasks } from "../../../apis/tasks";
-import moment from "moment";
 
 const Column = ({ TaskParent }) => {
   const colors = [
@@ -32,16 +29,6 @@ const Column = ({ TaskParent }) => {
       completed++;
     }
   });
-
-  //format date
-  // const formattedDate = (value) => {
-  //   const date = new Date(value).toLocaleDateString("en-US", {
-  //     year: "numeric",
-  //     month: "2-digit",
-  //     day: "2-digit",
-  //   });
-  //   return date;
-  // };
 
   const openTaskParentModal = () => {
     setIsOpenTaskModal(true);
@@ -100,6 +87,7 @@ const Column = ({ TaskParent }) => {
             </p>
           </div>
         </div>
+
         {isOpenTaskModal && (
           <TaskModal
             setTaskSelected={setTaskSelected}
@@ -110,7 +98,11 @@ const Column = ({ TaskParent }) => {
           />
         )}
         {addNewTask && (
-          <NewTaskModal addNewTask={addNewTask} setAddNewTask={setAddNewTask} />
+          <NewTaskModal
+            addNewTask={addNewTask}
+            setAddNewTask={setAddNewTask}
+            TaskParent={TaskParent}
+          />
         )}
       </div>
     </>
