@@ -49,15 +49,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   const { Option } = Select;
   const { id, eventID } = TaskParent;
   const [startDate, setStartDate] = useState("");
-  console.log(
-    "🚀 ~ file: NewTaskModal.js:52 ~ NewTaskModal ~ startDate:",
-    startDate
-  );
   const [endDate, setEndDate] = useState("");
-  console.log(
-    "🚀 ~ file: NewTaskModal.js:53 ~ NewTaskModal ~ endDate:",
-    endDate
-  );
   const [description, setDescription] = useState("");
   const [assignee, setAssignee] = useState([]);
   const [estimationTime, setEstimationTime] = useState(1);
@@ -113,10 +105,6 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   };
 
   const onChangeDate = (value, dateString) => {
-    console.log(
-      "🚀 ~ file: NewTaskModal.js:116 ~ onChangeDate ~ dateString:",
-      dateString
-    );
     // Chuyển đổi thành định dạng ISO 8601
     const isoStartDate = moment(dateString[0]).toISOString();
     const isoEndDate = moment(dateString[1]).toISOString();
@@ -319,7 +307,13 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
             </Form.Item>
 
             <Form.Item wrapperCol={{ span: 24 }}>
-              <Button type="primary" htmlType="submit" block className="mt-9">
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                className="mt-9"
+                loading={isLoading}
+              >
                 Submit
               </Button>
             </Form.Item>
