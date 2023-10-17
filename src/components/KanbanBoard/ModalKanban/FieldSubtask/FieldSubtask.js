@@ -24,6 +24,12 @@ import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndica
 import Members from "./Members";
 import { useRouteLoaderData } from "react-router-dom";
 import moment from "moment";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/vi";
+dayjs.locale("vi");
+dayjs.extend(utc);
+// Đặt múi giờ của dayjs thành UTC
+dayjs.utc();
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
@@ -64,27 +70,21 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
   const [isOpenDate, setIsOpenDate] = useState(false);
   const [isOpenMember, seItsOpenMember] = useState(false);
   const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
-  const [deadline, setDeadline] = useState(dayjs());
 
   const membersInTask = assignTasks.map((item) => item.assignee);
-  const formatDate = "YYYY/MM/DD HH:mm:ss";
-  const formattedDate = (value) => {
-    const date = new Date(value).toLocaleDateString("en-US", {
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  // const formatDate = "YYYY/MM/DD HH:mm:ss";
 
+  const formattedDate = (value) => {
+    const date = moment(value).format("MM/DD HH:mm");
+    console.log("🚀 ~ file: FieldSubtask.js:80 ~ formattedDate ~ date:", date);
     return date;
   };
 
   //Pick deadline
   const onChangeDate = (value, dateString) => {
-    // console.log("Selected Time: ", value);
-    console.log("Formatted Selected Time: ", dateString);
-    setDeadline(dateString);
+    // console.log("Formatted Selected Time: ", dateString);
   };
+
   const handleChangeSelect = (value) => {
     console.log(`selected ${value}`);
   };
@@ -244,8 +244,8 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
                 }}
                 onChange={onChangeDate}
                 defaultValue={[
-                  dayjs(taskSelected.startDate, formatDate),
-                  dayjs(taskSelected.endDate, formatDate),
+                  dayjs(taskSelected.startDate).utcOffset(7).local(),
+                  dayjs(taskSelected.endDate).utcOffset(7).local(),
                 ]}
                 format="YYYY/MM/DD HH:mm:ss"
               />

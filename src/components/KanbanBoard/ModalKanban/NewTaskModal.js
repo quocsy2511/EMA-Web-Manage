@@ -45,10 +45,6 @@ const props = {
 };
 
 const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
-  console.log(
-    "🚀 ~ file: NewTaskModal.js:48 ~ NewTaskModal ~ TaskParent:",
-    TaskParent
-  );
   const { RangePicker } = DatePicker;
   const { Option } = Select;
   const { id, eventID, title } = TaskParent;

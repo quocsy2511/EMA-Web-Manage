@@ -17,8 +17,8 @@ const EventStaffPage = () => {
   } = useQuery(["events"], () => getEventDivisions(), {
     select: (data) => {
       const event = data.map(({ ...item }) => {
-        item.startDate = moment(item.startDate).format("YYYY-MM-DD");
-        item.endDate = moment(item.endDate).format("YYYY-MM-DD");
+        item.startDate = moment(item.startDate).format("YYYY/MM/DD");
+        item.endDate = moment(item.endDate).format("YYYY/MM/DD");
         return {
           ...item,
         };
@@ -41,8 +41,8 @@ const EventStaffPage = () => {
         if (data && Array.isArray(data)) {
           const taskParents = data.filter((task) => task.parent === null);
           const formatDate = taskParents.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format("YYYY-MM-DD");
-            item.endDate = moment(item.endDate).format("YYYY-MM-DD");
+            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
+            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
             return {
               ...item,
             };

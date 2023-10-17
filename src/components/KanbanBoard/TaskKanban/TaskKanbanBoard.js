@@ -1,7 +1,8 @@
 import { CheckSquareOutlined } from "@ant-design/icons";
-import { Avatar, Tooltip } from "antd";
+import { Avatar } from "antd";
 import React from "react";
 import Members from "../ModalKanban/FieldSubtask/Members";
+import moment from "moment";
 
 const TaskKanbanBoard = ({
   setIsOpenTaskModal,
@@ -9,6 +10,7 @@ const TaskKanbanBoard = ({
   task,
   setTaskSelected,
 }) => {
+  // console.log("🚀 ~ file: TaskKanbanBoard.js:12 ~ task:", task);
   const { assignTasks } = task;
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
@@ -17,10 +19,7 @@ const TaskKanbanBoard = ({
   };
 
   const formattedDate = (value) => {
-    const date = new Date(value).toLocaleDateString("en-US", {
-      month: "2-digit",
-      day: "2-digit",
-    });
+    const date = moment(value).format("MM/DD");
     return date;
   };
 
