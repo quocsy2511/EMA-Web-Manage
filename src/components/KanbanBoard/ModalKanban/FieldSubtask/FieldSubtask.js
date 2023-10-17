@@ -28,6 +28,11 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const FieldSubtask = ({ taskSelected, taskParent }) => {
+  console.log(
+    "🚀 ~ file: FieldSubtask.js:31 ~ FieldSubtask ~ startDate:",
+    taskSelected.startDate
+  );
+
   const {
     data: staff,
     isError: isErrorStaff,
@@ -67,7 +72,7 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
   const [deadline, setDeadline] = useState(dayjs());
 
   const membersInTask = assignTasks.map((item) => item.assignee);
-  const formatDate = "YYYY/MM/DD hh:mm:ss";
+  const formatDate = "YYYY/MM/DD HH:mm:ss";
   const formattedDate = (value) => {
     const date = new Date(value).toLocaleDateString("en-US", {
       month: "2-digit",
@@ -144,22 +149,22 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
             ) : (
               <div className="flex justify-start items-center mt-4">
                 {isOpenMember ? (
-                  <Select
-                    autoFocus
-                    allowClear
-                    mode="multiple"
-                    placeholder="Select Member "
-                    bordered={false}
-                    style={{
-                      width: "80%",
-                    }}
-                    defaultValue={membersInTask}
-                    onChange={(value) => handleChangeSelect(value)}
-                    optionLabelProp="label"
-                  >
-                    {!isLoadingUsers ? (
-                      !isErrorUsers ? (
-                        <>
+                  !isLoadingUsers ? (
+                    !isErrorUsers ? (
+                      <>
+                        <Select
+                          autoFocus
+                          allowClear
+                          mode="multiple"
+                          placeholder="Select Member "
+                          bordered={false}
+                          style={{
+                            width: "80%",
+                          }}
+                          defaultValue={membersInTask}
+                          onChange={(value) => handleChangeSelect(value)}
+                          optionLabelProp="label"
+                        >
                           {users?.map((item, index) => {
                             return (
                               <Option
@@ -176,14 +181,14 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
                               </Option>
                             );
                           })}
-                        </>
-                      ) : (
-                        <AnErrorHasOccured />
-                      )
+                        </Select>
+                      </>
                     ) : (
-                      <LoadingComponentIndicator />
-                    )}
-                  </Select>
+                      <AnErrorHasOccured />
+                    )
+                  ) : (
+                    <LoadingComponentIndicator />
+                  )
                 ) : (
                   <>
                     {assignTasks.length > 0 &&
@@ -235,7 +240,7 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
                   dayjs(taskSelected.startDate, formatDate),
                   dayjs(taskSelected.endDate, formatDate),
                 ]}
-                format={formatDate}
+                format="YYYY/MM/DD HH:mm:ss"
               />
             ) : (
               <span
