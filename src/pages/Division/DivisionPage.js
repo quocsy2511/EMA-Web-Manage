@@ -11,7 +11,11 @@ import {
   message,
 } from "antd";
 import React, { Fragment, useState } from "react";
-import { getAllDivision, updateDivision, updateStatusDivision } from "../../apis/divisions";
+import {
+  getAllDivision,
+  updateDivision,
+  updateStatusDivision,
+} from "../../apis/divisions";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import { MdOutlineCancel, MdOutlineSave } from "react-icons/md";
 import { PiNotePencilBold, PiTrash } from "react-icons/pi";
@@ -22,7 +26,7 @@ const DivisionPage = () => {
   const [page, setPage] = useState(1);
   
   const { data, isLoading, isError } = useQuery(
-    ["division"],
+    ["divisions"],
     () => getAllDivision({ pageSize: 50, currentPage: page }),
     {
       select: (data) => {
@@ -43,45 +47,61 @@ const DivisionPage = () => {
     (division) => updateDivision(division),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["division"]);
+        queryClient.invalidateQueries(["divisions"]);
         onCancelEditing();
         messageApi.open({
           type: "success",
           content: "Cập nhật thành công",
         });
       },
-      onError: () => {
-        messageApi.open({
-          type: "error",
-          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-        });
+      onError: (error) => {
+        if (
+          error.response.data.statusCode === 500 &&
+          error.response.data.message ===
+            "Division is being used. Please modify the account first"
+        )
+          messageApi.open({
+            type: "error",
+            content: "Bộ phận đang được sử dụng, không thể vô hiệu!",
+          });
+        else
+          messageApi.open({
+            type: "error",
+            content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+          });
+        onCancelEditing();
       },
     }
   );
   const {
     mutate: updateDivisionStatusMutate,
     isLoading: updateDivisionStatusIsLoading,
-  } = useMutation((user) => updateStatusDivision(user), {
+  } = useMutation((divisionId) => updateStatusDivision(divisionId), {
     onSuccess: (data, variables) => {
-      // queryClient.setQueryData(["users", page], (oldValue) => {
-      //   console.log("variables: ", variables);
-      //   console.log("oldValue: ", oldValue);
-
-      //   const updateOldData = oldValue.data.map((item) => {
-      //     if (item.id === variables.userId)
-      //       return { ...item, status: variables.status };
-      //     return item;
-      //   });
-      //   oldValue = { ...oldValue, data: updateOldData };
-
-      //   return oldValue;
-      // });
-    },
-    onError: () => {
-      messageApi.open({
-        type: "error",
-        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+      queryClient.setQueryData(["divisions"], (oldValue) => {
+        const updatedOldData = oldValue.data.map((item) => {
+          if (item.id === variables) return { ...item, status: 0 };
+          return item;
+        });
+        oldValue = { ...oldValue, data: updatedOldData };
+        return oldValue;
       });
+    },
+    onError: (error) => {
+      if (
+        error.response.data.statusCode === 500 &&
+        error.response.data.message ===
+          "Division is being used. Please modify the account first"
+      )
+        messageApi.open({
+          type: "error",
+          content: "Bộ phận đang được sử dụng, không thể vô hiệu!",
+        });
+      else
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
     },
   });
 
@@ -111,7 +131,7 @@ const DivisionPage = () => {
 
   const handleDeleteAction = (record) => {
     // record : whole data of 1 selected row
-    // setData((prev) => prev.filter((item) => item.id !== record.id));
+    updateDivisionStatusMutate(record.key);
   };
 
   const onCancelEditing = () => {
@@ -138,17 +158,20 @@ const DivisionPage = () => {
       title: "Tên bộ phận",
       dataIndex: "divisionName",
       editTable: true,
+      width: 150,
     },
     {
       title: "Mô tả",
       dataIndex: "description",
       editTable: true,
+      width: 300,
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       editTable: true,
       align: "center",
+      width: 100,
       render: (_, record) => (
         <div className="text-center">
           <Tag
@@ -156,7 +179,7 @@ const DivisionPage = () => {
             color={record.status === 1 ? "green" : "volcano"}
             key={record.id}
           >
-            {record.status === 1 ? "ACTIVE" : "INACTIVE"}
+            {record.status === 1 ? "kích hoạt" : "vô hiệu"}
           </Tag>
         </div>
       ),
@@ -166,9 +189,9 @@ const DivisionPage = () => {
       dataIndex: "action",
       key: "action",
       align: "center",
-      fixed: "right",
+      // fixed: "right",
+      width: 100,
       render: (_, record) => {
-        // checkEditing is a method to check if we are editing this row or not to render save-cancel button
         const editable = checkEditing(record);
         return (
           data.data.length >= 1 && (
@@ -315,9 +338,8 @@ const DivisionPage = () => {
                   }}
                   columns={mergedColumns}
                   dataSource={data?.data}
-                  scroll={{
-                    x: 1300,
-                  }}
+                  bordered
+                  pagination={false}
                 />
               </Form>
             )

@@ -4,8 +4,8 @@ import moment from "moment";
 import { HOST } from "../constants/api";
 
 function calcExpirationTime(expTime) {
-  const currentTime = Number(moment().format("YYYYMMDDHHMMss"));
-  return currentTime - expTime;
+  const currentTime = moment().unix();
+  return expTime - currentTime;
 }
 
 export function getAuthToken() {
@@ -25,19 +25,21 @@ export function getAuthToken() {
 
 export function loginLoader() {
   const token = getAuthToken();
+  console.log("loginLoader token: ", token);
 
-  if (!token) return null;
+  if (!token || token === "EXPIRED") return;
   if (token.role === "MANAGER") return redirect("/manager");
   if (token.role === "STAFF") return redirect("/staff");
 }
 
 export function checkAuthLoader(params) {
   const token = getAuthToken();
+  // console.log("checkAuthLoader token: ", token);
   const authRole = params.request.url.split(HOST)[1].split("/")[1];
 
   if (!token || token === "EXPIRED") return redirect("/");
   if (token.role.toLowerCase() !== authRole)
-    return redirect(`/${token.role.toLowerCase()}`);
+    redirect(`/${token.role.toLowerCase()}`);
 
   return token;
 }

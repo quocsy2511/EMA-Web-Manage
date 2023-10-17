@@ -1,5 +1,7 @@
 import { authRequest } from "../utils/axios-utils";
 
+// mode: 1 -> get all division ( contain staff & employee )
+// mode: 2 -> get division dont have staff
 export const getAllDivision = ({ pageSize, currentPage }) =>
   authRequest({
     url: `/division?sizePage=${pageSize}&currentPage=${currentPage}`,
@@ -15,7 +17,7 @@ export const createDivision = ({ divisionName, description }) =>
     },
   });
 
-export const updateStatusDivision = ({ divisionId }) =>
+export const updateStatusDivision = (divisionId) =>
   authRequest({ url: `/division/${divisionId}/status`, method: "put" });
 
 export const updateDivision = ({
@@ -33,5 +35,3 @@ export const updateDivision = ({
       status,
     },
   });
-
-  

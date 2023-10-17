@@ -16,8 +16,6 @@ import { getAllDivision } from "../../apis/divisions";
 import viVN from "antd/locale/vi_VN";
 import moment from "moment";
 import dayjs from "dayjs";
-import { URL } from "../../constants/api";
-import { authRequest } from "../../utils/axios-utils";
 import { uploadFile } from "../../apis/files";
 
 const Label = ({ label }) => <p className="text-lg font-medium">{label}</p>;
@@ -29,6 +27,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["users", 1]);
+        form.resetFields();
         setShowDrawer(false);
         messageApi.open({
           type: "success",
@@ -36,8 +35,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
         });
       },
       onError: (error) => {
-        // console.log(error.response?.data?.message)
-        // console.log(error.response.data.statusCode)
         if (error.response?.data?.message === "EMAIL_EXIST") {
           messageApi.open({
             type: "error",
@@ -57,12 +54,8 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     ({ formData, user }) => uploadFile(formData),
     {
       onSuccess: (data, variables) => {
-        console.log("data: ", data);
-        console.log("variables: ", variables.user);
         const user = variables.user;
         variables.user = { avatar: data, ...user };
-        console.log("variables new: ", variables.user);
-
         createUserMutate(variables.user);
       },
       onError: () => {
@@ -79,7 +72,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     isLoading: divisionLoading,
     isError,
   } = useQuery(
-    ["division"],
+    ["divisions"],
     () => getAllDivision({ pageSize: 20, currentPage: 1 }),
     {
       select: (data) => {
@@ -106,14 +99,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     formData.append("folderName", "avatar");
 
     uploadFileMutate({ formData, user });
-
-    // Setup fixed avatar
-    // values = {
-    //   ...values,
-    //   avatar:
-    //     "https://hips.hearstapps.com/hmg-prod/images/gettyimages-1061959920.jpg?crop=1xw:1.0xh;center,top&resize=640:*",
-    // };
-    // mutate(values);
   };
 
   return (
@@ -137,7 +122,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
           requiredMark={false}
           initialValues={{
             gender: "MALE",
-            // dob: "2001-01-01"
+            // dob: dayjs("2001-01-01"),
           }}
         >
           <Form.Item
@@ -223,8 +208,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                     form.setFieldsValue({ dob: formattedDate });
                   }}
                   disabledDate={(current) => {
-                    // const sixteenYearsAgo = moment().subtract(16, "years");
-                    // return current && current > sixteenYearsAgo;
                     const today = moment();
                     return current && current > today;
                   }}
@@ -314,7 +297,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             </Form.Item>
           </div>
 
-          <div className="flex">
+          <div className="flex justify-between items-end">
             <Form.Item
               className=""
               name="avatar"
@@ -350,7 +333,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                 }}
                 // accept=".png,.jpg,.pdf"
                 beforeUpload={(file) => {
-                  console.log("file: ", file);
                   return new Promise((resolve, reject) => {
                     if (file && file.size > 52428800) {
                       reject("File quá lớn ( <50MB )");

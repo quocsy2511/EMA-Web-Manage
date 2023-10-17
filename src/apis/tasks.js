@@ -18,6 +18,7 @@ export const createTask = (task) =>
       desc: task.desc,
       priority: task.priority,
       estimationTime: task.estimationTime,
+      assignee: task.assignee,
       leader: task.leader ?? "",
       assignee: task.assignee,
       parentTask: task.parentTask ?? undefined,
@@ -42,4 +43,14 @@ export const createTask = (task) =>
 // "approvedBy": null,
 // "eventID": "4a5ae4c6-47af-454b-b69b-ccee2a0ea447",
 export const getTasks = ({ fieldName, conValue }) =>
-  authRequest({ url: `task?fieldName=${fieldName}&conValue=${conValue}` });
+  authRequest({ url: `/task?fieldName=${fieldName}&conValue=${conValue}` });
+
+export const filterTask = ({ assignee, eventID, priority, sort, status }) =>
+  authRequest({
+    url: `/task/filterByAssignee?${eventID ? `eventID=${eventID}` : ""}${
+      assignee ? `&assignee=${assignee}` : ""
+    }${priority ? `&priority=${priority}` : ""}${sort ? `&sort=${sort}` : ""}${
+      status ? `&status=${status}` : ""
+    }
+    `,
+  });

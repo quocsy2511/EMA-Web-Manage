@@ -13,6 +13,7 @@ const CreateDivisionDrawer = ({ showDrawer, setShowDrawer }) => {
       onSuccess: (data, division) => {
         form.setFieldsValue({ divisionName: "", description: "" });
         queryClient.invalidateQueries("division");
+        form.resetFields();
         setShowDrawer(false);
       },
       onError: () => {

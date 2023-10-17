@@ -8,6 +8,8 @@ export const getAllUser = ({ divisionId, role, pageSize, currentPage }) =>
     }${role ? `&role=${role}` : ""}`,
   });
 
+export const getUserById = (userId) => authRequest({ url: `/user/${userId}` });
+
 export const getProfile = () => authRequest({ url: "/user/profile" });
 
 export const createUser = (user) =>

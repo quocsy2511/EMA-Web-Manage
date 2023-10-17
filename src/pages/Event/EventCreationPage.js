@@ -1,6 +1,6 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ConfigProvider,
   DatePicker,
@@ -8,11 +8,17 @@ import {
   Input,
   InputNumber,
   Table,
+  Upload,
+  message,
 } from "antd";
 import viVN from "antd/locale/vi_VN";
 import moment from "moment";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getAllUser } from "../../apis/users";
+import { createEvent } from "../../apis/events";
+import { uploadFile } from "../../apis/files";
 
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
@@ -20,9 +26,65 @@ const { RangePicker } = DatePicker;
 const Title = ({ title }) => <p className="text-base font-medium">{title}</p>;
 
 const EventCreationPage = () => {
+  const navigate = useNavigate();
+  const {
+    data: staffs,
+    isLoading: staffIsLoading,
+    isError: staffIsError,
+  } = useQuery(
+    ["staffs"],
+    () => getAllUser({ role: "STAFF", pageSize: 50, currentPage: 1 }),
+    {
+      select: (data) => {
+        return data.data.map((staff) => ({
+          key: staff.divisionId,
+          staff: staff.fullName,
+          division: staff.divisionName,
+        }));
+      },
+    }
+  );
+
+  const { mutate } = useMutation((event) => createEvent(event), {
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Đã tạo 1 sự kiện",
+      });
+      form.resetFields();
+      navigate("/manager/event");
+    },
+    onError: () => {
+      messageApi.open({
+        type: "error",
+        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+      });
+    },
+  });
+
+  const { mutate: uploadFileMutate } = useMutation(
+    ({ formData, event }) => uploadFile(formData),
+    {
+      onSuccess: (data, variables) => {
+        variables.event = { coverUrl: data, ...variables.event };
+        console.log("EVENT: ", variables.event);
+        mutate(variables.event);
+      },
+      onError: () => {
+        messageApi.open({
+          type: "error",
+          content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
+  const [fileList, setFileList] = useState();
+
   const [form] = Form.useForm();
   //   form.resetFields()
   //   form.setFieldsValue({})
+  const [messageApi, contextHolder] = message.useMessage();
 
   const columns = [
     {
@@ -34,26 +96,26 @@ const EventCreationPage = () => {
     Table.SELECTION_COLUMN,
   ];
 
-  const dataSource = [
-    {
-      key: 1,
-      staff: "Sy",
-      division: "Phong ban",
-    },
-    {
-      key: 2,
-      staff: "Vu",
-      division: "Phong ban",
-    },
-    {
-      key: 3,
-      staff: "Sy",
-      division: "Thiet ke",
-    },
-  ];
-
   const onFinish = (values) => {
     console.log("Success:", values);
+
+    const formData = new FormData();
+    formData.append("file", fileList);
+    formData.append("folderName", "event");
+
+    values = {
+      eventName: values.eventName,
+      description: values.description,
+      startDate: moment(values.date[0].$d).format("YYYY-MM-DD"),
+      endDate: moment(values.date[1].$d).format("YYYY-MM-DD"),
+      location: values.location,
+      estBudget: +values.estBudget,
+      divisionId: values.divisions.map((division) => division.key),
+    };
+
+    console.log("TRANSORM: ", values);
+
+    uploadFileMutate({ formData, event: values });
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -62,6 +124,7 @@ const EventCreationPage = () => {
 
   return (
     <Fragment>
+      {contextHolder}
       <motion.div
         initial={{ y: -75 }}
         animate={{ y: 0 }}
@@ -92,16 +155,19 @@ const EventCreationPage = () => {
               e.preventDefault();
             }
           }}
+          // defaultValue={{
+          //   estBudget: 500000
+          // }}
         >
           <div className="flex justify-between">
             <Form.Item
               className="w-[30%]"
-              label={<Title title="Tiêu đề" />}
-              name="title"
+              label={<Title title="Tên sự kiện" />}
+              name="eventName"
               rules={[
                 {
                   required: true,
-                  message: "Nhập điii!",
+                  message: "Chưa nhập tên sự kiện!",
                 },
               ]}
             >
@@ -115,7 +181,7 @@ const EventCreationPage = () => {
               rules={[
                 {
                   required: true,
-                  message: "Nhập điii!",
+                  message: "Chưa nhập địa điểm!",
                 },
               ]}
             >
@@ -134,7 +200,7 @@ const EventCreationPage = () => {
                     if (value && value[0] && value[1]) {
                       return Promise.resolve();
                     }
-                    return Promise.reject("Please select a range of dates");
+                    return Promise.reject("chưa chọn thời gian tổ chức");
                   },
                 },
               ]}
@@ -142,6 +208,7 @@ const EventCreationPage = () => {
               <ConfigProvider locale={viVN}>
                 <RangePicker
                   onChange={(value) => {
+                    console.log(value);
                     form.setFieldsValue({ date: value });
                   }}
                   disabledDate={(current) => {
@@ -159,7 +226,7 @@ const EventCreationPage = () => {
             rules={[
               {
                 required: true,
-                message: "Nhập điii!",
+                message: "Chưa nhập mô tả!",
               },
             ]}
           >
@@ -172,7 +239,7 @@ const EventCreationPage = () => {
 
           <div className="flex gap-x-10">
             <Form.Item
-              className="w-[30%]"
+              className="w-[25%]"
               label={<Title title="Bộ phận tham gia" />}
               name="divisions"
               rules={[
@@ -181,16 +248,18 @@ const EventCreationPage = () => {
                     if (value && value.length > 0) {
                       return Promise.resolve();
                     }
-                    return Promise.reject("Chọn phòng ban phù hợp");
+                    return Promise.reject("Hãy chọn bộ phận phù hợp");
                   },
                 },
               ]}
             >
               <Table
-                className="border border-slate-300 rounded-lg p-2"
+                className="border border-slate-300 rounded-lg "
                 size="small"
+                scroll={{ y: 400 }}
                 columns={columns}
-                dataSource={dataSource}
+                dataSource={!staffIsLoading || !staffIsError ? staffs : []}
+                loading={staffIsLoading}
                 rowSelection={{
                   type: "checkbox",
                   onChange: (selectedRowKeys, selectedRows) => {
@@ -207,86 +276,93 @@ const EventCreationPage = () => {
               />
             </Form.Item>
 
-            <div className="w-[%]">
-              <Form.Item
-                className="w-full"
-                label={<Title title="Ước lượng ngân sách" />}
-                name="budget"
-                rules={[
-                  {
-                    required: true,
-                    message: "Nhập điii!",
-                  },
-                ]}
-              >
-                <div className="flex items-center gap-x-2">
-                  <InputNumber
-                    className="w-full"
-                    placeholder="0"
-                    min={500000}
-                    step={100000}
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    }
-                    parser={(value) => {
-                      form.setFieldsValue({ budget: value.replace(/,/g, "") });
-                      return `${value}`.replace(/,/g, "");
-                    }}
-                    onStep={(value) => {
-                      console.log(value);
-                      form.setFieldsValue({ budget: value });
-                    }}
-                    /*stringMode*/
-                  />
-                  <p>VNĐ</p>
-                </div>
-              </Form.Item>
-
-              <Form.Item
-                className="w-full"
-                label={<Title title="Ngày bắt đầu" />}
-                name="startDate"
-                dependencies={["date"]}
-                rules={[
-                  {
-                    required: true,
-                    message: "Chọn 1 ngày để bắt đầu",
-                  },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (
-                        !value ||
-                        moment(getFieldValue("date")?.[0].$d).isAfter(
-                          moment(value.$d)
-                        )
-                      ) {
-                        return Promise.resolve();
+            <Form.Item
+              className="w-[20%]"
+              name="coverUrl"
+              label={<Title title="Ảnh về sự kiện" />}
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList}
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn ảnh đại diện",
+                },
+                {
+                  validator(_, fileList) {
+                    return new Promise((resolve, reject) => {
+                      if (fileList && fileList[0].size > 52428800) {
+                        reject("File quá lớn ( <50MB )");
+                      } else {
+                        resolve();
                       }
-                      return Promise.reject(
-                        new Error("Không thể trễ hơn ngày diễn ra!")
-                      );
-                    },
-                  }),
-                ]}
+                    });
+                  },
+                },
+              ]}
+            >
+              <Upload.Dragger
+              className="h-40"
+                maxCount={1}
+                listType="text"
+                action=""
+                // customRequest={() => {}}
+                showUploadList={{
+                  showPreviewIcon: false,
+                  showRemoveIcon: false,
+                }}
+                beforeUpload={(file) => {
+                  console.log("file: ", file);
+                  return new Promise((resolve, reject) => {
+                    if (file && file.size > 10*1024*1024) {
+                      reject("File quá lớn ( <50MB )");
+                      return false;
+                    } else {
+                      setFileList(file);
+                      resolve();
+                      return true;
+                    }
+                  });
+                }}
               >
-                <ConfigProvider locale={viVN}>
-                  <DatePicker
-                    onChange={(value) => {
-                      form.setFieldsValue({ startDate: value });
-                    }}
-                    disabled={false}
-                    disabledDate={(current) => {
-                      const endDate = form.getFieldValue("date")?.[0]; // Get the end date from the range picker
-                      return (
-                        current &&
-                        (current < moment().startOf("day") ||
-                          (endDate && current > endDate))
-                      );
-                    }}
-                  />
-                </ConfigProvider>
-              </Form.Item>
-            </div>
+                Kéo tập tin vào đây
+              </Upload.Dragger>
+            </Form.Item>
+
+            <Form.Item
+              className="w-[15%]"
+              label={<Title title="Ước lượng ngân sách" />}
+              name="estBudget"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa nhập ngân sách!",
+                },
+              ]}
+            >
+              <div className="flex items-center gap-x-2">
+                <InputNumber
+                  className="w-full"
+                  placeholder="500,000"
+                  min={500000}
+                  step={100000}
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => {
+                    form.setFieldsValue({
+                      estBudget: value.replace(/,/g, ""),
+                    });
+                    return `${value}`.replace(/,/g, "");
+                  }}
+                  onStep={(value) => {
+                    console.log(value);
+                    form.setFieldsValue({ estBudget: value });
+                  }}
+                  /*stringMode*/
+                />
+                <p>VNĐ</p>
+              </div>
+            </Form.Item>
 
             <div className="flex-1 flex items-end justify-end gap-x-5 mb-0">
               <Form.Item className="0">
