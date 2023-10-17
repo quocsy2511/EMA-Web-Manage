@@ -6,102 +6,12 @@ import { getEventDivisions } from "../../apis/events";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
-// const [events, setEvents] = useState([
-//   {
-//     idEvent: 1,
-//     createBy: "Tung",
-//     eventName: "🔥 Sự kiện kỷ niệm 10 năm",
-//     description:
-//       "😽 Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident",
-//     members: [
-//       {
-//         name: "vux 1",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//       {
-//         name: "syx 1",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//       {
-//         name: "Huyx 1",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//       {
-//         name: "Thiepx 1",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//     ],
-//     startDate: "2023-10-01 00:00:00",
-//     endDate: "2023-10-06 00:00:00",
-//     processDate: "2023-10-05 00:00:00",
-//     location: "nhà thương biên hoà  32/2/1 biên hoà đồng nai ",
-//     coverUrl: "https://source.unsplash.com/random",
-//   },
-//   {
-//     idEvent: 2,
-//     createBy: "Sy 2",
-//     eventName: "🔥 Sự kiện kỷ niệm 20 năm",
-//     description:
-//       "😽😽 Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident",
-//     members: [
-//       {
-//         name: "vux 2",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//       {
-//         name: "syx 2",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//       {
-//         name: "Huyx 2",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//       {
-//         name: "Thiepx",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//     ],
-//     startDate: "2023-11-02 00:00:00",
-//     endDate: "2023-11-09 00:00:00",
-//     processDate: "2023-11-03 00:00:00",
-//     location: "bênh viện từ vũ  32/2/1 biên hoà đồng nai ",
-//     coverUrl: "https://source.unsplash.com/random",
-//   },
-//   {
-//     idEvent: 3,
-//     createBy: "Vu 3",
-//     eventName: "🔥 Sự kiện kỷ niệm 30 năm",
-//     description:
-//       "😽😽😽 Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident Dolor nostrud eu nulla elit labore excepteur nostrud. Proident",
-//     members: [
-//       {
-//         name: "vux 3",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//       {
-//         name: "syx 3",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//       {
-//         name: "Huyx 3",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//       {
-//         name: "Thiepx 3",
-//         avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
-//       },
-//     ],
-//     startDate: "2023-12-11 00:00:00",
-//     endDate: "2023-12-17 00:00:00",
-//     processDate: "2023-12-18 00:00:00",
-//     location: "nhà thương biên hoà  32/2/1 biên hoà đồng nai ",
-//     coverUrl: "https://source.unsplash.com/random",
-//   },
-// ]);
-
+import { Empty } from "antd";
+import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
 const EventStaffPage = () => {
   const {
     data: listEvent,
+
     isError,
     isLoading,
   } = useQuery(["events"], () => getEventDivisions(), {
@@ -126,14 +36,30 @@ const EventStaffPage = () => {
     <div className="flex flex-col ">
       {!isLoading ? (
         !isError ? (
-          <>
-            <HeaderEvent
-              events={listEvent}
-              setSelectEvent={setSelectEvent}
-              selectEvent={selectEvent}
-            />
-            <KanbanBoard selectEvent={selectEvent} />
-          </>
+          listEvent.length > 0 ? (
+            <>
+              <HeaderEvent
+                events={listEvent}
+                setSelectEvent={setSelectEvent}
+                selectEvent={selectEvent}
+              />
+              <KanbanBoard selectEvent={selectEvent} />
+            </>
+          ) : (
+            <div className="mt-56">
+              <Empty description={false} />
+              <div>
+                <h1 className="text-center mt-6 font-extrabold text-xl ">
+                  Hiện tại bạn đang không tham gia vào sự kiện nào{"  "}
+                  <SmileTwoTone twoToneColor="#52c41a" />
+                </h1>
+                <h3 className="text-center text-sm text-gray-400 mt-4">
+                  Vui lòng liên hệ quản lí để tham gia vào sự kiện . Cảm ơn{" "}
+                  <HeartTwoTone twoToneColor="#eb2f96" />
+                </h3>
+              </div>
+            </div>
+          )
         ) : (
           <AnErrorHasOccured />
         )
