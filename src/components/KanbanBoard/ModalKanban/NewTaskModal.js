@@ -60,11 +60,11 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
     isError: isErrorUsers,
     isLoading: isLoadingUsers,
   } = useQuery(
-    ["divisions"],
+    ["users-division"],
     () => getAllUser({ divisionId, pageSize: 10, currentPage: 1 }),
     {
       select: (data) => {
-        const listUsers = data.data.map(({ ...item }) => {
+        const listUsers = data.data.map((item) => {
           item.dob = moment(item.dob).format("YYYY-MM-DD");
           return {
             key: item.id,
@@ -233,44 +233,42 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
               ]}
               hasFeedback
             >
-              <Select
-                autoFocus
-                allowClear
-                mode="multiple"
-                placeholder="The first Member you choose will be the leader "
-                style={{
-                  width: "100%",
-                }}
-                onChange={(value) => handleChangeSelectMember(value)}
-                optionLabelProp="label"
-              >
-                {!isLoadingUsers ? (
-                  !isErrorUsers ? (
-                    <>
-                      {users?.map((item, index) => {
-                        return (
-                          <Option
-                            value={item.id}
-                            label={item.fullName}
-                            key={item.id}
-                          >
-                            <Space>
-                              <span role="img" aria-label={item.fullName}>
-                                <Avatar src={item.avatar} />
-                              </span>
-                              {item.fullName}
-                            </Space>
-                          </Option>
-                        );
-                      })}
-                    </>
-                  ) : (
-                    <AnErrorHasOccured />
-                  )
+              {!isLoadingUsers ? (
+                !isErrorUsers ? (
+                  <Select
+                    autoFocus
+                    allowClear
+                    mode="multiple"
+                    placeholder="The first Member you choose will be the leader "
+                    style={{
+                      width: "100%",
+                    }}
+                    onChange={(value) => handleChangeSelectMember(value)}
+                    optionLabelProp="label"
+                  >
+                    {users?.map((item, index) => {
+                      return (
+                        <Option
+                          value={item.id}
+                          label={item.fullName}
+                          key={item.id}
+                        >
+                          <Space>
+                            <span role="img" aria-label={item.fullName}>
+                              <Avatar src={item.avatar} />
+                            </span>
+                            {item.fullName}
+                          </Space>
+                        </Option>
+                      );
+                    })}
+                  </Select>
                 ) : (
-                  <LoadingComponentIndicator />
-                )}
-              </Select>
+                  <AnErrorHasOccured />
+                )
+              ) : (
+                <LoadingComponentIndicator />
+              )}
             </Form.Item>
             {/* priority */}
             <Form.Item

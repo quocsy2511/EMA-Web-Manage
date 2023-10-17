@@ -28,7 +28,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
     isError: isErrorUsers,
     isLoading: isLoadingUsers,
   } = useQuery(
-    ["divisions"],
+    ["users-division"],
     () => getAllUser({ divisionId, pageSize: 10, currentPage: page }),
     {
       select: (data) => {

@@ -50,7 +50,7 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
     isError: isErrorUsers,
     isLoading: isLoadingUsers,
   } = useQuery(
-    ["divisions"],
+    ["users-division"],
     () => getAllUser({ divisionId, pageSize: 10, currentPage: 1 }),
     {
       select: (data) => {
