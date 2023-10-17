@@ -5,7 +5,7 @@ import { Avatar, Tooltip } from "antd";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
 
-const Members = ({ userId }) => {
+const Members = ({ userId, size = "default" }) => {
   const { data, isError, isLoading } = useQuery(
     ["memberEmployee", userId],
     () => getMember({ userId }),
@@ -18,14 +18,14 @@ const Members = ({ userId }) => {
   );
 
   return (
-    <div
-      key={data?.id}
-      className="flex flex-row gap-x-2 justify-start items-center bg-transparent  rounded-md p-1 cursor-pointer"
+    <
+      // key={data?.id}
+      // className="flex flex-row justify-start items-center bg-transparent  rounded-md p-1 cursor-pointer"
     >
       {!isLoading ? (
         !isError ? (
           <Tooltip key="avatar" title={data?.fullName} placement="top">
-            <Avatar src={data?.avatar} size="default" />
+            <Avatar src={data?.avatar} size={size} />
           </Tooltip>
         ) : (
           <AnErrorHasOccured />
@@ -33,7 +33,7 @@ const Members = ({ userId }) => {
       ) : (
         <LoadingComponentIndicator />
       )}
-    </div>
+    </>
   );
 };
 

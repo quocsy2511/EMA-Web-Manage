@@ -28,11 +28,6 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const FieldSubtask = ({ taskSelected, taskParent }) => {
-  console.log(
-    "🚀 ~ file: FieldSubtask.js:31 ~ FieldSubtask ~ startDate:",
-    taskSelected.startDate
-  );
-
   const {
     data: staff,
     isError: isErrorStaff,
@@ -191,10 +186,22 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
                   )
                 ) : (
                   <>
-                    {assignTasks.length > 0 &&
-                      assignTasks.map((item) => (
-                        <Members userId={item.assignee} key={item.assignee} />
-                      ))}
+                    <Avatar.Group
+                      maxCount={3}
+                      maxStyle={{
+                        color: "#D25B68",
+                        backgroundColor: "#F4D7DA",
+                      }}
+                    >
+                      {assignTasks.length > 0 &&
+                        assignTasks.map((item) => (
+                          <Members
+                            userId={item.assignee}
+                            key={item.assignee}
+                            size="default"
+                          />
+                        ))}
+                    </Avatar.Group>
                     <Avatar
                       icon={<UsergroupAddOutlined className="text-black" />}
                       size="default"

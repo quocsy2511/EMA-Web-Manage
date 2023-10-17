@@ -8,6 +8,7 @@ import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
 import RolePage from "./pages/Role/RolePage";
+import BudgetStaffLayout from "./pages/Budget/BudgetStaffLayout";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -235,6 +236,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <TaskPageStaff />
+          </Suspense>
+        ),
+      },
+      {
+        path: "budget",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <BudgetStaffLayout />
           </Suspense>
         ),
       },

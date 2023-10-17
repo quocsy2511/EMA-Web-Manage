@@ -1,9 +1,6 @@
 import React from "react";
 import Column from "../KanbanBoard/Column/Column.js";
 import { BookOutlined, CalendarOutlined } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
-import { getTasks } from "../../apis/tasks.js";
-import moment from "moment";
 import AnErrorHasOccured from "../Error/AnErrorHasOccured.js";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator.js";
 
@@ -808,37 +805,12 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator.js
 //   },
 // ];
 
-const KanbanBoard = ({ selectEvent }) => {
-  const { id } = selectEvent;
-  // const [fieldName, setFieldName] = useState("eventID");
-
-  const {
-    data: listTaskParents,
-    isError: isErrorListTask,
-    isLoading: isLoadingListTask,
-  } = useQuery(
-    ["tasks"],
-    () => getTasks({ fieldName: "eventID", conValue: id }),
-    {
-      select: (data) => {
-        if (data && Array.isArray(data)) {
-          const taskParents = data.filter((task) => task.parent === null);
-          const formatDate = taskParents.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format("YYYY-MM-DD");
-            item.endDate = moment(item.endDate).format("YYYY-MM-DD");
-            return {
-              ...item,
-            };
-          });
-          return formatDate;
-        }
-        return data;
-      },
-
-      enabled: !!id,
-    }
-  );
-
+const KanbanBoard = ({
+  selectEvent,
+  listTaskParents,
+  isErrorListTask,
+  isLoadingListTask,
+}) => {
   return (
     <>
       <div className="bg-bgBoard  h-screen overflow-hidden overflow-y-scroll scrollbar-hide">
@@ -869,7 +841,7 @@ const KanbanBoard = ({ selectEvent }) => {
                 <Column
                   TaskParent={taskParent}
                   key={taskParent.id}
-                  idEvent={id}
+                  idEvent={selectEvent.id}
                 />
               ))
             ) : (

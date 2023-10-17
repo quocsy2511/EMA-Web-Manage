@@ -1,6 +1,7 @@
 import { CheckSquareOutlined } from "@ant-design/icons";
 import { Avatar, Tooltip } from "antd";
 import React from "react";
+import Members from "../ModalKanban/FieldSubtask/Members";
 
 const TaskKanbanBoard = ({
   setIsOpenTaskModal,
@@ -8,6 +9,7 @@ const TaskKanbanBoard = ({
   task,
   setTaskSelected,
 }) => {
+  const { assignTasks } = task;
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
     setTaskParent(false);
@@ -106,9 +108,22 @@ const TaskKanbanBoard = ({
           </span>
         </div>
         <div className="flex justify-end items-center mt-4">
-          <Tooltip key="avatar" title={task.member?.name} placement="top">
-            <Avatar src={task.member?.avatar} size="small" />
-          </Tooltip>
+          <Avatar.Group
+            maxCount={3}
+            maxStyle={{
+              color: "#D25B68",
+              backgroundColor: "#F4D7DA",
+            }}
+          >
+            {assignTasks.length > 0 &&
+              assignTasks.map((item) => (
+                <Members
+                  userId={item.assignee}
+                  size="small"
+                  key={item.assignee}
+                />
+              ))}
+          </Avatar.Group>
         </div>
       </div>
     </>

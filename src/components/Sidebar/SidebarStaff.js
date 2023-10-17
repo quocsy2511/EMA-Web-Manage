@@ -1,12 +1,17 @@
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
 import { BsJournalCheck, BsMailbox, BsPersonVcard } from "react-icons/bs";
-import { HiOutlineCalendarDays, HiOutlineHome } from "react-icons/hi2";
+import {
+  HiOutlineCalendarDays,
+  HiOutlineHome,
+  HiOutlineUserGroup,
+} from "react-icons/hi2";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
 import { Avatar, ConfigProvider, Menu } from "antd";
 import logo from "../../assets/images/logo.png";
 import { AnimatePresence, motion } from "framer-motion";
+import { LiaMoneyBillWaveAltSolid } from "react-icons/lia";
 
 const SidebarStaff = ({ collapsed }) => {
   const [colorTheme, setColorTheme] = useDarkMode();
@@ -68,6 +73,13 @@ const SidebarStaff = ({ collapsed }) => {
       "/staff/timekeeping",
       <p>
         <BsJournalCheck className="text-[#333333]" size={24} />
+      </p>
+    ),
+    getItem(
+      <LabelText text="Thu chi" />,
+      "/staff/budget",
+      <p>
+        <LiaMoneyBillWaveAltSolid className="text-[#4CAF50]" size={24} />
       </p>
     ),
   ];

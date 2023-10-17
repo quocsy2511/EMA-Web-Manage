@@ -8,10 +8,10 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 import moment from "moment";
 import { Empty } from "antd";
 import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
+import { getTasks } from "../../apis/tasks";
 const EventStaffPage = () => {
   const {
     data: listEvent,
-
     isError,
     isLoading,
   } = useQuery(["events"], () => getEventDivisions(), {
@@ -26,11 +26,44 @@ const EventStaffPage = () => {
       return event;
     },
   });
-
   const [selectEvent, setSelectEvent] = useState({});
+
+  const {
+    data: listTaskParents,
+    isError: isErrorListTask,
+    isLoading: isLoadingListTask,
+    refetch,
+  } = useQuery(
+    ["tasks"],
+    () => getTasks({ fieldName: "eventID", conValue: selectEvent.id }),
+    {
+      select: (data) => {
+        if (data && Array.isArray(data)) {
+          const taskParents = data.filter((task) => task.parent === null);
+          const formatDate = taskParents.map(({ ...item }) => {
+            item.startDate = moment(item.startDate).format("YYYY-MM-DD");
+            item.endDate = moment(item.endDate).format("YYYY-MM-DD");
+            return {
+              ...item,
+            };
+          });
+          return formatDate;
+        }
+        return data;
+      },
+
+      enabled: !!selectEvent.id,
+    }
+  );
+
   useEffect(() => {
     setSelectEvent(listEvent?.[0] ?? {});
   }, [listEvent]);
+
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectEvent]);
 
   return (
     <div className="flex flex-col ">
@@ -43,7 +76,12 @@ const EventStaffPage = () => {
                 setSelectEvent={setSelectEvent}
                 selectEvent={selectEvent}
               />
-              <KanbanBoard selectEvent={selectEvent} />
+              <KanbanBoard
+                selectEvent={selectEvent}
+                listTaskParents={listTaskParents}
+                isErrorListTask={isErrorListTask}
+                isLoadingListTask={isLoadingListTask}
+              />
             </>
           ) : (
             <div className="mt-56">

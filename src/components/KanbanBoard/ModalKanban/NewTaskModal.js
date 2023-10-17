@@ -45,9 +45,13 @@ const props = {
 };
 
 const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
+  console.log(
+    "🚀 ~ file: NewTaskModal.js:48 ~ NewTaskModal ~ TaskParent:",
+    TaskParent
+  );
   const { RangePicker } = DatePicker;
   const { Option } = Select;
-  const { id, eventID } = TaskParent;
+  const { id, eventID, title } = TaskParent;
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [description, setDescription] = useState("");
@@ -146,7 +150,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   return (
     <div>
       <Modal
-        title="New Task"
+        title={`Danh sách công việc - ${title}`}
         open={addNewTask}
         footer={false}
         onCancel={onCloseModal}
@@ -279,13 +283,14 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
             >
               <Segmented
                 // defaultValue="LOW"
-                options={["LOW", "MEDIUM", "HIGHT"]}
+                options={["LOW", "MEDIUM", "HIGH"]}
                 value={priority}
                 onChange={setPriority}
               />
             </Form.Item>
             {/* description */}
             <Form.Item
+              initialValue={description}
               label="Description"
               className="text-sm font-medium "
               name="desc"
