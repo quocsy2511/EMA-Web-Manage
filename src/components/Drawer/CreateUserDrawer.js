@@ -72,7 +72,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     isLoading: divisionLoading,
     isError,
   } = useQuery(
-    ["division"],
+    ["divisions"],
     () => getAllDivision({ pageSize: 20, currentPage: 1 }),
     {
       select: (data) => {

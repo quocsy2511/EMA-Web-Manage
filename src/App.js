@@ -45,7 +45,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <LoginPage />,
     errorElement: <ErrorPage />,
-    loader: loginLoader,
+    // loader: loginLoader,
   },
   {
     path: "/manager",

@@ -20,8 +20,8 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 
 const EventSubTaskPage = () => {
-  const taskId = useParams().taskId;
   const eventId = useParams().eventId;
+  const taskId = useParams().taskId;
 
   const {
     data: tasks,
@@ -73,12 +73,13 @@ const EventSubTaskPage = () => {
         type="primary"
         tooltip={<p>Tạo công việc</p>}
       />
-      <TaskAdditionModal
+      {/* <TaskAdditionModal
         isModalOpen={isOpenCreateTaskModal}
         setIsModalOpen={setIsOpenCreateTaskModal}
         eventId={eventId}
+        date={[tasks.startDate, tasks.endDate]}
         parentTaskId={taskId}
-      />
+      /> */}
       <motion.div
         initial={{ y: -75, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

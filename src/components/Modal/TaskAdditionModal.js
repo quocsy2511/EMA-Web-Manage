@@ -31,13 +31,14 @@ const TaskAdditionModal = ({
   parentTaskId,
   eventId,
   divisionId,
+  date,
 }) => {
   const {
     data: staffs,
     isLoading: staffIsLoading,
     isError: staffIsError,
   } = useQuery(
-    ["staff"],
+    ["staffs"],
     () => getAllUser({ role: "STAFF", pageSize: 50, currentPage: 1 }),
     {
       select: (data) => {
@@ -53,7 +54,7 @@ const TaskAdditionModal = ({
     isLoading: employeeIsLoading,
     isError: employeeIsError,
   } = useQuery(
-    ["employee"],
+    ["employees"],
     () =>
       getAllUser({
         divisionId,
@@ -113,8 +114,8 @@ const TaskAdditionModal = ({
 
     values = {
       ...values,
-      startDate: moment(values.date[0]).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
-      endDate: moment(values.date[1]).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
+      startDate: moment(values.date[0].$d).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
+      endDate: moment(values.date[1].$d).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
       eventID: eventId,
       estimationTime: +values.estimationTime,
       assignee: [values.assignee],
@@ -130,14 +131,26 @@ const TaskAdditionModal = ({
 
   return (
     <Modal
+      title={
+        <p className="text-center text-2xl">
+          {parentTaskId ? "Thông tin công việc" : "Thông tin hạng mục"}
+        </p>
+      }
       open={isModalOpen}
       onOk={handleOk}
       onCancel={handleCancel}
-        // confirmLoading={loading}
+      // confirmLoading={loading}
       okText="Tạo"
       cancelText="Hủy"
       centered
-      width={"70%"}
+      width={"50%"}
+      style={{
+        header: {
+          borderBottom: `5px solid red`,
+          borderRadius: 0,
+          paddingInlineStart: 5,
+        },
+      }}
     >
       {contextHolder}
       <Form
@@ -153,13 +166,10 @@ const TaskAdditionModal = ({
             e.preventDefault();
           }
         }}
-        // initialValues={{
-        //   status: "Chưa giải quyết",
-        // }}
       >
-        <div className="flex gap-x-8">
+        <div className="flex gap-x-10">
           <Form.Item
-            className="w-[50%]"
+            className="w-[55%]"
             label={<Title title="Tiêu đề" />}
             name="title"
             rules={[
@@ -172,7 +182,7 @@ const TaskAdditionModal = ({
             <Input placeholder="Tên công việc" />
           </Form.Item>
           <Form.Item
-            className="w-[40%]"
+            className="w-[45%]"
             label={
               <div className="flex gap-x-5 items-center">
                 <Title title="Thời gian" />
@@ -203,8 +213,15 @@ const TaskAdditionModal = ({
                   form.setFieldsValue({ date: value });
                 }}
                 disabledDate={(current) => {
-                  return current && current < moment().startOf("day");
+                  const startDate = moment(date[0]);
+                  const endDate = moment(date[1]);
+
+                  if (startDate.isSame(endDate, "day"))
+                    return !current.isSame(startDate, "day");
+
+                  return current && (current < startDate || current > endDate);
                 }}
+                className="w-full"
               />
             </ConfigProvider>
           </Form.Item>
@@ -222,7 +239,7 @@ const TaskAdditionModal = ({
         >
           {/* <TextArea rows={3} /> */}
           <ReactQuill
-            className="h-36 mb-11"
+            className="h-20 mb-10"
             theme="snow"
             placeholder="Mô tả về công việc"
           />

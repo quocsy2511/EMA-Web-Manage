@@ -32,7 +32,7 @@ const EventCreationPage = () => {
     isLoading: staffIsLoading,
     isError: staffIsError,
   } = useQuery(
-    ["staff"],
+    ["staffs"],
     () => getAllUser({ role: "STAFF", pageSize: 50, currentPage: 1 }),
     {
       select: (data) => {
@@ -52,7 +52,7 @@ const EventCreationPage = () => {
         content: "Đã tạo 1 sự kiện",
       });
       form.resetFields();
-      // navigate("/manager/event");
+      navigate("/manager/event");
     },
     onError: () => {
       messageApi.open({
@@ -109,7 +109,6 @@ const EventCreationPage = () => {
       startDate: moment(values.date[0].$d).format("YYYY-MM-DD"),
       endDate: moment(values.date[1].$d).format("YYYY-MM-DD"),
       location: values.location,
-      // coverUrl: "",
       estBudget: +values.estBudget,
       divisionId: values.divisions.map((division) => division.key),
     };
@@ -156,16 +155,19 @@ const EventCreationPage = () => {
               e.preventDefault();
             }
           }}
+          // defaultValue={{
+          //   estBudget: 500000
+          // }}
         >
           <div className="flex justify-between">
             <Form.Item
               className="w-[30%]"
-              label={<Title title="Tiêu đề" />}
+              label={<Title title="Tên sự kiện" />}
               name="eventName"
               rules={[
                 {
                   required: true,
-                  message: "Nhập điii!",
+                  message: "Chưa nhập tên sự kiện!",
                 },
               ]}
             >
@@ -179,7 +181,7 @@ const EventCreationPage = () => {
               rules={[
                 {
                   required: true,
-                  message: "Nhập điii!",
+                  message: "Chưa nhập địa điểm!",
                 },
               ]}
             >
@@ -198,7 +200,7 @@ const EventCreationPage = () => {
                     if (value && value[0] && value[1]) {
                       return Promise.resolve();
                     }
-                    return Promise.reject("Please select a range of dates");
+                    return Promise.reject("chưa chọn thời gian tổ chức");
                   },
                 },
               ]}
@@ -224,7 +226,7 @@ const EventCreationPage = () => {
             rules={[
               {
                 required: true,
-                message: "Nhập điii!",
+                message: "Chưa nhập mô tả!",
               },
             ]}
           >
@@ -246,14 +248,15 @@ const EventCreationPage = () => {
                     if (value && value.length > 0) {
                       return Promise.resolve();
                     }
-                    return Promise.reject("Chọn phòng ban phù hợp");
+                    return Promise.reject("Hãy chọn bộ phận phù hợp");
                   },
                 },
               ]}
             >
               <Table
-                className="border border-slate-300 rounded-lg p-2"
+                className="border border-slate-300 rounded-lg "
                 size="small"
+                scroll={{ y: 400 }}
                 columns={columns}
                 dataSource={!staffIsLoading || !staffIsError ? staffs : []}
                 loading={staffIsLoading}
@@ -276,7 +279,7 @@ const EventCreationPage = () => {
             <Form.Item
               className="w-[20%]"
               name="coverUrl"
-              label={<Title title="Ảnh địa diện" />}
+              label={<Title title="Ảnh về sự kiện" />}
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList}
               rules={[
@@ -298,6 +301,7 @@ const EventCreationPage = () => {
               ]}
             >
               <Upload.Dragger
+              className="h-40"
                 maxCount={1}
                 listType="text"
                 action=""
@@ -309,7 +313,7 @@ const EventCreationPage = () => {
                 beforeUpload={(file) => {
                   console.log("file: ", file);
                   return new Promise((resolve, reject) => {
-                    if (file && file.size > 52428800) {
+                    if (file && file.size > 10*1024*1024) {
                       reject("File quá lớn ( <50MB )");
                       return false;
                     } else {
@@ -319,7 +323,6 @@ const EventCreationPage = () => {
                     }
                   });
                 }}
-                fileList
               >
                 Kéo tập tin vào đây
               </Upload.Dragger>
@@ -332,14 +335,14 @@ const EventCreationPage = () => {
               rules={[
                 {
                   required: true,
-                  message: "Nhập điii!",
+                  message: "Chưa nhập ngân sách!",
                 },
               ]}
             >
               <div className="flex items-center gap-x-2">
                 <InputNumber
                   className="w-full"
-                  placeholder="0"
+                  placeholder="500,000"
                   min={500000}
                   step={100000}
                   formatter={(value) =>

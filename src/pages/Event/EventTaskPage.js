@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Avatar, FloatButton, Progress, Tooltip } from "antd";
@@ -12,9 +12,7 @@ import {
 } from "react-icons/bs";
 import { RiAttachment2, RiEditFill } from "react-icons/ri";
 import { LiaClipboardListSolid } from "react-icons/lia";
-import { HiOutlineClipboardDocumentList } from "react-icons/hi2";
 import { MdFilterListAlt, MdLocationPin } from "react-icons/md";
-import { BiSolidCommentDetail } from "react-icons/bi";
 import { FcMoneyTransfer } from "react-icons/fc";
 import EventTaskSelection from "../../components/Selection/EventTaskSelection";
 import TaskItem from "../../components/Task/TaskItem";
@@ -25,15 +23,15 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
 import "moment/locale/vi";
-import { getTasks } from "../../apis/tasks";
+import { filterTask, getTasks } from "../../apis/tasks";
 import EmptyList from "../../components/Error/EmptyList";
 
 moment.locale("vi"); // Set the locale to Vietnam
 
-const Tag = ({ icon, text }) => (
+const Tag = ({ icon, text, width }) => (
   <motion.div
     whileHover={{ y: -5 }}
-    className="flex items-center gap-x-2 px-5 py-2 rounded-full border border-slate-300 cursor-pointer"
+    className={`flex items-center gap-x-2 px-5 py-2 rounded-full border border-slate-300 cursor-pointer ${width}`}
   >
     {icon}
     <p className="text-sm font-normal">{text}</p>
@@ -46,24 +44,59 @@ const color = {
 
 const EventTaskPage = () => {
   const eventId = useParams().eventId;
+
+  const [assigneeSelection, setAssigneeSelection] = useState();
+  const [prioritySelection, setPrioritySelection] = useState();
+  const [statusSelection, setStatusSelection] = useState();
+
   const { data, isLoading, isError } = useQuery(["event-detail", eventId], () =>
     getDetailEvent(eventId)
   );
-  // console.log("data:", data);
+  console.log("DATA : ", data);
 
   const {
     data: tasks,
     isLoading: taskIsLoading,
     isError: taskIsError,
-    error: taskError,
-  } = useQuery(["tasks", eventId], () =>
-    getTasks({ fieldName: "eventID", conValue: eventId })
+  } = useQuery(
+    ["tasks", eventId],
+    () => getTasks({ fieldName: "eventID", conValue: eventId }),
+    {
+      select: (data) => {
+        return data.filter((item) => !item.parent);
+      },
+    }
   );
-  // console.log("tasks: ", tasks);
+  console.log("tasks: ", tasks);
 
-  const [assigneeSelection, setAssigneeSelection] = useState();
-  const [prioritySelection, setPrioritySelection] = useState();
-  const [devisionSelection, setDevisionSelection] = useState();
+  const {
+    data: filterTasks,
+    isLoading: filterTaskIsLoading,
+    isError: filterTaskIsError,
+    refetch,
+  } = useQuery(
+    ["filter-tasks"],
+    () =>
+      filterTask({
+        assignee: assigneeSelection,
+        eventID: eventId,
+        priority: prioritySelection,
+        status: statusSelection,
+      }),
+    {
+      select: (data) => {
+        return data.filter((item) => !item.parent);
+      },
+    }
+  );
+  console.log("filterTasks: ", filterTasks);
+
+  useEffect(() => {
+    if (assigneeSelection || prioritySelection || statusSelection) {
+      refetch();
+    }
+  }, [assigneeSelection, prioritySelection, statusSelection]);
+
   const [isOpenModal, setIsOpenModal] = useState(false);
 
   let status, statusColor, statusBgColor;
@@ -71,7 +104,7 @@ const EventTaskPage = () => {
   const resetFilter = () => {
     setAssigneeSelection();
     setPrioritySelection();
-    setDevisionSelection();
+    setStatusSelection();
   };
 
   const handleOpenModal = () => {
@@ -133,7 +166,7 @@ const EventTaskPage = () => {
         isModalOpen={isOpenModal}
         setIsModalOpen={setIsOpenModal}
         eventId={eventId}
-        // parentTaskId="1"
+        date={[data.startDate, data.endDate]}
       />
       <motion.div
         initial={{ y: -75 }}
@@ -181,10 +214,6 @@ const EventTaskPage = () => {
               />
             </Tooltip>
           ))}
-          {/* <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" />
-          <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" />
-          <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" />
-          <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" /> */}
         </Avatar.Group>
 
         <div className="w-5" />
@@ -194,26 +223,6 @@ const EventTaskPage = () => {
         >
           {status}
         </p>
-
-        {/* <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex-1 text-end"
-        >
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            className="bg-[#1677ff] text-white text-base font-medium px-4 py-2 rounded-lg"
-            onClick={handleOpenModal}
-          >
-            Tạo công việc
-          </motion.button>
-          <TaskAdditionModal
-            isModalOpen={isOpenModal}
-            setIsModalOpen={setIsOpenModal}
-            eventId={eventId}
-            // parentTaskId="1"
-          />
-        </motion.div> */}
       </motion.div>
 
       <motion.div
@@ -242,6 +251,7 @@ const EventTaskPage = () => {
             <Tag
               icon={<MdLocationPin size={20} color={color.green} />}
               text={data.location}
+              width={"max-w-[20%] truncate"}
             />
             <Tag
               icon={<FcMoneyTransfer size={20} />}
@@ -251,14 +261,14 @@ const EventTaskPage = () => {
               icon={<BsTagsFill size={20} color={color.green} />}
               text={`${tasks?.length ?? 0} hạng mục`}
             />
-            <Tag
+            {/* <Tag
               icon={<BsTagFill size={20} color={color.green} />}
               text="60 công việc"
             />
             <Tag
               icon={<BiSolidCommentDetail size={20} color={color.green} />}
               text="45 bình luận"
-            />
+            /> */}
           </div>
           <div className="flex flex-wrap gap-x-20 gap-y-5 mt-10">
             <div>
@@ -313,33 +323,37 @@ const EventTaskPage = () => {
         animate={{ y: 0 }}
         className="bg-white rounded-2xl px-10 py-8 mt-10 mb-20"
       >
-        {!taskIsLoading ? (
-          taskIsError ? (
+        {!taskIsLoading && !filterTaskIsLoading /* && !staffsIsLoading*/ ? (
+          taskIsError && filterTaskIsError /*&& staffsIsError*/ ? (
             <AnErrorHasOccured />
           ) : (
             <>
               <div className="flex items-center gap-x-5">
                 <EventTaskSelection
-                  title="Người giao"
-                  placeholder="Chọn nhân viên"
-                  options={[
-                    {
-                      value: "jack",
-                      label: "Jack",
-                    },
-                    {
-                      value: "jack1",
-                      label: "Jack1",
-                    },
-                    {
-                      value: "lucy",
-                      label: "Lucy",
-                    },
-                    {
-                      value: "tom",
-                      label: "Tom",
-                    },
-                  ]}
+                  title="Trưởng phòng"
+                  placeholder="Chọn trưởng phòng"
+                  options={
+                    // staffs
+                    // data.listDivision.map(division => ({value: division.userId,label: division.fullName}))
+                    [
+                      {
+                        value: "jack",
+                        label: "Jack",
+                      },
+                      {
+                        value: "jack1",
+                        label: "Jack1",
+                      },
+                      {
+                        value: "lucy",
+                        label: "Lucy",
+                      },
+                      {
+                        value: "tom",
+                        label: "Tom",
+                      },
+                    ]
+                  }
                   value={assigneeSelection}
                   updatevalue={setAssigneeSelection}
                   showSearch
@@ -371,41 +385,32 @@ const EventTaskPage = () => {
                   updatevalue={setPrioritySelection}
                 />
                 <EventTaskSelection
-                  title="Bộ phận"
-                  placeholder="Chọn bộ phận"
+                  title="Trạng thái"
+                  placeholder="Chọn trạng thái"
                   options={[
                     {
-                      value: "jack",
-                      label: "Jack",
+                      value: "PENDING",
+                      label: "PENDING",
                     },
                     {
-                      value: "lucy",
-                      label: "Lucy",
+                      value: "PROCESSING",
+                      label: "PROCESSING",
                     },
                     {
-                      value: "jack1",
-                      label: "Jack1",
+                      value: "DONE",
+                      label: "DONE",
                     },
                     {
-                      value: "tom",
-                      label: "Tom",
+                      value: "CANCEL",
+                      label: "CANCEL",
+                    },
+                    {
+                      value: "OVERDUE",
+                      label: "OVERDUE",
                     },
                   ]}
-                  value={devisionSelection}
-                  updatevalue={setDevisionSelection}
-                  showSearch
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  // Sort ascendingly
-                  filterSort={(optionA, optionB) =>
-                    (optionA?.label ?? "")
-                      .toLowerCase()
-                      .localeCompare((optionB?.label ?? "").toLowerCase())
-                  }
+                  value={statusSelection}
+                  updatevalue={setStatusSelection}
                 />
 
                 <div className="flex-1" />
@@ -425,7 +430,15 @@ const EventTaskPage = () => {
 
               <div className="flex flex-col gap-y-6 mt-8">
                 <AnimatePresence mode="await">
-                  {tasks.length === 0 ? (
+                  {assigneeSelection || prioritySelection || statusSelection ? (
+                    filterTasks.length === 0 ? (
+                      <EmptyList title="Chưa có công việc nào!" />
+                    ) : (
+                      filterTasks.map((task) => (
+                        <TaskItem key={task.id} task={task} isSubtask={false} />
+                      ))
+                    )
+                  ) : tasks.length === 0 ? (
                     <EmptyList title="Chưa có công việc nào!" />
                   ) : (
                     tasks.map((task) => (
@@ -438,9 +451,14 @@ const EventTaskPage = () => {
               <div className="flex items-center justify-end gap-x-6 mt-8">
                 <div className="flex items-center gap-x-1">
                   <LiaClipboardListSolid size={20} className="text-slate-400" />
-                  <p className="text-slate-500">{tasks.length} công việc</p>
+                  <p className="text-slate-500">
+                    {assigneeSelection || prioritySelection || statusSelection
+                      ? filterTasks.length
+                      : tasks.length}{" "}
+                    công việc
+                  </p>
                 </div>
-                <div className="flex items-center gap-x-1">
+                {/* <div className="flex items-center gap-x-1">
                   <HiOutlineClipboardDocumentList
                     size={20}
                     className="text-slate-400"
@@ -450,7 +468,7 @@ const EventTaskPage = () => {
                 <div className="flex items-center gap-x-1">
                   <RiAttachment2 size={20} className="text-slate-400" />
                   <p className="text-slate-500">15 tài liệu đính kèm</p>
-                </div>
+                </div> */}
               </div>
             </>
           )

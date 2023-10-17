@@ -8,9 +8,23 @@ export const createEvent = (event) =>
     data: event,
   });
 
-export const getAllEvent = ({ pageSize, currentPage }) =>
+// status: PENDING - PROCESSING - DONE - CANCEL
+// nameSort: startDate - endDate - updatedAt - createdAt
+export const getFilterEvent = ({
+  pageSize,
+  currentPage,
+  nameSort,
+  eventName,
+  monthYear,
+  sort,
+  status,
+}) =>
   authRequest({
-    url: `/event?sizePage=${pageSize}&currentPage=${currentPage}`,
+    url: `/event/filterEventByCondition?sizePage=${pageSize}&currentPage=${currentPage}&nameSort=${nameSort}${
+      eventName ? `&eventName=${eventName}` : ""
+    }${monthYear ? `&monthYear=${monthYear}` : ""}${
+      sort ? `&sort=${sort}` : ""
+    }${status ? `&status=${status}` : ""}`,
   });
 
 export const getDetailEvent = (eventId) =>

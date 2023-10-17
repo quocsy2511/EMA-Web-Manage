@@ -55,7 +55,7 @@ const PersonnelPage = () => {
     isLoading: divisionsIsLoading,
     isError: divisionIsError,
   } = useQuery(
-    ["division"],
+    ["divisions"],
     () => getAllDivision({ pageSize: 20, currentPage: 1 }),
     {
       select: (data) => data.data.filter((division) => division.status === 1),
@@ -88,9 +88,6 @@ const PersonnelPage = () => {
   } = useMutation((user) => updateStatusUser(user), {
     onSuccess: (data, variables) => {
       queryClient.setQueryData(["users", page], (oldValue) => {
-        console.log("variables: ", variables);
-        console.log("oldValue: ", oldValue);
-
         const updateOldData = oldValue.data.map((item) => {
           if (item.id === variables.userId)
             return { ...item, status: variables.status };
@@ -135,15 +132,13 @@ const PersonnelPage = () => {
     const avatar = form.getFieldValue("avatar");
     values = { ...values, userId, avatar };
 
-    const { divisionName, ...restValues } = values;
-    mutate(restValues);
+    // const { divisionName, ...restValues } = values;
+    console.log("restValue: ", values);
+    mutate(values);
   };
 
   // Handle delete 1 record
   const handleDeleteAction = (record) => {
-    // record : whole data of 1 selected row
-    // setData((prev) => prev.filter((item) => item.id !== record.id));
-    console.log(record);
     updateUserStatusMutate({ userId: record.id, status: "INACTIVE" });
   };
 
@@ -343,7 +338,7 @@ const PersonnelPage = () => {
       title: "Ngày sinh",
       dataIndex: "dob",
       key: "dob",
-      width: 90,
+      width: 120,
       editTable: true,
       filteredValue: null,
       align: "center",
@@ -353,7 +348,7 @@ const PersonnelPage = () => {
       title: "Giới tính",
       dataIndex: "gender",
       key: "gender",
-      width: 80,
+      width: 100,
       editTable: true,
       filteredValue: null,
       align: "center",
@@ -363,7 +358,7 @@ const PersonnelPage = () => {
       title: "Vai trò",
       dataIndex: "role",
       key: "role",
-      width: 80,
+      width: 150,
       editTable: true,
       filters: [
         { text: "Nhân viên", value: "EMPLOYEE" },
@@ -382,7 +377,7 @@ const PersonnelPage = () => {
       title: "Bộ phận",
       dataIndex: "divisionName",
       key: "divisionName",
-      width: 100,
+      width: 150,
       editTable: true,
       filters: [
         { text: "Hậu cần", value: "Hậu cần" },
@@ -396,12 +391,13 @@ const PersonnelPage = () => {
           {record.divisionName}
         </p>
       ),
+      align: "center",
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      width: 70,
+      width: 100,
       align: "center",
       editTable: true,
       filteredValue: null,

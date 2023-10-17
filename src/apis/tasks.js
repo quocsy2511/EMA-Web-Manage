@@ -6,7 +6,6 @@ import { authRequest } from "../utils/axios-utils";
 // parentTask = id của task lớn
 // ( optional = undefined )
 
-
 export const createTask = (task) =>
   authRequest({
     url: "/task/createTask",
@@ -44,4 +43,14 @@ export const createTask = (task) =>
 // "approvedBy": null,
 // "eventID": "4a5ae4c6-47af-454b-b69b-ccee2a0ea447",
 export const getTasks = ({ fieldName, conValue }) =>
-  authRequest({ url: `task?fieldName=${fieldName}&conValue=${conValue}` });
+  authRequest({ url: `/task?fieldName=${fieldName}&conValue=${conValue}` });
+
+export const filterTask = ({ assignee, eventID, priority, sort, status }) =>
+  authRequest({
+    url: `/task/filterByAssignee?${eventID ? `eventID=${eventID}` : ""}${
+      assignee ? `&assignee=${assignee}` : ""
+    }${priority ? `&priority=${priority}` : ""}${sort ? `&sort=${sort}` : ""}${
+      status ? `&status=${status}` : ""
+    }
+    `,
+  });
