@@ -57,7 +57,9 @@ const EventStaffPage = () => {
   );
 
   useEffect(() => {
+    refetch();
     setSelectEvent(listEvent?.[0] ?? {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listEvent]);
 
   useEffect(() => {

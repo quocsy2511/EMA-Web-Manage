@@ -1,6 +1,7 @@
 import { EyeOutlined } from "@ant-design/icons";
-import { Avatar, Select, Tag, Tooltip } from "antd";
+import { Avatar, Select, Tag } from "antd";
 import React, { useState } from "react";
+import Members from "../FieldSubtask/Members";
 
 const statusTask = [
   {
@@ -26,7 +27,13 @@ const statusTask = [
 ];
 
 const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
+  const { assignTasks } = Subtask;
   const selectSubtaskHandler = (value) => {
+    console.log(
+      "🚀 ~ file: Subtasks.js:32 ~ selectSubtaskHandler ~ value:",
+      value
+    );
+
     setSelectedSubTask(value);
   };
 
@@ -114,12 +121,22 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
           {/* Subtask member */}
           <div className="flex pl-2">
             <div className="flex justify-start items-center">
-              <Tooltip key="1" title="Vu" placement="top">
-                <Avatar
-                  src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=2"
-                  size="small"
-                />
-              </Tooltip>
+              <Avatar.Group
+                maxCount={3}
+                maxStyle={{
+                  color: "#D25B68",
+                  backgroundColor: "#F4D7DA",
+                }}
+              >
+                {assignTasks.length > 0 &&
+                  assignTasks.map((item) => (
+                    <Members
+                      userId={item.assignee}
+                      size="small"
+                      key={item.assignee}
+                    />
+                  ))}
+              </Avatar.Group>
             </div>
           </div>
           {/* Subtask date */}

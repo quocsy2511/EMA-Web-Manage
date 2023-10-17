@@ -13,7 +13,6 @@ const Members = ({ userId, size = "default" }) => {
       select: (data) => {
         return data;
       },
-      enabled: !!userId,
     }
   );
 

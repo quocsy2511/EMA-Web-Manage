@@ -811,6 +811,8 @@ const KanbanBoard = ({
   isErrorListTask,
   isLoadingListTask,
 }) => {
+
+
   return (
     <>
       <div className="bg-bgBoard  h-screen overflow-hidden overflow-y-scroll scrollbar-hide">

@@ -17,7 +17,7 @@ import {
   message,
 } from "antd";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getAllUser, getProfile } from "../../../../apis/users";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
@@ -34,6 +34,10 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const FieldSubtask = ({ taskSelected, taskParent }) => {
+  console.log(
+    "🚀 ~ file: FieldSubtask.js:37 ~ FieldSubtask ~ taskSelected:",
+    taskSelected
+  );
   const {
     data: staff,
     isError: isErrorStaff,
@@ -70,13 +74,17 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
   const [isOpenDate, setIsOpenDate] = useState(false);
   const [isOpenMember, seItsOpenMember] = useState(false);
   const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
+  console.log(
+    "🚀 ~ file: FieldSubtask.js:74 ~ FieldSubtask ~ assignTasks:",
+    assignTasks
+  );
 
   const membersInTask = assignTasks.map((item) => item.assignee);
   // const formatDate = "YYYY/MM/DD HH:mm:ss";
 
   const formattedDate = (value) => {
     const date = moment(value).format("MM/DD HH:mm");
-    console.log("🚀 ~ file: FieldSubtask.js:80 ~ formattedDate ~ date:", date);
+
     return date;
   };
 
@@ -107,6 +115,10 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
       }
     },
   };
+
+  useEffect(() => {
+    setAssignTasks(taskSelected.assignTasks);
+  }, [taskSelected]);
 
   return (
     <div className="flex flex-col ">
