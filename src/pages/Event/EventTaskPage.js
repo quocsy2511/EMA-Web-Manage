@@ -60,7 +60,13 @@ const EventTaskPage = () => {
     isError: taskIsError,
   } = useQuery(
     ["tasks", eventId],
-    () => getTasks({ fieldName: "eventID", conValue: eventId }),
+    () =>
+      getTasks({
+        fieldName: "eventID",
+        conValue: eventId,
+        pageSize: 50,
+        currentPage: 1,
+      }),
     {
       select: (data) => {
         return data.filter((item) => !item.parent);
@@ -167,6 +173,8 @@ const EventTaskPage = () => {
         setIsModalOpen={setIsOpenModal}
         eventId={eventId}
         date={[data.startDate, data.endDate]}
+        staffs={data.listDivision}
+        // parentTaskId="1"
       />
       <motion.div
         initial={{ y: -75 }}
@@ -324,7 +332,7 @@ const EventTaskPage = () => {
         className="bg-white rounded-2xl px-10 py-8 mt-10 mb-20"
       >
         {!taskIsLoading && !filterTaskIsLoading /* && !staffsIsLoading*/ ? (
-          taskIsError && filterTaskIsError /*&& staffsIsError*/ ? (
+          taskIsError || filterTaskIsError /*&& staffsIsError*/ ? (
             <AnErrorHasOccured />
           ) : (
             <>

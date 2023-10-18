@@ -27,10 +27,15 @@ const EventSubTaskPage = () => {
     data: tasks,
     isLoading: taskIsLoading,
     isError: taskIsError,
-    error: taskError,
   } = useQuery(
     ["tasks", eventId, taskId],
-    () => getTasks({ fieldName: "id", conValue: taskId }),
+    () =>
+      getTasks({
+        fieldName: "id",
+        conValue: taskId,
+        pageSize: 50,
+        currentPage: 1,
+      }),
     {
       select: (data) => {
         return data[0];

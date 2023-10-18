@@ -30,45 +30,29 @@ const TaskAdditionModal = ({
   setIsModalOpen,
   parentTaskId,
   eventId,
-  divisionId,
+  // divisionId,
   date,
+  staffs,
 }) => {
-  const {
-    data: staffs,
-    isLoading: staffIsLoading,
-    isError: staffIsError,
-  } = useQuery(
-    ["staffs"],
-    () => getAllUser({ role: "STAFF", pageSize: 50, currentPage: 1 }),
-    {
-      select: (data) => {
-        return data.data;
-      },
-      enabled: !parentTaskId,
-    }
-  );
-  // console.log("staffs: ", staffs);
-
-  const {
-    data: employees,
-    isLoading: employeeIsLoading,
-    isError: employeeIsError,
-  } = useQuery(
-    ["employees"],
-    () =>
-      getAllUser({
-        divisionId,
-        role: "EMPLOYEE",
-        pageSize: 50,
-        currentPage: 1,
-      }),
-    {
-      select: (data) => {
-        return data.data;
-      },
-      enabled: !!parentTaskId,
-    }
-  );
+  // const {
+  //   data: employees,
+  //   isLoading: employeeIsLoading,
+  //   isError: employeeIsError,
+  // } = useQuery(
+  //   ["employees"],
+  //   () =>
+  //     getAllUser({
+  //       divisionId,
+  //       pageSize: 50,
+  //       currentPage: 1,
+  //     }),
+  //   {
+  //     select: (data) => {
+  //       return data.data;
+  //     },
+  //     enabled: !!parentTaskId,
+  //   }
+  // );
   // console.log("employees: ", employees);
 
   const queryClient = useQueryClient();
@@ -249,8 +233,8 @@ const TaskAdditionModal = ({
           {parentTaskId ? (
             <>
               <Form.Item
-                className="w-[40%]"
-                label={<Title title="Giao cho nhân viên" />}
+                className="w-[50%]"
+                label={<Title title="Các nhân viên phù hợp" />}
                 name="assignee"
                 rules={[
                   {
@@ -259,28 +243,21 @@ const TaskAdditionModal = ({
                   },
                 ]}
               >
-                <Checkbox.Group
-                  className="flex flex-wrap gap-x-5"
+                <Select
+                  placeholder="Chọn nhân viên phù hợp"
+                  mode="multiple"
+                  allowClear
+                  options={[
+                    { label: "emp1", value: "emp1" },
+                    { label: "emp2", value: "2mp2" },
+                    { label: "emp3", value: "3mp3" },
+                    { label: "emp4", value: "4mp4" },
+                  ]}
                   onChange={(value) => {
                     form.setFieldsValue({ assignee: value });
+                    form.resetFields(["leader"]);
                   }}
-                >
-                  <Checkbox className="w-[30%] truncate" value="A">
-                    A asd asdas das das das d
-                  </Checkbox>
-                  <Checkbox className="w-[30%]" value="A">
-                    A
-                  </Checkbox>
-                  <Checkbox className="w-[30%]" value="A">
-                    A
-                  </Checkbox>
-                  <Checkbox className="w-[30%]" value="A">
-                    A
-                  </Checkbox>
-                  <Checkbox className="w-[30%]" value="A">
-                    A
-                  </Checkbox>
-                </Checkbox.Group>
+                />
               </Form.Item>
               <Form.Item
                 className=""
@@ -289,28 +266,26 @@ const TaskAdditionModal = ({
                 rules={[
                   {
                     required: true,
-                    message: "Chưa điền !",
+                    message: "Chưa chọn nhóm trưởng !",
                   },
                 ]}
               >
-                {/* <Select
-                placeholder="Nhân viên"
-                onChange={(value) => {
-                  console.log(value);
-                  form.setFieldsValue({ assignee: value });
-                }}
-                options={checkedList.map((option, index) => (
-                  <Option key={index} value={option}>
-                    {option}
-                  </Option>
-                ))}
-              /> */}
+                <Select
+                  placeholder="Nhân viên"
+                  // options={employees.filter((employee) =>
+                  //   form.getFieldValue("assignee").includes(employee)
+                  // )}
+                  onChange={(value) => {
+                    console.log(value);
+                    form.setFieldsValue({ leader: value });
+                  }}
+                />
               </Form.Item>
             </>
           ) : (
             <>
               <Form.Item
-                className="w-[25%]"
+                className="w-[40%]"
                 label={<Title title="Chịu trách nhiệm bởi" />}
                 name="assignee"
                 rules={[
@@ -325,41 +300,22 @@ const TaskAdditionModal = ({
                   onChange={(value) => {
                     form.setFieldsValue({ assignee: value });
                   }}
-                  loading={staffIsLoading}
-                  options={
-                    !staffIsError && !staffIsLoading
-                      ? staffs.map((staff) => ({
-                          value: staff.id,
-                          label: (
-                            <p>
-                              {staff.fullName} - {staff.divisionName}
-                            </p>
-                          ),
-                        }))
-                      : []
-                  }
+                  options={staffs.map((staff) => ({
+                    value: staff.userId,
+                    label: (
+                      <p>
+                        {staff.fullName} - {staff.divisionName}
+                      </p>
+                    ),
+                  }))}
                 />
-              </Form.Item>
-              <Form.Item
-                className="w-[25%]"
-                label={<Title title="Thời gian ước tính" />}
-                name="estimationTime"
-                rules={[
-                  {
-                    required: true,
-                    message: "Chưa điền !",
-                  },
-                ]}
-              >
-                <div className="flex gap-x-3 items-center">
-                  <Input type="number" min={0} />
-                  Tiếng
-                </div>
               </Form.Item>
             </>
           )}
+        </div>
+        <div className="flex gap-x-10">
           <Form.Item
-            className="w-[25%]"
+            className="w-[30%]"
             label={<Title title="Độ ưu tiên" />}
             name="priority"
             rules={[
@@ -389,6 +345,22 @@ const TaskAdditionModal = ({
                 },
               ]}
             />
+          </Form.Item>
+          <Form.Item
+            className="w-[20%]"
+            label={<Title title="Thời gian ước tính" />}
+            name="estimationTime"
+            rules={[
+              {
+                required: true,
+                message: "Chưa điền thời gian hoặc sai định dạng !",
+              },
+            ]}
+          >
+            <div className="flex gap-x-3 items-center">
+              <Input type="number" min={1} />
+              Giờ
+            </div>
           </Form.Item>
         </div>
 

@@ -42,8 +42,10 @@ export const createTask = (task) =>
 // "modifiedBy": null,
 // "approvedBy": null,
 // "eventID": "4a5ae4c6-47af-454b-b69b-ccee2a0ea447",
-export const getTasks = ({ fieldName, conValue }) =>
-  authRequest({ url: `/task?fieldName=${fieldName}&conValue=${conValue}` });
+export const getTasks = ({ fieldName, conValue, pageSize, currentPage }) =>
+  authRequest({
+    url: `/task?fieldName=${fieldName}&conValue=${conValue}&sizePage=${pageSize}&currentPage=${currentPage}`,
+  });
 
 export const filterTask = ({ assignee, eventID, priority, sort, status }) =>
   authRequest({
@@ -53,4 +55,26 @@ export const filterTask = ({ assignee, eventID, priority, sort, status }) =>
       status ? `&status=${status}` : ""
     }
     `,
+  });
+
+// "title": "",
+// "eventID": null,
+// "startDate": null,
+// "endDate": null,
+// "description": null,
+// "priority": "LOW",
+// "parentTask": null,
+// "estimationTime": null,
+// "effort": null
+export const updateTask = ({ taskID, ...task }) =>
+  authRequest({
+    url: `/task/updateTask?taskID=${taskID}`,
+    method: "put",
+    data: task,
+  });
+
+export const updateTaskStatus = ({ taskID, status }) =>
+  authRequest({
+    url: `/task/updateTaskStatus?taskID=${taskID}&status=${status}`,
+    method: "put",
   });

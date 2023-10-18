@@ -2,9 +2,9 @@ import { authRequest } from "../utils/axios-utils";
 
 // mode: 1 -> get all division ( contain staff & employee )
 // mode: 2 -> get division dont have staff
-export const getAllDivision = ({ pageSize, currentPage }) =>
+export const getAllDivision = ({ pageSize, currentPage, mode }) =>
   authRequest({
-    url: `/division?sizePage=${pageSize}&currentPage=${currentPage}`,
+    url: `/division?sizePage=${pageSize}&currentPage=${currentPage}&mode=${mode}`,
   });
 
 export const createDivision = ({ divisionName, description }) =>

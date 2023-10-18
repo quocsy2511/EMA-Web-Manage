@@ -26,8 +26,8 @@ const DivisionPage = () => {
   const [page, setPage] = useState(1);
   
   const { data, isLoading, isError } = useQuery(
-    ["divisions"],
-    () => getAllDivision({ pageSize: 50, currentPage: page }),
+    ["divisions",1],
+    () => getAllDivision({ pageSize: 50, currentPage: page, mode: 1 }),
     {
       select: (data) => {
         data.data = data.data.map(({ ...item }) => {
