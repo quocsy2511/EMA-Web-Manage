@@ -27,7 +27,10 @@ const EventStaffPage = () => {
     },
   });
   const [selectEvent, setSelectEvent] = useState({});
-  console.log("🚀 ~ file: EventStaffPage.js:30 ~ EventStaffPage ~ selectEvent:", selectEvent)
+  console.log(
+    "🚀 ~ file: EventStaffPage.js:30 ~ EventStaffPage ~ selectEvent:",
+    selectEvent
+  );
 
   const {
     data: listTaskParents,
@@ -36,7 +39,13 @@ const EventStaffPage = () => {
     refetch,
   } = useQuery(
     ["tasks"],
-    () => getTasks({ fieldName: "eventID", conValue: selectEvent.id }),
+    () =>
+      getTasks({
+        fieldName: "eventID",
+        conValue: selectEvent.id,
+        pageSize: 100,
+        currentPage: 1,
+      }),
     {
       select: (data) => {
         if (data && Array.isArray(data)) {
@@ -57,16 +66,13 @@ const EventStaffPage = () => {
     }
   );
 
-  // useEffect(() => {
-  //   refetch();
-  //   setSelectEvent(listEvent?.[0] ?? {});
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [listEvent]);
+  useEffect(() => {
+    setSelectEvent(listEvent?.[0] ?? {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listEvent]);
 
   useEffect(() => {
     refetch();
-    setSelectEvent(listEvent?.[0] ?? {});
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectEvent]);
 
