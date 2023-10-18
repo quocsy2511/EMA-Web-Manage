@@ -21,6 +21,9 @@ import { uploadFile } from "../../apis/files";
 const Label = ({ label }) => <p className="text-lg font-medium">{label}</p>;
 
 const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
+  const [divisionMode, setDivisionMode] = useState(1);
+  const [fileList, setFileList] = useState();
+
   const queryClient = useQueryClient();
   const { mutate: createUserMutate, isLoading } = useMutation(
     (user) => createUser(user),
@@ -70,22 +73,38 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
   const {
     data: divisionData,
     isLoading: divisionLoading,
-    isError,
+    isError: divisionIsError,
   } = useQuery(
-    ["divisions"],
-    () => getAllDivision({ pageSize: 20, currentPage: 1 }),
+    ["divisions", 1],
+    () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 1 }),
     {
-      select: (data) => {
-        return data.data.map((division) => ({
-          value: division.id,
-          label: division.divisionName,
-        }));
-      },
+      select: (data) =>
+        data.data
+          .filter((division) => division.status === 1)
+          .map((division) => ({
+            value: division.id,
+            label: division.divisionName,
+          })),
     }
   );
 
-  const [fileList, setFileList] = useState();
-  console.log("fileList state: ", fileList);
+  const {
+    data: divisionsWithoutStaff,
+    isLoading: divisionsWithoutStaffIsLoading,
+    isError: divisionsWithoutStaffIsError,
+  } = useQuery(
+    ["divisions", 2],
+    () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 2 }),
+    {
+      select: (data) =>
+        data.data
+          .filter((division) => division.status === 1)
+          .map((division) => ({
+            value: division.id,
+            label: division.divisionName,
+          })),
+    }
+  );
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
@@ -256,7 +275,10 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
               <Select
                 placeholder="Vai trò"
                 onChange={(value) => {
+                  if (value === "EMPLOYEE") setDivisionMode(1);
+                  else setDivisionMode(2);
                   form.setFieldsValue({ role: value });
+                  form.resetFields(["divisionId"])
                 }}
                 options={[
                   {
@@ -291,8 +313,19 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                 onChange={(value) => {
                   form.setFieldsValue({ divisionId: value });
                 }}
-                // loading={divisionLoading}
-                options={!divisionLoading ? divisionData : []}
+                loading={
+                  divisionLoading ||
+                  divisionsWithoutStaffIsLoading ||
+                  divisionIsError ||
+                  divisionsWithoutStaffIsError
+                }
+                options={
+                  !divisionLoading && !divisionsWithoutStaffIsLoading
+                    ? divisionMode === 1
+                      ? divisionData
+                      : divisionsWithoutStaff
+                    : []
+                }
               />
             </Form.Item>
           </div>

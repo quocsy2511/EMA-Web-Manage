@@ -15,6 +15,7 @@ import { PiSortAscending, PiSortDescending } from "react-icons/pi";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment/moment";
+import emptyEventImg from "../../assets/images/empty_event.png";
 
 const EventPage = () => {
   const navigate = useNavigate();
@@ -205,93 +206,23 @@ const EventPage = () => {
             <AnErrorHasOccured />
           ) : (
             <>
-              {/* <motion.div
-                initial={{ x: -100 }}
-                animate={{ x: 0 }}
-                className="flex"
-              >
-                <Input
-                  onPressEnter={(value) => {
-                    if (value) setSearchText(value.nativeEvent.target.value);
-                    else setSearchText();
-                  }}
-                  onChange={(value) => {
-                    if (value) setSearchText(value.nativeEvent.target.value);
-                    else setSearchText();
-                  }}
-                  size="large"
-                  placeholder="Tìm tên sự kiện"
-                  prefix={<BsSearch className="text-slate-500" />}
-                  allowClear
-                  className="w-[32%] cursor-pointer"
-                  // value={searchDate ? searchDate : null}
-                />
-
-                <div className="w-[1.8%]" />
-
-                <ConfigProvider locale={viVN}>
-                  <DatePicker
-                    type="year"
-                    picker="month"
-                    onChange={(value, dateString) => {
-                      if (value) setSearchDate(dateString);
-                      else setSearchDate();
-                    }}
-                    size="large"
-                    placeholder="Thời gian"
-                    className="w-[16%] cursor-pointer"
-                    value={searchDate ? moment(searchDate, "YYYY-MM") : null}
-                  />
-                </ConfigProvider>
-
-                <div className="w-[1.8%]" />
-
-                <Select
-                  className="w-[14.5%]"
-                  placeholder="Trạng thái"
-                  onChange={(value) => {
-                    if (value) setSearchStatus(value);
-                    else setSearchStatus();
-                  }}
-                  size="large"
-                  options={[
-                    {
-                      value: "PENDING",
-                      label: "PENDING",
-                    },
-                    {
-                      value: "PROCESSING",
-                      label: "PROCESSING",
-                    },
-                    {
-                      value: "DONE",
-                      label: "DONE",
-                    },
-                    {
-                      value: "CANCEL",
-                      label: "CANCEL",
-                    },
-                  ]}
-                  value={searchStatus}
-                />
-
-                <div className="flex-1 text-end">
-                  <Button onClick={reset} danger size="large">
-                    Đặt lại bộ lọc
-                  </Button>
-                </div>
-              </motion.div> */}
-
               <motion.div
                 initial={{ y: 100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
               >
                 <div className="mt-5 flex flex-wrap gap-x-[2%] gap-y-7">
-                  <AnimatePresence>
-                    {data.data.map((event) => (
-                      <EventItem key={event.id} event={event} />
-                    ))}
-                  </AnimatePresence>
+                  {data.data.length > 0 ? (
+                    <AnimatePresence>
+                      {data.data.map((event) => (
+                        <EventItem key={event.id} event={event} />
+                      ))}
+                    </AnimatePresence>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center">
+                      <img src={emptyEventImg} className="w-64 h-64" />
+                      <p>Không tìm thấy sự kiện nào!</p>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center justify-center gap-x-3 mt-8">
                   <MdOutlineKeyboardArrowLeft

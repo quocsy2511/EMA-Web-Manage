@@ -53,14 +53,28 @@ const PersonnelPage = () => {
   const {
     data: divisionsData,
     isLoading: divisionsIsLoading,
-    isError: divisionIsError,
+    isError: divisionsIsError,
   } = useQuery(
-    ["divisions"],
-    () => getAllDivision({ pageSize: 20, currentPage: 1 }),
+    ["divisions", 1],
+    () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 1 }),
     {
       select: (data) => data.data.filter((division) => division.status === 1),
     }
   );
+  console.log("divisionsData: ", divisionsData);
+
+  const {
+    data: divisionsWithoutStaff,
+    isLoading: divisionsWithoutStaffIsLoading,
+    isError: divisionsWithoutStaffIsError,
+  } = useQuery(
+    ["divisions", 2],
+    () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 2 }),
+    {
+      select: (data) => data.data.filter((division) => division.status === 1),
+    }
+  );
+  console.log("divisionsWithoutStaff: ", divisionsWithoutStaff);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading: updateUserIsLoading } = useMutation(
@@ -127,14 +141,13 @@ const PersonnelPage = () => {
   // Submit form
   const onFinish = (values) => {
     console.log("Success:", values);
-    // remove : divisionName / status
     const userId = form.getFieldValue("id");
     const avatar = form.getFieldValue("avatar");
-    values = { ...values, userId, avatar };
+    values = { ...values, userId, avatar, divisionId: values.divisionName };
 
-    // const { divisionName, ...restValues } = values;
-    console.log("restValue: ", values);
-    mutate(values);
+    const { divisionName, ...restValues } = values;
+    console.log("restValue: ", restValues);
+    mutate(restValues);
   };
 
   // Handle delete 1 record
@@ -162,9 +175,6 @@ const PersonnelPage = () => {
     setSortedInfo({});
     setFilteredInfo({});
     setSearchText("");
-
-    // reset table by call api again
-    // load()
   };
 
   //  =========================================================================
@@ -379,13 +389,20 @@ const PersonnelPage = () => {
       key: "divisionName",
       width: 150,
       editTable: true,
-      filters: [
-        { text: "Hậu cần", value: "Hậu cần" },
-        { text: "Kế Toán", value: "Kế Toán" },
-      ],
+      filters:
+        divisionsData
+          ?.filter((division) => division.status === 1)
+          .map((division) => ({
+            text: division.divisionName,
+            value: division.id,
+          })) ?? [],
       filteredValue: filteredInfo.divisionName || null,
-      onFilter: (value, record) =>
-        record.divisionName?.toLowerCase().includes(value.toLowerCase()),
+      onFilter: (value, record) => {
+        console.log("value: ", value);
+        console.log("record: ", record);
+        // return record.divisionName?.toLowerCase().includes(value.toLowerCase());
+        return record.divisionId === value;
+      },
       render: (_, record) => (
         <p className={`text-base ${!record.divisionName && "text-red-400"}`}>
           {record.divisionName}
@@ -452,7 +469,7 @@ const PersonnelPage = () => {
                     title="Hủy việc cập nhật ?"
                     onConfirm={onCancelEditing}
                     okText="OK"
-                    cancelText="Hủy"
+                    cancelText="Không"
                   >
                     {/* <MdOutlineCancel
                       className="text-red-700 cursor-pointer"
@@ -535,6 +552,10 @@ const PersonnelPage = () => {
     ...restProps
   }) => {
     // Setup input field type
+    const division =
+      form.getFieldValue("role") === "STAFF"
+        ? divisionsWithoutStaff
+        : divisionsData;
     let options;
     switch (dataIndex) {
       case "role":
@@ -544,7 +565,7 @@ const PersonnelPage = () => {
         ];
         break;
       case "divisionName":
-        options = divisionsData.map((division) => ({
+        options = division.map((division) => ({
           value: division.id,
           label: division.divisionName,
         }));
@@ -587,7 +608,10 @@ const PersonnelPage = () => {
       ) : (
         <Select
           onChange={(value) => {
+            console.log("dataIndex: ", dataIndex);
+            console.log("value: ", value);
             form.setFieldsValue({ [dataIndex]: value });
+            if (dataIndex === "role") form.resetFields(["divisionName"]);
           }}
           options={options}
           size="small"
@@ -603,14 +627,14 @@ const PersonnelPage = () => {
             rules={[
               (inputType === "text" || inputType === "selection") && {
                 required: true,
-                message: `Nhập dữ liệu đi!`,
+                message: `Chưa nhập dữ liệu !`,
               },
               inputType === "date" && {
                 validator: (rule, value) => {
                   if (value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject("Chọn 1 ngày đi");
+                  return Promise.reject("Chưa chọn ngày !");
                 },
               },
             ]}
@@ -630,8 +654,10 @@ const PersonnelPage = () => {
       <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-8">
         <div className="bg-white min-h rounded-xl p-8">
           <p className="text-2xl font-medium mb-5">Quản lý nhân sự</p>
-          {!isLoading && !divisionsIsLoading ? (
-            isError || divisionIsError ? (
+          {!isLoading &&
+          !divisionsIsLoading &&
+          !divisionsWithoutStaffIsLoading ? (
+            isError || divisionsIsError || divisionsWithoutStaffIsError ? (
               <AnErrorHasOccured />
             ) : (
               <>
@@ -643,7 +669,6 @@ const PersonnelPage = () => {
                     onChange={(e) => {
                       setSearchText(e.target.value);
                       if (e.target.value === "") {
-                        // loadData()
                         setFilteredData();
                       }
                     }}

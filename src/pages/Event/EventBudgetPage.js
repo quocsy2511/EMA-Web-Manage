@@ -88,14 +88,14 @@ const EventBudgetPage = () => {
         </div>
       </div>
 
-      <div className="bg-white mt-8 px-3 py-8 rounded-2xl">
+      <div className="bg-white mt-8 pl-3 pr-8 py-8 rounded-2xl">
         <Tabs
           tabPosition="left"
           defaultActiveKey="1"
           items={items}
           onChange={onChange}
           style={{ height: "100%" }}
-          //   centered
+            // centered
         />
       </div>
     </Fragment>

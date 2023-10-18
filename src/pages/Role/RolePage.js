@@ -48,8 +48,8 @@ const RolePage = () => {
   console.log("userData: ", data);
 
   const { data: divisionsData, isLoading: divisionsIsLoading } = useQuery(
-    ["divisions"],
-    () => getAllDivision({ pageSize: 20, currentPage: 1 }),
+    ["divisions", 1],
+    () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 1 }),
     {
       select: (data) =>
         data.data.result.data.filter((division) => division.status === 1),

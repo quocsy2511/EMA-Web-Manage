@@ -50,10 +50,10 @@ const EventItem = ({ event }) => {
       onClick={() => navigate(`${event.id}`)}
     >
       <div className="flex justify-between items-center">
-        <p className="text-xl font-semibold">{event.eventName}</p>
-        <div className="flex justify-between items-center">
+        <p className="text-xl font-semibold truncate">{event.eventName}</p>
+        <div className="flex justify-between items-center gap-x-1">
           <p
-            className={`text-sm font-medium px-3 py-2 ${statusBgColor} ${statusColor} rounded-lg`}
+            className={`text-sm font-medium px-3 py-2 ${statusBgColor} ${statusColor} rounded-lg truncate`}
           >
             {status}
           </p>
