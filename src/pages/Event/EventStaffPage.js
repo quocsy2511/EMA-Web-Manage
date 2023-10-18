@@ -27,6 +27,7 @@ const EventStaffPage = () => {
     },
   });
   const [selectEvent, setSelectEvent] = useState({});
+  console.log("🚀 ~ file: EventStaffPage.js:30 ~ EventStaffPage ~ selectEvent:", selectEvent)
 
   const {
     data: listTaskParents,
@@ -56,14 +57,16 @@ const EventStaffPage = () => {
     }
   );
 
-  useEffect(() => {
-    refetch();
-    setSelectEvent(listEvent?.[0] ?? {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listEvent]);
+  // useEffect(() => {
+  //   refetch();
+  //   setSelectEvent(listEvent?.[0] ?? {});
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [listEvent]);
 
   useEffect(() => {
     refetch();
+    setSelectEvent(listEvent?.[0] ?? {});
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectEvent]);
 

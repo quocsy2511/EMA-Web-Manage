@@ -84,7 +84,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
                 <Select
                   defaultValue={{ label: events[0].eventName, value: events }}
                   style={{
-                    width: 250,
+                    width: 300,
                   }}
                   bordered={false}
                   onChange={handleChangeEvent}

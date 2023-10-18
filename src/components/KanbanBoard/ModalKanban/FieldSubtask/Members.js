@@ -17,10 +17,7 @@ const Members = ({ userId, size = "default" }) => {
   );
 
   return (
-    <
-      // key={data?.id}
-      // className="flex flex-row justify-start items-center bg-transparent  rounded-md p-1 cursor-pointer"
-    >
+    <>
       {!isLoading ? (
         !isError ? (
           <Tooltip key="avatar" title={data?.fullName} placement="top">

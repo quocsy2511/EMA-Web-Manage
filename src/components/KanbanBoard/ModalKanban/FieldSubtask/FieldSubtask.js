@@ -74,10 +74,6 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
   const [isOpenDate, setIsOpenDate] = useState(false);
   const [isOpenMember, seItsOpenMember] = useState(false);
   const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
-  console.log(
-    "🚀 ~ file: FieldSubtask.js:74 ~ FieldSubtask ~ assignTasks:",
-    assignTasks
-  );
 
   const membersInTask = assignTasks.map((item) => item.assignee);
   // const formatDate = "YYYY/MM/DD HH:mm:ss";
@@ -228,11 +224,21 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
         </div>
         <div className=" flex flex-col">
           {/* upload file */}
-          <div className="flex flex-col w-full pl-12 mt-2">
+          <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden">
             <h4 className="text-sm font-semibold flex flex-row gap-x-2">
               <FolderOutlined />
               Tài liệu
             </h4>
+            {taskSelected.taskFiles.length > 0 &&
+              taskSelected.taskFiles.map((file) => (
+                <a
+                  key={file.id}
+                  href={file.fileUrl}
+                  className="text-ellipsis max-w-full overflow-hidden"
+                >
+                  {file.fileUrl}
+                </a>
+              ))}
             <div className="flex justify-start items-center mt-4">
               <Upload {...props}>
                 <Button icon={<UploadOutlined />}>Click to Upload</Button>

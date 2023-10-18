@@ -25,6 +25,7 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 import dayjs from "dayjs";
 import { debounce } from "lodash";
 import { createTask } from "../../../apis/tasks";
+import { uploadFile } from "../../../apis/files";
 
 const props = {
   name: "file",
@@ -54,6 +55,8 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   const [assignee, setAssignee] = useState([]);
   const [estimationTime, setEstimationTime] = useState(1);
   const [priority, setPriority] = useState("LOW");
+  const [fileList, setFileList] = useState();
+  console.log("fileList state: ", fileList);
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
     data: users,
@@ -77,23 +80,43 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   );
 
   const queryClient = useQueryClient();
-  const { mutate, isLoading } = useMutation((task) => createTask(task), {
-    onSuccess: (data, division) => {
-      queryClient.invalidateQueries("tasks");
-      setAddNewTask(false);
-    },
-    onError: () => {
-      message.open({
-        type: "error",
-        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-      });
-    },
-  });
+  const { mutate: submitFormTask, isLoading } = useMutation(
+    (task) => createTask(task),
+    {
+      onSuccess: (data, division) => {
+        queryClient.invalidateQueries("tasks");
+        setAddNewTask(false);
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
 
   const onCloseModal = () => {
     console.log("Close");
     setAddNewTask(false);
   };
+
+  const { mutate: uploadFileMutate } = useMutation(
+    ({ formData, task }) => uploadFile(formData),
+    {
+      onSuccess: (data, variables) => {
+        const task = variables.task;
+        variables.task = { fileUrl: data, ...task };
+        submitFormTask(variables.task);
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
+        });
+      },
+    }
+  );
 
   //chọn member
   const handleChangeSelectMember = (value) => {
@@ -129,18 +152,21 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   const formatter = (value) => `${value} giờ`;
 
   const onFinish = (values) => {
-    console.log("Success: ", values);
-    const data = {
-      ...values,
+    const { fileUrl, ...data } = values;
+    const task = {
+      ...data,
       eventID: eventID,
       startDate: startDate,
       endDate: endDate,
       parentTask: id,
       leader: assignee[0].toString(),
-      fileUrl: "",
     };
-    console.log("🚀 ~ file: NewTaskModal.js:125 ~ onFinish ~ data:", data);
-    mutate(data);
+
+    const formData = new FormData();
+    formData.append("file", fileList);
+    formData.append("folderName", "task");
+    uploadFileMutate({ formData, task });
+    // mutate(data);
   };
 
   return (
@@ -299,10 +325,55 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
               />
             </Form.Item>
             {/* file */}
-            <Form.Item label="File" className="text-sm font-medium ">
-              <Upload {...props}>
+            <Form.Item
+              label="File"
+              className="text-sm font-medium "
+              name="fileUrl"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList}
+              rules={[
+                {
+                  validator(_, fileList) {
+                    return new Promise((resolve, reject) => {
+                      if (fileList && fileList[0].size > 52428800) {
+                        reject("File quá lớn ( <50MB )");
+                      } else {
+                        resolve();
+                      }
+                    });
+                  },
+                },
+              ]}
+            >
+              {/* <Upload {...props}>
                 <Button icon={<UploadOutlined />}>Click to Upload</Button>
-              </Upload>
+              </Upload> */}
+              <Upload.Dragger
+                maxCount={1}
+                listType="text"
+                action=""
+                // customRequest={() => {}}
+                showUploadList={{
+                  showPreviewIcon: false,
+                  showRemoveIcon: false,
+                }}
+                // accept=".png,.jpg,.pdf"
+                beforeUpload={(file) => {
+                  return new Promise((resolve, reject) => {
+                    if (file && file.size > 52428800) {
+                      reject("File quá lớn ( <50MB )");
+                      return false;
+                    } else {
+                      setFileList(file);
+                      resolve();
+                      return true;
+                    }
+                  });
+                }}
+                fileList
+              >
+                Kéo tập tin vào
+              </Upload.Dragger>
             </Form.Item>
 
             <Form.Item wrapperCol={{ span: 24 }}>
