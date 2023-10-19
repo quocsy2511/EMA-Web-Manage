@@ -115,11 +115,11 @@ const TaskKanbanBoard = ({
             }}
           >
             {assignTasks.length > 0 &&
-              assignTasks.map((item) => (
+              assignTasks.map((item, index) => (
                 <Members
                   userId={item.assignee}
                   size="small"
-                  key={item.assignee}
+                  key={item.assignee ? item.assignee : index}
                 />
               ))}
           </Avatar.Group>

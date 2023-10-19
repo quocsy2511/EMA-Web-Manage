@@ -11,16 +11,22 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 
 const settingHeader = [
   {
-    key: "1",
-    label: "a danger item",
+    key: "công việc",
+    label: "Bảng công việc",
   },
   {
-    key: "2",
-    label: "a danger item",
+    key: "ngân sách",
+    label: "Ngân sách",
   },
 ];
 
-const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
+const HeaderEvent = ({
+  events,
+  setSelectEvent,
+  selectEvent,
+  isBoardTask,
+  setIsBoardTask,
+}) => {
   const [page, setPage] = useState(1);
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
@@ -72,6 +78,14 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
       }),
     },
   ];
+
+  const onClick = ({ key }) => {
+    if (key === "công việc") {
+      setIsBoardTask(true);
+    } else {
+      setIsBoardTask(false);
+    }
+  };
 
   return (
     <div className="p-4  left-0 bg-bgHeader z-50 right-0 top-14">
@@ -161,6 +175,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
                   <Dropdown
                     menu={{
                       items: settingHeader,
+                      onClick,
                     }}
                     placement="bottomRight"
                     arrow={{

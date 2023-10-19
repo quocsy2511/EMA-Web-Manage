@@ -9,7 +9,10 @@ import moment from "moment";
 import { Empty } from "antd";
 import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
 import { getTasks } from "../../apis/tasks";
+import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 const EventStaffPage = () => {
+  const [isBoardTask, setIsBoardTask] = useState(true);
+
   const {
     data: listEvent,
     isError,
@@ -27,10 +30,6 @@ const EventStaffPage = () => {
     },
   });
   const [selectEvent, setSelectEvent] = useState({});
-  console.log(
-    "🚀 ~ file: EventStaffPage.js:30 ~ EventStaffPage ~ selectEvent:",
-    selectEvent
-  );
 
   const {
     data: listTaskParents,
@@ -86,13 +85,19 @@ const EventStaffPage = () => {
                 events={listEvent}
                 setSelectEvent={setSelectEvent}
                 selectEvent={selectEvent}
+                setIsBoardTask={setIsBoardTask}
+                isBoardTask={isBoardTask}
               />
-              <KanbanBoard
-                selectEvent={selectEvent}
-                listTaskParents={listTaskParents}
-                isErrorListTask={isErrorListTask}
-                isLoadingListTask={isLoadingListTask}
-              />
+              {isBoardTask ? (
+                <KanbanBoard
+                  selectEvent={selectEvent}
+                  listTaskParents={listTaskParents}
+                  isErrorListTask={isErrorListTask}
+                  isLoadingListTask={isLoadingListTask}
+                />
+              ) : (
+                <BudgetStaff selectEvent={selectEvent} />
+              )}
             </>
           ) : (
             <div className="mt-56">
