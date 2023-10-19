@@ -30,7 +30,7 @@ const BudgetStaff = ({ selectEvent }) => {
   return (
     <>
       <div className="bg-white h-screen overflow-scroll">
-        {/* <div
+        <div
           className={`min-h-[200px] relative group md:w-[100%] w-[45%] bg-white cursor-pointer bg-auto bg-center px-16 mt-3`}
         >
           <h2 className="text-4xl font-semibold  mb-3">
@@ -48,7 +48,7 @@ const BudgetStaff = ({ selectEvent }) => {
               {selectEvent.description}
             </p>
           </span>
-        </div> */}
+        </div>
         <div className="mt-1 pl-3 pr-8 ">
           <Tabs
             tabPosition="left"
