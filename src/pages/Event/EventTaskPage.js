@@ -340,28 +340,10 @@ const EventTaskPage = () => {
                 <EventTaskSelection
                   title="Trưởng phòng"
                   placeholder="Chọn trưởng phòng"
-                  options={
-                    // staffs
-                    // data.listDivision.map(division => ({value: division.userId,label: division.fullName}))
-                    [
-                      {
-                        value: "jack",
-                        label: "Jack",
-                      },
-                      {
-                        value: "jack1",
-                        label: "Jack1",
-                      },
-                      {
-                        value: "lucy",
-                        label: "Lucy",
-                      },
-                      {
-                        value: "tom",
-                        label: "Tom",
-                      },
-                    ]
-                  }
+                  options={data.listDivision.map((division) => ({
+                    value: division.userId,
+                    label: division.fullName,
+                  }))}
                   value={assigneeSelection}
                   updatevalue={setAssigneeSelection}
                   showSearch
@@ -398,23 +380,23 @@ const EventTaskPage = () => {
                   options={[
                     {
                       value: "PENDING",
-                      label: "PENDING",
+                      label: <p className="text-gray-400">Đang kiểm thực</p>,
                     },
                     {
                       value: "PROCESSING",
-                      label: "PROCESSING",
+                      label: <p className="text-blue-400">Đang thực hiện</p>,
                     },
                     {
                       value: "DONE",
-                      label: "DONE",
+                      label: <p className="text-green-500">Hoàn thành</p>,
                     },
                     {
                       value: "CANCEL",
-                      label: "CANCEL",
+                      label: <p className="text-red-500">Hủy bỏ</p>,
                     },
                     {
                       value: "OVERDUE",
-                      label: "OVERDUE",
+                      label: <p className="text-orange-500">Quá hạn</p>,
                     },
                   ]}
                   value={statusSelection}

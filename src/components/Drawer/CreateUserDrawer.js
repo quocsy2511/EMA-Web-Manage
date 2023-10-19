@@ -141,7 +141,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
           requiredMark={false}
           initialValues={{
             gender: "MALE",
-            // dob: dayjs("2001-01-01"),
           }}
         >
           <Form.Item
@@ -278,7 +277,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                   if (value === "EMPLOYEE") setDivisionMode(1);
                   else setDivisionMode(2);
                   form.setFieldsValue({ role: value });
-                  form.resetFields(["divisionId"])
+                  form.resetFields(["divisionId"]);
                 }}
                 options={[
                   {
@@ -345,8 +344,8 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                 {
                   validator(_, fileList) {
                     return new Promise((resolve, reject) => {
-                      if (fileList && fileList[0].size > 52428800) {
-                        reject("File quá lớn ( <50MB )");
+                      if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                        reject("File quá lớn ( Dung lượng <10MB )");
                       } else {
                         resolve();
                       }
@@ -355,20 +354,24 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                 },
               ]}
             >
-              <Upload.Dragger
+              <Upload
+                className="flex items-center gap-x-3"
                 maxCount={1}
-                listType="text"
-                action=""
-                // customRequest={() => {}}
+                listType="picture-circle"
+                customRequest={({ file, onSuccess }) => {
+                  setTimeout(() => {
+                    onSuccess("ok");
+                  }, 0);
+                }}
                 showUploadList={{
                   showPreviewIcon: false,
-                  showRemoveIcon: false,
+                  // showRemoveIcon: false,
                 }}
                 // accept=".png,.jpg,.pdf"
                 beforeUpload={(file) => {
                   return new Promise((resolve, reject) => {
-                    if (file && file.size > 52428800) {
-                      reject("File quá lớn ( <50MB )");
+                    if (file && file?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( <10MB )");
                       return false;
                     } else {
                       setFileList(file);
@@ -377,10 +380,9 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                     }
                   });
                 }}
-                fileList
               >
                 Kéo tập tin vào
-              </Upload.Dragger>
+              </Upload>
             </Form.Item>
             <Form.Item>
               <Button

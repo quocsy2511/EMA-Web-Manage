@@ -18,10 +18,14 @@ import { getTasks } from "../../apis/tasks";
 import EmptyList from "../../components/Error/EmptyList";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import { getComment } from "../../apis/comments";
 
 const EventSubTaskPage = () => {
   const eventId = useParams().eventId;
   const taskId = useParams().taskId;
+
+  console.log("eventId: ", eventId);
+  console.log("taskId: ", taskId);
 
   const {
     data: tasks,
@@ -44,7 +48,14 @@ const EventSubTaskPage = () => {
   );
   console.log("tasks: ", tasks);
 
-  const [subtasks, setSubtasks] = useState([1, 2, 3]);
+  const {
+    data: comments,
+    isLoading: commentsIsLoading,
+    isError: commentsIsError,
+  } = useQuery(["comment", taskId], () => getComment(taskId));
+  console.log("COMMENT: ", comments);
+
+  // const [subtasks, setSubtasks] = useState([1, 2, 3]);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenCreateTaskModal, setIsOpenCreateTaskModal] = useState(false);
   const [selectedSubTask, setSelectedSubTask] = useState();
@@ -71,20 +82,19 @@ const EventSubTaskPage = () => {
 
   return (
     <Fragment>
-      {}
       <FloatButton
         onClick={handleOpenModal}
         icon={<BsPlus />}
         type="primary"
         tooltip={<p>Tạo công việc</p>}
       />
-      {/* <TaskAdditionModal
+      <TaskAdditionModal
         isModalOpen={isOpenCreateTaskModal}
         setIsModalOpen={setIsOpenCreateTaskModal}
         eventId={eventId}
         date={[tasks.startDate, tasks.endDate]}
         parentTaskId={taskId}
-      /> */}
+      />
       <motion.div
         initial={{ y: -75, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -98,7 +108,7 @@ const EventSubTaskPage = () => {
           <Link to=".." relative="path">
             Khai giảng
           </Link>{" "}
-          / Công việc 1
+          / {tasks.title}
         </p>
       </motion.div>
 
@@ -113,11 +123,17 @@ const EventSubTaskPage = () => {
           <div className="w-[2%]" />
 
           <div className="space-y-1">
-            <p className="text-2xl font-semibold">Lễ khai giảng</p>
-            <p className="text-sm">
-              Chịu trách nhiệm bởi{" "}
-              <span className="font-semibold">Quốc Sỹ</span> ( Thiết kế )
-            </p>
+            <p className="text-2xl font-semibold">{tasks.title}</p>
+            {tasks.assignTasks.length === 0 ? (
+              <p className="text-sm">Chưa giao công việc</p>
+            ) : (
+              <p className="text-sm">
+                Chịu trách nhiệm bởi{" "}
+                <span className="font-semibold">
+                  {tasks.assignTasks[0].user.profile.fullName}
+                </span>
+              </p>
+            )}
           </div>
 
           <div className="flex-1 flex justify-end">
@@ -146,9 +162,11 @@ const EventSubTaskPage = () => {
           <BiDetail size={30} className="text-slate-400" />
         </div>
 
-        <div className="flex flex-col gap-y-6 mt-10 mx-10">
+        <p className="px-14 pt-5 text-lg">{tasks.description}</p>
+
+        {/* <div className="flex flex-col gap-y-6 mt-10 mx-10">
           <AnimatePresence mode="await">
-            {tasks.subTask.length !== 0 ? (
+            {tasks.subTask.length !== 0 &&
               tasks.subTask.map((subtask) => (
                 <TaskItem
                   task={subtask}
@@ -156,21 +174,22 @@ const EventSubTaskPage = () => {
                   setSelectedSubTask={setSelectedSubTask}
                   setIsOpenModal={setIsOpenModal}
                 />
-              ))
-            ) : (
-              <EmptyList title="Chưa có công việc nào!" />
-            )}
+              ))}
             <SubTaskModal
               isOpenModal={isOpenModal}
               setIsOpenModal={setIsOpenModal}
               selectedSubTask={selectedSubTask}
             />
           </AnimatePresence>
-        </div>
+        </div> */}
 
-        <div className="mt-14">
-          <CommentInTask />
-        </div>
+        {!commentsIsLoading ? (
+          <div className="mt-14">
+            <CommentInTask comments={comments} taskId={taskId} />
+          </div>
+        ) : (
+          <LoadingComponentIndicator />
+        )}
       </motion.div>
     </Fragment>
   );
