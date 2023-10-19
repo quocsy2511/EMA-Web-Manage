@@ -1,19 +1,50 @@
 import { CloseOutlined, SendOutlined } from "@ant-design/icons";
-import { Avatar, Button, Input } from "antd";
-import React, { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Avatar, Button, Input, Modal, message } from "antd";
+import React, { createContext, useState } from "react";
 import { IoMdAttach } from "react-icons/io";
+import { removeComment } from "../../../../apis/comments";
+const ReachableContext = createContext(null);
+const UnreachableContext = createContext(null);
 
 const Comments = ({ comment, taskSelected }) => {
-  console.log(
-    "🚀 ~ file: Comments.js:12 ~ Comments ~ taskSelected:",
-    taskSelected
-  );
-  const { user, file, createdAt } = comment;
+  const { user, file, createdAt, id } = comment;
   const [input, setInput] = useState(comment.text);
   const [isOpenQuill, seItsOpenQuill] = useState(false);
+  const [modal, contextHolder] = Modal.useModal();
+  const queryClient = useQueryClient();
+  const { mutate: deletecommentMutate } = useMutation(
+    (commentId) => removeComment(commentId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["comments", taskSelected.id]);
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Ko thể xóa bình luận! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+  const config = {
+    title: "Delete Comment ?",
+    content: (
+      <>
+        <ReachableContext.Consumer>
+          {(name) => `Deleting a comment is forever. There is no undo !`}
+        </ReachableContext.Consumer>
+        <br />
+        {/* <UnreachableContext.Consumer>
+          {(name) => `Unreachable: ${name}!`}
+        </UnreachableContext.Consumer> */}
+      </>
+    ),
+  };
 
   return (
     <div className="flex flex-row mt-8 justify-start gap-x-4 " key={comment.id}>
+      {contextHolder}
       <Avatar src={user.profile.avatar} />
       <div className="flex flex-col w-full justify-start gap-y-2">
         <h3 className="text-sm font-semibold text-black">
@@ -101,7 +132,16 @@ const Comments = ({ comment, taskSelected }) => {
               >
                 chỉnh sửa
               </p>
-              <p className="hover:text-secondary underline underline-offset-2">
+              <p
+                className="hover:text-secondary underline underline-offset-2"
+                onClick={async () => {
+                  const confirmed = await modal.confirm(config);
+                  console.log("Confirmed: ", confirmed);
+                  if (confirmed === true) {
+                    deletecommentMutate(id);
+                  }
+                }}
+              >
                 Xoá
               </p>
             </div>
