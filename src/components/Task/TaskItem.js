@@ -9,24 +9,12 @@ import {
 import { BiDetail } from "react-icons/bi";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getUserById } from "../../apis/users";
 import moment from "moment";
 
 const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
   const navigate = useNavigate();
-
-  const {
-    data: user,
-    isLoading,
-    isError,
-  } = useQuery(
-    ["user", task.assignTasks[0]?.assignee],
-    () => getUserById(task.assignTasks[0]?.assignee),
-    {
-      enabled: task.assignTasks.length !== 0,
-    }
-  );
+  console.log("TASK ITEM: ", task);
+  const user = task.assignTasks?.[0]?.user?.profile;
 
   const goToSubTask = () => {
     navigate(`${task.id}`);
@@ -36,6 +24,22 @@ const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
     setSelectedSubTask(task);
     setIsOpenModal(true);
   };
+
+  let priority;
+  switch (task.priority) {
+    case "LOW":
+      priority = <FcLowPriority size={30} />;
+      break;
+    case "MEDIUM":
+      priority = <FcMediumPriority size={30} />;
+      break;
+    case "HIGH":
+      priority = <FcHighPriority size={30} />;
+      break;
+
+    default:
+      break;
+  }
 
   return (
     <motion.div
@@ -48,19 +52,20 @@ const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
       className="flex items-center px-10 py-6 rounded-2xl cursor-pointer"
       style={{ boxShadow: "0px 0px 18px 1px rgb(230 230 230)" }}
     >
-      <FcLowPriority size={25} />
+      {priority}
 
       <div className="w-[2%]" />
 
       <div className="space-y-1">
         <p className="text-xl font-semibold">{task.title}</p>
-        {task.assignTasks.length !== 0 && (
+        {user ? (
           <p className="text-xs">
             Chịu trách nhiệm bởi{" "}
-            <span className="font-medium">
-              {user?.fullName ?? "Tên người dùng"}
-            </span>{" "}
-            ( {user?.divisionName ?? ""} )
+            <span className="font-medium">{user.fullName}</span>
+          </p>
+        ) : (
+          <p className="text-xs">
+            Chưa phân công
           </p>
         )}
       </div>
