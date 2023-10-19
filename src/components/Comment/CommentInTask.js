@@ -158,7 +158,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
               ]}
             >
               <Upload
-                className="flex items-center gap-x-3"
+                className="flex items-center gap-x-3 "
                 maxCount={1}
                 listType="picture"
                 customRequest={({ file, onSuccess }) => {

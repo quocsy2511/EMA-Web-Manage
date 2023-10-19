@@ -63,6 +63,11 @@ code {
 .ant-menu.ant-menu-root.ant-menu-inline {
   border-right: 0;
 }
+.upload-list-inline .ant-upload-list-item {
+  float: left;
+  width: 200px;
+  margin-inline-end: 8px;
+}
 
 @layer utilities {
   @variants responsive {

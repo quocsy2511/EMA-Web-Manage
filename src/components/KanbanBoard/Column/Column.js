@@ -3,6 +3,9 @@ import TaskKanbanBoard from "../TaskKanban/TaskKanbanBoard";
 import TaskModal from "../ModalKanban/TaskModal";
 import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
+import { useQuery } from "@tanstack/react-query";
+import { getComment } from "../../../apis/comments";
+import moment from "moment";
 
 const Column = ({ TaskParent }) => {
   const colors = [

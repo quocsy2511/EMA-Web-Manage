@@ -18,7 +18,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
-import { getAllUser, getProfile } from "../../../../apis/users";
+import { getAllUser } from "../../../../apis/users";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
 import Members from "./Members";
@@ -33,22 +33,7 @@ dayjs.utc();
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const FieldSubtask = ({ taskSelected, taskParent }) => {
-  console.log(
-    "🚀 ~ file: FieldSubtask.js:37 ~ FieldSubtask ~ taskSelected:",
-    taskSelected
-  );
-  const {
-    data: staff,
-    isError: isErrorStaff,
-    isLoading: isLoadingStaff,
-  } = useQuery(["staff"], () => getProfile(), {
-    select: (data) => {
-      return data;
-    },
-    enabled: taskParent,
-  });
-
+const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
     data: users,
@@ -128,26 +113,14 @@ const FieldSubtask = ({ taskSelected, taskParent }) => {
             </h4>
             {taskParent ? (
               <div className="flex justify-start items-center mt-4">
-                {!isLoadingStaff ? (
-                  !isErrorStaff ? (
-                    <div className="flex flex-row gap-x-2 justify-start items-center bg-slate-50  rounded-md p-1 cursor-pointer">
-                      <Tooltip
-                        key="avatar"
-                        title={staff.fullName}
-                        placement="top"
-                      >
-                        <Avatar src={staff.avatar} size="small" />
-                      </Tooltip>
-                      <p className="w-[100px] flex-1  text-sm font-semibold">
-                        {staff.fullName}
-                      </p>
-                    </div>
-                  ) : (
-                    <AnErrorHasOccured />
-                  )
-                ) : (
-                  <LoadingComponentIndicator />
-                )}
+                <div className="flex flex-row gap-x-2 justify-start items-center bg-slate-50  rounded-md p-1 cursor-pointer">
+                  <Tooltip key="avatar" title={staff.fullName} placement="top">
+                    <Avatar src={staff.avatar} size="small" />
+                  </Tooltip>
+                  <p className="w-[100px] flex-1  text-sm font-semibold">
+                    {staff.fullName}
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="flex justify-start items-center mt-4">
