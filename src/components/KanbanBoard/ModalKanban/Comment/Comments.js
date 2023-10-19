@@ -1,4 +1,4 @@
-import { CloseOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
+import { CloseOutlined, SendOutlined } from "@ant-design/icons";
 import { Avatar, Button } from "antd";
 import React, { useState } from "react";
 import ReactQuill from "react-quill";
