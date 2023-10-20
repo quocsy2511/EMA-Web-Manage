@@ -143,8 +143,18 @@ const PersonnelPage = () => {
     console.log("Success:", values);
     const userId = form.getFieldValue("id");
     const avatar = form.getFieldValue("avatar");
-    values = { ...values, userId, avatar, divisionId: values.divisionName };
 
+    const dataDivisionForm = form.getFieldValue("divisionName");
+    const divisionId = divisionsData.filter((item) => {
+      if (
+        dataDivisionForm === item.id ||
+        dataDivisionForm === item.divisionName
+      ) {
+        return item;
+      }
+    })[0].id;
+
+    values = { ...values, userId, avatar, divisionId };
     const { divisionName, ...restValues } = values;
     console.log("restValue: ", restValues);
     mutate(restValues);
@@ -615,6 +625,7 @@ const PersonnelPage = () => {
           }}
           options={options}
           size="small"
+          // defaultValue={}
         />
       );
 

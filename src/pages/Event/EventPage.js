@@ -149,19 +149,19 @@ const EventPage = () => {
             },
             {
               value: "PENDING",
-              label: "PENDING",
+              label: "Đang chuẩn bị",
             },
             {
               value: "PROCESSING",
-              label: "PROCESSING",
+              label: "Đang diễn ra",
             },
             {
               value: "DONE",
-              label: "DONE",
+              label: "Kết thúc",
             },
             {
               value: "CANCEL",
-              label: "CANCEL",
+              label: "Hủy bỏ",
             },
           ]}
           value={searchStatus}

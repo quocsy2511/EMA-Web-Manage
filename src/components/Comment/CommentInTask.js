@@ -15,7 +15,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
   console.log("comments: ", comments);
 
   const [fileList, setFileList] = useState();
-  const [onClickEvent, setOnClickEvent] = useState(false);
+  console.log("fileList: ", fileList);
 
   const queryClient = useQueryClient();
   const { mutate } = useMutation((comment) => postComment(comment), {
@@ -36,7 +36,11 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
     {
       onSuccess: (data, variables) => {
         const comment = variables.comment;
-        variables.comment = { fileUrl: [data], ...comment };
+        // variables.comment = { fileUrl: [data], ...comment };
+        variables.comment = {
+          file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
+          ...comment,
+        };
         mutate(variables.comment);
       },
       onError: () => {
@@ -66,12 +70,8 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
-  const onEnterComment = () => {
-    // form.submit();
-  };
-
   const handleOnClick = () => {
-    // form.submit();
+    form.submit();
   };
 
   const handleDelete = (id) => {
@@ -113,6 +113,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
               size={40}
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
             />
+
             <Form.Item
               className="w-[95%] mb-0"
               name="content"
@@ -123,12 +124,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                 },
               ]}
             >
-              <Input
-                placeholder="Nhập bình luận"
-                onPressEnter={onEnterComment}
-                size="large"
-                allowClear
-              />
+              <Input placeholder="Nhập bình luận" size="large" allowClear />
             </Form.Item>
 
             <BsSendFill
@@ -216,7 +212,9 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                 let time;
                 const currentDate = moment();
                 console.log("currentDate: ", currentDate);
-                const targetDate = moment(comment.createdAt);
+                const targetDate = moment(comment.createdAt).format(
+                  "YYYY-MM-DD HH:mm:ss"
+                );
                 console.log("targetDate: ", targetDate);
                 const duration = moment.duration(currentDate.diff(targetDate));
 
@@ -250,7 +248,10 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                           {comment.user.profile.fullName}
                         </span>{" "}
                         đã bình luận vào{" "}
-                        <span className="font-bold">{time}</span>
+                        <span className="font-bold">
+                          {/* {time} */}
+                          {targetDate}
+                        </span>
                       </p>
                     </div>
 

@@ -15,17 +15,14 @@ import SubTaskModal from "../../components/Modal/SubTaskModal";
 import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
 import { useQuery } from "@tanstack/react-query";
 import { getTasks } from "../../apis/tasks";
-import EmptyList from "../../components/Error/EmptyList";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import { getComment } from "../../apis/comments";
+import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 
 const EventSubTaskPage = () => {
   const eventId = useParams().eventId;
   const taskId = useParams().taskId;
-
-  console.log("eventId: ", eventId);
-  console.log("taskId: ", taskId);
 
   const {
     data: tasks,
@@ -53,9 +50,7 @@ const EventSubTaskPage = () => {
     isLoading: commentsIsLoading,
     isError: commentsIsError,
   } = useQuery(["comment", taskId], () => getComment(taskId));
-  console.log("COMMENT: ", comments);
 
-  // const [subtasks, setSubtasks] = useState([1, 2, 3]);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenCreateTaskModal, setIsOpenCreateTaskModal] = useState(false);
   const [selectedSubTask, setSelectedSubTask] = useState();
@@ -80,6 +75,22 @@ const EventSubTaskPage = () => {
     );
   }
 
+  let priorityIcon;
+  switch (tasks.priority) {
+    case "LOW":
+      priorityIcon = <FcLowPriority size={30} />;
+      break;
+    case "MEDIUM":
+      priorityIcon = <FcMediumPriority size={30} />;
+      break;
+    case "HIGH":
+      priorityIcon = <FcHighPriority size={30} />;
+      break;
+
+    default:
+      break;
+  }
+
   return (
     <Fragment>
       <FloatButton
@@ -88,13 +99,16 @@ const EventSubTaskPage = () => {
         type="primary"
         tooltip={<p>Tạo công việc</p>}
       />
-      <TaskAdditionModal
-        isModalOpen={isOpenCreateTaskModal}
-        setIsModalOpen={setIsOpenCreateTaskModal}
-        eventId={eventId}
-        date={[tasks.startDate, tasks.endDate]}
-        parentTaskId={taskId}
-      />
+      {/* {tasks.assignTasks?.[0]?.user && (
+        <TaskAdditionModal
+          isModalOpen={isOpenCreateTaskModal}
+          setIsModalOpen={setIsOpenCreateTaskModal}
+          eventId={eventId}
+          date={[tasks.startDate, tasks.endDate]}
+          parentTaskId={taskId}
+          staffId={tasks.assignTasks?.[0]?.user?.id}
+        />
+      )} */}
       <motion.div
         initial={{ y: -75, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -118,7 +132,7 @@ const EventSubTaskPage = () => {
         className="min-h-[calc(100vh-200px)] bg-white mt-8 px-10 py-8 rounded-2xl"
       >
         <div className="flex items-center">
-          <FcLowPriority size={30} />
+          {priorityIcon}
 
           <div className="w-[2%]" />
 
@@ -130,7 +144,7 @@ const EventSubTaskPage = () => {
               <p className="text-sm">
                 Chịu trách nhiệm bởi{" "}
                 <span className="font-semibold">
-                  {tasks.assignTasks[0].user.profile.fullName}
+                  {/* {tasks.assignTasks[0].user.profile.fullName} */}
                 </span>
               </p>
             )}
@@ -163,12 +177,21 @@ const EventSubTaskPage = () => {
         </div>
 
         <p className="px-14 pt-5 text-lg">{tasks.description}</p>
+        {/* <div
+          className="px-14 pt-5"
+          dangerouslySetInnerHTML={{
+            __html: new QuillDeltaToHtmlConverter(
+              JSON.parse(tasks.description)
+            ).convert(),
+          }}
+        /> */}
 
-        {/* <div className="flex flex-col gap-y-6 mt-10 mx-10">
+        <div className="flex flex-col gap-y-6 mt-10 mx-10">
           <AnimatePresence mode="await">
             {tasks.subTask.length !== 0 &&
               tasks.subTask.map((subtask) => (
                 <TaskItem
+                  key={subtask.id}
                   task={subtask}
                   isSubtask={true}
                   setSelectedSubTask={setSelectedSubTask}
@@ -181,12 +204,16 @@ const EventSubTaskPage = () => {
               selectedSubTask={selectedSubTask}
             />
           </AnimatePresence>
-        </div> */}
+        </div>
 
-        {!commentsIsLoading ? (
-          <div className="mt-14">
-            <CommentInTask comments={comments} taskId={taskId} />
-          </div>
+        {!commentsIsLoading || !commentsIsError ? (
+          comments ? (
+            <div className="mt-14">
+              <CommentInTask comments={comments} taskId={taskId} />
+            </div>
+          ) : (
+            <p className="text-center mt-10">Không thể tải bình luận</p>
+          )
         ) : (
           <LoadingComponentIndicator />
         )}
