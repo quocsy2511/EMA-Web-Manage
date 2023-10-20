@@ -6,6 +6,12 @@ import Subtasks from "./Subtask/Subtasks";
 import CommentInput from "./Comment/CommentInput";
 import Comments from "./Comment/Comments";
 import { OrderedListOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import { getComment } from "../../../apis/comments";
+import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
+import { getProfile } from "../../../apis/users";
+import moment from "moment";
 
 const TaskModalContent = ({
   taskParent,
@@ -14,18 +20,47 @@ const TaskModalContent = ({
   taskSelected,
   setTaskSelected,
 }) => {
+  const {
+    data: listComments,
+    isError: isErrorListComments,
+    isLoading: isLoadingListComments,
+  } = useQuery(
+    ["comments", taskSelected.id],
+    () => getComment(taskSelected.id),
+    {
+      select: (data) => {
+        const formatDate = data.map(({ ...item }) => {
+          item.createdAt = moment(item.createdAt).format("MM/DD HH:mm");
+          return {
+            ...item,
+          };
+        });
+        return formatDate;
+      },
+      enabled: !!taskSelected.id,
+    }
+  );
+
+  const {
+    data: staff,
+    isError: isErrorStaff,
+    isLoading: isLoadingStaff,
+  } = useQuery(["staff"], () => getProfile(), {
+    select: (data) => {
+      return data;
+    },
+  });
+
   const [title, setTitle] = useState(taskSelected.title);
   const [description, setDescription] = useState(taskSelected.description);
-  const [comments, setComments] = useState(taskSelected.comment);
-
-  const [subTasks, setSubTasks] = useState(taskSelected.tasks);
+  const [subTasks, setSubTasks] = useState(taskSelected.subTask);
 
   // Subtask
   const onChangeSubtask = (id, newTitle) => {};
 
   let completed = 0;
   if (taskParent) {
-    subTasks.forEach((task) => {
+    taskSelected.subTask.forEach((task) => {
       if (task.status === "confirmed") {
         completed++;
       }
@@ -35,8 +70,7 @@ const TaskModalContent = ({
   useEffect(() => {
     setTitle(taskSelected.title);
     setDescription(taskSelected.description);
-    setComments(taskSelected.comment);
-    setSubTasks(taskSelected.tasks);
+    setSubTasks(taskSelected.subTask);
   }, [taskSelected]);
 
   return (
@@ -44,7 +78,19 @@ const TaskModalContent = ({
       <TitleSubtask setTitle={setTitle} title={title} />
 
       {/* field */}
-      <FieldSubtask taskSelected={taskSelected} taskParent={taskParent} />
+      {!isLoadingStaff ? (
+        !isErrorStaff ? (
+          <FieldSubtask
+            taskSelected={taskSelected}
+            taskParent={taskParent}
+            staff={staff}
+          />
+        ) : (
+          <AnErrorHasOccured />
+        )
+      ) : (
+        <LoadingComponentIndicator />
+      )}
 
       {/* task description */}
       <DescriptionSubtask
@@ -65,7 +111,7 @@ const TaskModalContent = ({
           </div>
           <div className="w-full flex flex-col">
             <h3 className="text-lg font-bold">
-              Subtask ({completed}/{subTasks.length})
+              Công việc ({completed}/{subTasks.length})
             </h3>
             {subTasks.map((subTask) => (
               <Subtasks
@@ -80,16 +126,33 @@ const TaskModalContent = ({
       )}
 
       {/* comment */}
-      <CommentInput />
+      {!isLoadingStaff ? (
+        !isErrorStaff ? (
+          <CommentInput staff={staff} taskSelected={taskSelected} />
+        ) : (
+          <AnErrorHasOccured />
+        )
+      ) : (
+        <LoadingComponentIndicator />
+      )}
 
       {/* comment of task */}
-      {comments.map((comment) => (
-        <Comments
-          key={comment.id}
-          comment={comment}
-          // setComment={setComment}
-        />
-      ))}
+      {!isLoadingListComments ? (
+        !isErrorListComments ? (
+          listComments.length > 0 &&
+          listComments.map((comment, index) => (
+            <Comments
+              key={index}
+              comment={comment}
+              taskSelected={taskSelected}
+            />
+          ))
+        ) : (
+          <AnErrorHasOccured />
+        )
+      ) : (
+        <LoadingComponentIndicator />
+      )}
     </div>
   );
 };

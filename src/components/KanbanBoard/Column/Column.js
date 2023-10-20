@@ -4,7 +4,8 @@ import TaskModal from "../ModalKanban/TaskModal";
 import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
 
-const Column = ({ TaskParentArray }) => {
+const Column = ({ TaskParent }) => {
+  // console.log("🚀 ~ file: Column.js:8 ~ Column ~ TaskParent:", TaskParent)
   const colors = [
     "bg-red-500",
     "bg-orange-500",
@@ -19,31 +20,21 @@ const Column = ({ TaskParentArray }) => {
   const [color, setColor] = useState(null);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [addNewTask, setAddNewTask] = useState(false);
-  const [taskParent, setTaskParent] = useState(false);
+  const [isTaskParent, setIsTaskParent] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
 
   let completed = 0;
-  let subTask = TaskParentArray.tasks;
+  let subTask = TaskParent.subTask;
   subTask.forEach((task) => {
     if (task.status === "confirmed") {
       completed++;
     }
   });
 
-  //format date
-  const formattedDate = (value) => {
-    const date = new Date(value).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-    return date;
-  };
-
   const openTaskParentModal = () => {
     setIsOpenTaskModal(true);
-    setTaskParent(true);
-    setTaskSelected(TaskParentArray);
+    setIsTaskParent(true);
+    setTaskSelected(TaskParent);
   };
 
   useEffect(() => {
@@ -55,24 +46,22 @@ const Column = ({ TaskParentArray }) => {
   return (
     <>
       <div className="scrollbar-hide mt-5 min-w-[280px]">
-        <div className=" bg-bgColumn  py-3 scrollbar-hide rounded-xl shadow-darkShadow shadow-sm">
+        <div className=" bg-transparent  scrollbar-hide rounded-xl w-full">
           {/* task parent */}
           <div
-            className=" flex flex-col items-start gap-2  justify-start 
-          w-[250px] mx-auto my-2 rounded-lg cursor-pointer py-1 px-1"
+            className="bg-bgBoard flex flex-col items-start gap-2  justify-start 
+          w-[250px] mx-auto my-2 rounded-lg cursor-pointer py-4 px-1 hover:opacity-70 shadow-lg shadow-darkShadow"
             onClick={() => openTaskParentModal()}
           >
-            <div className="flex items-start gap-2 w-full">
-              <span className={`rounded-full w-4 h-4 ${color} `}></span>
+            <div className="flex items-start gap-2 w-full px-2">
+              <span className={`rounded-full w-4 h-4 ${color} mt-[2px]`}></span>
               <div className="flex flex-col gap-y-[2px]">
-                <p className=" w-[215px] whitespace-normal italic font-semibold text-darkDropDown hover:text-secondary">
-                  {TaskParentArray?.title} ({completed}/
-                  {TaskParentArray?.tasks?.length})
+                <p className=" max-w-[215px] whitespace-normal italic font-semibold text-darkDropDown hover:text-secondary text-sm">
+                  {TaskParent?.title} ({completed}/{TaskParent?.subTask?.length}
+                  )
                 </p>
-                <p className="text-[7px] font-semibold text-gray-600 underline underline-offset-2">
-                  {/* {col.time} */}
-                  {formattedDate(TaskParentArray.startDate)} -{" "}
-                  {formattedDate(TaskParentArray.endDate)}
+                <p className="text-[8px] font-semibold text-gray-600 underline underline-offset-2">
+                  {TaskParent.startDate} - {TaskParent.endDate}
                 </p>
               </div>
             </div>
@@ -84,32 +73,37 @@ const Column = ({ TaskParentArray }) => {
                 <TaskKanbanBoard
                   setTaskSelected={setTaskSelected}
                   task={subTask}
-                  setTaskParent={setTaskParent}
+                  setTaskParent={setIsTaskParent}
                   setIsOpenTaskModal={setIsOpenTaskModal}
                   key={subTask.id}
                 />
               ))
             : ""}
           <div
-            className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400    cursor-pointer hover:bg-white"
+            className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow"
             onClick={() => setAddNewTask(true)}
           >
             <p className="text-sm font-semibold tracking-tighter">
-              + Add a task
+              + Thêm công việc mới
             </p>
           </div>
         </div>
+
         {isOpenTaskModal && (
           <TaskModal
             setTaskSelected={setTaskSelected}
             taskSelected={taskSelected}
-            taskParent={taskParent}
+            taskParent={isTaskParent}
             isOpenTaskModal={isOpenTaskModal}
             setIsOpenTaskModal={setIsOpenTaskModal}
           />
         )}
         {addNewTask && (
-          <NewTaskModal addNewTask={addNewTask} setAddNewTask={setAddNewTask} />
+          <NewTaskModal
+            addNewTask={addNewTask}
+            setAddNewTask={setAddNewTask}
+            TaskParent={TaskParent}
+          />
         )}
       </div>
     </>

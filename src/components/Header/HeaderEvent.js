@@ -1,4 +1,4 @@
-import { SlidersTwoTone, UserOutlined } from "@ant-design/icons";
+import { AlignRightOutlined, SlidersTwoTone } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Dropdown, Select, Tooltip } from "antd";
 import React, { useState } from "react";
@@ -11,16 +11,22 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 
 const settingHeader = [
   {
-    key: "1",
-    label: "a danger item",
+    key: "công việc",
+    label: "Bảng công việc",
   },
   {
-    key: "2",
-    label: "a danger item",
+    key: "ngân sách",
+    label: "Ngân sách",
   },
 ];
 
-const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
+const HeaderEvent = ({
+  events,
+  setSelectEvent,
+  selectEvent,
+  isBoardTask,
+  setIsBoardTask,
+}) => {
   const [page, setPage] = useState(1);
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
@@ -28,7 +34,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
     isError: isErrorUsers,
     isLoading: isLoadingUsers,
   } = useQuery(
-    ["divisions"],
+    ["users-division"],
     () => getAllUser({ divisionId, pageSize: 10, currentPage: page }),
     {
       select: (data) => {
@@ -43,10 +49,6 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
       },
     }
   );
-  // console.log(
-  //   "🚀 ~ file: EventStaffPage.js:118 ~ EventStaffPage ~ user:",
-  //   users
-  // );
 
   const handleChangeEvent = (value) => {
     const event = JSON.parse(value);
@@ -58,16 +60,16 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
     {
       key: "1",
       type: "group",
-      label: "Member",
+      label: "Thành viên",
       children: users?.map((item) => {
         return {
           key: item.id,
           label: (
-            <div className="flex flex-row gap-x-2 justify-start items-center">
+            <div className="flex flex-row gap-x-2 justify-start items-center w-fit h-fit">
               <Tooltip key={item.key} title={item.fullName} placement="top">
-                <Avatar src={item?.avatar ?? defaultImage} size={18} />
+                <Avatar src={item?.avatar ?? defaultImage} size={24} />
               </Tooltip>
-              <p className="text-ellipsis w-[100px] flex-1 overflow-hidden ">
+              <p className="text-ellipsis w-full flex-1 overflow-hidden ">
                 {item.fullName}
               </p>
             </div>
@@ -77,18 +79,26 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
     },
   ];
 
+  const onClick = ({ key }) => {
+    if (key === "công việc") {
+      setIsBoardTask(true);
+    } else {
+      setIsBoardTask(false);
+    }
+  };
+
   return (
-    <div className="p-4 fixed left-0 bg-bgHeader z-50 right-0 top-14">
+    <div className="p-4 left-0 bg-bgBoard z-50 right-0 top-14">
       {!isLoadingUsers ? (
         !isErrorUsers ? (
           <div className="flex items-center space-x-2 md:space-x-4">
-            <header className="flex justify-between  items-center w-full mx-8">
+            <header className="flex justify-between  items-center w-full ml-8 mr-1">
               {/* left header */}
               <div className="flex items-center gap-x-4">
                 <Select
                   defaultValue={{ label: events[0].eventName, value: events }}
                   style={{
-                    width: 250,
+                    width: 300,
                   }}
                   bordered={false}
                   onChange={handleChangeEvent}
@@ -134,7 +144,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
                           />
                         </svg>
                       </span>
-                      <p>Filter</p>
+                      <p>Bộ lọc</p>
                     </div>
                   </Dropdown>
                 </div>
@@ -165,6 +175,7 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
                   <Dropdown
                     menu={{
                       items: settingHeader,
+                      onClick,
                     }}
                     placement="bottomRight"
                     arrow={{
@@ -172,10 +183,11 @@ const HeaderEvent = ({ events, setSelectEvent, selectEvent }) => {
                     }}
                   >
                     <span className="cursor-pointer text-secondary text-sm">
-                      <SlidersTwoTone
+                      {/* <SlidersTwoTone
                         twoToneColor="#635fc7"
                         style={{ fontSize: 24 }}
-                      />
+                      /> */}
+                      <AlignRightOutlined className="text-2xl" />
                     </span>
                   </Dropdown>
                 </div>

@@ -1,213 +1,415 @@
 import {
+  BulbOutlined,
   FieldTimeOutlined,
   FolderOutlined,
   UploadOutlined,
   UserOutlined,
+  UsergroupAddOutlined,
+  VerticalAlignTopOutlined,
 } from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
   DatePicker,
   Select,
+  Space,
+  Tag,
   Tooltip,
   Upload,
   message,
 } from "antd";
 import dayjs from "dayjs";
-import React, { useState } from "react";
-
-const user = [
+import React, { useEffect, useState } from "react";
+import { getAllUser } from "../../../../apis/users";
+import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
+import { useRouteLoaderData } from "react-router-dom";
+import moment from "moment";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/vi";
+import { IoMdAttach } from "react-icons/io";
+import { updateTaskStatus } from "../../../../apis/tasks";
+dayjs.locale("vi");
+dayjs.extend(utc);
+// Đặt múi giờ của dayjs thành UTC
+dayjs.utc();
+const { RangePicker } = DatePicker;
+const { Option } = Select;
+const statusTask = [
   {
-    id: 1,
-    name: "Nguyen Vu",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
+    value: "PROCESSING",
+    label: "ĐANG DIỄN RA",
+    color: "processing",
   },
   {
-    id: 2,
-    name: "Nguyen Sy",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
+    value: "DONE",
+    label: "HOÀN THÀNH",
+    color: "green",
   },
   {
-    id: 3,
-    name: "Nguyen Tung",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
+    value: "PENDING",
+    label: "ĐANG CHỜ",
+    color: "warning",
   },
   {
-    id: 4,
-    name: "Nguyen Huy",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
+    value: "CANCEL",
+    label: "ĐÃ HUỶ",
+    color: "red",
   },
   {
-    id: 5,
-    name: "Nguyen Thiep",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=pixel&key=2",
+    value: "OVERDUE",
+    label: "QUÁ HẠN",
+    color: "red",
   },
 ];
 
-const FieldSubtask = ({ taskSelected, taskParent }) => {
-  const handleChangeSelect = (value) => {
-    // console.log(`selected ${value}`);
-  };
+const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
+  // console.log(
+  //   "🚀 ~ file: FieldSubtask.js:68 ~ FieldSubtask ~ taskSelected:",
+  //   taskSelected
+  // );
+  const taskID = taskSelected.id;
+  // const [status, setStatus] = useState(taskSelected.status);
+  // console.log("🚀 ~ file: FieldSubtask.js:74 ~ FieldSubtask ~ status:", status);
+  const [isOpenStatus, setIsOpenStatus] = useState(false);
+  const divisionId = useRouteLoaderData("staff").divisionID;
+  const {
+    data: users,
+    isError: isErrorUsers,
+    isLoading: isLoadingUsers,
+  } = useQuery(
+    ["users-division"],
+    () => getAllUser({ divisionId, pageSize: 10, currentPage: 1 }),
+    {
+      select: (data) => {
+        const listUsers = data.data.map(({ ...item }) => {
+          item.dob = moment(item.dob).format("YYYY-MM-DD");
+          return {
+            key: item.id,
+            ...item,
+          };
+        });
+        return listUsers;
+      },
+    }
+  );
+
   const [isOpenDate, setIsOpenDate] = useState(false);
   const [isOpenMember, seItsOpenMember] = useState(false);
-  const [deadline, setDeadline] = useState(dayjs());
+  const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
+
+  const membersInTask = assignTasks.map((item) => item.user?.id);
+  // const formatDate = "YYYY/MM/DD HH:mm:ss";
 
   const formattedDate = (value) => {
-    const date = new Date(value)
-      .toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-      .replace(/\//g, "-");
-
+    const date = moment(value).format("DD/MM HH:mm");
     return date;
   };
 
   //Pick deadline
-  const onChange = (value, dateString) => {
-    // console.log("Selected Time: ", value);
-    console.log("Formatted Selected Time: ", dateString);
-    setDeadline(dateString);
+  const onChangeDate = (value, dateString) => {
+    // console.log("Formatted Selected Time: ", dateString);
   };
 
-  //Upload file
-  const props = {
-    name: "file",
-    action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
-    headers: {
-      authorization: "authorization-text",
-    },
-    onChange(info) {
-      if (info.file.status !== "uploading") {
-        console.log(info.file, info.fileList);
-      }
-      if (info.file.status === "done") {
-        message.success(`${info.file.name} file uploaded successfully`);
-      } else if (info.file.status === "error") {
-        message.error(`${info.file.name} file upload failed.`);
-      }
-    },
+  const handleChangeMember = (value) => {
+    console.log(
+      "🚀 ~ file: FieldSubtask.js:116 ~ handleChangeMember ~ value:",
+      value
+    );
   };
+
+  const getColorStatusPriority = (value) => {
+    const colorMapping = {
+      DONE: { color: "success", title: "HOÀN THÀNH" },
+      PENDING: { color: "warning", title: "ĐANG CHỜ" },
+      CANCEL: { color: "red", title: "ĐÃ HUỶ" },
+      PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
+      OVERDUE: { color: "red", title: "QUÁ HẠN" },
+      LOW: { color: "warning", title: "THẤP" },
+      HIGH: { color: "red", title: "CAO" },
+      MEDIUM: { color: "processing", title: "TRUNG BÌNH" },
+    };
+    //colorMapping[status] ở đây để truy suất value bằng key
+    return colorMapping[value];
+  };
+
+  const queryClient = useQueryClient();
+  const { mutate: UpdateStatus } = useMutation(
+    ({ taskID, status }) => updateTaskStatus({ taskID, status }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tasks"]);
+        message.open({
+          type: "success",
+          content: "Cập nhật trạng thái thành công",
+        });
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Ko thể bình luận lúc này! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+  const handleChangeStatus = (value) => {
+    const data = { status: value, taskID: taskID };
+    UpdateStatus(data);
+  };
+
+  useEffect(() => {
+    setAssignTasks(taskSelected.assignTasks);
+  }, [taskSelected]);
 
   return (
-    <div className=" flex flex-row gap-x-6">
-      <div className="flex flex-col w-1/2">
-        {/* task member */}
-        <div className="flex flex-col w-full pl-12 mt-2">
-          <h4 className="text-sm font-semibold flex flex-row gap-x-2">
-            <UserOutlined />
-            {taskParent ? "Leader" : "Member"}
-          </h4>
-          <div className="flex justify-start items-center mt-4">
-            {isOpenMember ? (
-              <Select
-                placeholder="Select Member "
-                bordered={false}
-                style={{
-                  width: "80%",
-                }}
-                // value={user}
-                onChange={(value) => handleChangeSelect(value)}
-              >
-                {user.map((item, index) => {
-                  return (
-                    <Select.Option key={item.id} children={item}>
-                      <div className="flex flex-row gap-x-2 justify-start items-center ">
-                        <Tooltip
-                          key={item.id}
-                          title={item.name}
-                          placement="top"
-                        >
-                          <Avatar src={item.avatar} size={18} />
-                        </Tooltip>
-                        <p className="text-ellipsis w-[100px] flex-1 overflow-hidden ">
-                          {item.name}
-                        </p>
-                      </div>
-                    </Select.Option>
-                  );
-                })}
-              </Select>
+    <div className="flex flex-col ">
+      <div className=" flex flex-row gap-x-6">
+        <div className="flex flex-col w-1/2">
+          {/* task member */}
+          <div className="flex flex-col  pl-12 mt-2">
+            <h4 className="text-sm font-semibold flex flex-row gap-x-2">
+              <UserOutlined />
+              {taskParent ? "Trưởng phòng" : "Thành Viên"}
+            </h4>
+            {taskParent ? (
+              <div className="flex justify-start items-center mt-4">
+                <div className="flex flex-row gap-x-2 justify-start items-center bg-slate-50  rounded-md p-1 cursor-pointer">
+                  <Tooltip key="avatar" title={staff.fullName} placement="top">
+                    <Avatar src={staff.avatar} size="small" />
+                  </Tooltip>
+                  <p className="w-full flex-1  text-sm font-semibold">
+                    {staff.fullName}
+                  </p>
+                </div>
+              </div>
             ) : (
-              <div
-                className="flex flex-row gap-x-2 justify-start items-center bg-slate-50  rounded-md p-1 cursor-pointer"
-                onClick={() => seItsOpenMember(true)}
-              >
-                <Tooltip
-                  key="avatar"
-                  title={taskSelected.member?.name}
-                  placement="top"
-                >
-                  <Avatar src={taskSelected.member?.avatar} size="small" />
-                </Tooltip>
-                <p className="w-[100px] flex-1  text-sm font-semibold">
-                  {taskSelected.member?.name}
-                </p>
+              <div className="flex justify-start items-center mt-4">
+                {isOpenMember ? (
+                  !isLoadingUsers ? (
+                    !isErrorUsers ? (
+                      <>
+                        <Select
+                          autoFocus
+                          allowClear
+                          mode="multiple"
+                          placeholder="Select Member "
+                          bordered={false}
+                          style={{
+                            width: "80%",
+                          }}
+                          defaultValue={membersInTask}
+                          onChange={(value) => handleChangeMember(value)}
+                          optionLabelProp="label"
+                        >
+                          {users?.map((item, index) => {
+                            return (
+                              <Option
+                                value={item?.id}
+                                label={item?.fullName}
+                                key={!item.id ? index : item.id}
+                              >
+                                <Space>
+                                  <span role="img" aria-label={item.fullName}>
+                                    <Avatar src={item.avatar} />
+                                  </span>
+                                  {item.fullName}
+                                </Space>
+                              </Option>
+                            );
+                          })}
+                        </Select>
+                      </>
+                    ) : (
+                      <AnErrorHasOccured />
+                    )
+                  ) : (
+                    <LoadingComponentIndicator />
+                  )
+                ) : (
+                  <>
+                    <Avatar.Group
+                      maxCount={3}
+                      maxStyle={{
+                        color: "#D25B68",
+                        backgroundColor: "#F4D7DA",
+                      }}
+                    >
+                      {assignTasks.length > 0 &&
+                        assignTasks.map((item) => (
+                          <Tooltip
+                            key="avatar"
+                            title={item.user?.profile.fullName}
+                            placement="top"
+                          >
+                            {item.user === null ? (
+                              <Avatar
+                                icon={<UserOutlined />}
+                                size="default"
+                                className="bg-gray-500"
+                              />
+                            ) : (
+                              <Avatar
+                                src={item.user?.profile.avatar}
+                                size="default"
+                              />
+                            )}
+                          </Tooltip>
+                        ))}
+                    </Avatar.Group>
+                    <Avatar
+                      icon={<UsergroupAddOutlined className="text-black" />}
+                      size="default"
+                      onClick={() => seItsOpenMember(true)}
+                      className="cursor-pointer bg-lite"
+                    />
+                  </>
+                )}
               </div>
             )}
           </div>
         </div>
-        {/* task date */}
-        <div className="flex flex-col w-full pl-12 mt-2">
-          <h4 className="text-sm font-semibold flex flex-row gap-x-2">
-            <FieldTimeOutlined />
-            Date
-          </h4>
-          <div className="flex justify-start items-center mt-4">
-            {isOpenDate ? (
-              <DatePicker
-                showTime
-                onChange={onChange}
-                defaultValue={deadline}
-              />
-            ) : (
-              <span
-                className={`px-[6px] py-[2px] w-fit text-xs font-medium flex justify-start items-center gap-x-1 ${
-                  taskSelected.status === "processing"
-                    ? "bg-blue-300 bg-opacity-20 text-blue-600 rounded-md"
-                    : taskSelected.status === "done"
-                    ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
-                    : taskSelected.status === "confirmed"
-                    ? "bg-[#65a9a2] bg-opacity-20 text-[#13676a] rounded-md"
-                    : taskSelected.status === "pending"
-                    ? "bg-[#f9d14c] bg-opacity-20 text-[#faad14] rounded-md"
-                    : ""
-                }`}
-                onClick={() => setIsOpenDate(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-4 h-4"
+        <div className=" flex flex-col  w-1/2">
+          {/* upload file */}
+          <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden">
+            <h4 className="text-sm font-semibold flex flex-row gap-x-2">
+              <FolderOutlined />
+              Tài liệu
+            </h4>
+            {taskSelected.taskFiles.length > 0 &&
+              taskSelected.taskFiles.map((file) => (
+                <a
+                  key={file.id}
+                  href={file.fileUrl}
+                  className="text-ellipsis max-w-full overflow-hidden flex mt-2 text-green-500"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                {formattedDate(taskSelected.endDate)}
-              </span>
+                  <IoMdAttach className="cursor-pointer" size={20} />
+                  Tài liệu đính kèm
+                </a>
+              ))}
+            <div className="flex justify-start items-center mt-4">
+              {/* <Upload
+                className="upload-list-inline"
+                maxCount={1}
+                listType="picture"
+                action=""
+                customRequest={({ file, onSuccess }) => {
+                  setTimeout(() => {
+                    onSuccess("ok");
+                  }, 0);
+                }}
+                showUploadList={{
+                  showPreviewIcon: false,
+                }}
+                beforeUpload={(file) => {
+                  return new Promise((resolve, reject) => {
+                    if (file && file?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( <10MB )");
+                      return false;
+                    } else {
+                      // setFileList(file);
+                      resolve();
+                      return true;
+                    }
+                  });
+                }}
+              >
+                <Button icon={<UploadOutlined />}>Tải tài liệu</Button>
+              </Upload> */}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* priority / status */}
+      <div className=" flex flex-row gap-x-6">
+        <div className="flex flex-col w-1/2">
+          {/* priority */}
+          <div className="flex flex-col  pl-12 mt-2">
+            <h4 className="text-sm font-semibold flex flex-row gap-x-2">
+              <VerticalAlignTopOutlined />
+              Độ ưu tiên
+            </h4>
+            <div className="flex justify-start items-center mt-4">
+              <Tag
+                color={getColorStatusPriority(taskSelected.priority).color}
+                // onClick={() => setIsOpenStatus(true)}
+                className="h-fit"
+              >
+                {getColorStatusPriority(taskSelected.priority).title}
+              </Tag>
+            </div>
+          </div>
+        </div>
+        <div className=" flex flex-col  w-1/2">
+          {/* Status */}
+          <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden ">
+            <h4 className="text-sm font-semibold flex flex-row gap-x-2">
+              <BulbOutlined />
+              Trạng Thái
+            </h4>
+            {!isOpenStatus ? (
+              <Tag
+                color={getColorStatusPriority(taskSelected.status).color}
+                onClick={() => setIsOpenStatus(true)}
+                className="h-fit w-fit mt-4 cursor-pointer"
+              >
+                {getColorStatusPriority(taskSelected.status).title}
+              </Tag>
+            ) : (
+              <Select
+                removeIcon={true}
+                bordered={false}
+                defaultValue={taskSelected.status}
+                className="w-[190px] mt-4"
+                onChange={(value) => handleChangeStatus(value)}
+              >
+                {statusTask.map((status) => (
+                  <Select.Option key={status.value}>
+                    <Tag color={status.color}>{status.label}</Tag>
+                  </Select.Option>
+                ))}
+              </Select>
             )}
           </div>
         </div>
       </div>
-      <div className=" flex flex-col">
-        {/* upload file */}
-        <div className="flex flex-col w-full pl-12 mt-2">
+
+      <div className=" flex flex-row gap-x-6">
+        {/* task date */}
+        <div className="flex flex-col w-full pl-12 mt-4">
           <h4 className="text-sm font-semibold flex flex-row gap-x-2">
-            <FolderOutlined />
-            File
+            <FieldTimeOutlined />
+            Thời gian
           </h4>
           <div className="flex justify-start items-center mt-4">
-            <Upload {...props}>
-              <Button icon={<UploadOutlined />}>Click to Upload</Button>
-            </Upload>
+            {isOpenDate ? (
+              <RangePicker
+                showTime={{
+                  format: "HH:mm:ss",
+                }}
+                onChange={onChangeDate}
+                defaultValue={[
+                  dayjs(taskSelected.startDate).utcOffset(7).local(),
+                  dayjs(taskSelected.endDate).utcOffset(7).local(),
+                ]}
+                format="YYYY/MM/DD HH:mm:ss"
+              />
+            ) : (
+              <span
+                className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
+                  taskSelected.status === "CANCEL" ||
+                  taskSelected.status === "OVERDUE"
+                    ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
+                    : taskSelected.status === "DONE"
+                    ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
+                    : ""
+                }`}
+                onClick={() => setIsOpenDate(true)}
+              >
+                {formattedDate(taskSelected.startDate)} -{" "}
+                {formattedDate(taskSelected.endDate)}
+              </span>
+            )}
           </div>
         </div>
       </div>

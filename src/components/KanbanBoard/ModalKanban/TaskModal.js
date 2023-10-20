@@ -6,16 +6,16 @@ import TaskModalContent from "./TaskModalContent";
 const TaskModal = ({
   isOpenTaskModal,
   setIsOpenTaskModal,
-  taskParent = false,
+  taskParent,
   taskSelected,
   setTaskSelected,
 }) => {
   const [selectedSubTask, setSelectedSubTask] = useState(null);
-
   const onCloseModal = () => {
     console.log("Click");
     setIsOpenTaskModal(false);
   };
+
   return (
     <div>
       <Modal
@@ -23,7 +23,7 @@ const TaskModal = ({
         onCancel={onCloseModal}
         footer={false}
         closeIcon={false}
-        width={600}
+        width={800}
         style={{
           top: 20,
         }}

@@ -38,7 +38,7 @@ const PersonnelPage = () => {
     () => getAllUser({ pageSize: 10, currentPage: page }),
     {
       select: (data) => {
-        data.data = data.data.map(({ ...item }) => {
+        data.data = data.data.map((item) => {
           item.dob = moment(item.dob).format("YYYY-MM-DD");
           return {
             key: item.id,

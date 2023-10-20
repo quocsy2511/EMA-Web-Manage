@@ -24,6 +24,7 @@ module.exports = {
         bgHeader: "#fafbfc",
         bgBoard: "#ffffff",
         bgColumn: "#F4F5F7",
+        bgG: "#F3F4F8",
       },
     },
   },

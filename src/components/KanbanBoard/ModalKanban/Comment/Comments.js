@@ -1,26 +1,84 @@
 import { CloseOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Button } from "antd";
-import React, { useState } from "react";
-import ReactQuill from "react-quill";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Avatar, Button, Input, Modal, message } from "antd";
+import React, { createContext, useState } from "react";
+import { IoMdAttach } from "react-icons/io";
+import { removeComment } from "../../../../apis/comments";
+const ReachableContext = createContext(null);
 
-const Comments = ({ comment, setComment }) => {
-  const [input, setInput] = useState(comment.title);
+const Comments = ({ comment, taskSelected }) => {
+  const { user, file, createdAt, id } = comment;
+  const [input, setInput] = useState(comment.text);
   const [isOpenQuill, seItsOpenQuill] = useState(false);
+  const [modal, contextHolder] = Modal.useModal();
+  const queryClient = useQueryClient();
+  const { mutate: deletecommentMutate } = useMutation(
+    (commentId) => removeComment(commentId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["comments", taskSelected.id]);
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Không thể xóa bình luận! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+  const config = {
+    title: "Delete Comment ?",
+    content: (
+      <>
+        <ReachableContext.Consumer>
+          {(name) => `Deleting a comment is forever. There is no undo !`}
+        </ReachableContext.Consumer>
+        <br />
+      </>
+    ),
+  };
 
   return (
     <div className="flex flex-row mt-8 justify-start gap-x-4 " key={comment.id}>
-      <Avatar src={comment.avatar} />
+      {contextHolder}
+      {user?.profile === null ? (
+        <Avatar icon={<UserOutlined />} className="bg-gray-500" />
+      ) : (
+        <Avatar src={user?.profile?.avatar} />
+      )}
+
       <div className="flex flex-col w-full justify-start gap-y-2">
-        <h3 className="text-sm font-medium text-dark">{comment.createBy}</h3>
+        <h3 className="text-sm font-semibold text-black">
+          {user.profile.fullName}{" "}
+          <span className="font-normal text-xs text-gray-500">
+            at {createdAt}
+          </span>
+        </h3>
         {isOpenQuill ? (
           <div>
-            <ReactQuill
-              theme="snow"
+            <Input
+              className=""
               value={input}
-              onChange={setInput}
-              className="bg-transparent pb-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-[500px]"
+              onChange={(e) => setInput(e.target.value)}
             />
-            <div className="flex flex-row flex-x-2">
+            {comment.commentFiles.length > 0 &&
+              comment.commentFiles.map((file, index) => (
+                <div
+                  key={index}
+                  className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                >
+                  <a
+                    href={file.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 flex flex-row "
+                  >
+                    <IoMdAttach className="cursor-pointer" size={20} />
+                    Tệp đính kèm
+                  </a>
+                </div>
+              ))}
+            <div className="flex flex-row flex-x-2 mt-2">
               <Button
                 type="primary"
                 className="flex items-center justify-center"
@@ -34,18 +92,61 @@ const Comments = ({ comment, setComment }) => {
           </div>
         ) : (
           <div className="w-full">
-            <div className="rounded-md text-sm text-black font-normal bg-slate-50 cursor-pointer w-full  px-4 py-2 ">
-              <p className="">{comment.title}</p>
-            </div>
+            {comment.text === "" ? (
+              comment.commentFiles.length > 0 &&
+              comment.commentFiles.map((file, index) => (
+                <div
+                  key={index}
+                  className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                >
+                  <a
+                    href={file.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 flex flex-row "
+                  >
+                    <IoMdAttach className="cursor-pointer" size={20} />
+                    Tệp đính kèm
+                  </a>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="rounded-md text-sm text-black font-normal bg-slate-50 cursor-pointer w-full  px-4 py-2 ">
+                  <p className="">{comment.text}</p>
+                </div>
+                {comment.commentFiles.length > 0 &&
+                  comment.commentFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                    >
+                      <a
+                        href={file.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 flex flex-row "
+                      >
+                        <IoMdAttach className="cursor-pointer" size={20} />
+                        Tệp đính kèm
+                      </a>
+                    </div>
+                  ))}
+              </>
+            )}
+
             <div className="flex flex-row gap-x-2 text-text4 cursor-pointer ">
               <p
-                onClick={() => seItsOpenQuill(true)}
                 className="hover:text-secondary underline underline-offset-2"
+                onClick={async () => {
+                  const confirmed = await modal.confirm(config);
+                  console.log("Confirmed: ", confirmed);
+                  if (confirmed === true) {
+                    deletecommentMutate(id);
+                  }
+                }}
               >
-                Edit
-              </p>
-              <p className="hover:text-secondary underline underline-offset-2">
-                Delete
+                Xoá
               </p>
             </div>
           </div>
