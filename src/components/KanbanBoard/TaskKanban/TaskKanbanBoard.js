@@ -18,7 +18,6 @@ const TaskKanbanBoard = ({
   setTaskSelected,
 }) => {
   const { assignTasks, id, status } = task;
-  console.log("🚀 ~ file: TaskKanbanBoard.js:17 ~ task:", task);
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
     setTaskParent(false);

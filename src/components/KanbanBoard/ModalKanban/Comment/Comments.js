@@ -1,4 +1,4 @@
-import { CloseOutlined, SendOutlined } from "@ant-design/icons";
+import { CloseOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Button, Input, Modal, message } from "antd";
 import React, { createContext, useState } from "react";
@@ -21,7 +21,7 @@ const Comments = ({ comment, taskSelected }) => {
       onError: () => {
         message.open({
           type: "error",
-          content: "Ko thể xóa bình luận! Hãy thử lại sau",
+          content: "Không thể xóa bình luận! Hãy thử lại sau",
         });
       },
     }
@@ -34,9 +34,6 @@ const Comments = ({ comment, taskSelected }) => {
           {(name) => `Deleting a comment is forever. There is no undo !`}
         </ReachableContext.Consumer>
         <br />
-        {/* <UnreachableContext.Consumer>
-          {(name) => `Unreachable: ${name}!`}
-        </UnreachableContext.Consumer> */}
       </>
     ),
   };
@@ -44,7 +41,12 @@ const Comments = ({ comment, taskSelected }) => {
   return (
     <div className="flex flex-row mt-8 justify-start gap-x-4 " key={comment.id}>
       {contextHolder}
-      <Avatar src={user.profile.avatar} />
+      {user?.profile === null ? (
+        <Avatar icon={<UserOutlined />} className="bg-gray-500" />
+      ) : (
+        <Avatar src={user?.profile?.avatar} />
+      )}
+
       <div className="flex flex-col w-full justify-start gap-y-2">
         <h3 className="text-sm font-semibold text-black">
           {user.profile.fullName}{" "}
@@ -134,12 +136,6 @@ const Comments = ({ comment, taskSelected }) => {
             )}
 
             <div className="flex flex-row gap-x-2 text-text4 cursor-pointer ">
-              <p
-                onClick={() => seItsOpenQuill(true)}
-                className="hover:text-secondary underline underline-offset-2"
-              >
-                chỉnh sửa
-              </p>
               <p
                 className="hover:text-secondary underline underline-offset-2"
                 onClick={async () => {

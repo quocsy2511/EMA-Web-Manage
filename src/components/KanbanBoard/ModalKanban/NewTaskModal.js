@@ -35,7 +35,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   const [description, setDescription] = useState("");
   const [assignee, setAssignee] = useState([]);
   const [estimationTime, setEstimationTime] = useState(1);
-  const [priority, setPriority] = useState("LOW");
+  const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
@@ -63,8 +63,12 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   const { mutate: submitFormTask, isLoading } = useMutation(
     (task) => createTask(task),
     {
-      onSuccess: (data, division) => {
+      onSuccess: () => {
         queryClient.invalidateQueries("tasks");
+        message.open({
+          type: "success",
+          content: "Tạo một công việc mới thành công",
+        });
         setAddNewTask(false);
       },
       onError: () => {
@@ -81,12 +85,18 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
     setAddNewTask(false);
   };
 
-  const { mutate: uploadFileMutate } = useMutation(
-    ({ formData, task }) => uploadFile(formData),
-    {
+  const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
+    useMutation(({ formData, task }) => uploadFile(formData), {
       onSuccess: (data, variables) => {
         const task = variables.task;
-        variables.task = { fileUrl: data, ...task };
+        variables.task = {
+          file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
+          ...task,
+        };
+        console.log(
+          "🚀 ~ file: NewTaskModal.js:97 ~ NewTaskModal ~ variables.task:",
+          variables.task
+        );
         submitFormTask(variables.task);
       },
       onError: () => {
@@ -95,8 +105,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
           content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
         });
       },
-    }
-  );
+    });
 
   //chọn member
   const handleChangeSelectMember = (value) => {
@@ -132,7 +141,6 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   const formatter = (value) => `${value} giờ`;
 
   const onFinish = (values) => {
-    console.log("🚀 ~ file: NewTaskModal.js:135 ~ onFinish ~ values:", values);
     const { fileUrl, date, ...data } = values;
     const task = {
       ...data,
@@ -142,10 +150,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
       parentTask: id,
       leader: assignee[0].toString(),
     };
-    const formData = new FormData();
-    formData.append("file", fileList);
-    formData.append("folderName", "task");
-    // uploadFileMutate({ formData, task });
+
     if (values.fileUrl === undefined || values.fileUrl?.length === 0) {
       console.log("NOOO FILE");
       submitFormTask(task);
@@ -291,12 +296,16 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
               label="Độ ưu tiên"
               name="priority"
               className="text-sm font-medium "
-              initialValue={priority}
+              initialValue={priority.value}
             >
               <Segmented
                 // defaultValue="LOW"
-                options={["LOW", "MEDIUM", "HIGH"]}
-                value={priority}
+                options={[
+                  { label: "THẤP", value: "LOW" },
+                  { label: "TRUNG BÌNH", value: "MEDIUM" },
+                  { label: "CAO", value: "HIGH" },
+                ]}
+                value={priority.value}
                 onChange={setPriority}
               />
             </Form.Item>
@@ -370,7 +379,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
                 htmlType="submit"
                 block
                 className="mt-9"
-                loading={isLoading}
+                loading={isLoadingUploadFile || isLoading}
               >
                 Tạo công việc
               </Button>

@@ -5,6 +5,10 @@ import { IoLogOutOutline } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
 import { Header } from "antd/es/layout/layout";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
+import { getProfile } from "../../apis/users";
+import { useQuery } from "@tanstack/react-query";
+import AnErrorHasOccured from "../Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 
 const HeaderStaff = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
@@ -76,6 +80,16 @@ const HeaderStaff = ({ collapsed, setCollapsed }) => {
     },
   ];
 
+  const {
+    data: staff,
+    isError: isErrorStaff,
+    isLoading: isLoadingStaff,
+  } = useQuery(["staff"], () => getProfile(), {
+    select: (data) => {
+      return data;
+    },
+  });
+
   return (
     <Header className="p-0 bg-white border-b-2 h-[70px]">
       <div className="flex justify-between items-center ">
@@ -97,7 +111,7 @@ const HeaderStaff = ({ collapsed, setCollapsed }) => {
           </Button>
         </div>
         <div>
-          <div className="flex justify-center items-center gap-x-8">
+          <div className="flex justify-center items-center gap-x-8 pr-4">
             <div className="cursor-pointer flex items-center ">
               <Dropdown
                 menu={{
@@ -129,19 +143,32 @@ const HeaderStaff = ({ collapsed, setCollapsed }) => {
               arrow
             >
               <div className="flex items-center">
-                <div className="flex flex-col items-end">
-                  <p className="text-sm font-semibold text-black">User Name</p>
-                  <p className="text-xs font-normal text-black">Staff</p>
-                </div>
-                <div className="w-2" />
-                <Avatar
-                  size={40}
-                  icon={<p>icon</p>}
-                  alt="user_image"
-                  src={
-                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
-                  }
-                />
+                {!isLoadingStaff ? (
+                  !isErrorStaff ? (
+                    <>
+                      <div className="flex flex-col items-end">
+                        <p className="text-sm font-semibold text-black">
+                          {staff?.fullName}
+                        </p>
+                        <p className="text-xs font-normal text-black">
+                          Trưởng bộ phận
+                        </p>
+                      </div>
+                      <div className="w-2" />
+
+                      <Avatar
+                        size={40}
+                        icon={<p>icon</p>}
+                        alt="user_image"
+                        src={staff?.avatar}
+                      />
+                    </>
+                  ) : (
+                    <AnErrorHasOccured />
+                  )
+                ) : (
+                  <LoadingComponentIndicator />
+                )}
               </div>
             </Dropdown>
           </div>

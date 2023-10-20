@@ -22,7 +22,7 @@ export const createTask = (task) =>
       leader: task.leader ?? "",
       assignee: task.assignee,
       parentTask: task.parentTask ?? undefined,
-      fileUrl: task.fileUrl ?? undefined,
+      file: task.file ?? undefined,
     },
   });
 

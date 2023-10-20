@@ -48,6 +48,10 @@ const CommentInput = ({ staff, taskSelected }) => {
     onSuccess: () => {
       queryClient.invalidateQueries(["comments", taskId]);
       form.resetFields();
+      message.open({
+        type: "success",
+        content: "Tạo một bình luận mới thành công",
+      });
     },
     onError: () => {
       message.open({
@@ -62,13 +66,20 @@ const CommentInput = ({ staff, taskSelected }) => {
     {
       onSuccess: (data, variables) => {
         const comment = variables.comment;
-        variables.comment = { fileUrl: [data], ...comment };
+        variables.comment = {
+          file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
+          ...comment,
+        };
+        console.log(
+          "🚀 ~ file: CommentInput.js:73 ~ CommentInput ~ variables.comment:",
+          variables.comment
+        );
         mutate(variables.comment);
       },
       onError: () => {
         message.open({
           type: "error",
-          content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
+          content: "Không thể tải tệp tin lên! Hãy thử lại sau",
         });
       },
     }
@@ -158,7 +169,6 @@ const CommentInput = ({ staff, taskSelected }) => {
                   ]}
                 >
                   <Upload
-                    
                     maxCount={1}
                     listType="picture"
                     customRequest={({ file, onSuccess }) => {

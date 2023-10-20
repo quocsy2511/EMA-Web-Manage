@@ -65,11 +65,11 @@ const HeaderEvent = ({
         return {
           key: item.id,
           label: (
-            <div className="flex flex-row gap-x-2 justify-start items-center">
+            <div className="flex flex-row gap-x-2 justify-start items-center w-fit h-fit">
               <Tooltip key={item.key} title={item.fullName} placement="top">
-                <Avatar src={item?.avatar ?? defaultImage} size={18} />
+                <Avatar src={item?.avatar ?? defaultImage} size={24} />
               </Tooltip>
-              <p className="text-ellipsis w-[100px] flex-1 overflow-hidden ">
+              <p className="text-ellipsis w-full flex-1 overflow-hidden ">
                 {item.fullName}
               </p>
             </div>

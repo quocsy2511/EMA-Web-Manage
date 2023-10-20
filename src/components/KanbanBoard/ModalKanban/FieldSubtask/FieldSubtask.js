@@ -7,7 +7,7 @@ import {
   UsergroupAddOutlined,
   VerticalAlignTopOutlined,
 } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -29,6 +29,7 @@ import moment from "moment";
 import utc from "dayjs/plugin/utc";
 import "dayjs/locale/vi";
 import { IoMdAttach } from "react-icons/io";
+import { updateTaskStatus } from "../../../../apis/tasks";
 dayjs.locale("vi");
 dayjs.extend(utc);
 // Đặt múi giờ của dayjs thành UTC
@@ -64,6 +65,13 @@ const statusTask = [
 ];
 
 const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
+  // console.log(
+  //   "🚀 ~ file: FieldSubtask.js:68 ~ FieldSubtask ~ taskSelected:",
+  //   taskSelected
+  // );
+  const taskID = taskSelected.id;
+  // const [status, setStatus] = useState(taskSelected.status);
+  // console.log("🚀 ~ file: FieldSubtask.js:74 ~ FieldSubtask ~ status:", status);
   const [isOpenStatus, setIsOpenStatus] = useState(false);
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
@@ -104,8 +112,11 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
     // console.log("Formatted Selected Time: ", dateString);
   };
 
-  const handleChangeSelect = (value) => {
-    console.log(`selected ${value}`);
+  const handleChangeMember = (value) => {
+    console.log(
+      "🚀 ~ file: FieldSubtask.js:116 ~ handleChangeMember ~ value:",
+      value
+    );
   };
 
   const getColorStatusPriority = (value) => {
@@ -122,8 +133,29 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
     //colorMapping[status] ở đây để truy suất value bằng key
     return colorMapping[value];
   };
+
+  const queryClient = useQueryClient();
+  const { mutate: UpdateStatus } = useMutation(
+    ({ taskID, status }) => updateTaskStatus({ taskID, status }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tasks"]);
+        message.open({
+          type: "success",
+          content: "Cập nhật trạng thái thành công",
+        });
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Ko thể bình luận lúc này! Hãy thử lại sau",
+        });
+      },
+    }
+  );
   const handleChangeStatus = (value) => {
-    console.log(`selected ${value}`);
+    const data = { status: value, taskID: taskID };
+    UpdateStatus(data);
   };
 
   useEffect(() => {
@@ -167,7 +199,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
                             width: "80%",
                           }}
                           defaultValue={membersInTask}
-                          onChange={(value) => handleChangeSelect(value)}
+                          onChange={(value) => handleChangeMember(value)}
                           optionLabelProp="label"
                         >
                           {users?.map((item, index) => {
@@ -310,7 +342,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
         </div>
         <div className=" flex flex-col  w-1/2">
           {/* Status */}
-          <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden">
+          <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden ">
             <h4 className="text-sm font-semibold flex flex-row gap-x-2">
               <BulbOutlined />
               Trạng Thái
@@ -319,7 +351,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
               <Tag
                 color={getColorStatusPriority(taskSelected.status).color}
                 onClick={() => setIsOpenStatus(true)}
-                className="h-fit w-fit mt-4"
+                className="h-fit w-fit mt-4 cursor-pointer"
               >
                 {getColorStatusPriority(taskSelected.status).title}
               </Tag>
@@ -338,7 +370,6 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
                 ))}
               </Select>
             )}
-            {/* <div className="flex justify-start items-center mt-4"></div> */}
           </div>
         </div>
       </div>
@@ -366,14 +397,11 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
             ) : (
               <span
                 className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
-                  taskSelected.status === "PROCESSING"
-                    ? "bg-blue-300 bg-opacity-20 text-blue-600 rounded-md"
+                  taskSelected.status === "CANCEL" ||
+                  taskSelected.status === "OVERDUE"
+                    ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
                     : taskSelected.status === "DONE"
                     ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
-                    : taskSelected.status === "CONFIRMED"
-                    ? "bg-[#65a9a2] bg-opacity-20 text-[#13676a] rounded-md"
-                    : taskSelected.status === "PENDING"
-                    ? "bg-[#f9d14c] bg-opacity-20 text-[#faad14] rounded-md"
                     : ""
                 }`}
                 onClick={() => setIsOpenDate(true)}

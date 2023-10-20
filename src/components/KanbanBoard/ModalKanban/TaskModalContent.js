@@ -40,6 +40,7 @@ const TaskModalContent = ({
       enabled: !!taskSelected.id,
     }
   );
+
   const {
     data: staff,
     isError: isErrorStaff,

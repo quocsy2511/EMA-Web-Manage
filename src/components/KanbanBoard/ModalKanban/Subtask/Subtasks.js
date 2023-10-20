@@ -32,7 +32,7 @@ const statusTask = [
 ];
 
 const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
-  console.log("🚀 ~ file: Subtasks.js:177 ~ Subtasks ~ Subtask:", Subtask);
+  // console.log("🚀 ~ file: Subtasks.js:177 ~ Subtasks ~ Subtask:", Subtask);
   const { assignTasks } = Subtask;
   const selectSubtaskHandler = (value) => {
     setSelectedSubTask(value);
