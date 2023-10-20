@@ -20,7 +20,6 @@ const TaskModalContent = ({
   taskSelected,
   setTaskSelected,
 }) => {
-  // const taskId =  taskSelected.id;
   const {
     data: listComments,
     isError: isErrorListComments,
@@ -38,7 +37,7 @@ const TaskModalContent = ({
         });
         return formatDate;
       },
-      // enabled: !!taskSelected.id,
+      enabled: !!taskSelected.id,
     }
   );
   const {
@@ -49,7 +48,6 @@ const TaskModalContent = ({
     select: (data) => {
       return data;
     },
-    enabled: taskParent,
   });
 
   const [title, setTitle] = useState(taskSelected.title);
@@ -141,9 +139,9 @@ const TaskModalContent = ({
       {!isLoadingListComments ? (
         !isErrorListComments ? (
           listComments.length > 0 &&
-          listComments.map((comment) => (
+          listComments.map((comment, index) => (
             <Comments
-              key={comment.id}
+              key={index}
               comment={comment}
               taskSelected={taskSelected}
             />

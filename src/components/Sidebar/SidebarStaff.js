@@ -49,13 +49,13 @@ const SidebarStaff = ({ collapsed }) => {
         <HiOutlineHome className="text-[#2196f3]" size={24} />
       </p>
     ),
-    getItem(
-      <LabelText text="Công việc" />,
-      "/staff/task",
-      <p>
-        <HiOutlineCalendarDays className="text-[#9c27b0]" size={24} />
-      </p>
-    ),
+    // getItem(
+    //   <LabelText text="Công việc" />,
+    //   "/staff/task",
+    //   <p>
+    //     <HiOutlineCalendarDays className="text-[#9c27b0]" size={24} />
+    //   </p>
+    // ),
     getItem(
       <LabelText text="Yêu cầu" />,
       "/staff/request",
@@ -75,13 +75,13 @@ const SidebarStaff = ({ collapsed }) => {
         <BsJournalCheck className="text-[#333333]" size={24} />
       </p>
     ),
-    getItem(
-      <LabelText text="Thu chi" />,
-      "/staff/budget",
-      <p>
-        <LiaMoneyBillWaveAltSolid className="text-[#4CAF50]" size={24} />
-      </p>
-    ),
+    // getItem(
+    //   <LabelText text="Thu chi" />,
+    //   "/staff/budget",
+    //   <p>
+    //     <LiaMoneyBillWaveAltSolid className="text-[#4CAF50]" size={24} />
+    //   </p>
+    // ),
   ];
 
   return (

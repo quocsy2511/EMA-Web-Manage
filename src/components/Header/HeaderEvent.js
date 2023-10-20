@@ -1,4 +1,4 @@
-import { SlidersTwoTone } from "@ant-design/icons";
+import { AlignRightOutlined, SlidersTwoTone } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Dropdown, Select, Tooltip } from "antd";
 import React, { useState } from "react";
@@ -88,11 +88,11 @@ const HeaderEvent = ({
   };
 
   return (
-    <div className="p-4  left-0 bg-bgHeader z-50 right-0 top-14">
+    <div className="p-4 left-0 bg-bgBoard z-50 right-0 top-14">
       {!isLoadingUsers ? (
         !isErrorUsers ? (
           <div className="flex items-center space-x-2 md:space-x-4">
-            <header className="flex justify-between  items-center w-full mx-8">
+            <header className="flex justify-between  items-center w-full ml-8 mr-1">
               {/* left header */}
               <div className="flex items-center gap-x-4">
                 <Select
@@ -183,10 +183,11 @@ const HeaderEvent = ({
                     }}
                   >
                     <span className="cursor-pointer text-secondary text-sm">
-                      <SlidersTwoTone
+                      {/* <SlidersTwoTone
                         twoToneColor="#635fc7"
                         style={{ fontSize: 24 }}
-                      />
+                      /> */}
+                      <AlignRightOutlined className="text-2xl" />
                     </span>
                   </Dropdown>
                 </div>

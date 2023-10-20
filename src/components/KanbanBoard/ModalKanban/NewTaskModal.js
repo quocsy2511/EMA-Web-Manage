@@ -25,6 +25,7 @@ import dayjs from "dayjs";
 import { debounce } from "lodash";
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
+import { UploadOutlined } from "@ant-design/icons";
 const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   const { RangePicker } = DatePicker;
   const { Option } = Select;
@@ -36,7 +37,6 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   const [estimationTime, setEstimationTime] = useState(1);
   const [priority, setPriority] = useState("LOW");
   const [fileList, setFileList] = useState();
-  console.log("fileList state: ", fileList);
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
     data: users,
@@ -132,7 +132,8 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   const formatter = (value) => `${value} giờ`;
 
   const onFinish = (values) => {
-    const { fileUrl, ...data } = values;
+    console.log("🚀 ~ file: NewTaskModal.js:135 ~ onFinish ~ values:", values);
+    const { fileUrl, date, ...data } = values;
     const task = {
       ...data,
       eventID: eventID,
@@ -141,12 +142,20 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
       parentTask: id,
       leader: assignee[0].toString(),
     };
-
     const formData = new FormData();
     formData.append("file", fileList);
     formData.append("folderName", "task");
-    uploadFileMutate({ formData, task });
-    // mutate(data);
+    // uploadFileMutate({ formData, task });
+    if (values.fileUrl === undefined || values.fileUrl?.length === 0) {
+      console.log("NOOO FILE");
+      submitFormTask(task);
+    } else {
+      console.log("HAS FILE");
+      const formData = new FormData();
+      formData.append("file", fileList);
+      formData.append("folderName", "task");
+      uploadFileMutate({ formData, task });
+    }
   };
 
   return (
@@ -156,7 +165,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
         open={addNewTask}
         footer={false}
         onCancel={onCloseModal}
-        width={600}
+        width={900}
         className="text-lg font-bold"
       >
         <div className="mt-4 p-4">
@@ -174,7 +183,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
           >
             {/* title */}
             <Form.Item
-              label="Title"
+              label="Tên công việc"
               name="title"
               className="text-sm font-medium "
               rules={[
@@ -191,7 +200,8 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
             </Form.Item>
             {/* date */}
             <Form.Item
-              label="Date"
+              name="date"
+              label="Thời hạn"
               className="text-sm font-medium "
               rules={[
                 {
@@ -214,7 +224,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
             {/* Estimated */}
             <Form.Item
               initialValue={estimationTime}
-              label="Estimated"
+              label="Ước tính giờ"
               name="estimationTime"
               className="text-sm font-medium "
             >
@@ -228,7 +238,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
             </Form.Item>
             {/* member */}
             <Form.Item
-              label="Assignee"
+              label="Phân công"
               name="assignee"
               className="text-sm font-medium "
               rules={[
@@ -278,7 +288,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
             </Form.Item>
             {/* priority */}
             <Form.Item
-              label="Priority"
+              label="Độ ưu tiên"
               name="priority"
               className="text-sm font-medium "
               initialValue={priority}
@@ -293,7 +303,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
             {/* description */}
             <Form.Item
               initialValue={description}
-              label="Description"
+              label="Mô tả"
               className="text-sm font-medium "
               name="desc"
             >
@@ -306,7 +316,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
             </Form.Item>
             {/* file */}
             <Form.Item
-              label="File"
+              label="Tài liệu"
               className="text-sm font-medium "
               name="fileUrl"
               valuePropName="fileList"
@@ -315,8 +325,8 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
                 {
                   validator(_, fileList) {
                     return new Promise((resolve, reject) => {
-                      if (fileList && fileList[0].size > 52428800) {
-                        reject("File quá lớn ( <50MB )");
+                      if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                        reject("File quá lớn ( dung lượng < 10MB )");
                       } else {
                         resolve();
                       }
@@ -325,23 +335,23 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
                 },
               ]}
             >
-              {/* <Upload {...props}>
-                <Button icon={<UploadOutlined />}>Click to Upload</Button>
-              </Upload> */}
-              <Upload.Dragger
+              <Upload
+                className="upload-list-inline"
                 maxCount={1}
-                listType="text"
+                listType="picture"
                 action=""
-                // customRequest={() => {}}
+                customRequest={({ file, onSuccess }) => {
+                  setTimeout(() => {
+                    onSuccess("ok");
+                  }, 0);
+                }}
                 showUploadList={{
                   showPreviewIcon: false,
-                  showRemoveIcon: false,
                 }}
-                // accept=".png,.jpg,.pdf"
                 beforeUpload={(file) => {
                   return new Promise((resolve, reject) => {
-                    if (file && file.size > 52428800) {
-                      reject("File quá lớn ( <50MB )");
+                    if (file && file?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( <10MB )");
                       return false;
                     } else {
                       setFileList(file);
@@ -350,12 +360,10 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
                     }
                   });
                 }}
-                fileList
               >
-                Kéo tập tin vào
-              </Upload.Dragger>
+                <Button icon={<UploadOutlined />}>Tải tài liệu</Button>
+              </Upload>
             </Form.Item>
-
             <Form.Item wrapperCol={{ span: 24 }}>
               <Button
                 type="primary"
@@ -364,7 +372,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
                 className="mt-9"
                 loading={isLoading}
               >
-                Submit
+                Tạo công việc
               </Button>
             </Form.Item>
           </Form>

@@ -1,39 +1,40 @@
-import { EyeOutlined } from "@ant-design/icons";
-import { Avatar, Select, Tag } from "antd";
+import { EyeOutlined, UserOutlined } from "@ant-design/icons";
+import { Avatar, Select, Tag, Tooltip } from "antd";
 import React, { useState } from "react";
-import Members from "../FieldSubtask/Members";
+import moment from "moment";
 
 const statusTask = [
   {
-    value: "processing",
-    label: "Processing",
+    value: "PROCESSING",
+    label: "ĐANG DIỄN RA",
     color: "processing",
   },
   {
-    value: "done",
-    label: "done",
+    value: "DONE",
+    label: "HOÀN THÀNH",
     color: "lime",
   },
   {
-    value: "pending",
-    label: "pending",
+    value: "PENDING",
+    label: "ĐANG CHỜ",
     color: "warning",
   },
   {
-    value: "confirmed",
-    label: "confirmed",
-    color: "success",
+    value: "CANCEL",
+    label: "ĐÃ HUỶ",
+    color: "red",
+  },
+  {
+    value: "OVERDUE",
+    label: "QUÁ HẠN",
+    color: "red",
   },
 ];
 
 const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
+  console.log("🚀 ~ file: Subtasks.js:177 ~ Subtasks ~ Subtask:", Subtask);
   const { assignTasks } = Subtask;
   const selectSubtaskHandler = (value) => {
-    console.log(
-      "🚀 ~ file: Subtasks.js:32 ~ selectSubtaskHandler ~ value:",
-      value
-    );
-
     setSelectedSubTask(value);
   };
 
@@ -41,10 +42,11 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
 
   const getColorStatus = (status) => {
     const colorMapping = {
-      done: "success",
-      pending: "warning",
-      confirmed: "cyan",
-      processing: "processing",
+      DONE: { color: "success", status: "ĐÃ HOÀN THÀNH" },
+      PENDING: { color: "warning", status: "ĐANG CHỜ" },
+      CANCEL: { color: "red", status: "ĐÃ HUỶ" },
+      PROCESSING: { color: "processing", status: "ĐANG DIỄN RA" },
+      OVERDUE: { color: "red", status: "QUÁ HẠN" },
     };
     //colorMapping[status] ở đây để truy suất value bằng key
     return colorMapping[status];
@@ -55,21 +57,13 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
   };
 
   const formattedDate = (value) => {
-    const date = new Date(value)
-      .toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-      .replace(/\//g, "-");
-
+    const date = moment(value).format("DD/MM HH:mm");
     return date;
   };
 
   return (
     <div className="mt-2 flex flex-col gap-y-2 cursor-pointer ">
-      <div className="mt-1 flex flex-col gap-y-2">
+      <div className="mt-1 flex flex-col gap-y-2  pb-2">
         <div className="flex flex-row gap-x-2 cursor-pointer ">
           <input
             className={
@@ -85,22 +79,22 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
           />
           {!isOpenStatus ? (
             <Tag
-              color={getColorStatus(Subtask.status)}
+              color={getColorStatus(Subtask.status).color}
               onClick={() => setIsOpenStatus(true)}
               className="h-fit"
             >
-              {Subtask.status}
+              {getColorStatus(Subtask.status).status}
             </Tag>
           ) : (
             <Select
               removeIcon={true}
               bordered={false}
               defaultValue={Subtask.status}
-              className="w-[170px]"
+              className="w-[190px]"
               onChange={(value) => handleChangeStatus(value)}
             >
               {statusTask.map((status) => (
-                <Select.Option key={status.value} o>
+                <Select.Option key={status.value}>
                   <Tag color={status.color}>{status.label}</Tag>
                 </Select.Option>
               ))}
@@ -130,11 +124,23 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
               >
                 {assignTasks.length > 0 &&
                   assignTasks.map((item) => (
-                    <Members
-                      userId={item.assignee}
-                      size="small"
-                      key={item.assignee}
-                    />
+                    <Tooltip
+                      key="avatar"
+                      title={item.user?.profile.fullName}
+                      placement="top"
+                    >
+                      {" "}
+                      {item.user === null ? (
+                        <Avatar
+                          icon={<UserOutlined />}
+                          size="small"
+                          className="bg-gray-500"
+                        />
+                      ) : (
+                        <Avatar src={item.user?.profile.avatar} size="small" />
+                      )}
+                      {/* <Avatar src={item.user.profile.avatar} size="small" /> */}
+                    </Tooltip>
                   ))}
               </Avatar.Group>
             </div>

@@ -5,7 +5,6 @@ import React, { createContext, useState } from "react";
 import { IoMdAttach } from "react-icons/io";
 import { removeComment } from "../../../../apis/comments";
 const ReachableContext = createContext(null);
-const UnreachableContext = createContext(null);
 
 const Comments = ({ comment, taskSelected }) => {
   const { user, file, createdAt, id } = comment;
@@ -61,8 +60,11 @@ const Comments = ({ comment, taskSelected }) => {
               onChange={(e) => setInput(e.target.value)}
             />
             {comment.commentFiles.length > 0 &&
-              comment.commentFiles.map((file) => (
-                <div className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block">
+              comment.commentFiles.map((file, index) => (
+                <div
+                  key={index}
+                  className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                >
                   <a
                     href={file.fileUrl}
                     target="_blank"
@@ -90,8 +92,11 @@ const Comments = ({ comment, taskSelected }) => {
           <div className="w-full">
             {comment.text === "" ? (
               comment.commentFiles.length > 0 &&
-              comment.commentFiles.map((file) => (
-                <div className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block">
+              comment.commentFiles.map((file, index) => (
+                <div
+                  key={index}
+                  className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                >
                   <a
                     href={file.fileUrl}
                     target="_blank"
@@ -109,8 +114,11 @@ const Comments = ({ comment, taskSelected }) => {
                   <p className="">{comment.text}</p>
                 </div>
                 {comment.commentFiles.length > 0 &&
-                  comment.commentFiles.map((file) => (
-                    <div className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block">
+                  comment.commentFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                    >
                       <a
                         href={file.fileUrl}
                         target="_blank"

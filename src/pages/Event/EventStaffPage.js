@@ -12,7 +12,6 @@ import { getTasks } from "../../apis/tasks";
 import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 const EventStaffPage = () => {
   const [isBoardTask, setIsBoardTask] = useState(true);
-
   const {
     data: listEvent,
     isError,
@@ -60,20 +59,25 @@ const EventStaffPage = () => {
         }
         return data;
       },
-
+      staleTime: 60000,
       enabled: !!selectEvent.id,
     }
   );
-
   useEffect(() => {
-    setSelectEvent(listEvent?.[0] ?? {});
+    if (listEvent && listEvent.length > 0) {
+      setSelectEvent(listEvent[0]);
+    }
+    // setSelectEvent(listEvent?.[0] ?? {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listEvent]);
 
   useEffect(() => {
-    refetch();
+    if (selectEvent.id) {
+      refetch();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectEvent]);
+  }, [selectEvent, refetch]);
 
   return (
     <div className="flex flex-col ">

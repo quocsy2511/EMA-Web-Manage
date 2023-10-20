@@ -23,7 +23,7 @@ const TaskModal = ({
         onCancel={onCloseModal}
         footer={false}
         closeIcon={false}
-        width={600}
+        width={800}
         style={{
           top: 20,
         }}

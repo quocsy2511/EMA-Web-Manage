@@ -5,7 +5,7 @@ import Input from "antd/es/input/Input";
 import React, { useState } from "react";
 import { IoMdAttach } from "react-icons/io";
 import { uploadFile } from "../../../../apis/files";
-import { postComment, removeComment } from "../../../../apis/comments";
+import { postComment } from "../../../../apis/comments";
 
 const CommentInput = ({ staff, taskSelected }) => {
   const taskId = taskSelected.id;
@@ -74,31 +74,11 @@ const CommentInput = ({ staff, taskSelected }) => {
     }
   );
 
-  const { mutate: deletecommentMutate } = useMutation(
-    (commentId) => removeComment(commentId),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["comments", taskId]);
-      },
-      onError: () => {
-        message.open({
-          type: "error",
-          content: "Ko thể xóa bình luận! Hãy thử lại sau",
-        });
-      },
-    }
-  );
-
   const onFinish = (values) => {
-    console.log(
-      "🚀 ~ file: CommentInput.js:46 ~ CommentInput ~ values:",
-      values
-    );
     values = { ...values, taskID: taskId };
     if (!values.fileUrl || values.fileUrl?.length === 0) {
       console.log("NOOO FILE");
       const { fileUrl, ...restValue } = values;
-
       mutate(restValue);
     } else {
       console.log("HAS FILE");
@@ -178,7 +158,7 @@ const CommentInput = ({ staff, taskSelected }) => {
                   ]}
                 >
                   <Upload
-                    // className="flex items-center gap-x-3 upload-list-inline"
+                    
                     maxCount={1}
                     listType="picture"
                     customRequest={({ file, onSuccess }) => {
