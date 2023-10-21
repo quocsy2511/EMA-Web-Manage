@@ -11,7 +11,6 @@ const KanbanBoard = ({
   isErrorListTask,
   isLoadingListTask,
 }) => {
-  console.log("ad", selectEvent?.description);
   return (
     <>
       <div className="bg-bgG h-screen overflow-hidden overflow-y-scroll scrollbar-hide">

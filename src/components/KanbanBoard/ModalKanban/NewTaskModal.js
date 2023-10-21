@@ -39,15 +39,21 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
-    data: users,
-    isError: isErrorUsers,
-    isLoading: isLoadingUsers,
+    data: employees,
+    isError: isErrorEmployees,
+    isLoading: isLoadingEmployees,
   } = useQuery(
-    ["users-division"],
-    () => getAllUser({ divisionId, pageSize: 10, currentPage: 1 }),
+    ["employees"],
+    () =>
+      getAllUser({
+        divisionId,
+        pageSize: 10,
+        currentPage: 1,
+        role: "EMPLOYEE",
+      }),
     {
       select: (data) => {
-        const listUsers = data.data.map((item) => {
+        const listUsers = data.data.map(({ ...item }) => {
           item.dob = moment(item.dob).format("YYYY-MM-DD");
           return {
             key: item.id,
@@ -153,16 +159,16 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
     };
     console.log("🚀 ~ file: NewTaskModal.js:146 ~ onFinish ~ task:", task);
 
-    // if (values.fileUrl === undefined || values.fileUrl?.length === 0) {
-    //   console.log("NOOO FILE");
-    //   submitFormTask(task);
-    // } else {
-    //   console.log("HAS FILE");
-    //   const formData = new FormData();
-    //   formData.append("file", fileList);
-    //   formData.append("folderName", "task");
-    //   uploadFileMutate({ formData, task });
-    // }
+    if (values.fileUrl === undefined || values.fileUrl?.length === 0) {
+      console.log("NOOO FILE");
+      submitFormTask(task);
+    } else {
+      console.log("HAS FILE");
+      const formData = new FormData();
+      formData.append("file", fileList);
+      formData.append("folderName", "task");
+      uploadFileMutate({ formData, task });
+    }
   };
   const [form] = Form.useForm();
   return (
@@ -257,8 +263,8 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
               ]}
               hasFeedback
             >
-              {!isLoadingUsers ? (
-                !isErrorUsers ? (
+              {!isLoadingEmployees ? (
+                !isErrorEmployees ? (
                   <Select
                     autoFocus
                     allowClear
@@ -270,7 +276,7 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
                     onChange={(value) => handleChangeSelectMember(value)}
                     optionLabelProp="label"
                   >
-                    {users?.map((item, index) => {
+                    {employees?.map((item, index) => {
                       return (
                         <Option
                           value={item.id}

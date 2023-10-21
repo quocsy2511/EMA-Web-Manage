@@ -65,13 +65,11 @@ const statusTask = [
 ];
 
 const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
-  // console.log(
-  //   "🚀 ~ file: FieldSubtask.js:68 ~ FieldSubtask ~ taskSelected:",
-  //   taskSelected
-  // );
+  console.log(
+    "🚀 ~ file: FieldSubtask.js:68 ~ FieldSubtask ~ taskSelected:",
+    taskSelected
+  );
   const taskID = taskSelected.id;
-  // const [status, setStatus] = useState(taskSelected.status);
-  // console.log("🚀 ~ file: FieldSubtask.js:74 ~ FieldSubtask ~ status:", status);
   const [isOpenStatus, setIsOpenStatus] = useState(false);
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
@@ -153,6 +151,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
       },
     }
   );
+
   const handleChangeStatus = (value) => {
     const data = { status: value, taskID: taskID };
     UpdateStatus(data);

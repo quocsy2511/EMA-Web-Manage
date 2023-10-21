@@ -51,15 +51,10 @@ const TaskKanbanBoard = ({
     }
   );
 
-  console.log(
-    "🚀 ~ file: TaskKanbanBoard.js:30 ~ assignTasks:",
-    subtaskDetails[0].assignTasks
-  );
-
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
     setTaskParent(false);
-    setTaskSelected(subtaskDetails[0]);
+    setTaskSelected(subtaskDetails?.[0]);
     // setTaskSelected(task);
   };
 
@@ -127,7 +122,7 @@ const TaskKanbanBoard = ({
                 : ""
             }`}
           >
-            {task.status === "confirmed" && (
+            {task.status === "DONE" && (
               <CheckSquareOutlined className="text-[#08979c]" />
             )}
             <svg
@@ -213,8 +208,8 @@ const TaskKanbanBoard = ({
             {!isLoadingSubtaskDetails ? (
               !isErrorSubtaskDetails ? (
                 <>
-                  {subtaskDetails[0].assignTasks > 0 &&
-                    subtaskDetails[0].assignTasks.map((item, index) => (
+                  {subtaskDetails?.[0].assignTasks > 0 &&
+                    subtaskDetails?.[0].assignTasks.map((item, index) => (
                       <Tooltip
                         key="avatar"
                         title={item.user?.profile?.fullName}

@@ -1,7 +1,9 @@
 import { EyeOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Select, Tag, Tooltip } from "antd";
+import { Avatar, Select, Tag, Tooltip, message } from "antd";
 import React, { useState } from "react";
 import moment from "moment";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateTaskStatus } from "../../../../apis/tasks";
 
 const statusTask = [
   {
@@ -33,7 +35,7 @@ const statusTask = [
 
 const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
   console.log("🚀 ~ file: Subtasks.js:177 ~ Subtasks ~ Subtask:", Subtask);
-  const { assignTasks } = Subtask;
+  const { assignTasks, id } = Subtask;
   const selectSubtaskHandler = (value) => {
     setSelectedSubTask(value);
   };
@@ -42,7 +44,7 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
 
   const getColorStatus = (status) => {
     const colorMapping = {
-      DONE: { color: "success", status: "ĐÃ HOÀN THÀNH" },
+      DONE: { color: "success", status: "HOÀN THÀNH" },
       PENDING: { color: "warning", status: "ĐANG CHỜ" },
       CANCEL: { color: "red", status: "ĐÃ HUỶ" },
       PROCESSING: { color: "processing", status: "ĐANG DIỄN RA" },
@@ -52,8 +54,29 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
     return colorMapping[status];
   };
 
+  const queryClient = useQueryClient();
+  const { mutate: UpdateStatus } = useMutation(
+    ({ taskID, status }) => updateTaskStatus({ taskID, status }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tasks"]);
+        message.open({
+          type: "success",
+          content: "Cập nhật trạng thái thành công",
+        });
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Ko thể bình luận lúc này! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
   const handleChangeStatus = (value) => {
-    console.log(`selected ${value}`);
+    const data = { status: value, taskID: id };
+    UpdateStatus(data);
   };
 
   const formattedDate = (value) => {
@@ -67,7 +90,7 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
         <div className="flex flex-row gap-x-2 cursor-pointer ">
           <input
             className={
-              Subtask.status === "confirmed"
+              Subtask.status === "DONE"
                 ? "line-through decoration-red-700 decoration-2 opacity-30 bg-transparent px-2 py-1 rounded-md text-sm font-medium border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer "
                 : "bg-transparent px-2 py-1 rounded-md text-sm font-medium border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer "
             }

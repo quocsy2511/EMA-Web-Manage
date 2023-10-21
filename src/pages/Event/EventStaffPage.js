@@ -38,11 +38,7 @@ const EventStaffPage = () => {
   });
   const [selectEvent, setSelectEvent] = useState({});
 
-  const {
-    data: staff,
-    isError: isErrorStaff,
-    isLoading: isLoadingStaff,
-  } = useQuery(["staff"], () => getProfile(), {
+  const { data: staff } = useQuery(["staff"], () => getProfile(), {
     select: (data) => {
       return data;
     },
@@ -93,11 +89,12 @@ const EventStaffPage = () => {
         }
         return data;
       },
-      staleTime: 60000,
+      // staleTime: 5000,
       enabled: !!selectEvent.id && !!staff.id,
+      // refetchOnWindowFocus: true,
+      // cacheTime: 0,
     }
   );
-
 
   function filterSubTasks(task, searchText) {
     const subtaskTitles = task?.subTask?.filter((subtask) =>

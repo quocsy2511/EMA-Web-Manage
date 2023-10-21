@@ -5,8 +5,6 @@ import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
 
 const Column = ({ TaskParent }) => {
-
-
   const colors = [
     "bg-red-500",
     "bg-orange-500",
@@ -27,7 +25,7 @@ const Column = ({ TaskParent }) => {
   let completed = 0;
   let subTask = TaskParent.subTask;
   subTask.forEach((task) => {
-    if (task.status === "confirmed") {
+    if (task.status === "DONE") {
       completed++;
     }
   });
