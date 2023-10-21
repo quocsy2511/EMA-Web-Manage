@@ -2,6 +2,11 @@ import { Modal } from "antd";
 import React, { useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import TaskModalContent from "./TaskModalContent";
+import { useQuery } from "@tanstack/react-query";
+import { getTasks } from "../../../apis/tasks";
+import moment from "moment";
+import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 
 const TaskModal = ({
   isOpenTaskModal,
@@ -11,6 +16,36 @@ const TaskModal = ({
   setTaskSelected,
 }) => {
   const [selectedSubTask, setSelectedSubTask] = useState(null);
+  const {
+    data: subtaskDetails,
+    isError: isErrorSubtaskDetails,
+    isLoading: isLoadingSubtaskDetails,
+  } = useQuery(
+    ["subtaskDetails", selectedSubTask?.id],
+    () =>
+      getTasks({
+        fieldName: "id",
+        conValue: selectedSubTask?.id,
+        pageSize: 10,
+        currentPage: 1,
+      }),
+    {
+      select: (data) => {
+        if (data) {
+          const formatDate = data.map(({ ...item }) => {
+            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
+            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
+            return {
+              ...item,
+            };
+          });
+          return formatDate;
+        }
+      },
+      enabled: !!selectedSubTask?.id,
+    }
+  );
+
   const onCloseModal = () => {
     console.log("Click");
     setIsOpenTaskModal(false);
@@ -29,7 +64,7 @@ const TaskModal = ({
         }}
       >
         {selectedSubTask === null ? (
-          //cha
+          //task cha
           <TaskModalContent
             setTaskSelected={setTaskSelected}
             taskSelected={taskSelected}
@@ -37,14 +72,21 @@ const TaskModal = ({
             taskParent={taskParent}
             setSelectedSubTask={setSelectedSubTask}
           />
+        ) : //task con
+        !isLoadingSubtaskDetails ? (
+          !isErrorSubtaskDetails ? (
+            <>
+              <TaskModalContent
+                taskSelected={subtaskDetails?.[0]}
+                setIsOpenTaskModal={setIsOpenTaskModal}
+                taskParent={!taskParent}
+              />
+            </>
+          ) : (
+            <AnErrorHasOccured />
+          )
         ) : (
-          //con
-          <TaskModalContent
-            taskSelected={selectedSubTask}
-            setIsOpenTaskModal={setIsOpenTaskModal}
-            taskParent={!taskParent}
-            selectedSubTask={selectedSubTask}
-          />
+          <LoadingComponentIndicator />
         )}
       </Modal>
     </div>

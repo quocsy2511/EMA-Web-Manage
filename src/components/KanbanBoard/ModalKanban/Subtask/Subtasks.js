@@ -34,7 +34,6 @@ const statusTask = [
 ];
 
 const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
-  console.log("🚀 ~ file: Subtasks.js:177 ~ Subtasks ~ Subtask:", Subtask);
   const { assignTasks, id } = Subtask;
   const selectSubtaskHandler = (value) => {
     setSelectedSubTask(value);
@@ -60,6 +59,7 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["tasks"]);
+        queryClient.invalidateQueries(["subtaskDetails"], id);
         message.open({
           type: "success",
           content: "Cập nhật trạng thái thành công",

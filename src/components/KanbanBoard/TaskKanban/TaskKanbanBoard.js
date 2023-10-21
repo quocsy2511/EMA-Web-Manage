@@ -51,6 +51,7 @@ const TaskKanbanBoard = ({
     }
   );
 
+
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
     setTaskParent(false);
@@ -110,7 +111,6 @@ const TaskKanbanBoard = ({
         <p className="font-normal text-sm tracking-wide hover:text-secondary ">
           {task?.title}
         </p>
-
         {/* Sumary */}
         <div className="flex justify-start items-center gap-x-2 cursor-pointer mt-1 flex-wrap">
           <span
@@ -208,7 +208,7 @@ const TaskKanbanBoard = ({
             {!isLoadingSubtaskDetails ? (
               !isErrorSubtaskDetails ? (
                 <>
-                  {subtaskDetails?.[0].assignTasks > 0 &&
+                  {subtaskDetails?.[0].assignTasks.length > 0 &&
                     subtaskDetails?.[0].assignTasks.map((item, index) => (
                       <Tooltip
                         key="avatar"

@@ -16,9 +16,7 @@ import moment from "moment";
 const TaskModalContent = ({
   taskParent,
   setSelectedSubTask,
-  selectedSubTask,
   taskSelected,
-  setTaskSelected,
 }) => {
   const {
     data: listComments,
@@ -140,13 +138,16 @@ const TaskModalContent = ({
       {!isLoadingListComments ? (
         !isErrorListComments ? (
           listComments.length > 0 &&
-          listComments.map((comment, index) => (
-            <Comments
-              key={index}
-              comment={comment}
-              taskSelected={taskSelected}
-            />
-          ))
+          listComments.map(
+            (comment, index) =>
+              taskParent === false && (
+                <Comments
+                  key={index}
+                  comment={comment}
+                  taskSelected={taskSelected}
+                />
+              )
+          )
         ) : (
           <AnErrorHasOccured />
         )

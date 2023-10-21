@@ -65,10 +65,6 @@ const statusTask = [
 ];
 
 const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
-  console.log(
-    "🚀 ~ file: FieldSubtask.js:68 ~ FieldSubtask ~ taskSelected:",
-    taskSelected
-  );
   const taskID = taskSelected.id;
   const [isOpenStatus, setIsOpenStatus] = useState(false);
   const divisionId = useRouteLoaderData("staff").divisionID;
@@ -96,9 +92,9 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
   const [isOpenDate, setIsOpenDate] = useState(false);
   const [isOpenMember, seItsOpenMember] = useState(false);
   const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
+  // console.log("🚀 ~ file: FieldSubtask.js:95 ~ FieldSubtask ~ assignTasks:", assignTasks)
 
   const membersInTask = assignTasks?.map((item) => item.user?.id);
-  // const formatDate = "YYYY/MM/DD HH:mm:ss";
 
   const formattedDate = (value) => {
     const date = moment(value).format("DD/MM HH:mm");
@@ -136,8 +132,9 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
   const { mutate: UpdateStatus } = useMutation(
     ({ taskID, status }) => updateTaskStatus({ taskID, status }),
     {
-      onSuccess: () => {
+      onSuccess: (status) => {
         queryClient.invalidateQueries(["tasks"]);
+        queryClient.invalidateQueries(["subtaskDetails"], taskID);
         message.open({
           type: "success",
           content: "Cập nhật trạng thái thành công",
@@ -146,7 +143,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
       onError: () => {
         message.open({
           type: "error",
-          content: "Ko thể bình luận lúc này! Hãy thử lại sau",
+          content: "Ko thể cập nhật trạng thái lúc này! Hãy thử lại sau",
         });
       },
     }
@@ -330,11 +327,11 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
             </h4>
             <div className="flex justify-start items-center mt-4">
               <Tag
-                color={getColorStatusPriority(taskSelected.priority).color}
+                color={getColorStatusPriority(taskSelected.priority)?.color}
                 // onClick={() => setIsOpenStatus(true)}
                 className="h-fit"
               >
-                {getColorStatusPriority(taskSelected.priority).title}
+                {getColorStatusPriority(taskSelected.priority)?.title}
               </Tag>
             </div>
           </div>
@@ -348,11 +345,11 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
             </h4>
             {!isOpenStatus ? (
               <Tag
-                color={getColorStatusPriority(taskSelected.status).color}
+                color={getColorStatusPriority(taskSelected.status)?.color}
                 onClick={() => setIsOpenStatus(true)}
                 className="h-fit w-fit mt-4 cursor-pointer"
               >
-                {getColorStatusPriority(taskSelected.status).title}
+                {getColorStatusPriority(taskSelected.status)?.title}
               </Tag>
             ) : (
               <Select
