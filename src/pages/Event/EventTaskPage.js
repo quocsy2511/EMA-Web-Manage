@@ -7,13 +7,17 @@ import {
   BsHourglassSplit,
   BsHourglassBottom,
   BsTagsFill,
-  BsTagFill,
   BsPlus,
 } from "react-icons/bs";
 import { RiAttachment2, RiEditFill } from "react-icons/ri";
 import { LiaClipboardListSolid } from "react-icons/lia";
 import { MdFilterListAlt, MdLocationPin } from "react-icons/md";
-import { FcMoneyTransfer } from "react-icons/fc";
+import {
+  FcMoneyTransfer,
+  FcHighPriority,
+  FcLowPriority,
+  FcMediumPriority,
+} from "react-icons/fc";
 import EventTaskSelection from "../../components/Selection/EventTaskSelection";
 import TaskItem from "../../components/Task/TaskItem";
 import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
@@ -25,6 +29,7 @@ import moment from "moment";
 import "moment/locale/vi";
 import { filterTask, getTasks } from "../../apis/tasks";
 import EmptyList from "../../components/Error/EmptyList";
+import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 
 moment.locale("vi"); // Set the locale to Vietnam
 
@@ -255,6 +260,14 @@ const EventTaskPage = () => {
           <p className="w-[60%] text-sm text-slate-400 mt-3">
             {data.description}
           </p>
+          {/* <div
+            className="w-[60%] text-sm text-slate-400 mt-3"
+            dangerouslySetInnerHTML={{
+              __html: new QuillDeltaToHtmlConverter(
+                JSON.parse(data.description)
+              ).convert(),
+            }}
+          /> */}
           <div className="flex items-center flex-wrap gap-x-4 gap-y-5 mt-6">
             <Tag
               icon={<MdLocationPin size={20} color={color.green} />}
@@ -318,9 +331,22 @@ const EventTaskPage = () => {
 
             <div className="w-[40%]">
               <p className="text-base font-semibold">Tiến độ các hạng mục</p>
-              <Tooltip title="3/25 task lớn đã xong">
-                <Progress percent={70} />
-              </Tooltip>
+              {tasks && tasks?.length !== 0 ? (
+                <Tooltip
+                  title={`${
+                    tasks.filter((item) => item.status === "DONE").length
+                  }/${tasks.length} task lớn đã xong`}
+                >
+                  <Progress
+                    percent={
+                      tasks.filter((item) => item.status === "DONE").length /
+                      tasks.length
+                    }
+                  />
+                </Tooltip>
+              ) : (
+                <p className="text-slate-500">Chưa có hạng mục</p>
+              )}
             </div>
           </div>
         </div>
@@ -360,15 +386,30 @@ const EventTaskPage = () => {
                   options={[
                     {
                       value: "LOW",
-                      label: "Thấp",
+                      label: (
+                        <div className="flex items-center gap-x-2">
+                          <FcLowPriority />
+                          <span>Thấp</span>
+                        </div>
+                      ),
                     },
                     {
                       value: "MEDIUM",
-                      label: "Trung bình",
+                      label: (
+                        <div className="flex items-center gap-x-2">
+                          <FcMediumPriority />
+                          <span>Trung bình</span>
+                        </div>
+                      ),
                     },
                     {
                       value: "HIGH",
-                      label: "Cao",
+                      label: (
+                        <div className="flex items-center gap-x-2">
+                          <FcHighPriority />
+                          <span>Cao</span>
+                        </div>
+                      ),
                     },
                   ]}
                   value={prioritySelection}
@@ -422,14 +463,20 @@ const EventTaskPage = () => {
                 <AnimatePresence mode="await">
                   {assigneeSelection || prioritySelection || statusSelection ? (
                     filterTasks.length === 0 ? (
-                      <EmptyList title="Chưa có công việc nào!" />
+                      <EmptyList
+                        key="empty-task"
+                        title="Chưa có công việc nào!"
+                      />
                     ) : (
                       filterTasks.map((task) => (
                         <TaskItem key={task.id} task={task} isSubtask={false} />
                       ))
                     )
                   ) : tasks.length === 0 ? (
-                    <EmptyList title="Chưa có công việc nào!" />
+                    <EmptyList
+                      key="empty-task"
+                      title="Chưa có công việc nào!"
+                    />
                   ) : (
                     tasks.map((task) => (
                       <TaskItem key={task.id} task={task} isSubtask={false} />

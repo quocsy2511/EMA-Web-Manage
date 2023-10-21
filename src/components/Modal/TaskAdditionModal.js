@@ -15,10 +15,12 @@ import viVN from "antd/locale/vi_VN";
 import moment from "moment";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import UploadTask from "../Upload/UploadTask";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllUser } from "../../apis/users";
+import { getAllUser, getUserById } from "../../apis/users";
 import { createTask } from "../../apis/tasks";
+import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
+import { uploadFile } from "../../apis/files";
+import { IoMdAttach } from "react-icons/io";
 
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
@@ -28,41 +30,63 @@ const Title = ({ title }) => <p className="text-base font-medium">{title}</p>;
 const TaskAdditionModal = ({
   isModalOpen,
   setIsModalOpen,
-  parentTaskId,
   eventId,
-  // divisionId,
   date,
   staffs,
+
+  parentTaskId,
+  staffId,
 }) => {
-  // const {
-  //   data: employees,
-  //   isLoading: employeeIsLoading,
-  //   isError: employeeIsError,
-  // } = useQuery(
-  //   ["employees"],
-  //   () =>
-  //     getAllUser({
-  //       divisionId,
-  //       pageSize: 50,
-  //       currentPage: 1,
-  //     }),
-  //   {
-  //     select: (data) => {
-  //       return data.data;
-  //     },
-  //     enabled: !!parentTaskId,
-  //   }
-  // );
-  // console.log("employees: ", employees);
+  console.log("parentTaskId: ", parentTaskId);
+  console.log("staffId: ", staffId);
+
+  const {
+    data: staff,
+    isLoading: staffIsLoading,
+    isError: staffIsError,
+  } = useQuery(["user", staffId], () => getUserById(staffId), {
+    enabled: !!parentTaskId && !!staffId,
+  });
+  console.log("STAFF: ", staff);
+
+  const divisionId = staff?.divisionId;
+  console.log("divisionId: ", divisionId);
+
+  const {
+    data: employees,
+    isLoading: employeesIsLoading,
+    isError: employeesIsError,
+  } = useQuery(
+    ["employees", divisionId],
+    () =>
+      getAllUser({
+        divisionId,
+        role: "EMPLOYEE",
+        pageSize: 50,
+        currentPage: 1,
+      }),
+    {
+      select: (data) => {
+        return data.data.map((employee) => ({
+          label: employee.fullName,
+          value: employee.id,
+        }));
+      },
+      enabled: !!divisionId,
+    }
+  );
+  console.log("employees: ", employees);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation((task) => createTask(task), {
     onSuccess: () => {
-      console.log("API SUCCESS");
-      queryClient.invalidateQueries(["tasks", eventId]);
+      if (parentTaskId)
+        queryClient.invalidateQueries(["tasks", eventId, parentTaskId]);
+      else queryClient.invalidateQueries(["tasks", eventId]);
+
       messageApi.open({
         type: "success",
-        content: "Đã tạo 1 đề mục",
+        content: "Đã tạo 1 hạng mục",
       });
       form.resetFields();
       setIsModalOpen(false);
@@ -75,8 +99,29 @@ const TaskAdditionModal = ({
     },
   });
 
+  const { mutate: uploadFileMutate, isLoading: uploadIsLoading } = useMutation(
+    ({ formData, task }) => uploadFile(formData),
+    {
+      onSuccess: (data, variables) => {
+        const task = variables.task;
+        variables.task = {
+          file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
+          ...task,
+        };
+        // mutate(variables.task);
+      },
+      onError: () => {
+        messageApi.open({
+          type: "error",
+          content: "Không thể tải tệp tin lên! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
   const [isTime, setIsTime] = useState(false);
   const [fileList, setFileList] = useState();
+  const [selectedEmployeesId, setSelectedEmployeesId] = useState();
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
@@ -103,6 +148,7 @@ const TaskAdditionModal = ({
       eventID: eventId,
       estimationTime: +values.estimationTime,
       assignee: [values.assignee],
+      // leader: values.assignee,
     };
 
     console.log("Transform data: ", values);
@@ -111,6 +157,21 @@ const TaskAdditionModal = ({
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
+  };
+
+  const handleValuesChange = (changedValues) => {
+    console.log("changedValues: ", changedValues);
+
+    const formFieldName = Object.keys(changedValues)[0];
+    console.log("formFieldName: ", formFieldName);
+
+    if (formFieldName === "assignee") {
+      console.log("ASSIGNEE CHANGE");
+
+      console.log("setState assignee: ", changedValues[formFieldName]);
+      setSelectedEmployeesId(changedValues[formFieldName]);
+      // form.set
+    }
   };
 
   return (
@@ -123,7 +184,7 @@ const TaskAdditionModal = ({
       open={isModalOpen}
       onOk={handleOk}
       onCancel={handleCancel}
-      // confirmLoading={loading}
+      confirmLoading={isLoading || uploadIsLoading}
       okText="Tạo"
       cancelText="Hủy"
       centered
@@ -150,6 +211,7 @@ const TaskAdditionModal = ({
             e.preventDefault();
           }
         }}
+        onValuesChange={handleValuesChange}
       >
         <div className="flex gap-x-10">
           <Form.Item
@@ -221,7 +283,6 @@ const TaskAdditionModal = ({
             },
           ]}
         >
-          {/* <TextArea rows={3} /> */}
           <ReactQuill
             className="h-20 mb-10"
             theme="snow"
@@ -230,57 +291,63 @@ const TaskAdditionModal = ({
         </Form.Item>
 
         <div className="flex gap-x-8">
-          {parentTaskId ? (
+          {parentTaskId && staffId ? (
             <>
-              <Form.Item
-                className="w-[50%]"
-                label={<Title title="Các nhân viên phù hợp" />}
-                name="assignee"
-                rules={[
-                  {
-                    required: true,
-                    message: "Chưa chọn nhân viên !",
-                  },
-                ]}
-              >
-                <Select
-                  placeholder="Chọn nhân viên phù hợp"
-                  mode="multiple"
-                  allowClear
-                  options={[
-                    { label: "emp1", value: "emp1" },
-                    { label: "emp2", value: "2mp2" },
-                    { label: "emp3", value: "3mp3" },
-                    { label: "emp4", value: "4mp4" },
-                  ]}
-                  onChange={(value) => {
-                    form.setFieldsValue({ assignee: value });
-                    form.resetFields(["leader"]);
-                  }}
-                />
-              </Form.Item>
-              <Form.Item
-                className=""
-                label={<Title title="Chịu trách nhiệm bởi" />}
-                name="leader"
-                rules={[
-                  {
-                    required: true,
-                    message: "Chưa chọn nhóm trưởng !",
-                  },
-                ]}
-              >
-                <Select
-                  placeholder="Nhân viên"
-                  // options={employees.filter((employee) =>
-                  //   form.getFieldValue("assignee").includes(employee)
-                  // )}
-                  onChange={(value) => {
-                    console.log(value);
-                    form.setFieldsValue({ leader: value });
-                  }}
-                />
-              </Form.Item>
+              {staffIsLoading && employeesIsLoading ? (
+                <LoadingComponentIndicator />
+              ) : staffIsError || employeesIsError ? (
+                <p>Ko thể tải dữ liệu, vui lòng thử lại</p>
+              ) : (
+                <>
+                  <Form.Item
+                    className="w-[50%]"
+                    label={<Title title="Các nhân viên phù hợp" />}
+                    name="assignee"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa chọn nhân viên !",
+                      },
+                    ]}
+                  >
+                    <Select
+                      placeholder="Chọn nhân viên phù hợp"
+                      mode="multiple"
+                      allowClear
+                      options={employees}
+                      onChange={(value) => {
+                        form.setFieldsValue({ assignee: value });
+                        // form.resetFields(["leader"]);
+                      }}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    className=""
+                    label={<Title title="Chịu trách nhiệm bởi" />}
+                    name="leader"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa chọn nhóm trưởng !",
+                      },
+                    ]}
+                  >
+                    <Select
+                      placeholder="Trưởng nhóm"
+                      options={
+                        selectedEmployeesId
+                          ? employees.filter((employee) =>
+                              selectedEmployeesId.includes(employee.value)
+                            )
+                          : []
+                      }
+                      onChange={(value) => {
+                        form.setFieldsValue({ leader: value });
+                      }}
+                    />
+                  </Form.Item>
+                </>
+              )}
             </>
           ) : (
             <>
@@ -347,7 +414,7 @@ const TaskAdditionModal = ({
             />
           </Form.Item>
           <Form.Item
-            className="w-[20%]"
+            className="w-[30%]"
             label={<Title title="Thời gian ước tính" />}
             name="estimationTime"
             rules={[
@@ -364,7 +431,58 @@ const TaskAdditionModal = ({
           </Form.Item>
         </div>
 
-        <div className="flex gap-x-5"></div>
+        <div className="flex gap-x-5">
+          <Form.Item
+            className="mb-0"
+            name="fileUrl"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => e?.fileList}
+            rules={[
+              {
+                validator(_, fileList) {
+                  return new Promise((resolve, reject) => {
+                    if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( dung lượng < 10MB )");
+                    } else {
+                      resolve();
+                    }
+                  });
+                },
+              },
+            ]}
+          >
+            <Upload
+              className="flex items-center gap-x-3"
+              maxCount={1}
+              listType="picture"
+              customRequest={({ file, onSuccess }) => {
+                setTimeout(() => {
+                  onSuccess("ok");
+                }, 0);
+              }}
+              showUploadList={{
+                showPreviewIcon: false,
+              }}
+              beforeUpload={(file) => {
+                return new Promise((resolve, reject) => {
+                  if (file && file?.size > 10 * 1024 * 1024) {
+                    reject("File quá lớn ( <10MB )");
+                    return false;
+                  } else {
+                    setFileList(file);
+                    resolve();
+                    return true;
+                  }
+                });
+              }}
+            >
+              <div className="flex items-center">
+                <IoMdAttach className="cursor-pointer" size={20} />
+                <p className="text-sm font-medium">Tài liệu đính kèm</p>
+              </div>
+            </Upload>
+          </Form.Item>
+        </div>
       </Form>
     </Modal>
   );

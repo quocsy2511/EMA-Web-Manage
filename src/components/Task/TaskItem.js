@@ -13,7 +13,6 @@ import moment from "moment";
 
 const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
   const navigate = useNavigate();
-  console.log("TASK ITEM: ", task);
   const user = task.assignTasks?.[0]?.user?.profile;
 
   const goToSubTask = () => {
@@ -44,9 +43,9 @@ const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
   return (
     <motion.div
       layout
-      initial={{ x: -100 }}
-      animate={{ x: 0 }}
-      exit={{ x: 100 }}
+      initial={{ x: -100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: 100, opacity: 0 }}
       whileHover={{ x: 5, y: -5 }}
       onClick={!isSubtask ? goToSubTask : openSubTaskModal}
       className="flex items-center px-10 py-6 rounded-2xl cursor-pointer"
@@ -64,9 +63,7 @@ const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
             <span className="font-medium">{user.fullName}</span>
           </p>
         ) : (
-          <p className="text-xs">
-            Chưa phân công
-          </p>
+          <p className="text-xs">Chưa phân công</p>
         )}
       </div>
 
@@ -75,7 +72,7 @@ const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
           <BsHourglassSplit size={15} />
           <div className="w-4" />
           <p className="text-sm font-medium">
-            {moment(task.startDate).format("YYYY/MM/DD")}
+            {moment(task.startDate).format("DD/MM/YYYY")}
           </p>
         </div>
         <div className="w-[4%]" />
@@ -83,7 +80,7 @@ const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
           <BsHourglassBottom size={15} />
           <div className="w-4" />
           <p className="text-sm font-medium">
-            {moment(task.endDate).format("YYYY/MM/DD")}
+            {moment(task.endDate).format("DD/MM/YYYY")}
           </p>
         </div>
       </div>

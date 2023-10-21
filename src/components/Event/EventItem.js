@@ -10,6 +10,7 @@ import {
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
 
 const EventItem = ({ event }) => {
   const navigate = useNavigate();
@@ -78,12 +79,16 @@ const EventItem = ({ event }) => {
       <div className="flex items-center gap-x-3">
         <div className="flex items-center gap-x-2 text-green-600 bg-green-400 bg-opacity-20 px-2 py-1 rounded-lg">
           <BsHourglassSplit size={18} />
-          <p className="font-semibold">{event.startDate}</p>
+          <p className="font-semibold">
+            {moment(event.startDate).format("DD-MM-YYYY")}
+          </p>
         </div>
         <BsArrowRightShort size={20} />
         <div className="flex items-center gap-x-2 text-red-500 bg-red-300 bg-opacity-20 px-2 py-1 rounded-lg">
           <BsHourglassBottom size={18} />
-          <p className="font-semibold">{event.endDate}</p>
+          <p className="font-semibold">
+            {moment(event.endDate).format("DD-MM-YYYY")}
+          </p>
         </div>
       </div>
 

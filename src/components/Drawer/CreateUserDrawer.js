@@ -53,12 +53,12 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     }
   );
 
-  const { mutate: uploadFileMutate } = useMutation(
+  const { mutate: uploadFileMutate, isLoading: uploadIsLoading } = useMutation(
     ({ formData, user }) => uploadFile(formData),
     {
       onSuccess: (data, variables) => {
         const user = variables.user;
-        variables.user = { avatar: data, ...user };
+        variables.user = { avatar: data.downloadUrl, ...user };
         createUserMutate(variables.user);
       },
       onError: () => {
@@ -143,6 +143,59 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             gender: "MALE",
           }}
         >
+          <Form.Item
+            className="text-center"
+            name="avatar"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => e?.fileList}
+            rules={[
+              {
+                required: true,
+                message: "Chưa chọn ảnh đại diện",
+              },
+              {
+                validator(_, fileList) {
+                  return new Promise((resolve, reject) => {
+                    if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( Dung lượng <10MB )");
+                    } else {
+                      resolve();
+                    }
+                  });
+                },
+              },
+            ]}
+          >
+            <Upload
+              className="flex items-center gap-x-3"
+              maxCount={1}
+              listType="picture-circle"
+              customRequest={({ file, onSuccess }) => {
+                setTimeout(() => {
+                  onSuccess("ok");
+                }, 0);
+              }}
+              showUploadList={{
+                showPreviewIcon: false,
+                // showRemoveIcon: false,
+              }}
+              // accept=".png,.jpg,.pdf"
+              beforeUpload={(file) => {
+                return new Promise((resolve, reject) => {
+                  if (file && file?.size > 10 * 1024 * 1024) {
+                    reject("File quá lớn ( <10MB )");
+                    return false;
+                  } else {
+                    setFileList(file);
+                    resolve();
+                    return true;
+                  }
+                });
+              }}
+            >
+              Ảnh dại diện
+            </Upload>
+          </Form.Item>
           <Form.Item
             name="fullName"
             label={<Label label="Họ và tên" />}
@@ -329,68 +382,14 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             </Form.Item>
           </div>
 
-          <div className="flex justify-between items-end">
-            <Form.Item
-              className=""
-              name="avatar"
-              label={<Label label="Ảnh địa diện" />}
-              valuePropName="fileList"
-              getValueFromEvent={(e) => e?.fileList}
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa chọn ảnh đại diện",
-                },
-                {
-                  validator(_, fileList) {
-                    return new Promise((resolve, reject) => {
-                      if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
-                        reject("File quá lớn ( Dung lượng <10MB )");
-                      } else {
-                        resolve();
-                      }
-                    });
-                  },
-                },
-              ]}
-            >
-              <Upload
-                className="flex items-center gap-x-3"
-                maxCount={1}
-                listType="picture-circle"
-                customRequest={({ file, onSuccess }) => {
-                  setTimeout(() => {
-                    onSuccess("ok");
-                  }, 0);
-                }}
-                showUploadList={{
-                  showPreviewIcon: false,
-                  // showRemoveIcon: false,
-                }}
-                // accept=".png,.jpg,.pdf"
-                beforeUpload={(file) => {
-                  return new Promise((resolve, reject) => {
-                    if (file && file?.size > 10 * 1024 * 1024) {
-                      reject("File quá lớn ( <10MB )");
-                      return false;
-                    } else {
-                      setFileList(file);
-                      resolve();
-                      return true;
-                    }
-                  });
-                }}
-              >
-                Kéo tập tin vào
-              </Upload>
-            </Form.Item>
+          <div className="text-center">
             <Form.Item>
               <Button
                 className="mt-5"
                 type="primary"
                 size="large"
                 onClick={() => form.submit()}
-                loading={isLoading}
+                loading={isLoading || uploadIsLoading}
               >
                 Tạo
               </Button>

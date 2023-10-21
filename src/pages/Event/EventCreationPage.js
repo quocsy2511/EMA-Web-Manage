@@ -2,6 +2,7 @@ import React, { Fragment, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  Button,
   ConfigProvider,
   DatePicker,
   Form,
@@ -13,14 +14,13 @@ import {
 } from "antd";
 import viVN from "antd/locale/vi_VN";
 import moment from "moment";
-import ReactQuill from "react-quill";
+import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getAllUser } from "../../apis/users";
 import { createEvent } from "../../apis/events";
 import { uploadFile } from "../../apis/files";
 
-const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 
 const Title = ({ title }) => <p className="text-base font-medium">{title}</p>;
@@ -45,7 +45,7 @@ const EventCreationPage = () => {
     }
   );
 
-  const { mutate } = useMutation((event) => createEvent(event), {
+  const { mutate, isLoading } = useMutation((event) => createEvent(event), {
     onSuccess: () => {
       messageApi.open({
         type: "success",
@@ -62,11 +62,11 @@ const EventCreationPage = () => {
     },
   });
 
-  const { mutate: uploadFileMutate } = useMutation(
+  const { mutate: uploadFileMutate, isLoading: uploadIsLoading } = useMutation(
     ({ formData, event }) => uploadFile(formData),
     {
       onSuccess: (data, variables) => {
-        variables.event = { coverUrl: data, ...variables.event };
+        variables.event = { coverUrl: data.downloadUrl, ...variables.event };
         console.log("EVENT: ", variables.event);
         mutate(variables.event);
       },
@@ -105,13 +105,15 @@ const EventCreationPage = () => {
 
     values = {
       eventName: values.eventName,
-      description: values.description,
+      description: JSON.stringify(values.description.ops),
       startDate: moment(values.date[0].$d).format("YYYY-MM-DD"),
       endDate: moment(values.date[1].$d).format("YYYY-MM-DD"),
       location: values.location,
       estBudget: +values.estBudget,
       divisionId: values.divisions.map((division) => division.key),
     };
+
+    console.log("Parse to json: ", JSON.stringify(values.description.ops));
 
     console.log("TRANSORM: ", values);
 
@@ -234,6 +236,13 @@ const EventCreationPage = () => {
               className="h-36 mb-11"
               theme="snow"
               placeholder="Nhập mô tả"
+              onChange={(content, delta, source, editor) => {
+                // console.log("content: ", content);
+                // console.log("delta: ", delta);
+                // console.log("source: ", source);
+                // console.log("editor: ", editor.getContents());
+                form.setFieldsValue({ description: editor.getContents() });
+              }}
             />
           </Form.Item>
 
@@ -256,7 +265,7 @@ const EventCreationPage = () => {
               <Table
                 className="border border-slate-300 rounded-lg "
                 size="small"
-                scroll={{ y: 400 }}
+                scroll={{ y: 150 }}
                 columns={columns}
                 dataSource={!staffIsLoading || !staffIsError ? staffs : []}
                 loading={staffIsLoading}
@@ -290,8 +299,8 @@ const EventCreationPage = () => {
                 {
                   validator(_, fileList) {
                     return new Promise((resolve, reject) => {
-                      if (fileList && fileList[0].size > 52428800) {
-                        reject("File quá lớn ( <50MB )");
+                      if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                        reject("File quá lớn ( <10MB )");
                       } else {
                         resolve();
                       }
@@ -301,20 +310,22 @@ const EventCreationPage = () => {
               ]}
             >
               <Upload.Dragger
-              className="h-40"
+                className="h-40"
                 maxCount={1}
-                listType="text"
-                action=""
-                // customRequest={() => {}}
+                listType="picture"
+                customRequest={({ file, onSuccess }) => {
+                  setTimeout(() => {
+                    onSuccess("ok");
+                  }, 0);
+                }}
                 showUploadList={{
                   showPreviewIcon: false,
-                  showRemoveIcon: false,
                 }}
                 beforeUpload={(file) => {
                   console.log("file: ", file);
                   return new Promise((resolve, reject) => {
-                    if (file && file.size > 10*1024*1024) {
-                      reject("File quá lớn ( <50MB )");
+                    if (file && file?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( <10MB )");
                       return false;
                     } else {
                       setFileList(file);
@@ -366,24 +377,21 @@ const EventCreationPage = () => {
 
             <div className="flex-1 flex items-end justify-end gap-x-5 mb-0">
               <Form.Item className="0">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  className="bg-red-200 text-red-500 text-base font-medium px-8 py-2 rounded-lg"
-                  type="submit"
-                >
-                  <Link className="hover:text-red-500" to=".." relative="path">
+                <Button danger size="large">
+                  <Link to=".." relative="path">
                     Trở về
                   </Link>
-                </motion.button>
+                </Button>
               </Form.Item>
               <Form.Item className="">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  className="bg-[#1677ff] text-white text-base font-medium px-8 py-2 rounded-lg"
-                  type="submit"
+                <Button
+                  size="large"
+                  type="primary"
+                  loading={isLoading || uploadIsLoading}
+                  onClick={() => form.submit()}
                 >
                   Tạo
-                </motion.button>
+                </Button>
               </Form.Item>
             </div>
           </div>

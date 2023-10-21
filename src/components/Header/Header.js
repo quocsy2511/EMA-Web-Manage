@@ -138,7 +138,11 @@ const Header = ({ collapsed, setCollapsed, data }) => {
                     {data?.fullName ?? "User Name"}
                   </p>
                   <p className="text-xs font-normal">
-                    {data?.role ?? "Manager"}
+                    {data?.role
+                      ? data.role === "MANAGER"
+                        ? "Quản lý"
+                        : "Trưởng bộ phận"
+                      : "Vai trò"}
                   </p>
                 </div>
                 <div className="w-2" />
