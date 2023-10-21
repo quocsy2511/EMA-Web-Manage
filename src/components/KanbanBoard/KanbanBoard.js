@@ -3,6 +3,7 @@ import Column from "../KanbanBoard/Column/Column.js";
 import { BookOutlined, CalendarOutlined } from "@ant-design/icons";
 import AnErrorHasOccured from "../Error/AnErrorHasOccured.js";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator.js";
+import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 
 const KanbanBoard = ({
   selectEvent,
@@ -10,7 +11,7 @@ const KanbanBoard = ({
   isErrorListTask,
   isLoadingListTask,
 }) => {
-
+  console.log("ad", selectEvent?.description);
   return (
     <>
       <div className="bg-bgG h-screen overflow-hidden overflow-y-scroll scrollbar-hide">
@@ -29,9 +30,16 @@ const KanbanBoard = ({
           </span>
           <span className="relative z-20  flex flex-row justify-start items-start gap-x-2 mt-3 mb-6">
             <BookOutlined className="text-lg text-orange-500" />
-            <p className="text-base w-2/3  px-4 italic text-black ">
-              {selectEvent.description}
-            </p>
+            {selectEvent?.description !== undefined && (
+              <p
+                className="text-base w-2/3  px-4 italic text-black "
+                dangerouslySetInnerHTML={{
+                  __html: new QuillDeltaToHtmlConverter(
+                    JSON.parse(selectEvent?.description)
+                  ).convert(),
+                }}
+              ></p>
+            )}
           </span>
         </div>
         <div className="flex scrollbar-default overflow-x-scroll px-10 py-2 gap-x-3 ">
