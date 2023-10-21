@@ -5,7 +5,8 @@ import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
 
 const Column = ({ TaskParent }) => {
-  // console.log("🚀 ~ file: Column.js:8 ~ Column ~ TaskParent:", TaskParent)
+
+
   const colors = [
     "bg-red-500",
     "bg-orange-500",
@@ -46,21 +47,21 @@ const Column = ({ TaskParent }) => {
   return (
     <>
       <div className="scrollbar-hide mt-5 min-w-[280px]">
-        <div className=" bg-transparent  scrollbar-hide rounded-xl w-full">
+        <div className=" bg-bgSubtask py-4 scrollbar-hide rounded-xl w-full shadow-xl">
           {/* task parent */}
           <div
-            className="bg-bgBoard flex flex-col items-start gap-2  justify-start 
+            className="bg-blue-400 flex flex-col items-start gap-2  justify-start 
           w-[250px] mx-auto my-2 rounded-lg cursor-pointer py-4 px-1 hover:opacity-70 shadow-lg shadow-darkShadow"
             onClick={() => openTaskParentModal()}
           >
             <div className="flex items-start gap-2 w-full px-2">
               <span className={`rounded-full w-4 h-4 ${color} mt-[2px]`}></span>
-              <div className="flex flex-col gap-y-[2px]">
-                <p className=" max-w-[215px] whitespace-normal italic font-semibold text-darkDropDown hover:text-secondary text-sm">
+              <div className="flex flex-col gap-y-[2px]  hover:text-secondary">
+                <p className=" max-w-[215px] whitespace-normal italic font-semibold text-white text-sm">
                   {TaskParent?.title} ({completed}/{TaskParent?.subTask?.length}
                   )
                 </p>
-                <p className="text-[8px] font-semibold text-gray-600 underline underline-offset-2">
+                <p className="text-[8px] font-semibold text-white underline underline-offset-2">
                   {TaskParent.startDate} - {TaskParent.endDate}
                 </p>
               </div>

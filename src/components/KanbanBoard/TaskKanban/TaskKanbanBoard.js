@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getComment } from "../../../apis/comments";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
+import { getTasks } from "../../../apis/tasks";
 
 const TaskKanbanBoard = ({
   setIsOpenTaskModal,
@@ -17,11 +18,49 @@ const TaskKanbanBoard = ({
   task,
   setTaskSelected,
 }) => {
+  // console.log("🚀 ~ file: TaskKanbanBoard.js:20 ~ task:", task);
   const { assignTasks, id, status } = task;
+
+  const {
+    data: subtaskDetails,
+    isError: isErrorSubtaskDetails,
+    isLoading: isLoadingSubtaskDetails,
+  } = useQuery(
+    ["subtaskDetails", id],
+    () =>
+      getTasks({
+        fieldName: "id",
+        conValue: id,
+        pageSize: 10,
+        currentPage: 1,
+      }),
+    {
+      select: (data) => {
+        if (data) {
+          const formatDate = data.map(({ ...item }) => {
+            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
+            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
+            return {
+              ...item,
+            };
+          });
+          return formatDate;
+        }
+      },
+      enabled: !!id,
+    }
+  );
+
+  console.log(
+    "🚀 ~ file: TaskKanbanBoard.js:30 ~ assignTasks:",
+    subtaskDetails[0].assignTasks
+  );
+
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
     setTaskParent(false);
-    setTaskSelected(task);
+    setTaskSelected(subtaskDetails[0]);
+    // setTaskSelected(task);
   };
 
   const {
@@ -171,24 +210,37 @@ const TaskKanbanBoard = ({
               backgroundColor: "#F4D7DA",
             }}
           >
-            {assignTasks.length > 0 &&
-              assignTasks.map((item, index) => (
-                <Tooltip
-                  key="avatar"
-                  title={item.user?.profile.fullName}
-                  placement="top"
-                >
-                  {item.user === null ? (
-                    <Avatar
-                      icon={<UserOutlined />}
-                      size="small"
-                      className="bg-gray-500"
-                    />
-                  ) : (
-                    <Avatar src={item.user?.profile.avatar} size="small" />
-                  )}
-                </Tooltip>
-              ))}
+            {!isLoadingSubtaskDetails ? (
+              !isErrorSubtaskDetails ? (
+                <>
+                  {subtaskDetails[0].assignTasks > 0 &&
+                    subtaskDetails[0].assignTasks.map((item, index) => (
+                      <Tooltip
+                        key="avatar"
+                        title={item.user?.profile?.fullName}
+                        placement="top"
+                      >
+                        {item.user.profile === null ? (
+                          <Avatar
+                            icon={<UserOutlined />}
+                            size="small"
+                            className="bg-gray-500"
+                          />
+                        ) : (
+                          <Avatar
+                            src={item.user?.profile?.avatar}
+                            size="small"
+                          />
+                        )}
+                      </Tooltip>
+                    ))}
+                </>
+              ) : (
+                <AnErrorHasOccured />
+              )
+            ) : (
+              <LoadingComponentIndicator />
+            )}
           </Avatar.Group>
         </div>
       </div>

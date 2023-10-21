@@ -32,7 +32,7 @@ const statusTask = [
 ];
 
 const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
-  // console.log("🚀 ~ file: Subtasks.js:177 ~ Subtasks ~ Subtask:", Subtask);
+  console.log("🚀 ~ file: Subtasks.js:177 ~ Subtasks ~ Subtask:", Subtask);
   const { assignTasks } = Subtask;
   const selectSubtaskHandler = (value) => {
     setSelectedSubTask(value);
@@ -122,7 +122,7 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
                   backgroundColor: "#F4D7DA",
                 }}
               >
-                {assignTasks.length > 0 &&
+                {assignTasks?.length > 0 &&
                   assignTasks.map((item) => (
                     <Tooltip
                       key="avatar"
@@ -130,7 +130,7 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
                       placement="top"
                     >
                       {" "}
-                      {item.user === null ? (
+                      {item.user.profile === null ? (
                         <Avatar
                           icon={<UserOutlined />}
                           size="small"
@@ -139,7 +139,6 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
                       ) : (
                         <Avatar src={item.user?.profile.avatar} size="small" />
                       )}
-                      {/* <Avatar src={item.user.profile.avatar} size="small" /> */}
                     </Tooltip>
                   ))}
               </Avatar.Group>

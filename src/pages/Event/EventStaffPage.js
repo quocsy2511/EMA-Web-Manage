@@ -8,19 +8,27 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 import moment from "moment";
 import { Empty } from "antd";
 import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
-import { getTasks } from "../../apis/tasks";
+import { filterTask, getTasks } from "../../apis/tasks";
 import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
+import { getProfile } from "../../apis/users";
 const EventStaffPage = () => {
   const [isBoardTask, setIsBoardTask] = useState(true);
+  const [searchText, setSearchText] = useState("");
+  const [priority, setPriority] = useState("");
+  const [sort, setSort] = useState("");
+  const [status, setStatus] = useState("");
   const {
     data: listEvent,
     isError,
     isLoading,
   } = useQuery(["events"], () => getEventDivisions(), {
     select: (data) => {
-      const event = data.map(({ ...item }) => {
+      const filteredEvents = data.filter((item) => item.status !== "DONE");
+
+      const event = filteredEvents.map(({ ...item }) => {
         item.startDate = moment(item.startDate).format("YYYY/MM/DD");
         item.endDate = moment(item.endDate).format("YYYY/MM/DD");
+
         return {
           ...item,
         };
@@ -31,6 +39,24 @@ const EventStaffPage = () => {
   const [selectEvent, setSelectEvent] = useState({});
 
   const {
+    data: staff,
+    isError: isErrorStaff,
+    isLoading: isLoadingStaff,
+  } = useQuery(["staff"], () => getProfile(), {
+    select: (data) => {
+      return data;
+    },
+  });
+
+  const listStatus = [
+    "PENDING",
+    "PROCESSING",
+    "DONE",
+    "CONFIRM",
+    "CANCEL",
+    "OVERDUE",
+  ];
+  const {
     data: listTaskParents,
     isError: isErrorListTask,
     isLoading: isLoadingListTask,
@@ -38,11 +64,12 @@ const EventStaffPage = () => {
   } = useQuery(
     ["tasks"],
     () =>
-      getTasks({
-        fieldName: "eventID",
-        conValue: selectEvent.id,
-        pageSize: 100,
-        currentPage: 1,
+      filterTask({
+        assignee: staff.id,
+        eventID: selectEvent.id,
+        priority: priority,
+        sort: sort,
+        status: status,
       }),
     {
       select: (data) => {
@@ -51,6 +78,13 @@ const EventStaffPage = () => {
           const formatDate = taskParents.map(({ ...item }) => {
             item.startDate = moment(item.startDate).format("YYYY/MM/DD");
             item.endDate = moment(item.endDate).format("YYYY/MM/DD");
+            if (item.subTask && Array.isArray(item.subTask)) {
+              item.subTask.sort((a, b) => {
+                return (
+                  listStatus.indexOf(a.status) - listStatus.indexOf(b.status)
+                );
+              });
+            }
             return {
               ...item,
             };
@@ -60,14 +94,40 @@ const EventStaffPage = () => {
         return data;
       },
       staleTime: 60000,
-      enabled: !!selectEvent.id,
+      enabled: !!selectEvent.id && !!staff.id,
     }
   );
+
+
+  function filterSubTasks(task, searchText) {
+    const subtaskTitles = task?.subTask?.filter((subtask) =>
+      subtask?.title?.toLowerCase().includes(searchText?.toLowerCase())
+    );
+
+    return subtaskTitles;
+  }
+  const filteredTaskParents = listTaskParents
+    ?.map((task) => {
+      const parentTitle = task?.title?.toLowerCase();
+      const subTaskResults = filterSubTasks(task, searchText);
+
+      if (
+        parentTitle.includes(searchText?.toLowerCase()) ||
+        subTaskResults.length > 0
+      ) {
+        // Nếu parent hoặc subTask thỏa mãn điều kiện, trả về task với danh sách subTask được cắt
+        return { ...task, subTask: subTaskResults };
+      } else {
+        // Nếu không có subTask nào thỏa mãn điều kiện, trả về null
+        return null;
+      }
+    })
+    .filter((task) => task !== null);
+
   useEffect(() => {
     if (listEvent && listEvent.length > 0) {
       setSelectEvent(listEvent[0]);
     }
-    // setSelectEvent(listEvent?.[0] ?? {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listEvent]);
 
@@ -91,11 +151,14 @@ const EventStaffPage = () => {
                 selectEvent={selectEvent}
                 setIsBoardTask={setIsBoardTask}
                 isBoardTask={isBoardTask}
+                setSearchText={setSearchText}
+                searchText={searchText}
               />
               {isBoardTask ? (
                 <KanbanBoard
                   selectEvent={selectEvent}
-                  listTaskParents={listTaskParents}
+                  listTaskParents={filteredTaskParents}
+                  // listTaskParents={listTaskParents}
                   isErrorListTask={isErrorListTask}
                   isLoadingListTask={isLoadingListTask}
                 />

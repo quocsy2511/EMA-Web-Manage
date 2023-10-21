@@ -49,7 +49,7 @@ const Comments = ({ comment, taskSelected }) => {
 
       <div className="flex flex-col w-full justify-start gap-y-2">
         <h3 className="text-sm font-semibold text-black">
-          {user.profile.fullName}{" "}
+          {user?.profile?.fullName}{" "}
           <span className="font-normal text-xs text-gray-500">
             at {createdAt}
           </span>

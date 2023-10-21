@@ -99,7 +99,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
   const [isOpenMember, seItsOpenMember] = useState(false);
   const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
 
-  const membersInTask = assignTasks.map((item) => item.user?.id);
+  const membersInTask = assignTasks?.map((item) => item.user?.id);
   // const formatDate = "YYYY/MM/DD HH:mm:ss";
 
   const formattedDate = (value) => {
@@ -175,11 +175,11 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
             {taskParent ? (
               <div className="flex justify-start items-center mt-4">
                 <div className="flex flex-row gap-x-2 justify-start items-center bg-slate-50  rounded-md p-1 cursor-pointer">
-                  <Tooltip key="avatar" title={staff.fullName} placement="top">
-                    <Avatar src={staff.avatar} size="small" />
+                  <Tooltip key="avatar" title={staff?.fullName} placement="top">
+                    <Avatar src={staff?.avatar} size="small" />
                   </Tooltip>
                   <p className="w-full flex-1  text-sm font-semibold">
-                    {staff.fullName}
+                    {staff?.fullName}
                   </p>
                 </div>
               </div>
@@ -210,10 +210,10 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
                                 key={!item.id ? index : item.id}
                               >
                                 <Space>
-                                  <span role="img" aria-label={item.fullName}>
-                                    <Avatar src={item.avatar} />
+                                  <span role="img" aria-label={item?.fullName}>
+                                    <Avatar src={item?.avatar} />
                                   </span>
-                                  {item.fullName}
+                                  {item?.fullName}
                                 </Space>
                               </Option>
                             );
@@ -235,14 +235,14 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
                         backgroundColor: "#F4D7DA",
                       }}
                     >
-                      {assignTasks.length > 0 &&
-                        assignTasks.map((item) => (
+                      {assignTasks?.length > 0 &&
+                        assignTasks?.map((item) => (
                           <Tooltip
                             key="avatar"
-                            title={item.user?.profile.fullName}
+                            title={item.user?.profile?.fullName}
                             placement="top"
                           >
-                            {item.user === null ? (
+                            {item.user.profile === null ? (
                               <Avatar
                                 icon={<UserOutlined />}
                                 size="default"
@@ -250,7 +250,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
                               />
                             ) : (
                               <Avatar
-                                src={item.user?.profile.avatar}
+                                src={item.user?.profile?.avatar}
                                 size="default"
                               />
                             )}
@@ -276,8 +276,8 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
               <FolderOutlined />
               Tài liệu
             </h4>
-            {taskSelected.taskFiles.length > 0 &&
-              taskSelected.taskFiles.map((file) => (
+            {taskSelected?.taskFiles?.length > 0 &&
+              taskSelected?.taskFiles.map((file) => (
                 <a
                   key={file.id}
                   href={file.fileUrl}
@@ -363,7 +363,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
                 className="w-[190px] mt-4"
                 onChange={(value) => handleChangeStatus(value)}
               >
-                {statusTask.map((status) => (
+                {statusTask?.map((status) => (
                   <Select.Option key={status.value}>
                     <Tag color={status.color}>{status.label}</Tag>
                   </Select.Option>

@@ -10,7 +10,7 @@ const KanbanBoard = ({
   isErrorListTask,
   isLoadingListTask,
 }) => {
-  // console.log("🚀 ~ file: KanbanBoard.js:13 ~ listTaskParents:", listTaskParents)
+
   return (
     <>
       <div className="bg-bgG h-screen overflow-hidden overflow-y-scroll scrollbar-hide">
@@ -34,7 +34,7 @@ const KanbanBoard = ({
             </p>
           </span>
         </div>
-        <div className="flex scrollbar-default overflow-x-scroll px-10 py-2 ">
+        <div className="flex scrollbar-default overflow-x-scroll px-10 py-2 gap-x-3 ">
           {!isLoadingListTask ? (
             !isErrorListTask ? (
               listTaskParents.map((taskParent, index) => (
