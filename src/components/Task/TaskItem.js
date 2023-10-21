@@ -10,10 +10,14 @@ import { BiDetail } from "react-icons/bi";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
+import { useQuery } from "@tanstack/react-query";
+import { getUserById } from "../../apis/users";
 
 const TaskItem = ({ task, isSubtask, setSelectedSubTask, setIsOpenModal }) => {
   const navigate = useNavigate();
-  const user = task.assignTasks?.[0]?.user?.profile;
+  const { data: user } = useQuery(["user", task.assignTasks[0].user.id], () =>
+    getUserById(task.assignTasks[0].user.id)
+  );
 
   const goToSubTask = () => {
     navigate(`${task.id}`);

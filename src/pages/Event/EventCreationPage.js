@@ -14,7 +14,7 @@ import {
 } from "antd";
 import viVN from "antd/locale/vi_VN";
 import moment from "moment";
-import ReactQuill, { Quill } from "react-quill";
+import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getAllUser } from "../../apis/users";
@@ -112,9 +112,7 @@ const EventCreationPage = () => {
       estBudget: +values.estBudget,
       divisionId: values.divisions.map((division) => division.key),
     };
-
-    console.log("Parse to json: ", JSON.stringify(values.description.ops));
-
+    
     console.log("TRANSORM: ", values);
 
     uploadFileMutate({ formData, event: values });
@@ -222,7 +220,7 @@ const EventCreationPage = () => {
           </div>
 
           <Form.Item
-            className="h-56"
+            // className="h-56"
             label={<Title title="Mô tả" />}
             name="description"
             rules={[
@@ -233,14 +231,10 @@ const EventCreationPage = () => {
             ]}
           >
             <ReactQuill
-              className="h-36 mb-11"
+              className="h-24 mb-10"
               theme="snow"
               placeholder="Nhập mô tả"
               onChange={(content, delta, source, editor) => {
-                // console.log("content: ", content);
-                // console.log("delta: ", delta);
-                // console.log("source: ", source);
-                // console.log("editor: ", editor.getContents());
                 form.setFieldsValue({ description: editor.getContents() });
               }}
             />

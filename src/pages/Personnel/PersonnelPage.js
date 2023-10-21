@@ -49,6 +49,7 @@ const PersonnelPage = () => {
       },
     }
   );
+  console.log("DATA: ", data);
 
   const {
     data: divisionsData,
@@ -61,7 +62,7 @@ const PersonnelPage = () => {
       select: (data) => data.data.filter((division) => division.status === 1),
     }
   );
-  console.log("divisionsData: ", divisionsData);
+  // console.log("divisionsData: ", divisionsData);
 
   const {
     data: divisionsWithoutStaff,
@@ -74,7 +75,7 @@ const PersonnelPage = () => {
       select: (data) => data.data.filter((division) => division.status === 1),
     }
   );
-  console.log("divisionsWithoutStaff: ", divisionsWithoutStaff);
+  // console.log("divisionsWithoutStaff: ", divisionsWithoutStaff);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading: updateUserIsLoading } = useMutation(
@@ -174,8 +175,11 @@ const PersonnelPage = () => {
 
   const searchGlobal = () => {
     if (searchText) {
-      const filterSearchedData = data.data.filter((value) =>
-        value.fullName.toLowerCase().includes(searchText.toLowerCase())
+      const filterSearchedData = data.data.filter(
+        (value) =>
+          value.fullName.toLowerCase().includes(searchText.toLowerCase()) ||
+          value.email.toLowerCase().includes(searchText.toLowerCase()) ||
+          value.phoneNumber.includes(searchText.toLowerCase())
       );
       setFilteredData(filterSearchedData);
     }
@@ -316,6 +320,7 @@ const PersonnelPage = () => {
       editTable: true,
       ...getColumnSearchProps("fullName"),
       filteredValue: null,
+      fixed: "left",
     },
     {
       title: "Email",
@@ -467,11 +472,6 @@ const PersonnelPage = () => {
             <div className="flex items-center justify-center">
               {editable ? (
                 <Space size="middle">
-                  {/* <MdOutlineSave
-                    className=" cursor-pointer"
-                    size={25}
-                    onClick={onSaveEditing}
-                  /> */}
                   <Button type="primary" size="small" onClick={onSaveEditing}>
                     Cập nhật
                   </Button>
@@ -675,7 +675,7 @@ const PersonnelPage = () => {
                 <div className="flex gap-x-4 mb-8">
                   <Input
                     className="w-[30%]"
-                    placeholder="Tìm kiếm theo tên"
+                    placeholder="Tìm kiếm theo tên, email, sđt"
                     value={searchText}
                     onChange={(e) => {
                       setSearchText(e.target.value);
@@ -688,9 +688,9 @@ const PersonnelPage = () => {
                   <Button type="primary" onClick={searchGlobal}>
                     Tìm kiếm
                   </Button>
-                  <Button danger onClick={handleResetTable}>
+                  {/* <Button danger onClick={handleResetTable}>
                     Đặt lại
-                  </Button>
+                  </Button> */}
                   <div className="flex-1 text-end">
                     <Button
                       type="primary"

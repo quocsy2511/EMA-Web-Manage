@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Checkbox,
   ConfigProvider,
   DatePicker,
   Drawer,
   Form,
   Input,
+  Radio,
   Select,
   Upload,
   message,
@@ -30,8 +32,12 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["users", 1]);
+        queryClient.invalidateQueries(["divisions", 2]);
+        
         form.resetFields();
+        setDivisionMode(1)
         setShowDrawer(false);
+
         messageApi.open({
           type: "success",
           content: "Đã tạo 1 nhân viên",
@@ -87,6 +93,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
           })),
     }
   );
+  console.log("divisionData: ", divisionData);
 
   const {
     data: divisionsWithoutStaff,
@@ -117,6 +124,8 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     formData.append("file", fileList);
     formData.append("folderName", "avatar");
 
+    console.log("User: ", user);
+
     uploadFileMutate({ formData, user });
   };
 
@@ -141,6 +150,8 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
           requiredMark={false}
           initialValues={{
             gender: "MALE",
+            role: "EMPLOYEE",
+            isFullTime: true,
           }}
         >
           <Form.Item
@@ -381,6 +392,15 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
               />
             </Form.Item>
           </div>
+
+          <Form.Item name="isFullTime">
+            {divisionMode === 1 && (
+              <Radio.Group>
+                <Radio value={true}>Fulltime</Radio>
+                <Radio value={false}>Parttime</Radio>
+              </Radio.Group>
+            )}
+          </Form.Item>
 
           <div className="text-center">
             <Form.Item>

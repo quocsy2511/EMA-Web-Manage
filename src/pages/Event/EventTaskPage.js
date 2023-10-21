@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Avatar, FloatButton, Progress, Tooltip } from "antd";
-import { FaLongArrowAltRight } from "react-icons/fa";
+import { FaLongArrowAltRight, FaUserFriends } from "react-icons/fa";
 import {
   BsHourglassSplit,
   BsHourglassBottom,
@@ -45,6 +45,7 @@ const Tag = ({ icon, text, width }) => (
 
 const color = {
   green: "hsl(156.62deg 81.93% 32.55%)",
+  blue: "#1677ff",
 };
 
 const EventTaskPage = () => {
@@ -122,33 +123,6 @@ const EventTaskPage = () => {
     setIsOpenModal((prev) => !prev);
   };
 
-  if (data) {
-    switch (data.status) {
-      case "PENDING":
-        status = "Chờ bắt đầu";
-        statusColor = "text-slate-500";
-        statusBgColor = "bg-slate-100";
-        break;
-      case "PROCESSING":
-        status = "Đang diễn ra";
-        statusColor = "text-orange-500";
-        statusBgColor = "bg-orange-100";
-        break;
-      case "DONE":
-        status = "Đã kết thúc";
-        statusColor = "text-green-500";
-        statusBgColor = "bg-green-100";
-        break;
-      case "CANCEL":
-        status = "Hủy bỏ";
-        statusColor = "text-red-500";
-        statusBgColor = "bg-red-100";
-        break;
-      default:
-        break;
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="h-[calc(100vh-128px)]">
@@ -165,6 +139,31 @@ const EventTaskPage = () => {
     );
   }
 
+  switch (data.status) {
+    case "PENDING":
+      status = "Chờ bắt đầu";
+      statusColor = "text-slate-500";
+      statusBgColor = "bg-slate-100";
+      break;
+    case "PROCESSING":
+      status = "Đang diễn ra";
+      statusColor = "text-orange-500";
+      statusBgColor = "bg-orange-100";
+      break;
+    case "DONE":
+      status = "Đã kết thúc";
+      statusColor = "text-green-500";
+      statusBgColor = "bg-green-100";
+      break;
+    case "CANCEL":
+      status = "Hủy bỏ";
+      statusColor = "text-red-500";
+      statusBgColor = "bg-red-100";
+      break;
+    default:
+      break;
+  }
+
   return (
     <Fragment>
       <FloatButton
@@ -179,7 +178,6 @@ const EventTaskPage = () => {
         eventId={eventId}
         date={[data.startDate, data.endDate]}
         staffs={data.listDivision}
-        // parentTaskId="1"
       />
       <motion.div
         initial={{ y: -75 }}
@@ -257,17 +255,16 @@ const EventTaskPage = () => {
             </Link>
             <RiEditFill className="cursor-pointer text-slate-400" size={20} />
           </div>
-          <p className="w-[60%] text-sm text-slate-400 mt-3">
-            {data.description}
-          </p>
-          {/* <div
+
+          <div
             className="w-[60%] text-sm text-slate-400 mt-3"
             dangerouslySetInnerHTML={{
               __html: new QuillDeltaToHtmlConverter(
                 JSON.parse(data.description)
               ).convert(),
             }}
-          /> */}
+          />
+
           <div className="flex items-center flex-wrap gap-x-4 gap-y-5 mt-6">
             <Tag
               icon={<MdLocationPin size={20} color={color.green} />}
@@ -282,15 +279,21 @@ const EventTaskPage = () => {
               icon={<BsTagsFill size={20} color={color.green} />}
               text={`${tasks?.length ?? 0} hạng mục`}
             />
-            {/* <Tag
-              icon={<BsTagFill size={20} color={color.green} />}
-              text="60 công việc"
-            />
-            <Tag
-              icon={<BiSolidCommentDetail size={20} color={color.green} />}
-              text="45 bình luận"
-            /> */}
           </div>
+
+          <div className="mt-6">
+            <p className=" font-medium">Bộ phận chịu trách nhiệm</p>
+            <div className="flex items-center flex-wrap gap-x-4 gap-y-3 mt-3">
+              {data.listDivision.map((division) => (
+                <Tag
+                  icon={<FaUserFriends size={20} color={color.blue} />}
+                  text={`${division.fullName} - ${division.divisionName}`}
+                  width={"truncate"}
+                />
+              ))}
+            </div>
+          </div>
+
           <div className="flex flex-wrap gap-x-20 gap-y-5 mt-10">
             <div>
               <div className="flex items-center gap-x-2">
@@ -335,7 +338,7 @@ const EventTaskPage = () => {
                 <Tooltip
                   title={`${
                     tasks.filter((item) => item.status === "DONE").length
-                  }/${tasks.length} task lớn đã xong`}
+                  }/${tasks.length} hạng mục đã xong`}
                 >
                   <Progress
                     percent={
@@ -357,8 +360,8 @@ const EventTaskPage = () => {
         animate={{ y: 0 }}
         className="bg-white rounded-2xl px-10 py-8 mt-10 mb-20"
       >
-        {!taskIsLoading && !filterTaskIsLoading /* && !staffsIsLoading*/ ? (
-          taskIsError || filterTaskIsError /*&& staffsIsError*/ ? (
+        {!taskIsLoading && !filterTaskIsLoading ? (
+          taskIsError || filterTaskIsError ? (
             <AnErrorHasOccured />
           ) : (
             <>
@@ -430,6 +433,10 @@ const EventTaskPage = () => {
                     {
                       value: "DONE",
                       label: <p className="text-green-500">Hoàn thành</p>,
+                    },
+                    {
+                      value: "CONFIRM",
+                      label: <p className="text-pink-500">Đã xác thực</p>,
                     },
                     {
                       value: "CANCEL",
