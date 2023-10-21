@@ -81,10 +81,10 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
   const onFinish = (value) => {
     console.log("Success: ", value);
     value = { ...value, taskID: taskId };
+    const { fileUrl, ...restValue } = value;
 
     if (!value.fileUrl || value.fileUrl?.length === 0) {
       console.log("NOOO FILE");
-      const { fileUrl, ...restValue } = value;
 
       mutate(restValue);
     } else {
@@ -92,7 +92,6 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
       const formData = new FormData();
       formData.append("file", fileList);
       formData.append("folderName", "comment");
-      const { fileUrl, ...restValue } = value;
 
       uploadFileMutate({ formData, comment: restValue });
     }

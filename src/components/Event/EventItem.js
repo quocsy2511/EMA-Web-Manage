@@ -11,6 +11,7 @@ import { AiOutlineInfoCircle } from "react-icons/ai";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
+import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 
 const EventItem = ({ event }) => {
   const navigate = useNavigate();
@@ -70,7 +71,11 @@ const EventItem = ({ event }) => {
 
       {/* 1 line = 1rem = +4  */}
       <p
-        dangerouslySetInnerHTML={{ __html: event.description }}
+        dangerouslySetInnerHTML={{
+          __html: new QuillDeltaToHtmlConverter(
+            JSON.parse(event.description)
+          ).convert(),
+        }}
         className="text-sm text-slate-500 line-clamp-3 h-16"
       ></p>
 

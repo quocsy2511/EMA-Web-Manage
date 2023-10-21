@@ -22,7 +22,6 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { uploadFile } from "../../apis/files";
 import { IoMdAttach } from "react-icons/io";
 
-const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 
 const Title = ({ title }) => <p className="text-base font-medium">{title}</p>;
@@ -108,7 +107,7 @@ const TaskAdditionModal = ({
           file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
           ...task,
         };
-        // mutate(variables.task);
+        mutate(variables.task);
       },
       onError: () => {
         messageApi.open({
@@ -121,6 +120,7 @@ const TaskAdditionModal = ({
 
   const [isTime, setIsTime] = useState(false);
   const [fileList, setFileList] = useState();
+  console.log("fileList: ", fileList);
   const [selectedEmployeesId, setSelectedEmployeesId] = useState();
 
   const [form] = Form.useForm();
@@ -137,10 +137,6 @@ const TaskAdditionModal = ({
   const onFinish = (values) => {
     console.log("Success:", values);
 
-    const formData = new FormData();
-    formData.append("file", fileList);
-    formData.append("folderName", "task");
-
     values = {
       ...values,
       startDate: moment(values.date[0].$d).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
@@ -148,11 +144,27 @@ const TaskAdditionModal = ({
       eventID: eventId,
       estimationTime: +values.estimationTime,
       assignee: [values.assignee],
-      // leader: values.assignee,
+      desc: JSON.stringify(values.desc.ops)
     };
 
-    console.log("Transform data: ", values);
-    mutate(values);
+    if(parentTaskId) values = {...values, parentTask: parentTaskId}
+
+    const { fileUrl, date, ...restValue } = values;
+
+    if (!values.fileUrl || values.fileUrl?.length === 0) {
+      console.log("NOOO FILE");
+
+      console.log("Transform data: ", restValue);
+      mutate(restValue);
+    } else {
+      console.log("HAS FILE");
+      const formData = new FormData();
+      formData.append("file", fileList);
+      formData.append("folderName", "task");
+
+      console.log("Transform data: ", restValue);
+      uploadFileMutate({ formData, task: restValue });
+    }
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -287,6 +299,9 @@ const TaskAdditionModal = ({
             className="h-20 mb-10"
             theme="snow"
             placeholder="Mô tả về công việc"
+            onChange={(content, delta, source, editor) => {
+              form.setFieldsValue({ desc: editor.getContents() });
+            }}
           />
         </Form.Item>
 
@@ -317,7 +332,6 @@ const TaskAdditionModal = ({
                       options={employees}
                       onChange={(value) => {
                         form.setFieldsValue({ assignee: value });
-                        // form.resetFields(["leader"]);
                       }}
                     />
                   </Form.Item>
@@ -355,12 +369,12 @@ const TaskAdditionModal = ({
                 className="w-[40%]"
                 label={<Title title="Chịu trách nhiệm bởi" />}
                 name="assignee"
-                rules={[
-                  {
-                    required: true,
-                    message: "Chọn 1 trưởng phòng !",
-                  },
-                ]}
+                // rules={[
+                //   {
+                //     required: true,
+                //     message: "Chọn 1 trưởng phòng !",
+                //   },
+                // ]}
               >
                 <Select
                   placeholder="Bộ phận"
@@ -388,7 +402,7 @@ const TaskAdditionModal = ({
             rules={[
               {
                 required: true,
-                message: "Chưa điền !",
+                message: "Chưa chọn độ ưu tiên !",
               },
             ]}
           >

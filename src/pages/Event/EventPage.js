@@ -218,9 +218,11 @@ const EventPage = () => {
                       ))}
                     </AnimatePresence>
                   ) : (
-                    <div className="flex flex-col items-center justify-center">
+                    <div className="flex-1 flex flex-col items-center gap-y-4 justify-center bg-white m-auto py-[5%] rounded-2xl">
                       <img src={emptyEventImg} className="w-64 h-64" />
-                      <p>Không tìm thấy sự kiện nào!</p>
+                      <p className="text-lg font-medium">
+                        Không tìm thấy sự kiện nào!
+                      </p>
                     </div>
                   )}
                 </div>

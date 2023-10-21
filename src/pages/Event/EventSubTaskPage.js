@@ -99,16 +99,17 @@ const EventSubTaskPage = () => {
         type="primary"
         tooltip={<p>Tạo công việc</p>}
       />
-      {/* {tasks.assignTasks?.[0]?.user && (
-        <TaskAdditionModal
-          isModalOpen={isOpenCreateTaskModal}
-          setIsModalOpen={setIsOpenCreateTaskModal}
-          eventId={eventId}
-          date={[tasks.startDate, tasks.endDate]}
-          parentTaskId={taskId}
-          staffId={tasks.assignTasks?.[0]?.user?.id}
-        />
-      )} */}
+
+      <TaskAdditionModal
+        isModalOpen={isOpenCreateTaskModal}
+        setIsModalOpen={setIsOpenCreateTaskModal}
+        eventId={eventId}
+        date={[tasks.startDate, tasks.endDate]}
+
+        parentTaskId={taskId}
+        staffId={tasks.assignTasks[0].user.id}
+      />
+
       <motion.div
         initial={{ y: -75, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -176,15 +177,15 @@ const EventSubTaskPage = () => {
           <BiDetail size={30} className="text-slate-400" />
         </div>
 
-        <p className="px-14 pt-5 text-lg">{tasks.description}</p>
-        {/* <div
+        {/* <p className="px-14 pt-5 text-lg">{tasks.description}</p> */}
+        <div
           className="px-14 pt-5"
           dangerouslySetInnerHTML={{
             __html: new QuillDeltaToHtmlConverter(
               JSON.parse(tasks.description)
             ).convert(),
           }}
-        /> */}
+        />
 
         <div className="flex flex-col gap-y-6 mt-10 mx-10">
           <AnimatePresence mode="await">

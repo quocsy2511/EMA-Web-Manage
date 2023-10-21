@@ -79,6 +79,11 @@ const ConfirmedBudget = () => {
       editTable: true,
     },
     {
+      title: "Ngày tạo",
+      // dataIndex: "realExpense",
+      // key: "realExpense",
+    },
+    {
       title: "Trạng thái",
       dataIndex: "status",
       editTable: true,
@@ -90,7 +95,7 @@ const ConfirmedBudget = () => {
             color={record.status === 1 ? "green" : "volcano"}
             key={record.id}
           >
-            {record.status === 1 ? "ACTIVE" : "INACTIVE"}
+            {record.status === 1 ? "Đã duyệt" : "Từ chối"}
           </Tag>
         </div>
       ),
@@ -100,11 +105,13 @@ const ConfirmedBudget = () => {
       dataIndex: "action",
       key: "action",
       align: "center",
+      width: 150,
+      align: "center",
       render: (_, record) => {
         const editable = checkEditing(record);
         return (
           data.length > 0 && (
-            <div>
+            <div className="flex flex-col items-center">
               {editable ? (
                 <Space size={"middle"}>
                   <Button type="primary" size="small" onClick={onSaveEditing}>
@@ -123,6 +130,7 @@ const ConfirmedBudget = () => {
                 </Space>
               ) : (
                 <BiEdit
+                  className="cursor-pointer"
                   size={25}
                   onClick={() => {
                     onEditing(record);
@@ -171,18 +179,6 @@ const ConfirmedBudget = () => {
     children,
     ...restProps
   }) => {
-    // const inputNode = (
-    //   <Select
-    //     onChange={(value) => {
-    //       console.log("dataIndex: ", dataIndex);
-    //       console.log("value: ", value);
-    //       form.setFieldsValue({ [dataIndex]: value });
-    //     }}
-    //     options={[]}
-    //     size="small"
-    //   />
-    // );
-
     const inputNode =
       inputType === "text" ? (
         <Input size="small" allowClear />
