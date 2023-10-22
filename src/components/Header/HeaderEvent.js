@@ -1,7 +1,13 @@
-import { AlignRightOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  AlignRightOutlined,
+  CheckOutlined,
+  ClearOutlined,
+  SearchOutlined,
+  StarFilled,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Dropdown, Input, Select, Tooltip } from "antd";
-import React, { useEffect, useState } from "react";
+import { Avatar, Dropdown, Input, Select, Tag, Tooltip } from "antd";
+import React from "react";
 import { useRouteLoaderData } from "react-router-dom";
 import { getAllUser } from "../../apis/users";
 import moment from "moment";
@@ -9,7 +15,7 @@ import defaultImage from "../../assets/images/pngwing.com.png";
 import AnErrorHasOccured from "../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { debounce } from "lodash";
-
+import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 const settingHeader = [
   {
     key: "công việc",
@@ -22,6 +28,8 @@ const settingHeader = [
 ];
 
 const HeaderEvent = ({
+  sort,
+  setSort,
   events,
   setSelectEvent,
   selectEvent,
@@ -29,16 +37,20 @@ const HeaderEvent = ({
   setIsBoardTask,
   setSearchText,
   searchText,
+  setFilterMember,
+  filterMember,
+  setStatusSelected,
+  statusSelected,
 }) => {
-  const [page, setPage] = useState(1);
   const divisionId = useRouteLoaderData("staff").divisionID;
+  const listRole = ["STAFF", "EMPLOYEE"];
   const {
     data: users,
     isError: isErrorUsers,
     isLoading: isLoadingUsers,
   } = useQuery(
     ["users-division"],
-    () => getAllUser({ divisionId, pageSize: 10, currentPage: page }),
+    () => getAllUser({ divisionId, pageSize: 10, currentPage: 1 }),
     {
       select: (data) => {
         const listUsers = data.data.map(({ ...item }) => {
@@ -48,38 +60,14 @@ const HeaderEvent = ({
             ...item,
           };
         });
-        return listUsers;
-      },
-    }
-  );
-
-  const {
-    data: employees,
-    isError: isErrorEmployees,
-    isLoading: isLoadingEmployees,
-  } = useQuery(
-    ["employees"],
-    () =>
-      getAllUser({
-        divisionId,
-        pageSize: 10,
-        currentPage: page,
-        role: "EMPLOYEE",
-      }),
-    {
-      select: (data) => {
-        const listUsers = data.data.map(({ ...item }) => {
-          item.dob = moment(item.dob).format("YYYY-MM-DD");
-          return {
-            key: item.id,
-            ...item,
-          };
+        listUsers.sort((a, b) => {
+          return listRole.indexOf(a.role) - listRole.indexOf(b.role);
         });
         return listUsers;
       },
     }
   );
-
+  const staffUsers = users?.filter((user) => user.role === "STAFF");
   const handleChangeEvent = (value) => {
     const event = JSON.parse(value);
     setSelectEvent(event);
@@ -89,28 +77,125 @@ const HeaderEvent = ({
     setSearchText(value);
   }, 500);
 
-  useEffect(() => {});
+  const listStatus = [
+    { label: "CHUẨN BỊ", value: "PENDING", color: "warning" },
+    { label: "ĐANG DIỄN RA", value: "PROCESSING", color: "processing" },
+    { label: "HOÀN THÀNH", value: "DONE", color: "green" },
+    { label: "XÁC NHẬN", value: "CONFIRM", color: "orange" },
+    { label: "ĐÃ HUỶ", value: "CANCEL", color: "red" },
+    { label: "QUÁ HẠN", value: "OVERDUE", color: "red" },
+  ];
   //custom dropdown
   const filterUser = [
     {
       key: "1",
       type: "group",
       label: "Thành viên",
-      children: employees?.map((item) => {
+      children: users?.map((item) => {
         return {
           key: item.id,
+          label:
+            item.id === filterMember ? (
+              <div className="flex flex-row gap-x-2 justify-start items-center w-fit h-fit text-secondary text-base">
+                {item.role === "STAFF" ? (
+                  <>
+                    <Tooltip
+                      key={item.key}
+                      title={item.fullName}
+                      placement="top"
+                    >
+                      <Avatar src={item?.avatar ?? defaultImage} size={24} />
+                    </Tooltip>
+                    <p className="text-ellipsis w-full flex-1 overflow-hidden ">
+                      {item.fullName}
+                    </p>
+                    <StarFilled className="text-yellow-400" />
+                  </>
+                ) : (
+                  <>
+                    <Tooltip
+                      key={item.key}
+                      title={item.fullName}
+                      placement="top"
+                    >
+                      <Avatar src={item?.avatar ?? defaultImage} size={24} />
+                    </Tooltip>
+                    <p className="text-ellipsis w-full flex-1 overflow-hidden ">
+                      {item.fullName}
+                    </p>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-row gap-x-2 justify-start items-center w-fit h-fit opacity-60">
+                {item.role === "STAFF" ? (
+                  <>
+                    <Tooltip
+                      key={item.key}
+                      title={item.fullName}
+                      placement="top"
+                    >
+                      <Avatar src={item?.avatar ?? defaultImage} size={24} />
+                    </Tooltip>
+                    <p className="text-ellipsis w-full flex-1 overflow-hidden ">
+                      {item.fullName}
+                    </p>
+                    <StarFilled className="text-yellow-400" />
+                  </>
+                ) : (
+                  <>
+                    <Tooltip
+                      key={item.key}
+                      title={item.fullName}
+                      placement="top"
+                    >
+                      <Avatar src={item?.avatar ?? defaultImage} size={24} />
+                    </Tooltip>
+                    <p className="text-ellipsis w-full flex-1 overflow-hidden ">
+                      {item.fullName}
+                    </p>
+                  </>
+                )}
+              </div>
+            ),
+        };
+      }),
+    },
+    {
+      key: 2,
+      type: "group",
+      label: "Trạng thái Công việc",
+      children: listStatus.map((status) => {
+        return {
+          key: status.value,
           label: (
-            <div className="flex flex-row gap-x-2 justify-start items-center w-fit h-fit">
-              <Tooltip key={item.key} title={item.fullName} placement="top">
-                <Avatar src={item?.avatar ?? defaultImage} size={24} />
-              </Tooltip>
-              <p className="text-ellipsis w-full flex-1 overflow-hidden ">
-                {item.fullName}
-              </p>
+            <div key={status.value} className="pl-2">
+              {status.value === statusSelected ? (
+                <Tag color={status.color}>
+                  {status.label}{" "}
+                  <CheckOutlined className="text-green-400 ml-2" />
+                </Tag>
+              ) : (
+                <Tag
+                  color={status.color}
+                  className="opacity-50"
+                  bordered={false}
+                >
+                  {status.label}
+                </Tag>
+              )}
             </div>
           ),
         };
       }),
+    },
+    {
+      key: "clear",
+      label: (
+        <div className="flex justify-center items-center py-3 hover:text-red-400">
+          <ClearOutlined />
+        </div>
+      ),
     },
   ];
 
@@ -120,6 +205,19 @@ const HeaderEvent = ({
     } else {
       setIsBoardTask(false);
     }
+  };
+
+  const onClickFilterMember = ({ key }) => {
+    const isKeyInListStatus = listStatus.some((status) => status.value === key);
+    if (isKeyInListStatus === false && key !== "clear") {
+      setFilterMember(key);
+    } else if (isKeyInListStatus === false && key === "clear") {
+      setStatusSelected(key);
+      setFilterMember(staffUsers?.id);
+    } else {
+      setStatusSelected(key);
+    }
+    // setFilterMember(key);
   };
 
   return (
@@ -156,6 +254,7 @@ const HeaderEvent = ({
               {/* search */}
               <div>
                 <Input
+                  allowClear
                   placeholder="tìm kiếm công việc trong bảng "
                   style={{
                     width: 400,
@@ -165,16 +264,30 @@ const HeaderEvent = ({
                   suffix={<SearchOutlined />}
                 />
               </div>
-
-              {/* right header */}
               <div className="flex justify-center items-center gap-x-3">
+                <div className="border-r-[1px] border-r-solid border-gray-400 pr-2 cursor-pointer">
+                  {sort === "DESC" ? (
+                    <HiSortDescending
+                      size={24}
+                      onClick={() => setSort("ASC")}
+                    />
+                  ) : (
+                    <HiSortAscending
+                      size={24}
+                      onClick={() => setSort("DESC")}
+                    />
+                  )}
+                </div>
+
                 <div className="border-r-[1px] border-r-solid border-gray-400 pr-2">
-                  {!isLoadingEmployees ? (
-                    !isErrorEmployees ? (
+                  {!isLoadingUsers ? (
+                    !isErrorUsers ? (
                       <Dropdown
                         menu={{
                           items: filterUser,
+                          onClick: onClickFilterMember,
                         }}
+                        // trigger={["click"]}
                       >
                         <div className=" flex justify-center items-center gap-x-2 px-4 py-2 cursor-pointer  rounded-lg hover:bg-secondaryHover hover:text-secondary">
                           <span>

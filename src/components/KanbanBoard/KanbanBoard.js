@@ -10,6 +10,7 @@ const KanbanBoard = ({
   listTaskParents,
   isErrorListTask,
   isLoadingListTask,
+  selectedStatus,
 }) => {
   return (
     <>
@@ -46,6 +47,7 @@ const KanbanBoard = ({
             !isErrorListTask ? (
               listTaskParents.map((taskParent, index) => (
                 <Column
+                  selectedStatus={selectedStatus}
                   TaskParent={taskParent}
                   key={taskParent.id}
                   idEvent={selectEvent.id}

@@ -157,7 +157,6 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
       leader: assignee[0].toString(),
       desc: JSON.stringify(values.desc.ops),
     };
-    console.log("🚀 ~ file: NewTaskModal.js:146 ~ onFinish ~ task:", task);
 
     if (values.fileUrl === undefined || values.fileUrl?.length === 0) {
       console.log("NOOO FILE");

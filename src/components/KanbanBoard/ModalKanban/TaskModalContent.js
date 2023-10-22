@@ -13,11 +13,7 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 import { getProfile } from "../../../apis/users";
 import moment from "moment";
 
-const TaskModalContent = ({
-  taskParent,
-  setSelectedSubTask,
-  taskSelected,
-}) => {
+const TaskModalContent = ({ taskParent, setSelectedSubTask, taskSelected }) => {
   const {
     data: listComments,
     isError: isErrorListComments,
@@ -124,14 +120,18 @@ const TaskModalContent = ({
       )}
 
       {/* comment */}
-      {!isLoadingStaff ? (
-        !isErrorStaff ? (
-          <CommentInput staff={staff} taskSelected={taskSelected} />
-        ) : (
-          <AnErrorHasOccured />
-        )
-      ) : (
-        <LoadingComponentIndicator />
+      {!taskParent && (
+        <>
+          {!isLoadingStaff ? (
+            !isErrorStaff ? (
+              <CommentInput staff={staff} taskSelected={taskSelected} />
+            ) : (
+              <AnErrorHasOccured />
+            )
+          ) : (
+            <LoadingComponentIndicator />
+          )}
+        </>
       )}
 
       {/* comment of task */}

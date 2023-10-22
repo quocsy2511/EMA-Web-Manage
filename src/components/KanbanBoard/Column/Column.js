@@ -4,7 +4,7 @@ import TaskModal from "../ModalKanban/TaskModal";
 import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
 
-const Column = ({ TaskParent }) => {
+const Column = ({ TaskParent, selectedStatus }) => {
   const colors = [
     "bg-red-500",
     "bg-orange-500",
@@ -27,6 +27,13 @@ const Column = ({ TaskParent }) => {
   subTask.forEach((task) => {
     if (task.status === "DONE") {
       completed++;
+    }
+  });
+  const filteredSubTask = subTask.filter((task) => {
+    if (selectedStatus === "clear") {
+      return true;
+    } else {
+      return task.status === selectedStatus;
     }
   });
 
@@ -68,7 +75,7 @@ const Column = ({ TaskParent }) => {
 
           {/* subtask */}
           {subTask.length > 0
-            ? subTask.map((subTask, index) => (
+            ? filteredSubTask.map((subTask, index) => (
                 <TaskKanbanBoard
                   setTaskSelected={setTaskSelected}
                   task={subTask}

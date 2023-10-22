@@ -8,15 +8,14 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 import moment from "moment";
 import { Empty } from "antd";
 import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
-import { filterTask, getTasks } from "../../apis/tasks";
+import { filterTask } from "../../apis/tasks";
 import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
 const EventStaffPage = () => {
   const [isBoardTask, setIsBoardTask] = useState(true);
-  const [searchText, setSearchText] = useState("");
-  const [priority, setPriority] = useState("");
-  const [sort, setSort] = useState("");
-  const [status, setStatus] = useState("");
+  const [searchText, setSearchText] = useState(null);
+  const [sort, setSort] = useState("DESC");
+  const [statusSelected, setStatusSelected] = useState("clear");
   const {
     data: listEvent,
     isError,
@@ -61,11 +60,11 @@ const EventStaffPage = () => {
     ["tasks"],
     () =>
       filterTask({
-        assignee: staff.id,
-        eventID: selectEvent.id,
-        priority: priority,
+        assignee: staff?.id,
+        eventID: selectEvent?.id,
+        priority: "",
         sort: sort,
-        status: status,
+        status: "",
       }),
     {
       select: (data) => {
@@ -89,13 +88,62 @@ const EventStaffPage = () => {
         }
         return data;
       },
-      // staleTime: 5000,
-      enabled: !!selectEvent.id && !!staff.id,
-      // refetchOnWindowFocus: true,
-      // cacheTime: 0,
+      enabled: !!selectEvent?.id && !!staff?.id,
     }
   );
 
+  const [filterMember, setFilterMember] = useState(staff?.id);
+
+  const { data: listTaskFilter, refetch: refetchListTaskFilter } = useQuery(
+    ["tasks-filter-member"],
+    () =>
+      filterTask({
+        assignee: filterMember,
+        eventID: selectEvent?.id,
+        priority: "",
+        sort: sort,
+        status: "",
+      }),
+    {
+      select: (data) => {
+        if (data && Array.isArray(data)) {
+          const taskParents = data.filter((task) => task.parent !== null);
+          const formatDate = taskParents.map(({ ...item }) => {
+            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
+            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
+            if (item.subTask && Array.isArray(item.subTask)) {
+              item.subTask.sort((a, b) => {
+                return (
+                  listStatus.indexOf(a.status) - listStatus.indexOf(b.status)
+                );
+              });
+            }
+            return {
+              ...item,
+            };
+          });
+          return formatDate;
+        }
+        return data;
+      },
+      enabled: !!staff?.id && !!selectEvent?.id,
+    }
+  );
+
+  useEffect(() => {
+    if (staff?.id) {
+      setFilterMember(staff.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staff?.id]);
+  useEffect(() => {
+    if (staff?.id) {
+      refetchListTaskFilter();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterMember]);
+
+  //handle search task ch va task con
   function filterSubTasks(task, searchText) {
     const subtaskTitles = task?.subTask?.filter((subtask) =>
       subtask?.title?.toLowerCase().includes(searchText?.toLowerCase())
@@ -103,23 +151,69 @@ const EventStaffPage = () => {
 
     return subtaskTitles;
   }
-  const filteredTaskParents = listTaskParents
-    ?.map((task) => {
-      const parentTitle = task?.title?.toLowerCase();
-      const subTaskResults = filterSubTasks(task, searchText);
+  // Hàm để so sánh và cập nhật listTaskParents
+  function updateListTaskParents(listTaskParents, listTaskFilter, searchText) {
+    //check điều kiện nếu có search thì search theo cái list hiện có
+    if (searchText) {
+      const filteredTaskParents = listTaskParents
+        ?.map((task) => {
+          // const parentTitle = task?.title?.toLowerCase(); //check thằng cha
+          const subTaskResults = filterSubTasks(task, searchText); // check thằng con
 
-      if (
-        parentTitle.includes(searchText?.toLowerCase()) ||
-        subTaskResults.length > 0
-      ) {
-        // Nếu parent hoặc subTask thỏa mãn điều kiện, trả về task với danh sách subTask được cắt
-        return { ...task, subTask: subTaskResults };
+          if (
+            // parentTitle.includes(searchText?.toLowerCase()) ||
+            subTaskResults.length > 0
+          ) {
+            // Nếu parent hoặc subTask thỏa mãn điều kiện, trả về task với danh sách subTask được cắt
+            return { ...task, subTask: subTaskResults };
+          } else {
+            // Nếu không có subTask nào thỏa mãn điều kiện, trả về null
+            return { ...task, subTask: subTaskResults };
+          }
+        })
+        .filter((task) => task !== null);
+
+      console.log(
+        "🚀 ~ file: EventStaffPage.js:187 ~ updateListTaskParents ~ filteredTaskParents:",
+        filteredTaskParents
+      );
+      return filteredTaskParents;
+    }
+
+    //check ng dùng chọn filter
+    if (listTaskFilter?.length === 0) {
+      // Nếu listTaskFilter rỗng, refetch listTaskParents
+      refetch();
+      return listTaskParents;
+    }
+
+    // Lặp qua từng task trong listTaskParents
+    const updatedListTaskParents = listTaskParents?.map((task) => {
+      // Kiểm tra xem task có subTask và có trong listTaskFilter không
+      if (task.subTask && Array.isArray(task.subTask)) {
+        // Lọc ra các subTask có id giống với các task trong listTaskFilter
+        const updatedSubTasks = task?.subTask?.filter((subtask) =>
+          listTaskFilter?.some(
+            (filteredTask) => filteredTask?.id === subtask?.id
+          )
+        );
+        return {
+          ...task,
+          subTask: updatedSubTasks,
+        };
       } else {
-        // Nếu không có subTask nào thỏa mãn điều kiện, trả về null
-        return null;
+        return task;
       }
-    })
-    .filter((task) => task !== null);
+    });
+
+    return updatedListTaskParents;
+  }
+
+  const searchFilterTask = updateListTaskParents(
+    listTaskParents,
+    listTaskFilter,
+    searchText
+  );
 
   useEffect(() => {
     if (listEvent && listEvent.length > 0) {
@@ -132,9 +226,8 @@ const EventStaffPage = () => {
     if (selectEvent.id) {
       refetch();
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectEvent, refetch]);
+  }, [selectEvent, refetch, sort]);
 
   return (
     <div className="flex flex-col ">
@@ -143,6 +236,11 @@ const EventStaffPage = () => {
           listEvent.length > 0 ? (
             <>
               <HeaderEvent
+                statusSelected={statusSelected}
+                setStatusSelected={setStatusSelected}
+                filterMember={filterMember}
+                setSort={setSort}
+                sort={sort}
                 events={listEvent}
                 setSelectEvent={setSelectEvent}
                 selectEvent={selectEvent}
@@ -150,12 +248,13 @@ const EventStaffPage = () => {
                 isBoardTask={isBoardTask}
                 setSearchText={setSearchText}
                 searchText={searchText}
+                setFilterMember={setFilterMember}
               />
               {isBoardTask ? (
                 <KanbanBoard
+                  selectedStatus={statusSelected}
                   selectEvent={selectEvent}
-                  listTaskParents={filteredTaskParents}
-                  // listTaskParents={listTaskParents}
+                  listTaskParents={searchFilterTask}
                   isErrorListTask={isErrorListTask}
                   isLoadingListTask={isLoadingListTask}
                 />

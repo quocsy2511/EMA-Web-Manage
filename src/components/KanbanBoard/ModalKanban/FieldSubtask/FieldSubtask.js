@@ -2,23 +2,14 @@ import {
   BulbOutlined,
   FieldTimeOutlined,
   FolderOutlined,
-  UploadOutlined,
   UserOutlined,
   UsergroupAddOutlined,
   VerticalAlignTopOutlined,
+  MinusCircleOutlined,
+  FileExclamationOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Avatar,
-  Button,
-  DatePicker,
-  Select,
-  Space,
-  Tag,
-  Tooltip,
-  Upload,
-  message,
-} from "antd";
+import { Avatar, DatePicker, Select, Space, Tag, Tooltip, message } from "antd";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import { getAllUser } from "../../../../apis/users";
@@ -49,7 +40,7 @@ const statusTask = [
   },
   {
     value: "PENDING",
-    label: "ĐANG CHỜ",
+    label: "CHUẨN BỊ",
     color: "warning",
   },
   {
@@ -69,12 +60,18 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
   const [isOpenStatus, setIsOpenStatus] = useState(false);
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
-    data: users,
-    isError: isErrorUsers,
-    isLoading: isLoadingUsers,
+    data: employees,
+    isError: isErrorEmployees,
+    isLoading: isLoadingEmployees,
   } = useQuery(
-    ["users-division"],
-    () => getAllUser({ divisionId, pageSize: 10, currentPage: 1 }),
+    ["employees"],
+    () =>
+      getAllUser({
+        divisionId,
+        pageSize: 10,
+        currentPage: 1,
+        role: "EMPLOYEE",
+      }),
     {
       select: (data) => {
         const listUsers = data.data.map(({ ...item }) => {
@@ -116,7 +113,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
   const getColorStatusPriority = (value) => {
     const colorMapping = {
       DONE: { color: "success", title: "HOÀN THÀNH" },
-      PENDING: { color: "warning", title: "ĐANG CHỜ" },
+      PENDING: { color: "warning", title: "CHUẨN BỊ" },
       CANCEL: { color: "red", title: "ĐÃ HUỶ" },
       PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
       OVERDUE: { color: "red", title: "QUÁ HẠN" },
@@ -182,8 +179,8 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
             ) : (
               <div className="flex justify-start items-center mt-4">
                 {isOpenMember ? (
-                  !isLoadingUsers ? (
-                    !isErrorUsers ? (
+                  !isLoadingEmployees ? (
+                    !isErrorEmployees ? (
                       <>
                         <Select
                           autoFocus
@@ -198,7 +195,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
                           onChange={(value) => handleChangeMember(value)}
                           optionLabelProp="label"
                         >
-                          {users?.map((item, index) => {
+                          {employees?.map((item, index) => {
                             return (
                               <Option
                                 value={item?.id}
@@ -272,7 +269,7 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
               <FolderOutlined />
               Tài liệu
             </h4>
-            {taskSelected?.taskFiles?.length > 0 &&
+            {taskSelected?.taskFiles?.length > 0 ? (
               taskSelected?.taskFiles.map((file) => (
                 <a
                   key={file.id}
@@ -282,7 +279,17 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
                   <IoMdAttach className="cursor-pointer" size={20} />
                   Tài liệu đính kèm
                 </a>
-              ))}
+              ))
+            ) : (
+              <Tag
+                icon={<FileExclamationOutlined />}
+                color="default"
+                className="w-fit mt-4"
+                bordered={false}
+              >
+                không có file
+              </Tag>
+            )}
             <div className="flex justify-start items-center mt-4">
               {/* <Upload
                 className="upload-list-inline"
@@ -326,13 +333,18 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
               Độ ưu tiên
             </h4>
             <div className="flex justify-start items-center mt-4">
-              <Tag
-                color={getColorStatusPriority(taskSelected.priority)?.color}
-                // onClick={() => setIsOpenStatus(true)}
-                className="h-fit"
-              >
-                {getColorStatusPriority(taskSelected.priority)?.title}
-              </Tag>
+              {taskSelected.priority !== null ? (
+                <Tag
+                  color={getColorStatusPriority(taskSelected.priority)?.color}
+                  className="h-fit"
+                >
+                  {getColorStatusPriority(taskSelected.priority)?.title}
+                </Tag>
+              ) : (
+                <Tag icon={<MinusCircleOutlined />} color="default">
+                  không có độ ưu tiên
+                </Tag>
+              )}
             </div>
           </div>
         </div>
@@ -377,34 +389,47 @@ const FieldSubtask = ({ taskSelected, taskParent, staff }) => {
             <FieldTimeOutlined />
             Thời gian
           </h4>
+
           <div className="flex justify-start items-center mt-4">
-            {isOpenDate ? (
+            {taskSelected?.startDate && taskSelected?.endDate !== null ? (
+              <>
+                {isOpenDate ? (
+                  <RangePicker
+                    showTime={{
+                      format: "HH:mm:ss",
+                    }}
+                    onChange={onChangeDate}
+                    defaultValue={[
+                      dayjs(taskSelected.startDate).utcOffset(7).local(),
+                      dayjs(taskSelected.endDate).utcOffset(7).local(),
+                    ]}
+                    format="YYYY/MM/DD HH:mm:ss"
+                  />
+                ) : (
+                  <span
+                    className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
+                      taskSelected.status === "CANCEL" ||
+                      taskSelected.status === "OVERDUE"
+                        ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
+                        : taskSelected.status === "DONE"
+                        ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
+                        : ""
+                    }`}
+                    onClick={() => setIsOpenDate(true)}
+                  >
+                    {formattedDate(taskSelected.startDate)} -{" "}
+                    {formattedDate(taskSelected.endDate)}
+                  </span>
+                )}
+              </>
+            ) : (
               <RangePicker
                 showTime={{
                   format: "HH:mm:ss",
                 }}
                 onChange={onChangeDate}
-                defaultValue={[
-                  dayjs(taskSelected.startDate).utcOffset(7).local(),
-                  dayjs(taskSelected.endDate).utcOffset(7).local(),
-                ]}
                 format="YYYY/MM/DD HH:mm:ss"
               />
-            ) : (
-              <span
-                className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
-                  taskSelected.status === "CANCEL" ||
-                  taskSelected.status === "OVERDUE"
-                    ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
-                    : taskSelected.status === "DONE"
-                    ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
-                    : ""
-                }`}
-                onClick={() => setIsOpenDate(true)}
-              >
-                {formattedDate(taskSelected.startDate)} -{" "}
-                {formattedDate(taskSelected.endDate)}
-              </span>
             )}
           </div>
         </div>

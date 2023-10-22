@@ -18,9 +18,7 @@ const TaskKanbanBoard = ({
   task,
   setTaskSelected,
 }) => {
-  // console.log("🚀 ~ file: TaskKanbanBoard.js:20 ~ task:", task);
-  const { assignTasks, id, status } = task;
-
+  const { id, status } = task;
   const {
     data: subtaskDetails,
     isError: isErrorSubtaskDetails,
@@ -36,21 +34,23 @@ const TaskKanbanBoard = ({
       }),
     {
       select: (data) => {
-        if (data) {
+        if (data.startDate && data.endDate) {
           const formatDate = data.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
+            item.startDate = moment(item.startDate).format(
+              "YYYY/MM/DD HH:mm:ss"
+            );
+            item.endDate = moment(item.endDate).format("YYYY/MM/DD HH:mm:ss");
             return {
               ...item,
             };
           });
           return formatDate;
         }
+        return data;
       },
-      enabled: !!id,
+      enabled: !!task?.id,
     }
   );
-
 
   const openTaskModalHandler = () => {
     setIsOpenTaskModal(true);
@@ -76,7 +76,7 @@ const TaskKanbanBoard = ({
     enabled: !!task,
   });
 
-  let totalTaskFiles = task?.taskFiles?.length;
+  let totalTaskFiles = subtaskDetails?.[0]?.taskFiles?.length;
   let totalFiles = totalTaskFiles;
   listComments?.forEach((item) => {
     let totalCommentFiles = item.commentFiles.length;
@@ -90,7 +90,7 @@ const TaskKanbanBoard = ({
   const getColorStatusPriority = (value) => {
     const colorMapping = {
       DONE: { color: "success", title: "HOÀN THÀNH" },
-      PENDING: { color: "warning", title: "ĐANG CHỜ" },
+      PENDING: { color: "warning", title: "CHUẨN BỊ" },
       CANCEL: { color: "red", title: "ĐÃ HUỶ" },
       PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
       OVERDUE: { color: "red", title: "QUÁ HẠN" },
@@ -105,7 +105,7 @@ const TaskKanbanBoard = ({
   return (
     <>
       <div
-        className="w-[250px] mx-auto my-5 rounded-lg bg-white  shadow-darkShadow py-3 px-3 shadow-lg hover:opacity-60  cursor-pointer"
+        className="w-[250px] min-h-[138px] mx-auto my-5 rounded-lg bg-white  shadow-darkShadow py-3 px-3 shadow-lg hover:opacity-60  cursor-pointer"
         onClick={() => openTaskModalHandler()}
       >
         <p className="font-normal text-sm tracking-wide hover:text-secondary ">
@@ -113,35 +113,37 @@ const TaskKanbanBoard = ({
         </p>
         {/* Sumary */}
         <div className="flex justify-start items-center gap-x-2 cursor-pointer mt-1 flex-wrap">
-          <span
-            className={`px-[6px] py-[2px] w-fit text-xs font-medium flex justify-start items-center gap-x-1 ${
-              task.status === "CANCEL" || task.status === "OVERDUE"
-                ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
-                : task.status === "DONE"
-                ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
-                : ""
-            }`}
-          >
-            {task.status === "DONE" && (
-              <CheckSquareOutlined className="text-[#08979c]" />
-            )}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-4 h-4"
+          {task?.endDate !== null && (
+            <span
+              className={`px-[6px] py-[2px] w-fit text-xs font-medium flex justify-start items-center gap-x-1 ${
+                task.status === "CANCEL" || task.status === "OVERDUE"
+                  ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
+                  : task.status === "DONE"
+                  ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
+                  : ""
+              }`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            {/* {task.time} */}
-            {formattedDate(task.endDate)}
-          </span>
+              {task.status === "DONE" && (
+                <CheckSquareOutlined className="text-[#08979c]" />
+              )}
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="w-4 h-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              {formattedDate(task.endDate)}
+            </span>
+          )}
 
           {!isLoadingListComments ? (
             !isErrorListComments ? (

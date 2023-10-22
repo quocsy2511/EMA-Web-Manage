@@ -54,7 +54,7 @@ const DescriptionSubtask = ({ description, setDescription }) => {
             className="rounded-md text-sm text-black font-normal hover:bg-slate-100 cursor-pointer w-full bg-transparent px-4 py-2"
             onClick={() => seItsOpenQuill(true)}
           >
-            {description !== undefined && (
+            {description !== undefined && description !== null && (
               <p
                 className="text-base italic text-black "
                 dangerouslySetInnerHTML={{
