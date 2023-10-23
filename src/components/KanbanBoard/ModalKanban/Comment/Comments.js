@@ -6,7 +6,7 @@ import { IoMdAttach } from "react-icons/io";
 import { removeComment } from "../../../../apis/comments";
 const ReachableContext = createContext(null);
 
-const Comments = ({ comment, taskSelected }) => {
+const Comments = ({ comment, taskSelected, disableUpdate }) => {
   const { user, file, createdAt, id } = comment;
   const [input, setInput] = useState(comment.text);
   const [isOpenQuill, seItsOpenQuill] = useState(false);
@@ -46,7 +46,6 @@ const Comments = ({ comment, taskSelected }) => {
       ) : (
         <Avatar src={user?.profile?.avatar} />
       )}
-
       <div className="flex flex-col w-full justify-start gap-y-2">
         <h3 className="text-sm font-semibold text-black">
           {user?.profile?.fullName}{" "}
@@ -54,7 +53,52 @@ const Comments = ({ comment, taskSelected }) => {
             at {createdAt}
           </span>
         </h3>
-        {isOpenQuill ? (
+        {disableUpdate ? (
+          <div className="w-full">
+            {comment.text === "" ? (
+              comment.commentFiles.length > 0 &&
+              comment.commentFiles.map((file, index) => (
+                <div
+                  key={index}
+                  className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                >
+                  <a
+                    href={file.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 flex flex-row "
+                  >
+                    <IoMdAttach className="cursor-pointer" size={20} />
+                    Tệp đính kèm
+                  </a>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="rounded-md text-sm text-black font-normal bg-slate-50 cursor-pointer w-full  px-4 py-2 ">
+                  <p className="">{comment.text}</p>
+                </div>
+                {comment.commentFiles.length > 0 &&
+                  comment.commentFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="mt-2 px-2 py-[2px] cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                    >
+                      <a
+                        href={file.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 flex flex-row "
+                      >
+                        <IoMdAttach className="cursor-pointer" size={20} />
+                        Tệp đính kèm
+                      </a>
+                    </div>
+                  ))}
+              </>
+            )}
+          </div>
+        ) : isOpenQuill ? (
           <div>
             <Input
               className=""
@@ -134,7 +178,6 @@ const Comments = ({ comment, taskSelected }) => {
                   ))}
               </>
             )}
-
             <div className="flex flex-row gap-x-2 text-text4 cursor-pointer ">
               <p
                 className="hover:text-secondary underline underline-offset-2"

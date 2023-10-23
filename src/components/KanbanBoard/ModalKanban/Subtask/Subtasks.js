@@ -2,8 +2,10 @@ import { EyeOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Select, Tag, Tooltip, message } from "antd";
 import React, { useState } from "react";
 import moment from "moment";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateTaskStatus } from "../../../../apis/tasks";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getTasks, updateTaskStatus } from "../../../../apis/tasks";
+import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
 
 const statusTask = [
   {
@@ -14,12 +16,17 @@ const statusTask = [
   {
     value: "DONE",
     label: "HOÀN THÀNH",
-    color: "lime",
+    color: "green",
+  },
+  {
+    value: "CONFIRM",
+    label: "XÁC NHẬN",
+    color: "purple",
   },
   {
     value: "PENDING",
-    label: "ĐANG CHỜ",
-    color: "warning",
+    label: "CHUẨN BỊ",
+    color: "default",
   },
   {
     value: "CANCEL",
@@ -33,8 +40,47 @@ const statusTask = [
   },
 ];
 
-const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
-  const { assignTasks, id } = Subtask;
+const Subtasks = ({
+  onChangeSubtask,
+  Subtask,
+  setSelectedSubTask,
+  disableUpdate,
+}) => {
+  const { id } = Subtask;
+
+  const {
+    data: subtaskDetails,
+    isError: isErrorSubtaskDetails,
+    isLoading: isLoadingSubtaskDetails,
+  } = useQuery(
+    ["subtaskDetails", id],
+    () =>
+      getTasks({
+        fieldName: "id",
+        conValue: id,
+        pageSize: 10,
+        currentPage: 1,
+      }),
+    {
+      select: (data) => {
+        if (data.startDate && data.endDate) {
+          const formatDate = data.map(({ ...item }) => {
+            item.startDate = moment(item.startDate).format(
+              "YYYY/MM/DD HH:mm:ss"
+            );
+            item.endDate = moment(item.endDate).format("YYYY/MM/DD HH:mm:ss");
+            return {
+              ...item,
+            };
+          });
+          return formatDate;
+        }
+        return data;
+      },
+      enabled: !!Subtask?.id,
+    }
+  );
+
   const selectSubtaskHandler = (value) => {
     setSelectedSubTask(value);
   };
@@ -43,11 +89,12 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
 
   const getColorStatus = (status) => {
     const colorMapping = {
-      DONE: { color: "success", status: "HOÀN THÀNH" },
-      PENDING: { color: "warning", status: "ĐANG CHỜ" },
+      DONE: { color: "green", status: "HOÀN THÀNH" },
+      PENDING: { color: "default", status: "CHUẨN BỊ" },
       CANCEL: { color: "red", status: "ĐÃ HUỶ" },
       PROCESSING: { color: "processing", status: "ĐANG DIỄN RA" },
       OVERDUE: { color: "red", status: "QUÁ HẠN" },
+      CONFIRM: { color: "purple", status: "XÁC NHẬN" },
     };
     //colorMapping[status] ở đây để truy suất value bằng key
     return colorMapping[status];
@@ -86,8 +133,8 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
 
   return (
     <div className="mt-2 flex flex-col gap-y-2 cursor-pointer ">
-      <div className="mt-1 flex flex-col gap-y-2  pb-2">
-        <div className="flex flex-row gap-x-2 cursor-pointer ">
+      <div className="mt-1 flex flex-col gap-y-2 pb-2">
+        <div className="flex flex-row gap-x-2 cursor-pointer justify-center items-center">
           <input
             className={
               Subtask.status === "DONE"
@@ -99,8 +146,13 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
             onChange={(e) => onChangeSubtask(Subtask.id, e.target.value)}
             id="board-name-input"
             type="text"
+            disabled
           />
-          {!isOpenStatus ? (
+          {disableUpdate ? (
+            <Tag color={getColorStatus(Subtask.status).color} className="h-fit">
+              {getColorStatus(Subtask.status).status}
+            </Tag>
+          ) : !isOpenStatus ? (
             <Tag
               color={getColorStatus(Subtask.status).color}
               onClick={() => setIsOpenStatus(true)}
@@ -123,6 +175,7 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
               ))}
             </Select>
           )}
+
           <EyeOutlined
             className="text-blue-500"
             onClick={() => selectSubtaskHandler(Subtask)}
@@ -145,25 +198,37 @@ const Subtasks = ({ onChangeSubtask, Subtask, setSelectedSubTask }) => {
                   backgroundColor: "#F4D7DA",
                 }}
               >
-                {assignTasks?.length > 0 &&
-                  assignTasks.map((item) => (
-                    <Tooltip
-                      key="avatar"
-                      title={item.user?.profile.fullName}
-                      placement="top"
-                    >
-                      {" "}
-                      {item.user.profile === null ? (
-                        <Avatar
-                          icon={<UserOutlined />}
-                          size="small"
-                          className="bg-gray-500"
-                        />
-                      ) : (
-                        <Avatar src={item.user?.profile.avatar} size="small" />
-                      )}
-                    </Tooltip>
-                  ))}
+                {!isLoadingSubtaskDetails ? (
+                  !isErrorSubtaskDetails ? (
+                    <>
+                      {subtaskDetails?.[0].assignTasks.length > 0 &&
+                        subtaskDetails?.[0].assignTasks.map((item, index) => (
+                          <Tooltip
+                            key="avatar"
+                            title={item.user?.profile?.fullName}
+                            placement="top"
+                          >
+                            {item?.user?.profile === null ? (
+                              <Avatar
+                                icon={<UserOutlined />}
+                                size="small"
+                                className="bg-gray-500"
+                              />
+                            ) : (
+                              <Avatar
+                                src={item.user?.profile?.avatar}
+                                size="small"
+                              />
+                            )}
+                          </Tooltip>
+                        ))}
+                    </>
+                  ) : (
+                    <AnErrorHasOccured />
+                  )
+                ) : (
+                  <LoadingComponentIndicator />
+                )}
               </Avatar.Group>
             </div>
           </div>

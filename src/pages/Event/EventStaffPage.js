@@ -23,11 +23,9 @@ const EventStaffPage = () => {
   } = useQuery(["events"], () => getEventDivisions(), {
     select: (data) => {
       const filteredEvents = data.filter((item) => item.status !== "DONE");
-
       const event = filteredEvents.map(({ ...item }) => {
-        item.startDate = moment(item.startDate).format("YYYY/MM/DD");
-        item.endDate = moment(item.endDate).format("YYYY/MM/DD");
-
+        item.startDate = moment(item.startDate).format("DD/MM/YYYY");
+        item.endDate = moment(item.endDate).format("DD/MM/YYYY");
         return {
           ...item,
         };

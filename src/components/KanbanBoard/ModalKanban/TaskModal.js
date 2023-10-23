@@ -14,6 +14,7 @@ const TaskModal = ({
   taskParent,
   taskSelected,
   setTaskSelected,
+  disableUpdate,
 }) => {
   const [selectedSubTask, setSelectedSubTask] = useState(null);
   const {
@@ -66,6 +67,7 @@ const TaskModal = ({
         {selectedSubTask === null ? (
           //task cha
           <TaskModalContent
+            disableUpdate={disableUpdate}
             setTaskSelected={setTaskSelected}
             taskSelected={taskSelected}
             setIsOpenTaskModal={setIsOpenTaskModal}
@@ -77,6 +79,7 @@ const TaskModal = ({
           !isErrorSubtaskDetails ? (
             <>
               <TaskModalContent
+                disableUpdate={disableUpdate}
                 taskSelected={subtaskDetails?.[0]}
                 setIsOpenTaskModal={setIsOpenTaskModal}
                 taskParent={!taskParent}

@@ -72,6 +72,10 @@ code {
 .ant-radio-group.ant-radio-group-outline.ant-picker-calendar-mode-switch.css-dev-only-do-not-override-18iikkb {
   display: none;
 }
+:where(.css-dev-only-do-not-override-18iikkb).ant-input-disabled,
+:where(.css-dev-only-do-not-override-18iikkb).ant-input[disabled] {
+  background-color: transparent;
+}
 
 @layer utilities {
   @variants responsive {

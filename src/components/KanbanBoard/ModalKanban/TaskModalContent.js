@@ -5,7 +5,7 @@ import DescriptionSubtask from "./DescriptionSubtask/DescriptionSubtask";
 import Subtasks from "./Subtask/Subtasks";
 import CommentInput from "./Comment/CommentInput";
 import Comments from "./Comment/Comments";
-import { OrderedListOutlined } from "@ant-design/icons";
+import { OrderedListOutlined, SnippetsOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { getComment } from "../../../apis/comments";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
@@ -13,7 +13,22 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 import { getProfile } from "../../../apis/users";
 import moment from "moment";
 
-const TaskModalContent = ({ taskParent, setSelectedSubTask, taskSelected }) => {
+const TaskModalContent = ({
+  taskParent,
+  setSelectedSubTask,
+  taskSelected,
+  disableUpdate,
+}) => {
+  // console.log(
+  //   "🚀 ~ file: TaskModalContent.js:22 ~ taskSelected:",
+  //   taskSelected.status
+  // );
+  // const [disableTask, setDisableTask] = useState(false);
+  // useEffect(() => {
+  //   if (taskSelected.status === "CONFIRM") {
+  //     setDisableTask(true);
+  //   }
+  // }, [taskSelected.status]);
   const {
     data: listComments,
     isError: isErrorListComments,
@@ -48,7 +63,6 @@ const TaskModalContent = ({ taskParent, setSelectedSubTask, taskSelected }) => {
   const [title, setTitle] = useState(taskSelected.title);
   const [description, setDescription] = useState(taskSelected.description);
   const [subTasks, setSubTasks] = useState(taskSelected.subTask);
-
   // Subtask
   const onChangeSubtask = (id, newTitle) => {};
 
@@ -69,12 +83,18 @@ const TaskModalContent = ({ taskParent, setSelectedSubTask, taskSelected }) => {
 
   return (
     <div>
-      <TitleSubtask setTitle={setTitle} title={title} />
+      <TitleSubtask
+        // disableTask={disableTask}
+        disableUpdate={disableUpdate}
+        setTitle={setTitle}
+        title={title}
+      />
 
       {/* field */}
       {!isLoadingStaff ? (
         !isErrorStaff ? (
           <FieldSubtask
+            disableUpdate={disableUpdate}
             taskSelected={taskSelected}
             taskParent={taskParent}
             staff={staff}
@@ -88,6 +108,7 @@ const TaskModalContent = ({ taskParent, setSelectedSubTask, taskSelected }) => {
 
       {/* task description */}
       <DescriptionSubtask
+        disableUpdate={disableUpdate}
         description={description}
         setDescription={setDescription}
       />
@@ -109,6 +130,7 @@ const TaskModalContent = ({ taskParent, setSelectedSubTask, taskSelected }) => {
             </h3>
             {subTasks.map((subTask) => (
               <Subtasks
+                disableUpdate={disableUpdate}
                 key={subTask.id}
                 onChangeSubtask={onChangeSubtask}
                 Subtask={subTask}
@@ -119,41 +141,56 @@ const TaskModalContent = ({ taskParent, setSelectedSubTask, taskSelected }) => {
         </div>
       )}
 
-      {/* comment */}
-      {!taskParent && (
-        <>
-          {!isLoadingStaff ? (
-            !isErrorStaff ? (
-              <CommentInput staff={staff} taskSelected={taskSelected} />
+      <>
+        <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
+          <div className="flex justify-center items-center">
+            <label
+              htmlFor="board-description-input" //lấy id :D
+              className="text-sm dark:text-white text-gray-500 cursor-pointer"
+            >
+              <SnippetsOutlined style={{ fontSize: 24, color: "black" }} />
+            </label>
+          </div>
+          <div className="w-full flex flex-col">
+            <h3 className="text-lg font-bold">Hoạt động</h3>
+          </div>
+        </div>
+        {/* comment */}
+        {!disableUpdate && (
+          <>
+            {!isLoadingStaff ? (
+              !isErrorStaff ? (
+                <CommentInput staff={staff} taskSelected={taskSelected} />
+              ) : (
+                <AnErrorHasOccured />
+              )
             ) : (
-              <AnErrorHasOccured />
+              <LoadingComponentIndicator />
+            )}
+          </>
+        )}
+        {/* comment of task */}
+        {!isLoadingListComments ? (
+          !isErrorListComments ? (
+            listComments.length > 0 &&
+            listComments.map(
+              (comment, index) =>
+                taskParent === false && (
+                  <Comments
+                    disableUpdate={disableUpdate}
+                    key={index}
+                    comment={comment}
+                    taskSelected={taskSelected}
+                  />
+                )
             )
           ) : (
-            <LoadingComponentIndicator />
-          )}
-        </>
-      )}
-
-      {/* comment of task */}
-      {!isLoadingListComments ? (
-        !isErrorListComments ? (
-          listComments.length > 0 &&
-          listComments.map(
-            (comment, index) =>
-              taskParent === false && (
-                <Comments
-                  key={index}
-                  comment={comment}
-                  taskSelected={taskSelected}
-                />
-              )
+            <AnErrorHasOccured />
           )
         ) : (
-          <AnErrorHasOccured />
-        )
-      ) : (
-        <LoadingComponentIndicator />
-      )}
+          <LoadingComponentIndicator />
+        )}
+      </>
     </div>
   );
 };

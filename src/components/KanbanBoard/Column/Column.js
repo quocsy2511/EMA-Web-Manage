@@ -22,11 +22,18 @@ const Column = ({ TaskParent, selectedStatus }) => {
   const [addNewTask, setAddNewTask] = useState(false);
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
+  const [disableUpdate, setDisableUpdate] = useState(false);
+
+  useEffect(() => {
+    if (TaskParent?.status === "CONFIRM") {
+      setDisableUpdate(true);
+    }
+  }, [TaskParent]);
 
   let completed = 0;
   let subTask = TaskParent.subTask;
   subTask.forEach((task) => {
-    if (task.status === "DONE") {
+    if (task.status === "CONFIRM") {
       completed++;
     }
   });
@@ -89,18 +96,21 @@ const Column = ({ TaskParent, selectedStatus }) => {
                 />
               ))
             : ""}
-          <div
-            className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow"
-            onClick={() => setAddNewTask(true)}
-          >
-            <p className="text-sm font-semibold tracking-tighter">
-              + Thêm công việc mới
-            </p>
-          </div>
+          {!disableUpdate && (
+            <div
+              className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow"
+              onClick={() => setAddNewTask(true)}
+            >
+              <p className="text-sm font-semibold tracking-tighter">
+                + Thêm công việc mới
+              </p>
+            </div>
+          )}
         </div>
 
         {isOpenTaskModal && (
           <TaskModal
+            disableUpdate={disableUpdate}
             setTaskSelected={setTaskSelected}
             taskSelected={taskSelected}
             taskParent={isTaskParent}
@@ -110,6 +120,7 @@ const Column = ({ TaskParent, selectedStatus }) => {
         )}
         {addNewTask && (
           <NewTaskModal
+            disableUpdate={disableUpdate}
             disableEndDate={TaskParent?.endDate}
             addNewTask={addNewTask}
             setAddNewTask={setAddNewTask}

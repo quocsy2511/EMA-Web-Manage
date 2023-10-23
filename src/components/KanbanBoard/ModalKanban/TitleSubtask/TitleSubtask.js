@@ -2,7 +2,8 @@ import { ThunderboltOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import React from "react";
 
-const TitleSubtask = ({ title, setTitle }) => {
+const TitleSubtask = ({ title, setTitle, disableUpdate }) => {
+  // console.log("🚀 ~ file: TitleSubtask.js:6 ~ TitleSubtask ~ disableTask:", disableTask)
   return (
     <div className="mt-8 flex flex-row gap-x-2 justify-start items-center">
       <div className="flex justify-center items-center">
@@ -25,6 +26,7 @@ const TitleSubtask = ({ title, setTitle }) => {
         onChange={(e) => setTitle(e.target.value)}
         id="board-name-input"
         type="text"
+        disabled={disableUpdate}
       />
     </div>
   );

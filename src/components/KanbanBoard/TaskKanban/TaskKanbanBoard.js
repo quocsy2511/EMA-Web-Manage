@@ -89,11 +89,12 @@ const TaskKanbanBoard = ({
   };
   const getColorStatusPriority = (value) => {
     const colorMapping = {
-      DONE: { color: "success", title: "HOÀN THÀNH" },
-      PENDING: { color: "warning", title: "CHUẨN BỊ" },
+      DONE: { color: "green", title: "HOÀN THÀNH" },
+      PENDING: { color: "default", title: "CHUẨN BỊ" },
       CANCEL: { color: "red", title: "ĐÃ HUỶ" },
+      CONFIRM: { color: "purple", title: "XÁC NHẬN" },
       PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
-      OVERDUE: { color: "red", title: "QUÁ HẠN" },
+      OVERDUE: { color: "orange", title: "QUÁ HẠN" },
       LOW: { color: "warning", title: "THẤP" },
       HIGH: { color: "red", title: "CAO" },
       MEDIUM: { color: "processing", title: "TRUNG BÌNH" },
@@ -120,27 +121,29 @@ const TaskKanbanBoard = ({
                   ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
                   : task.status === "DONE"
                   ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
+                  : task.status === "CONFIRM"
+                  ? "bg-purple-300 bg-opacity-20 text-purple-600 rounded-md"
                   : ""
               }`}
             >
-              {task.status === "DONE" && (
-                <CheckSquareOutlined className="text-[#08979c]" />
+              {task.status === "CONFIRM" ? (
+                <CheckSquareOutlined className="text-purple-600" />
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
               )}
-
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-4 h-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
               {formattedDate(task.endDate)}
             </span>
           )}
@@ -192,11 +195,11 @@ const TaskKanbanBoard = ({
         </div>
         <div className="flex justify-start items-center gap-x-2 cursor-pointer mt-1 flex-wrap">
           <Tag
-            color={getColorStatusPriority(status).color}
+            color={getColorStatusPriority(status)?.color}
             className="h-fit w-fit mt-1 gap-x-1 flex flex-row"
           >
             <BulbOutlined />
-            {getColorStatusPriority(status).title}
+            {getColorStatusPriority(status)?.title}
           </Tag>
         </div>
         <div className="flex justify-end items-center mt-4">
@@ -217,7 +220,7 @@ const TaskKanbanBoard = ({
                         title={item.user?.profile?.fullName}
                         placement="top"
                       >
-                        {item.user.profile === null ? (
+                        {item?.user?.profile === null ? (
                           <Avatar
                             icon={<UserOutlined />}
                             size="small"

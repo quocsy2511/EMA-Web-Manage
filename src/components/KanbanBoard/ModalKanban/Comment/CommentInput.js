@@ -1,4 +1,4 @@
-import { SendOutlined, SnippetsOutlined } from "@ant-design/icons";
+import { SendOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Button, Form, Upload, message } from "antd";
 import Input from "antd/es/input/Input";
@@ -104,19 +104,6 @@ const CommentInput = ({ staff, taskSelected }) => {
 
   return (
     <>
-      <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
-        <div className="flex justify-center items-center">
-          <label
-            htmlFor="board-description-input" //lấy id :D
-            className="text-sm dark:text-white text-gray-500 cursor-pointer"
-          >
-            <SnippetsOutlined style={{ fontSize: 24, color: "black" }} />
-          </label>
-        </div>
-        <div className="w-full flex flex-col">
-          <h3 className="text-lg font-bold">Hoạt động</h3>
-        </div>
-      </div>
       <div className="flex flex-row mt-4 justify-start gap-x-4 ">
         <Avatar src={staff.avatar} />
         <div className=" flex flex-col w-full gap-y-2">
