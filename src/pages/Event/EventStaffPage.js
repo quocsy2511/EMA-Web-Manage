@@ -71,8 +71,10 @@ const EventStaffPage = () => {
         if (data && Array.isArray(data)) {
           const taskParents = data.filter((task) => task.parent === null);
           const formatDate = taskParents.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
+            item.startDate = moment(item.startDate).format(
+              "YYYY/MM/DD HH:mm:ss"
+            );
+            item.endDate = moment(item.endDate).format("YYYY/MM/DD HH:mm:ss");
             if (item.subTask && Array.isArray(item.subTask)) {
               item.subTask.sort((a, b) => {
                 return (

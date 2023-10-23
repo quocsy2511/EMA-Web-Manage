@@ -3,6 +3,7 @@ import TaskKanbanBoard from "../TaskKanban/TaskKanbanBoard";
 import TaskModal from "../ModalKanban/TaskModal";
 import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
+import moment from "moment";
 
 const Column = ({ TaskParent, selectedStatus }) => {
   const colors = [
@@ -49,6 +50,9 @@ const Column = ({ TaskParent, selectedStatus }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const startDate = moment(TaskParent?.startDate).format("YYYY/MM/DD ");
+  const endDate = moment(TaskParent?.endDate).format("YYYY/MM/DD ");
+
   return (
     <>
       <div className="scrollbar-hide mt-5 min-w-[280px]">
@@ -67,7 +71,7 @@ const Column = ({ TaskParent, selectedStatus }) => {
                   )
                 </p>
                 <p className="text-[8px] font-semibold text-white underline underline-offset-2">
-                  {TaskParent.startDate} - {TaskParent.endDate}
+                  {startDate} - {endDate}
                 </p>
               </div>
             </div>
@@ -106,6 +110,7 @@ const Column = ({ TaskParent, selectedStatus }) => {
         )}
         {addNewTask && (
           <NewTaskModal
+            disableEndDate={TaskParent?.endDate}
             addNewTask={addNewTask}
             setAddNewTask={setAddNewTask}
             TaskParent={TaskParent}

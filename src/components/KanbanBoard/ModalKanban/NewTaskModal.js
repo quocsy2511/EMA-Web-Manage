@@ -21,12 +21,16 @@ import { getAllUser } from "../../../apis/users";
 import moment from "moment";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
-import dayjs from "dayjs";
-import { debounce } from "lodash";
+// import { debounce } from "lodash";
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
 import { UploadOutlined } from "@ant-design/icons";
-const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
+const NewTaskModal = ({
+  addNewTask,
+  setAddNewTask,
+  TaskParent,
+  disableEndDate,
+}) => {
   const { RangePicker } = DatePicker;
   const { Option } = Select;
   const { id, eventID, title } = TaskParent;
@@ -131,13 +135,14 @@ const NewTaskModal = ({ addNewTask, setAddNewTask, TaskParent }) => {
   };
 
   //hàm để bắt ko chọn ngày đã  qua
+  const today = moment();
   const disabledDate = (current) => {
-    return current && current < dayjs().startOf("day");
+    return current.isBefore(today) || current.isAfter(disableEndDate);
   };
 
-  const descriptionDebounced = debounce((value) => {
-    setDescription(value);
-  }, 500); // Thời gian chờ 500ms
+  // const descriptionDebounced = debounce((value) => {
+  //   setDescription(value);
+  // }, 500); // Thời gian chờ 500ms
 
   //Render Estimated Time
   const onChangeEstimatedTime = (newValue) => {
