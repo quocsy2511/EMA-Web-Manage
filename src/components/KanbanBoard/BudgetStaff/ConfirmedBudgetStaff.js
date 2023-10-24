@@ -49,7 +49,7 @@ const ConfirmedBudgetStaff = ({ selectEvent }) => {
 
   return (
     <div>
-      <div className="w-full bg-[#F0F6FF] p-8 rounded-xl">
+      <div className="w-full bg-white p-8 rounded-xl">
         <Table
           bordered
           columns={columns}

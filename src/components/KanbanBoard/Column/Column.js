@@ -120,7 +120,7 @@ const Column = ({ TaskParent, selectedStatus }) => {
         )}
         {addNewTask && (
           <NewTaskModal
-            disableUpdate={disableUpdate}
+            disableStartDate={TaskParent?.startDate}
             disableEndDate={TaskParent?.endDate}
             addNewTask={addNewTask}
             setAddNewTask={setAddNewTask}

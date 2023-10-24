@@ -17,7 +17,7 @@ const NewBudget = ({ selectEvent }) => {
   );
 
   return (
-    <div className="w-full p-8 bg-[#F0F6FF] flex-1  rounded-xl overflow-y-auto flex justify-center items-center">
+    <div className="w-full p-8 bg-white flex-1  rounded-xl overflow-y-auto flex justify-center items-center">
       <Form
         labelCol={{
           span: 4,

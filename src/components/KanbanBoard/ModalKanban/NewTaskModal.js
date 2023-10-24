@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
+  ConfigProvider,
   DatePicker,
   Form,
   Input,
@@ -25,11 +26,14 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
 import { UploadOutlined } from "@ant-design/icons";
+import viVN from "antd/locale/vi_VN";
+
 const NewTaskModal = ({
   addNewTask,
   setAddNewTask,
   TaskParent,
   disableEndDate,
+  disableStartDate,
 }) => {
   const { RangePicker } = DatePicker;
   const { Option } = Select;
@@ -134,10 +138,87 @@ const NewTaskModal = ({
     setEndDate(isoEndDate);
   };
 
-  //hàm để bắt ko chọn ngày đã  qua
   const today = moment();
+  const todayFormat = moment().format("YYYY-MM-DD HH:mm:ss");
+  const checkStartDateFormat = moment(disableStartDate).format("YYYY-MM-DD");
+  const checkEndDateFormat = moment(disableEndDate).format("YYYY-MM-DD");
+
+  const hourStartDate = moment(disableStartDate).format("HH");
+  const minutesStartDate = moment(disableStartDate).format("mm");
+  const hourCurrentDate = moment(todayFormat).format("HH");
+  const minutesCurrentDate = moment(todayFormat).format("mm");
+
+  const hourEndDate = moment(disableEndDate).format("HH");
+  const minutesEndDate = moment(disableEndDate).format("mm");
+  console.log(
+    "🚀 ~ file: NewTaskModal.js:146 ~ disableStartDate:",
+    disableStartDate
+  );
+  console.log(
+    "🚀 ~ file: NewTaskModal.js:149 ~ disableEndDate:",
+    disableEndDate
+  );
+
+  //validate pick date
   const disabledDate = (current) => {
-    return current.isBefore(today) || current.isAfter(disableEndDate);
+    if (current.isBefore(disableStartDate, "day")) {
+      return (
+        current.isBefore(disableEndDate, "day") ||
+        current.isAfter(disableEndDate, "day")
+      );
+    } else {
+      return current.isBefore(today) || current.isAfter(disableEndDate, "day");
+    }
+  };
+  //validate pick timess
+  const range = (start, end) => {
+    const result = [];
+    for (let i = start; i < end; i++) {
+      result.push(i);
+    }
+    return result;
+  };
+  const disabledRangeTime = (_, type) => {
+    if (!today.isBefore(disableStartDate, "day")) {
+      if (type === "start") {
+        return {
+          disabledHours: () => range(0, hourCurrentDate),
+          disabledMinutes: () => range(0, minutesCurrentDate),
+        };
+      }
+      return {
+        disabledHours: () => range(0, 0),
+        disabledMinutes: () => range(0, 0),
+      };
+    } else if (
+      checkStartDateFormat.toString() === checkEndDateFormat.toString()
+    ) {
+      if (type === "start") {
+        return {
+          disabledHours: () => range(0, hourStartDate),
+          disabledMinutes: () => range(0, minutesStartDate),
+        };
+      }
+      return {
+        // disabledHours: () => range(hourEndDate, 60),
+        disabledHours: () =>
+          range(0, hourStartDate).concat(range(hourEndDate, 24)), // Sửa đoạn này
+        disabledMinutes: () =>
+          range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
+      };
+    } else {
+      if (type === "start") {
+        return {
+          disabledHours: () => range(0, hourStartDate),
+          disabledMinutes: () => range(0, minutesStartDate),
+        };
+      }
+      return {
+        // disabledHours: () => range(hourEndDate, 60),
+        disabledHours: () => range(hourEndDate, 24), // Sửa đoạn này
+        disabledMinutes: () => range(minutesEndDate, 60),
+      };
+    }
   };
 
   // const descriptionDebounced = debounce((value) => {
@@ -230,14 +311,19 @@ const NewTaskModal = ({
               ]}
               hasFeedback
             >
-              <RangePicker
-                disabledDate={disabledDate}
-                showTime={{
-                  format: "HH:mm:ss",
-                }}
-                onChange={onChangeDate}
-                formatDate="YYYY/MM/DD HH:mm:ss"
-              />
+              <ConfigProvider locale={viVN}>
+                <RangePicker
+                  placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
+                  disabledTime={disabledRangeTime}
+                  disabledDate={disabledDate}
+                  showTime={{
+                    format: "HH:mm:ss",
+                    hideDisabledOptions: true,
+                  }}
+                  onChange={onChangeDate}
+                  formatDate="YYYY/MM/DD HH:mm:ss"
+                />
+              </ConfigProvider>
             </Form.Item>
             {/* Estimated */}
             <Form.Item
