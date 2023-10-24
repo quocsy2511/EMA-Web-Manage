@@ -17,6 +17,10 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["comments", taskSelected.id]);
+        message.open({
+          type: "success",
+          content: "Bình luận đã được xoá",
+        });
       },
       onError: () => {
         message.open({

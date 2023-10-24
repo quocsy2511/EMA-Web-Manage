@@ -117,13 +117,15 @@ const CommentInput = ({ staff, taskSelected }) => {
                   className="mb-2 flex-1"
                   rules={[
                     {
+                      validateTrigger: true,
+                      min: 1,
                       required: true,
-                      // whitespace: true,
                       message: "chưa nhập bình luận ",
                     },
                   ]}
                 >
                   <Input
+                    id="warning"
                     placeholder="Viết bình luận ..."
                     className="placeholder:italic"
                     allowClear

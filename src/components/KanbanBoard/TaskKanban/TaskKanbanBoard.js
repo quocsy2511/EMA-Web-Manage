@@ -109,7 +109,7 @@ const TaskKanbanBoard = ({
         className="w-[250px] min-h-[138px] mx-auto my-5 rounded-lg bg-white  shadow-darkShadow py-3 px-3 shadow-lg hover:opacity-60  cursor-pointer"
         onClick={() => openTaskModalHandler()}
       >
-        <p className="font-normal text-sm tracking-wide hover:text-secondary ">
+        <p className="font-normal text-sm tracking-wide hover:text-secondary break-words ">
           {task?.title}
         </p>
         {/* Sumary */}

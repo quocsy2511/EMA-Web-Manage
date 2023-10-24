@@ -11,6 +11,7 @@ import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
 import { filterTask } from "../../apis/tasks";
 import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
+moment.suppressDeprecationWarnings = true;
 const EventStaffPage = () => {
   const [isBoardTask, setIsBoardTask] = useState(true);
   const [searchText, setSearchText] = useState(null);

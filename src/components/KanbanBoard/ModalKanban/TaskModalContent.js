@@ -19,16 +19,6 @@ const TaskModalContent = ({
   taskSelected,
   disableUpdate,
 }) => {
-  // console.log(
-  //   "🚀 ~ file: TaskModalContent.js:22 ~ taskSelected:",
-  //   taskSelected.status
-  // );
-  // const [disableTask, setDisableTask] = useState(false);
-  // useEffect(() => {
-  //   if (taskSelected.status === "CONFIRM") {
-  //     setDisableTask(true);
-  //   }
-  // }, [taskSelected.status]);
   const {
     data: listComments,
     isError: isErrorListComments,
@@ -60,7 +50,7 @@ const TaskModalContent = ({
     },
   });
 
-  const [title, setTitle] = useState(taskSelected.title);
+  // const [title, setTitle] = useState(taskSelected.title);
   const [description, setDescription] = useState(taskSelected.description);
   const [subTasks, setSubTasks] = useState(taskSelected.subTask);
   // Subtask
@@ -76,7 +66,7 @@ const TaskModalContent = ({
   }
 
   useEffect(() => {
-    setTitle(taskSelected.title);
+    // setTitle(taskSelected.title);
     setDescription(taskSelected.description);
     setSubTasks(taskSelected.subTask);
   }, [taskSelected]);
@@ -84,10 +74,11 @@ const TaskModalContent = ({
   return (
     <div>
       <TitleSubtask
-        // disableTask={disableTask}
         disableUpdate={disableUpdate}
-        setTitle={setTitle}
-        title={title}
+        // setTitle={setTitle}
+        // title={title}
+        taskParent={taskParent}
+        taskSelected={taskSelected}
       />
 
       {/* field */}
@@ -111,6 +102,7 @@ const TaskModalContent = ({
         disableUpdate={disableUpdate}
         description={description}
         setDescription={setDescription}
+        taskParent={taskParent}
       />
 
       {/* task subTask */}

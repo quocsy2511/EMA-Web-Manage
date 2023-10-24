@@ -19,7 +19,7 @@ export const createTask = (task) =>
       priority: task.priority,
       estimationTime: task.estimationTime,
       assignee: task.assignee,
-      
+
       // Subtask only
       leader: task.leader ?? "",
       parentTask: task.parentTask ?? undefined,
@@ -67,7 +67,10 @@ export const filterTask = ({ assignee, eventID, priority, sort, status }) =>
 // "parentTask": null,
 // "estimationTime": null,
 // "effort": null
-export const updateTask = ({ taskID, ...task }) =>
+export const updateTask = ({ taskID, task }) =>
+  // {
+  //   console.log("🚀 ~ file: tasks.js:71 ~ updateTask ~ task:", task);
+  // };
   authRequest({
     url: `/task/updateTask?taskID=${taskID}`,
     method: "put",

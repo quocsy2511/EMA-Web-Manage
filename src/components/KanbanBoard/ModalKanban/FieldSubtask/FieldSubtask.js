@@ -341,20 +341,45 @@ const FieldSubtask = ({ taskSelected, taskParent, staff, disableUpdate }) => {
               <VerticalAlignTopOutlined />
               Độ ưu tiên
             </h4>
-            <div className="flex justify-start items-center mt-4">
-              {taskSelected.priority !== null ? (
-                <Tag
-                  color={getColorStatusPriority(taskSelected.priority)?.color}
-                  className="h-fit"
-                >
-                  {getColorStatusPriority(taskSelected.priority)?.title}
-                </Tag>
-              ) : (
-                <Tag icon={<MinusCircleOutlined />} color="default">
-                  không có độ ưu tiên
-                </Tag>
-              )}
-            </div>
+            {taskParent ? (
+              <>
+                <div className="flex justify-start items-center mt-4">
+                  {taskSelected.priority !== null ? (
+                    <Tag
+                      color={
+                        getColorStatusPriority(taskSelected.priority)?.color
+                      }
+                      className="h-fit"
+                    >
+                      {getColorStatusPriority(taskSelected.priority)?.title}
+                    </Tag>
+                  ) : (
+                    <Tag icon={<MinusCircleOutlined />} color="default">
+                      không có độ ưu tiên
+                    </Tag>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-start items-center mt-4">
+                  {taskSelected.priority !== null ? (
+                    <Tag
+                      color={
+                        getColorStatusPriority(taskSelected.priority)?.color
+                      }
+                      className="h-fit"
+                    >
+                      {getColorStatusPriority(taskSelected.priority)?.title}
+                    </Tag>
+                  ) : (
+                    <Tag icon={<MinusCircleOutlined />} color="default">
+                      không có độ ưu tiên
+                    </Tag>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
         <div className=" flex flex-col  w-1/2">
@@ -410,67 +435,91 @@ const FieldSubtask = ({ taskSelected, taskParent, staff, disableUpdate }) => {
             <FieldTimeOutlined />
             Thời gian
           </h4>
-          <div className="flex justify-start items-center mt-4">
-            {disableUpdate ? (
-              <span
-                className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
-                  taskSelected.status === "CANCEL" ||
-                  taskSelected.status === "OVERDUE"
-                    ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
-                    : taskSelected.status === "DONE"
-                    ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
-                    : ""
-                }`}
-              >
-                {formattedDate(taskSelected.startDate)} -{" "}
-                {formattedDate(taskSelected.endDate)}
-              </span>
-            ) : (
-              <>
-                {taskSelected?.startDate && taskSelected?.endDate !== null ? (
+          {taskParent ? (
+            <>
+              <div className="flex justify-start items-center mt-4">
+                <span
+                  className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
+                    taskSelected.status === "CANCEL" ||
+                    taskSelected.status === "OVERDUE"
+                      ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
+                      : taskSelected.status === "DONE"
+                      ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
+                      : ""
+                  }`}
+                >
+                  {formattedDate(taskSelected.startDate)} -{" "}
+                  {formattedDate(taskSelected.endDate)}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-start items-center mt-4">
+                {disableUpdate ? (
+                  <span
+                    className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
+                      taskSelected.status === "CANCEL" ||
+                      taskSelected.status === "OVERDUE"
+                        ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
+                        : taskSelected.status === "DONE"
+                        ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
+                        : ""
+                    }`}
+                  >
+                    {formattedDate(taskSelected.startDate)} -{" "}
+                    {formattedDate(taskSelected.endDate)}
+                  </span>
+                ) : (
                   <>
-                    {isOpenDate ? (
+                    {taskSelected?.startDate &&
+                    taskSelected?.endDate !== null ? (
+                      <>
+                        {isOpenDate ? (
+                          <RangePicker
+                            showTime={{
+                              format: "HH:mm:ss",
+                            }}
+                            onChange={onChangeDate}
+                            defaultValue={[
+                              dayjs(taskSelected.startDate)
+                                .utcOffset(7)
+                                .local(),
+                              dayjs(taskSelected.endDate).utcOffset(7).local(),
+                            ]}
+                            format="YYYY/MM/DD HH:mm:ss"
+                          />
+                        ) : (
+                          <span
+                            className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
+                              taskSelected.status === "CANCEL" ||
+                              taskSelected.status === "OVERDUE"
+                                ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
+                                : taskSelected.status === "DONE"
+                                ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
+                                : ""
+                            }`}
+                            onClick={() => setIsOpenDate(true)}
+                          >
+                            {formattedDate(taskSelected.startDate)} -{" "}
+                            {formattedDate(taskSelected.endDate)}
+                          </span>
+                        )}
+                      </>
+                    ) : (
                       <RangePicker
                         showTime={{
                           format: "HH:mm:ss",
                         }}
                         onChange={onChangeDate}
-                        defaultValue={[
-                          dayjs(taskSelected.startDate).utcOffset(7).local(),
-                          dayjs(taskSelected.endDate).utcOffset(7).local(),
-                        ]}
                         format="YYYY/MM/DD HH:mm:ss"
                       />
-                    ) : (
-                      <span
-                        className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
-                          taskSelected.status === "CANCEL" ||
-                          taskSelected.status === "OVERDUE"
-                            ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
-                            : taskSelected.status === "DONE"
-                            ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
-                            : ""
-                        }`}
-                        onClick={() => setIsOpenDate(true)}
-                      >
-                        {formattedDate(taskSelected.startDate)} -{" "}
-                        {formattedDate(taskSelected.endDate)}
-                      </span>
                     )}
                   </>
-                ) : (
-                  <RangePicker
-                    showTime={{
-                      format: "HH:mm:ss",
-                    }}
-                    onChange={onChangeDate}
-                    format="YYYY/MM/DD HH:mm:ss"
-                  />
                 )}
-                s
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
