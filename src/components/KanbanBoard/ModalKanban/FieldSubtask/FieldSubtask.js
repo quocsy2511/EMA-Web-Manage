@@ -9,7 +9,18 @@ import {
   FileExclamationOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, DatePicker, Select, Space, Tag, Tooltip, message } from "antd";
+import {
+  Avatar,
+  Button,
+  DatePicker,
+  Form,
+  Segmented,
+  Select,
+  Space,
+  Tag,
+  Tooltip,
+  message,
+} from "antd";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import { getAllUser } from "../../../../apis/users";
@@ -20,10 +31,15 @@ import moment from "moment";
 import utc from "dayjs/plugin/utc";
 import "dayjs/locale/vi";
 import { IoMdAttach } from "react-icons/io";
-import { updateTaskStatus } from "../../../../apis/tasks";
+import {
+  assignMember,
+  updateTask,
+  updateTaskStatus,
+} from "../../../../apis/tasks";
+import ListFile from "../File/ListFile";
+import FileInput from "../File/FileInput";
 dayjs.locale("vi");
 dayjs.extend(utc);
-// Đặt múi giờ của dayjs thành UTC
 dayjs.utc();
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -61,10 +77,68 @@ const statusTask = [
 ];
 const StatusParentTask = statusTask.filter((task) => task.value !== "CONFIRM");
 
-const FieldSubtask = ({ taskSelected, taskParent, staff, disableUpdate }) => {
-  const taskID = taskSelected.id;
+const optionsPriority = [
+  { label: "THẤP", value: "LOW" },
+  { label: "TRUNG BÌNH", value: "MEDIUM" },
+  { label: "CAO", value: "HIGH" },
+];
+
+const FieldSubtask = ({
+  disableEndDate,
+  disableStartDate,
+  taskSelected,
+  taskParent,
+  staff,
+  disableUpdate,
+  setIsOpenTaskModal,
+}) => {
+  const selectedPriority = optionsPriority.find(
+    (option) => option.value === taskSelected?.priority
+  );
+  const eventID = taskSelected?.event?.id;
+  const taskID = taskSelected?.id;
+  const parentTask = taskSelected?.parent?.id;
   const [isOpenStatus, setIsOpenStatus] = useState(false);
   const divisionId = useRouteLoaderData("staff").divisionID;
+  const queryClient = useQueryClient();
+  const [isOpenDate, setIsOpenDate] = useState(false);
+  const [isOpenMember, seItsOpenMember] = useState(false);
+  const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
+  const [startDateUpdate, setStartDateUpdate] = useState("");
+  const [endDateUpdate, setEndDateUpdate] = useState("");
+  const [isRangePickerFocused, setIsRangePickerFocused] = useState(false);
+  const [isRangePickerCancel, setIsRangePickerCancel] = useState(false);
+  const [isOpenPriority, setIsOpenPriority] = useState(false);
+  // const [priority, setPriority] = useState(selectedPriority);
+  // console.log("🚀 ~ file: FieldSubtask.js:110 ~ priority:", priority);
+  const today = moment();
+  const todayFormat = moment().format("YYYY-MM-DD HH:mm:ss");
+  const checkStartDateFormat = moment(disableStartDate).format("YYYY-MM-DD");
+  const checkEndDateFormat = moment(disableEndDate).format("YYYY-MM-DD");
+  const hourStartDate = moment(disableStartDate).format("HH");
+  const minutesStartDate = moment(disableStartDate).format("mm");
+  const hourCurrentDate = moment(todayFormat).format("HH");
+  const minutesCurrentDate = moment(todayFormat).format("mm");
+  const hourEndDate = moment(disableEndDate).format("HH");
+  const minutesEndDate = moment(disableEndDate).format("mm");
+  const membersInTask = assignTasks?.map((item) => item.user?.id);
+
+  const getColorStatusPriority = (value) => {
+    const colorMapping = {
+      DONE: { color: "green", title: "HOÀN THÀNH" },
+      PENDING: { color: "default", title: "CHUẨN BỊ" },
+      CANCEL: { color: "red", title: "ĐÃ HUỶ" },
+      PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
+      OVERDUE: { color: "orange", title: "QUÁ HẠN" },
+      LOW: { color: "warning", title: "THẤP" },
+      HIGH: { color: "red", title: "CAO" },
+      MEDIUM: { color: "processing", title: "TRUNG BÌNH" },
+      CONFIRM: { color: "purple", title: "XÁC NHẬN" },
+    };
+    //colorMapping[status] ở đây để truy suất value bằng key
+    return colorMapping[value];
+  };
+
   const {
     data: employees,
     isError: isErrorEmployees,
@@ -92,51 +166,166 @@ const FieldSubtask = ({ taskSelected, taskParent, staff, disableUpdate }) => {
     }
   );
 
-  const [isOpenDate, setIsOpenDate] = useState(false);
-  const [isOpenMember, seItsOpenMember] = useState(false);
-  const [assignTasks, setAssignTasks] = useState(taskSelected.assignTasks);
-  // console.log("🚀 ~ file: FieldSubtask.js:95 ~ FieldSubtask ~ assignTasks:", assignTasks)
-
-  const membersInTask = assignTasks?.map((item) => item.user?.id);
-
+  //handle date
+  const onFocusRangePicker = () => {
+    setIsRangePickerFocused(true);
+    setIsRangePickerCancel(true);
+  };
+  const onBlurRangePicker = () => {
+    setIsRangePickerFocused(false);
+    setIsRangePickerCancel(false);
+  };
+  const onChangeDate = (value, dateString) => {
+    const isoStartDate = moment(dateString[0]).toISOString();
+    const isoEndDate = moment(dateString[1]).toISOString();
+    setStartDateUpdate(isoStartDate);
+    setEndDateUpdate(isoEndDate);
+  };
+  ///////////////validate Date
   const formattedDate = (value) => {
     const date = moment(value).format("DD/MM HH:mm");
     return date;
   };
 
+  const disabledDate = (current) => {
+    if (current.isBefore(disableStartDate, "day")) {
+      return (
+        current.isBefore(disableEndDate, "day") ||
+        current.isAfter(disableEndDate, "day")
+      );
+    } else {
+      return current.isBefore(today) || current.isAfter(disableEndDate, "day");
+    }
+  };
+  //validate pick timess
+  const range = (start, end) => {
+    const result = [];
+    for (let i = start; i < end; i++) {
+      result.push(i);
+    }
+    return result;
+  };
+  const disabledRangeTime = (_, type) => {
+    if (!today.isBefore(disableStartDate, "day")) {
+      if (type === "start") {
+        return {
+          disabledHours: () => range(0, hourCurrentDate),
+          disabledMinutes: () => range(0, minutesCurrentDate),
+        };
+      }
+      return {
+        disabledHours: () => range(0, 0),
+        disabledMinutes: () => range(0, 0),
+      };
+    } else if (
+      checkStartDateFormat.toString() === checkEndDateFormat.toString()
+    ) {
+      if (type === "start") {
+        return {
+          disabledHours: () => range(0, hourStartDate),
+          disabledMinutes: () => range(0, minutesStartDate),
+        };
+      }
+      return {
+        disabledHours: () =>
+          range(0, hourStartDate).concat(range(hourEndDate, 24)), // Sửa đoạn này
+        disabledMinutes: () =>
+          range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
+      };
+    } else {
+      if (type === "start") {
+        return {
+          disabledHours: () => range(0, hourStartDate),
+          disabledMinutes: () => range(0, minutesStartDate),
+        };
+      }
+      return {
+        disabledHours: () => range(hourEndDate, 24), // Sửa đoạn này
+        disabledMinutes: () => range(minutesEndDate, 60),
+      };
+    }
+  };
   //Pick deadline
-  const onChangeDate = (value, dateString) => {
-    // console.log("Formatted Selected Time: ", dateString);
-  };
+  const { mutate: updateDate, isLoading } = useMutation(
+    ({ taskID, task }) => updateTask({ taskID, task }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tasks"]);
+        queryClient.invalidateQueries(["subtaskDetails"], taskID);
+        setIsRangePickerFocused(false);
+        setIsRangePickerCancel(false);
+        message.open({
+          type: "success",
+          content: "Cập nhật thời gian công việc  thành công",
+        });
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Cập nhật thời gian công việc thất bại",
+        });
+      },
+    }
+  );
 
-  const handleChangeMember = (value) => {
-    console.log(
-      "🚀 ~ file: FieldSubtask.js:116 ~ handleChangeMember ~ value:",
-      value
-    );
-  };
-
-  const getColorStatusPriority = (value) => {
-    const colorMapping = {
-      DONE: { color: "green", title: "HOÀN THÀNH" },
-      PENDING: { color: "default", title: "CHUẨN BỊ" },
-      CANCEL: { color: "red", title: "ĐÃ HUỶ" },
-      PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
-      OVERDUE: { color: "orange", title: "QUÁ HẠN" },
-      LOW: { color: "warning", title: "THẤP" },
-      HIGH: { color: "red", title: "CAO" },
-      MEDIUM: { color: "processing", title: "TRUNG BÌNH" },
-      CONFIRM: { color: "purple", title: "XÁC NHẬN" },
+  const updateTimeFinish = (value) => {
+    const {
+      approvedBy,
+      assignTasks,
+      createdAt,
+      createdBy,
+      event,
+      id,
+      modifiedBy,
+      parent,
+      status,
+      subTask,
+      taskFiles,
+      updatedAt,
+      ...rest
+    } = taskSelected;
+    const data = {
+      ...rest,
+      startDate: startDateUpdate,
+      endDate: endDateUpdate,
+      eventID: eventID,
+      parentTask: parentTask,
     };
-    //colorMapping[status] ở đây để truy suất value bằng key
-    return colorMapping[value];
+    updateDate({ taskID, task: data });
   };
 
-  const queryClient = useQueryClient();
+  ////////Pick members
+  const { mutate: UpdateMember } = useMutation((data) => assignMember(data), {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["tasks"]);
+      queryClient.invalidateQueries(["subtaskDetails"], taskID);
+      message.open({
+        type: "success",
+        content: "cập nhật nhân viên được giao công việc thành công",
+      });
+    },
+    onError: () => {
+      message.open({
+        type: "error",
+        content:
+          "Ko thể cập nhật nhân viên được giao công việc lúc này! Hãy thử lại sau",
+      });
+    },
+  });
+  const handleChangeMember = (value) => {
+    const data = {
+      assignee: value,
+      taskID: taskID,
+      leader: value?.length > 0 ? value[0] : "",
+    };
+    UpdateMember(data);
+  };
+
+  /////////Pick Status
   const { mutate: UpdateStatus } = useMutation(
     ({ taskID, status }) => updateTaskStatus({ taskID, status }),
     {
-      onSuccess: (status) => {
+      onSuccess: () => {
         queryClient.invalidateQueries(["tasks"]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
         message.open({
@@ -152,10 +341,54 @@ const FieldSubtask = ({ taskSelected, taskParent, staff, disableUpdate }) => {
       },
     }
   );
-
   const handleChangeStatus = (value) => {
     const data = { status: value, taskID: taskID };
     UpdateStatus(data);
+  };
+
+  ////Pick Priority
+  const { mutate: updatePriority } = useMutation(
+    ({ taskID, task }) => updateTask({ taskID, task }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tasks"]);
+        queryClient.invalidateQueries(["subtaskDetails"], taskID);
+        message.open({
+          type: "success",
+          content: "Cập nhật độ ưu tiên công việc  thành công",
+        });
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Cập nhật độ ưu tiên mới thất bại",
+        });
+      },
+    }
+  );
+  const updatePriorityFinish = (value) => {
+    const {
+      approvedBy,
+      assignTasks,
+      createdAt,
+      createdBy,
+      event,
+      id,
+      modifiedBy,
+      parent,
+      status,
+      subTask,
+      taskFiles,
+      updatedAt,
+      ...rest
+    } = taskSelected;
+    const data = {
+      ...rest,
+      priority: value,
+      eventID: eventID,
+      parentTask: parentTask,
+    };
+    updatePriority({ taskID, task: data });
   };
 
   useEffect(() => {
@@ -278,57 +511,15 @@ const FieldSubtask = ({ taskSelected, taskParent, staff, disableUpdate }) => {
               <FolderOutlined />
               Tài liệu
             </h4>
-            {taskSelected?.taskFiles?.length > 0 ? (
+            {taskSelected?.taskFiles?.length > 0 &&
               taskSelected?.taskFiles.map((file) => (
-                <a
-                  key={file.id}
-                  href={file.fileUrl}
-                  className="text-ellipsis max-w-full overflow-hidden flex mt-2 text-green-500"
-                >
-                  <IoMdAttach className="cursor-pointer" size={20} />
-                  Tài liệu đính kèm
-                </a>
-              ))
-            ) : (
-              <Tag
-                icon={<FileExclamationOutlined />}
-                color="default"
-                className="w-fit mt-4"
-                bordered={false}
-              >
-                không có file
-              </Tag>
+                <ListFile key={file.id} file={file} />
+              ))}
+            {!taskParent && (
+              <div className="flex justify-start items-center mt-4">
+                <FileInput taskID={taskID} setIsOpenTaskModal={setIsOpenTaskModal} />
+              </div>
             )}
-            <div className="flex justify-start items-center mt-4">
-              {/* <Upload
-                className="upload-list-inline"
-                maxCount={1}
-                listType="picture"
-                action=""
-                customRequest={({ file, onSuccess }) => {
-                  setTimeout(() => {
-                    onSuccess("ok");
-                  }, 0);
-                }}
-                showUploadList={{
-                  showPreviewIcon: false,
-                }}
-                beforeUpload={(file) => {
-                  return new Promise((resolve, reject) => {
-                    if (file && file?.size > 10 * 1024 * 1024) {
-                      reject("File quá lớn ( <10MB )");
-                      return false;
-                    } else {
-                      // setFileList(file);
-                      resolve();
-                      return true;
-                    }
-                  });
-                }}
-              >
-                <Button icon={<UploadOutlined />}>Tải tài liệu</Button>
-              </Upload> */}
-            </div>
           </div>
         </div>
       </div>
@@ -364,14 +555,36 @@ const FieldSubtask = ({ taskSelected, taskParent, staff, disableUpdate }) => {
               <>
                 <div className="flex justify-start items-center mt-4">
                   {taskSelected.priority !== null ? (
-                    <Tag
-                      color={
-                        getColorStatusPriority(taskSelected.priority)?.color
-                      }
-                      className="h-fit"
-                    >
-                      {getColorStatusPriority(taskSelected.priority)?.title}
-                    </Tag>
+                    <>
+                      {!isOpenPriority ? (
+                        <Tag
+                          color={
+                            getColorStatusPriority(taskSelected.priority)?.color
+                          }
+                          className="h-fit"
+                          onClick={() => setIsOpenPriority(true)}
+                        >
+                          {getColorStatusPriority(taskSelected.priority)?.title}
+                        </Tag>
+                      ) : (
+                        <Form
+                          name="Priority"
+                          // onFinish={updatePriorityFinish}
+                        >
+                          <Form.Item
+                            name="priority"
+                            className="text-sm font-medium "
+                            initialValue={selectedPriority?.value}
+                          >
+                            <Segmented
+                              options={optionsPriority}
+                              value={selectedPriority?.value}
+                              onChange={(value) => updatePriorityFinish(value)}
+                            />
+                          </Form.Item>
+                        </Form>
+                      )}
+                    </>
                   ) : (
                     <Tag icon={<MinusCircleOutlined />} color="default">
                       không có độ ưu tiên
@@ -476,19 +689,64 @@ const FieldSubtask = ({ taskSelected, taskParent, staff, disableUpdate }) => {
                     taskSelected?.endDate !== null ? (
                       <>
                         {isOpenDate ? (
-                          <RangePicker
-                            showTime={{
-                              format: "HH:mm:ss",
-                            }}
-                            onChange={onChangeDate}
-                            defaultValue={[
-                              dayjs(taskSelected.startDate)
-                                .utcOffset(7)
-                                .local(),
-                              dayjs(taskSelected.endDate).utcOffset(7).local(),
-                            ]}
-                            format="YYYY/MM/DD HH:mm:ss"
-                          />
+                          <Form onFinish={updateTimeFinish} name="date">
+                            <Form.Item
+                              name="date"
+                              className="mb-0"
+                              rules={[
+                                {
+                                  type: "array",
+                                  required: true,
+                                  message: "Please select time!",
+                                },
+                              ]}
+                              initialValue={[
+                                dayjs(taskSelected.startDate)
+                                  .utcOffset(7)
+                                  .local(),
+                                dayjs(taskSelected.endDate)
+                                  .utcOffset(7)
+                                  .local(),
+                              ]}
+                            >
+                              <RangePicker
+                                placeholder={[
+                                  "ngày bắt đầu  ",
+                                  "ngày kết thúc ",
+                                ]}
+                                disabledTime={disabledRangeTime}
+                                disabledDate={disabledDate}
+                                showTime={{
+                                  format: "HH:mm:ss",
+                                  hideDisabledOptions: true,
+                                }}
+                                onChange={onChangeDate}
+                                format="YYYY/MM/DD HH:mm:ss"
+                                onFocus={onFocusRangePicker}
+                                // onBlur={onBlurRangePicker}
+                                allowClear={false}
+                              />
+                            </Form.Item>
+                            <div className="flex flex-row gap-x-2">
+                              {isRangePickerFocused && (
+                                <Button
+                                  type="link"
+                                  htmlType="submit"
+                                  loading={isLoading}
+                                >
+                                  Lưu
+                                </Button>
+                              )}
+                              {isRangePickerCancel && (
+                                <Button
+                                  type="link"
+                                  onClick={() => onBlurRangePicker()}
+                                >
+                                  Huỷ
+                                </Button>
+                              )}
+                            </div>
+                          </Form>
                         ) : (
                           <span
                             className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${

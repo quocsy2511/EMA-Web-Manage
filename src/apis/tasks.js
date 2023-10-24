@@ -68,9 +68,6 @@ export const filterTask = ({ assignee, eventID, priority, sort, status }) =>
 // "estimationTime": null,
 // "effort": null
 export const updateTask = ({ taskID, task }) =>
-  // {
-  //   console.log("🚀 ~ file: tasks.js:71 ~ updateTask ~ task:", task);
-  // };
   authRequest({
     url: `/task/updateTask?taskID=${taskID}`,
     method: "put",
@@ -81,4 +78,15 @@ export const updateTaskStatus = ({ taskID, status }) =>
   authRequest({
     url: `/task/updateTaskStatus?taskID=${taskID}&status=${status}`,
     method: "put",
+  });
+
+export const assignMember = (data) =>
+  authRequest({
+    url: "/assign-task",
+    method: "post",
+    data: {
+      taskID: data.taskID,
+      assignee: data.assignee,
+      leader: data.leader ?? "",
+    },
   });

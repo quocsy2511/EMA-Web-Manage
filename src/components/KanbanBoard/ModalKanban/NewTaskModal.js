@@ -102,6 +102,14 @@ const NewTaskModal = ({
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
     useMutation(({ formData, task }) => uploadFile(formData), {
       onSuccess: (data, variables) => {
+        console.log(
+          "🚀 ~ file: NewTaskModal.js:105 ~ useMutation ~ variables:",
+          variables
+        );
+        console.log(
+          "🚀 ~ file: NewTaskModal.js:105 ~ useMutation ~ data:",
+          data
+        );
         const task = variables.task;
         variables.task = {
           file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
@@ -111,7 +119,7 @@ const NewTaskModal = ({
           "🚀 ~ file: NewTaskModal.js:97 ~ NewTaskModal ~ variables.task:",
           variables.task
         );
-        submitFormTask(variables.task);
+        // submitFormTask(variables.task);
       },
       onError: () => {
         message.open({
@@ -131,13 +139,17 @@ const NewTaskModal = ({
   };
 
   const onChangeDate = (value, dateString) => {
+    console.log(
+      "🚀 ~ file: NewTaskModal.js:134 ~ onChangeDate ~ dateString:",
+      dateString
+    );
     // Chuyển đổi thành định dạng ISO 8601
     const isoStartDate = moment(dateString[0]).toISOString();
     const isoEndDate = moment(dateString[1]).toISOString();
     setStartDate(isoStartDate);
     setEndDate(isoEndDate);
   };
-
+  //validate pick date
   const today = moment();
   const todayFormat = moment().format("YYYY-MM-DD HH:mm:ss");
   const checkStartDateFormat = moment(disableStartDate).format("YYYY-MM-DD");
@@ -150,16 +162,7 @@ const NewTaskModal = ({
 
   const hourEndDate = moment(disableEndDate).format("HH");
   const minutesEndDate = moment(disableEndDate).format("mm");
-  console.log(
-    "🚀 ~ file: NewTaskModal.js:146 ~ disableStartDate:",
-    disableStartDate
-  );
-  console.log(
-    "🚀 ~ file: NewTaskModal.js:149 ~ disableEndDate:",
-    disableEndDate
-  );
 
-  //validate pick date
   const disabledDate = (current) => {
     if (current.isBefore(disableStartDate, "day")) {
       return (
@@ -221,10 +224,6 @@ const NewTaskModal = ({
     }
   };
 
-  // const descriptionDebounced = debounce((value) => {
-  //   setDescription(value);
-  // }, 500); // Thời gian chờ 500ms
-
   //Render Estimated Time
   const onChangeEstimatedTime = (newValue) => {
     setEstimationTime(newValue);
@@ -255,6 +254,7 @@ const NewTaskModal = ({
       uploadFileMutate({ formData, task });
     }
   };
+
   const [form] = Form.useForm();
   return (
     <div>
@@ -311,19 +311,19 @@ const NewTaskModal = ({
               ]}
               hasFeedback
             >
-              <ConfigProvider locale={viVN}>
-                <RangePicker
-                  placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
-                  disabledTime={disabledRangeTime}
-                  disabledDate={disabledDate}
-                  showTime={{
-                    format: "HH:mm:ss",
-                    hideDisabledOptions: true,
-                  }}
-                  onChange={onChangeDate}
-                  formatDate="YYYY/MM/DD HH:mm:ss"
-                />
-              </ConfigProvider>
+              {/* <ConfigProvider locale={viVN}> */}
+              <RangePicker
+                placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
+                disabledTime={disabledRangeTime}
+                disabledDate={disabledDate}
+                showTime={{
+                  format: "HH:mm:ss",
+                  hideDisabledOptions: true,
+                }}
+                onChange={onChangeDate}
+                formatDate="YYYY/MM/DD HH:mm:ss"
+              />
+              {/* </ConfigProvider> */}
             </Form.Item>
             {/* Estimated */}
             <Form.Item

@@ -14,10 +14,13 @@ import { getProfile } from "../../../apis/users";
 import moment from "moment";
 
 const TaskModalContent = ({
+  disableEndDate,
+  disableStartDate,
   taskParent,
   setSelectedSubTask,
   taskSelected,
   disableUpdate,
+  setIsOpenTaskModal,
 }) => {
   const {
     data: listComments,
@@ -85,10 +88,13 @@ const TaskModalContent = ({
       {!isLoadingStaff ? (
         !isErrorStaff ? (
           <FieldSubtask
+            disableEndDate={disableEndDate}
+            disableStartDate={disableStartDate}
             disableUpdate={disableUpdate}
             taskSelected={taskSelected}
             taskParent={taskParent}
             staff={staff}
+            setIsOpenTaskModal={setIsOpenTaskModal}
           />
         ) : (
           <AnErrorHasOccured />

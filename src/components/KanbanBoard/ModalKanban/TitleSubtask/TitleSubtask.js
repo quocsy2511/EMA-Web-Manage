@@ -1,7 +1,6 @@
 import { ThunderboltOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Form, Input, message } from "antd";
-import TextArea from "antd/es/input/TextArea";
 import { debounce } from "lodash";
 import React, { useRef, useState } from "react";
 import { updateTask } from "../../../../apis/tasks";
@@ -32,13 +31,13 @@ const TitleSubtask = ({ disableUpdate, taskParent, taskSelected }) => {
         inputRef.current.blur(); //bỏ forcus vô input
         message.open({
           type: "success",
-          content: "Cập tên công việc mới thành công",
+          content: "Cập nhật tên công việc mới thành công",
         });
       },
       onError: () => {
         message.open({
           type: "error",
-          content: "Cập tên công việc mới thất bại",
+          content: "Cập nhật tên công việc mới thất bại",
         });
       },
     }
@@ -96,7 +95,7 @@ const TitleSubtask = ({ disableUpdate, taskParent, taskSelected }) => {
           <Form.Item name="title" initialValue={title} className="w-full mb-2">
             <Input
               onPressEnter={onPressEnter}
-              autoComplete={false}
+              autoComplete="false"
               ref={inputRef}
               className="truncate bg-transparent px-4 py-2 rounded-md text-3xl font-bold border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer h-fit"
               placeholder="Tên công việc ...."

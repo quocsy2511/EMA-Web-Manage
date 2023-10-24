@@ -9,6 +9,8 @@ import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 
 const TaskModal = ({
+  disableEndDate,
+  disableStartDate,
   isOpenTaskModal,
   setIsOpenTaskModal,
   taskParent,
@@ -73,6 +75,8 @@ const TaskModal = ({
             setIsOpenTaskModal={setIsOpenTaskModal}
             taskParent={taskParent}
             setSelectedSubTask={setSelectedSubTask}
+            disableEndDate={disableEndDate}
+            disableStartDate={disableStartDate}
           />
         ) : //task con
         !isLoadingSubtaskDetails ? (
@@ -83,6 +87,8 @@ const TaskModal = ({
                 taskSelected={subtaskDetails?.[0]}
                 setIsOpenTaskModal={setIsOpenTaskModal}
                 taskParent={!taskParent}
+                disableEndDate={disableEndDate}
+                disableStartDate={disableStartDate}
               />
             </>
           ) : (

@@ -110,6 +110,8 @@ const Column = ({ TaskParent, selectedStatus }) => {
 
         {isOpenTaskModal && (
           <TaskModal
+            disableStartDate={TaskParent?.startDate}
+            disableEndDate={TaskParent?.endDate}
             disableUpdate={disableUpdate}
             setTaskSelected={setTaskSelected}
             taskSelected={taskSelected}
