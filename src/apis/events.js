@@ -1,4 +1,3 @@
-import axios from "axios";
 import { authRequest } from "../utils/axios-utils";
 
 export const createEvent = (event) =>

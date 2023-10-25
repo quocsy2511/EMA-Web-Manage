@@ -1,5 +1,10 @@
 import React, { Fragment, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useRouteLoaderData,
+} from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   FcHighPriority,
@@ -7,22 +12,28 @@ import {
   FcMediumPriority,
 } from "react-icons/fc";
 import { BsHourglassBottom, BsHourglassSplit, BsPlus } from "react-icons/bs";
-import { Avatar, FloatButton } from "antd";
 import { BiDetail } from "react-icons/bi";
+import { VscDebugStart } from "react-icons/vsc";
+import { MdOutlineDoneOutline } from "react-icons/md";
+import { Avatar, Button, FloatButton, message } from "antd";
 import TaskItem from "../../components/Task/TaskItem";
 import CommentInTask from "../../components/Comment/CommentInTask";
 import SubTaskModal from "../../components/Modal/SubTaskModal";
 import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
-import { useQuery } from "@tanstack/react-query";
-import { getTasks } from "../../apis/tasks";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getTasks, updateTaskStatus } from "../../apis/tasks";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import { getComment } from "../../apis/comments";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
+import moment from "moment";
+import TaskUpdateModal from "../../components/Modal/TaskUpdateModal";
 
 const EventSubTaskPage = () => {
   const eventId = useParams().eventId;
   const taskId = useParams().taskId;
+  const manager = useRouteLoaderData("manager");
+  const navigate = useNavigate();
 
   const {
     data: tasks,
@@ -51,12 +62,54 @@ const EventSubTaskPage = () => {
     isError: commentsIsError,
   } = useQuery(["comment", taskId], () => getComment(taskId));
 
+  const queryClient = useQueryClient();
+  const {
+    mutate: updateEventStatusMutate,
+    isLoading: updateEventStatusIsLoading,
+  } = useMutation(
+    ({ taskID, status }) => updateTaskStatus({ taskID, status }),
+    {
+      onSuccess: (data, variables) => {
+        if (variables.status === "PROCESSING") {
+          queryClient.invalidateQueries(["tasks", eventId, taskId]);
+          messageApi.open({
+            type: "success",
+            content: "Cập nhật trạng thái hạng mục thành bắt đầu.",
+          });
+        }
+        if (variables.status === "CONFIRM") {
+          messageApi.open({
+            type: "success",
+            content: "Hạng mục đã hoàn thành.",
+          });
+          navigate(`/manager/event/${eventId}`);
+        }
+      },
+    }
+  );
+
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenCreateTaskModal, setIsOpenCreateTaskModal] = useState(false);
   const [selectedSubTask, setSelectedSubTask] = useState();
+  const [isOpenUpdateTaskModal, setIsOpenUpdateTaskModal] = useState(false);
+  const [isOpenUpdateSubTaskModal, setIsOpenUpdateSubTaskModal] =
+    useState(false);
+
+  const [messageApi, contextHolder] = message.useMessage();
 
   const handleOpenModal = () => {
     setIsOpenCreateTaskModal((prev) => !prev);
+  };
+
+  const handleOpenUpdateModal = () => {
+    setIsOpenUpdateTaskModal((prev) => !prev);
+  };
+
+  const handleUpdateStatusTask = (status) => {
+    updateEventStatusMutate({
+      taskID: taskId,
+      status,
+    });
   };
 
   if (taskIsLoading) {
@@ -91,24 +144,92 @@ const EventSubTaskPage = () => {
       break;
   }
 
+  let status, statusColor, statusBorder;
+  switch (tasks.status) {
+    case "PENDING":
+      status = "Đang chuẩn bị";
+      statusColor = "text-gray-400";
+      statusBorder = "border-gray-400";
+      break;
+
+    case "PROCESSING":
+      status = "Đang thực hiện";
+      statusColor = "text-blue-400";
+      statusBorder = "border-blue-400";
+      break;
+
+    case "DONE":
+      status = "Hoàn thành";
+      statusColor = "text-green-400";
+      statusBorder = "border-green-400";
+      break;
+
+    case "CONFIRM":
+      status = "Đã xác thực";
+      statusColor = "text-purple-400";
+      statusBorder = "border-purple-400";
+      break;
+
+    case "CANCEL":
+      status = "Hủy bỏ";
+      statusColor = "text-red-500";
+      statusBorder = "border-red-500";
+      break;
+
+    case "OVERDUE":
+      status = "Quá hạn";
+      statusColor = "text-orange-500";
+      statusBorder = "border-orange-500";
+      break;
+
+    default:
+      break;
+  }
+
   return (
     <Fragment>
+      {contextHolder}
       <FloatButton
         onClick={handleOpenModal}
         icon={<BsPlus />}
         type="primary"
-        tooltip={<p>Tạo công việc</p>}
+        tooltip={
+          <p>
+            {tasks.assignTasks.length !== 0
+              ? "Tạo công việc"
+              : "Chưa phân công cho bộ phận nào!"}
+          </p>
+        }
       />
 
-      <TaskAdditionModal
-        isModalOpen={isOpenCreateTaskModal}
-        setIsModalOpen={setIsOpenCreateTaskModal}
-        eventId={eventId}
-        date={[tasks.startDate, tasks.endDate]}
+      {tasks.assignTasks.length !== 0 && (
+        <TaskAdditionModal
+          isModalOpen={isOpenCreateTaskModal}
+          setIsModalOpen={setIsOpenCreateTaskModal}
+          eventId={eventId}
+          date={[tasks.startDate, tasks.endDate]}
+          parentTaskId={taskId}
+          staffId={tasks.assignTasks[0].user.id}
+        />
+      )}
 
-        parentTaskId={taskId}
-        staffId={tasks.assignTasks[0].user.id}
+      <TaskUpdateModal
+        isModalOpen={isOpenUpdateTaskModal}
+        setIsModalOpen={setIsOpenUpdateTaskModal}
+        eventID={eventId}
+        task={tasks}
+        isSubTask={false}
       />
+
+      {/* {selectedSubTask && (
+        <TaskUpdateModal
+          isModalOpen={isOpenUpdateSubTaskModal}
+          setIsModalOpen={setIsOpenUpdateSubTaskModal}
+          eventID={eventId}
+          task={selectedSubTask}
+          isSubTask={true}
+        />
+      )} */}
 
       <motion.div
         initial={{ y: -75, opacity: 0 }}
@@ -121,10 +242,55 @@ const EventSubTaskPage = () => {
           </Link>{" "}
           /{" "}
           <Link to=".." relative="path">
-            Khai giảng
+            {tasks.event.eventName}
           </Link>{" "}
           / {tasks.title}
         </p>
+        <div className="flex items-end">
+          <AnimatePresence>
+            {tasks.subTask.length !== 0 &&
+              tasks.subTask.filter((task) => task.status === "CONFIRM")
+                .length === tasks.subTask.length &&
+              tasks.status === "DONE" && (
+                <motion.div
+                  initial={{ x: 50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: 50, opacity: 0 }}
+                >
+                  <Button
+                    isLoading={updateEventStatusIsLoading}
+                    // size="large"
+                    icon={<MdOutlineDoneOutline size={15} />}
+                    type="primary"
+                    onClick={() => handleUpdateStatusTask("CONFIRM")}
+                    className="font-medium"
+                  >
+                    Hoàn thành hạng mục
+                  </Button>
+                </motion.div>
+              )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {tasks.status === "PENDING" && (
+              <motion.div
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 50, opacity: 0 }}
+              >
+                <Button
+                  isLoading={updateEventStatusIsLoading}
+                  // size="large"
+                  type="primary"
+                  icon={<VscDebugStart size={15} />}
+                  onClick={() => handleUpdateStatusTask("PROCESSING")}
+                >
+                  Bắt đầu hạng mục
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </motion.div>
 
       <motion.div
@@ -140,85 +306,166 @@ const EventSubTaskPage = () => {
           <div className="space-y-1">
             <p className="text-2xl font-semibold">{tasks.title}</p>
             {tasks.assignTasks.length === 0 ? (
-              <p className="text-sm">Chưa giao công việc</p>
+              <p className="text-sm">Chưa giao công việc !!</p>
             ) : (
               <p className="text-sm">
                 Chịu trách nhiệm bởi{" "}
                 <span className="font-semibold">
-                  {/* {tasks.assignTasks[0].user.profile.fullName} */}
+                  {tasks.assignTasks[0]?.user.profile.fullName}
                 </span>
               </p>
             )}
           </div>
 
           <div className="flex-1 flex justify-end">
-            <div className="flex items-center px-4 py-2 bg-green-100 text-green-400 rounded-xl">
-              <BsHourglassSplit size={15} />
-              <div className="w-4" />
-              <p className="text-base font-medium">28/9/2023</p>
+            <div
+              className={`flex items-center px-3 ${statusColor} border ${statusBorder} rounded-full`}
+            >
+              {status}
             </div>
             <div className="w-[4%]" />
-            <div className="flex items-center px-4 py-2 bg-green-100 text-green-400 rounded-xl">
+            <motion.div
+              whileHover={{ y: -5 }}
+              className="flex items-center px-4 py-2 bg-green-100 text-green-400 rounded-xl"
+            >
+              <BsHourglassSplit size={15} />
+              <div className="w-4" />
+              <p className="text-base font-medium">
+                {tasks.startDate
+                  ? moment(tasks.startDate).format("DD/MM/YYYY HH:mm:ss")
+                  : "-- : --"}
+              </p>
+            </motion.div>
+            <div className="w-[4%]" />
+            <motion.div
+              whileHover={{ y: -5 }}
+              className="flex items-center px-4 py-2 bg-red-100 text-red-400 rounded-xl"
+            >
               <BsHourglassBottom size={15} />
               <div className="w-4" />
-              <p className="text-base font-medium">28/9/2023</p>
-            </div>
+              <p className="text-base font-medium">
+                {tasks.endDate
+                  ? moment(tasks.endDate).format("DD/MM/YYYY HH:mm:ss")
+                  : "-- : --"}
+              </p>
+            </motion.div>
           </div>
 
           <div className="w-[4%]" />
 
-          <Avatar
-            size={40}
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
-          />
+          <motion.div whileHover={{ y: -5 }}>
+            <Avatar size={40} src={tasks.assignTasks[0]?.user.profile.avatar} />
+          </motion.div>
 
           <div className="w-[4%]" />
 
-          <BiDetail size={30} className="text-slate-400" />
+          <motion.div
+            whileHover={{ y: -5 }}
+            className="cursor-pointer"
+            onClick={handleOpenUpdateModal}
+          >
+            <BiDetail size={30} className="text-slate-400" />
+          </motion.div>
         </div>
 
-        {/* <p className="px-14 pt-5 text-lg">{tasks.description}</p> */}
-        <div
-          className="px-14 pt-5"
-          dangerouslySetInnerHTML={{
-            __html: new QuillDeltaToHtmlConverter(
-              JSON.parse(tasks.description)
-            ).convert(),
-          }}
-        />
+        <div className="mt-5 px-8 py-5 bg-slate-50 rounded-xl">
+          <p className="text-lg font-medium">Mô tả</p>
+          <div
+            className="text-sm"
+            dangerouslySetInnerHTML={{
+              __html: new QuillDeltaToHtmlConverter(
+                JSON.parse(tasks.description)
+              ).convert(),
+            }}
+          />
+          {tasks.taskFiles.length > 0 && (
+            <>
+              <p className="text-lg font-medium">Tệp đính kèm</p>
+              <div className="flex gap-x-3 items-center">
+                {tasks.taskFiles.map((file) => (
+                  <a
+                    href={file.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500"
+                  >
+                    {file.fileName}
+                  </a>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
 
-        <div className="flex flex-col gap-y-6 mt-10 mx-10">
-          <AnimatePresence mode="await">
+        <div
+          className={`flex flex-col gap-y-6 ${
+            tasks.subTask.length !== 0 && "mt-10 mx-10"
+          }`}
+        >
+          <AnimatePresence>
             {tasks.subTask.length !== 0 &&
-              tasks.subTask.map((subtask) => (
-                <TaskItem
-                  key={subtask.id}
-                  task={subtask}
-                  isSubtask={true}
-                  setSelectedSubTask={setSelectedSubTask}
+              tasks.subTask.map((subtask) => {
+                if (
+                  subtask.assignTasks.length !== 0 ||
+                  subtask.createdBy === manager.id
+                )
+                  return (
+                    <div key={subtask.id}>
+                      <TaskItem
+                        task={subtask}
+                        isSubtask={true}
+                        setSelectedSubTask={setSelectedSubTask}
+                        setIsOpenUpdateSubTaskModal={
+                          setIsOpenUpdateSubTaskModal
+                        }
+                        setIsOpenModal={setIsOpenModal}
+                      />
+                      {/* <TaskUpdateModal
+                        isModalOpen={isOpenUpdateSubTaskModal}
+                        setIsModalOpen={setIsOpenUpdateSubTaskModal}
+                        eventID={eventId}
+                        task={subtask}
+                        isSubTask={true}
+                      /> */}
+                    </div>
+                  );
+              })}
+            {selectedSubTask && (
+              <>
+                <SubTaskModal
+                  isOpenModal={isOpenModal}
                   setIsOpenModal={setIsOpenModal}
+                  selectedSubTask={selectedSubTask}
                 />
-              ))}
-            <SubTaskModal
-              isOpenModal={isOpenModal}
-              setIsOpenModal={setIsOpenModal}
-              selectedSubTask={selectedSubTask}
-            />
+                <TaskUpdateModal
+                  isModalOpen={isOpenUpdateSubTaskModal}
+                  setIsModalOpen={setIsOpenUpdateSubTaskModal}
+                  eventID={eventId}
+                  task={selectedSubTask}
+                  isSubTask={true}
+                />
+              </>
+            )}
           </AnimatePresence>
         </div>
 
-        {!commentsIsLoading || !commentsIsError ? (
-          comments ? (
-            <div className="mt-14">
-              <CommentInTask comments={comments} taskId={taskId} />
-            </div>
+        <AnimatePresence mode="wait">
+          {!commentsIsLoading || !commentsIsError ? (
+            comments ? (
+              <div key="comments" className="mt-14">
+                <CommentInTask comments={comments} taskId={taskId} />
+              </div>
+            ) : (
+              <p key="no-comment" className="text-center mt-10">
+                Không thể tải bình luận
+              </p>
+            )
           ) : (
-            <p className="text-center mt-10">Không thể tải bình luận</p>
-          )
-        ) : (
-          <LoadingComponentIndicator />
-        )}
+            <LoadingComponentIndicator />
+          )}
+        </AnimatePresence>
       </motion.div>
+      <FloatButton.BackTop className="right-24" />
     </Fragment>
   );
 };

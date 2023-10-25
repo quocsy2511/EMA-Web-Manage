@@ -1,4 +1,3 @@
-import axios from "axios";
 import { authRequest } from "../utils/axios-utils";
 
 // assignee = [id1, id2, ...]
@@ -19,9 +18,9 @@ export const createTask = (task) =>
       priority: task.priority,
       estimationTime: task.estimationTime,
       assignee: task.assignee,
-      
+      leader: task.leader,
+
       // Subtask only
-      leader: task.leader ?? "",
       parentTask: task.parentTask ?? undefined,
       file: task.file ?? undefined,
     },
@@ -79,3 +78,6 @@ export const updateTaskStatus = ({ taskID, status }) =>
     url: `/task/updateTaskStatus?taskID=${taskID}&status=${status}`,
     method: "put",
   });
+
+export const assignTask = (data) =>
+  authRequest({ url: "/assign-task", method: "post", data });

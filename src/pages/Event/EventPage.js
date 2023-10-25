@@ -157,7 +157,7 @@ const EventPage = () => {
             },
             {
               value: "DONE",
-              label: "Kết thúc",
+              label: "Đã kết thúc",
             },
             {
               value: "CANCEL",
@@ -226,38 +226,44 @@ const EventPage = () => {
                     </div>
                   )}
                 </div>
-                <div className="flex items-center justify-center gap-x-3 mt-8">
-                  <MdOutlineKeyboardArrowLeft
-                    className={`text-slate-500 ${
-                      data.prevPage
-                        ? "cursor-pointer hover:text-blue-600"
-                        : "cursor-not-allowed"
-                    }`}
-                    onClick={() => data.prevPage && setPage((prev) => prev - 1)}
-                    size={25}
-                  />
-                  {Array.from({ length: data.lastPage }, (_, index) => (
-                    <div
-                      key={index}
-                      className={`border border-slate-300 rounded-xl px-4 py-2 text-base font-medium cursor-pointer hover:bg-blue-200 ${
-                        page === index + 1 &&
-                        "text-blue-600 border-blue-800 bg-blue-100"
+                {data.data.length === 6 && (
+                  <div className="flex items-center justify-center gap-x-3 mt-8">
+                    <MdOutlineKeyboardArrowLeft
+                      className={`text-slate-500 ${
+                        data.prevPage
+                          ? "cursor-pointer hover:text-blue-600"
+                          : "cursor-not-allowed"
                       }`}
-                      onClick={() => setPage(index + 1)}
-                    >
-                      {index + 1}
-                    </div>
-                  ))}
-                  <MdOutlineKeyboardArrowRight
-                    className={`text-slate-500 ${
-                      data.nextPage
-                        ? "cursor-pointer hover:text-blue-600"
-                        : "cursor-not-allowed"
-                    }`}
-                    onClick={() => data.nextPage && setPage((prev) => prev + 1)}
-                    size={25}
-                  />
-                </div>
+                      onClick={() =>
+                        data.prevPage && setPage((prev) => prev - 1)
+                      }
+                      size={25}
+                    />
+                    {Array.from({ length: data.lastPage }, (_, index) => (
+                      <div
+                        key={index}
+                        className={`border border-slate-300 rounded-xl px-4 py-2 text-base font-medium cursor-pointer hover:bg-blue-200 ${
+                          page === index + 1 &&
+                          "text-blue-600 border-blue-800 bg-blue-100"
+                        }`}
+                        onClick={() => setPage(index + 1)}
+                      >
+                        {index + 1}
+                      </div>
+                    ))}
+                    <MdOutlineKeyboardArrowRight
+                      className={`text-slate-500 ${
+                        data.nextPage
+                          ? "cursor-pointer hover:text-blue-600"
+                          : "cursor-not-allowed"
+                      }`}
+                      onClick={() =>
+                        data.nextPage && setPage((prev) => prev + 1)
+                      }
+                      size={25}
+                    />
+                  </div>
+                )}
               </motion.div>
             </>
           )

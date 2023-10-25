@@ -8,12 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getProfile } from "../apis/users";
 
 const RootPage = () => {
-  // const data = useLoaderData();
   const [collapsed, setCollapsed] = useState(false);
-
-  const { data, refetch } = useQuery(["profile"], getProfile, {
-    refetchOnMount: false,
-  });
 
   return (
     <Fragment>
@@ -28,11 +23,7 @@ const RootPage = () => {
         {/* Main */}
         <Layout>
           {/* header */}
-          <Header
-            collapsed={collapsed}
-            setCollapsed={setCollapsed}
-            data={data ?? {}}
-          />
+          <Header collapsed={collapsed} setCollapsed={setCollapsed} />
           {/* Content */}
           <Content>
             <div className="bg-white flex items-center ">

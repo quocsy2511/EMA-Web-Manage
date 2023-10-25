@@ -82,8 +82,6 @@ const EventCreationPage = () => {
   const [fileList, setFileList] = useState();
 
   const [form] = Form.useForm();
-  //   form.resetFields()
-  //   form.setFieldsValue({})
   const [messageApi, contextHolder] = message.useMessage();
 
   const columns = [
@@ -112,7 +110,7 @@ const EventCreationPage = () => {
       estBudget: +values.estBudget,
       divisionId: values.divisions.map((division) => division.key),
     };
-    
+
     console.log("TRANSORM: ", values);
 
     uploadFileMutate({ formData, event: values });
@@ -155,9 +153,7 @@ const EventCreationPage = () => {
               e.preventDefault();
             }
           }}
-          // defaultValue={{
-          //   estBudget: 500000
-          // }}
+          initialValues={{ estBudget: 500000 }}
         >
           <div className="flex justify-between">
             <Form.Item
@@ -200,7 +196,7 @@ const EventCreationPage = () => {
                     if (value && value[0] && value[1]) {
                       return Promise.resolve();
                     }
-                    return Promise.reject("chưa chọn thời gian tổ chức");
+                    return Promise.reject("Chưa chọn thời gian tổ chức");
                   },
                 },
               ]}
@@ -214,6 +210,7 @@ const EventCreationPage = () => {
                   disabledDate={(current) => {
                     return current && current < moment().startOf("day");
                   }}
+                  format={"DD/MM/YYYY"}
                 />
               </ConfigProvider>
             </Form.Item>
@@ -347,7 +344,7 @@ const EventCreationPage = () => {
               <div className="flex items-center gap-x-2">
                 <InputNumber
                   className="w-full"
-                  placeholder="500,000"
+                  defaultValue={500000}
                   min={500000}
                   step={100000}
                   formatter={(value) =>

@@ -13,6 +13,111 @@ import {
 import React, { Fragment, useState } from "react";
 import { BiEdit } from "react-icons/bi";
 
+const dummyData = [
+  {
+    "id": "0a160c2b-1188-4da9-8126-b2a7b3eb56a4",
+    "budgetName": "Tiền thuê mic 123",
+    "estExpense": 200000,
+    "realExpense": 400000,
+    "status": "ACCEPT",
+    "eventID": "2e361780-2d0c-481d-b541-fbe646521052",
+    "eventName": "Sự kiện 10 năm thành lập FBT",
+    "createBy": "332767d3-b77e-49ec-a595-b8c77f5d53f2",
+    "createAt": "2023-10-24T14:47:26.000Z",
+    "approveBy": "568c4cd7-4f68-46b7-bcc4-90ac9f11740e",
+    "approveDate": "2023-10-24T17:24:12.000Z",
+    "urlImage": "url image hóa đơn 1",
+    "supplier": "Saigon LED 1",
+    "description": "Thuê sảnh từ 8h00 - 12h00 ",
+    "userName": "test"
+  },
+  {
+    "id": "0a160c2b-1188-4da9-8126-b2a7b3eb56a5",
+    "budgetName": "Tiền thuê mic 123",
+    "estExpense": 200000,
+    "realExpense": 400000,
+    "status": "ACCEPT",
+    "eventID": "2e361780-2d0c-481d-b541-fbe646521052",
+    "eventName": "Sự kiện 10 năm thành lập FBT",
+    "createBy": "332767d3-b77e-49ec-a595-b8c77f5d53f2",
+    "createAt": "2023-10-24T14:47:26.000Z",
+    "approveBy": "568c4cd7-4f68-46b7-bcc4-90ac9f11740e",
+    "approveDate": "2023-10-24T17:24:12.000Z",
+    "urlImage": "url image hóa đơn 1",
+    "supplier": "Saigon LED 1",
+    "description": "Thuê sảnh từ 8h00 - 12h00 ",
+    "userName": "test"
+  },
+  {
+    "id": "0a160c2b-1188-4da9-8126-b2a7b3eb56a6",
+    "budgetName": "Tiền thuê mic 123",
+    "estExpense": 200000,
+    "realExpense": 400000,
+    "status": "ACCEPT",
+    "eventID": "2e361780-2d0c-481d-b541-fbe646521052",
+    "eventName": "Sự kiện 10 năm thành lập FBT",
+    "createBy": "332767d3-b77e-49ec-a595-b8c77f5d53f2",
+    "createAt": "2023-10-24T14:47:26.000Z",
+    "approveBy": "568c4cd7-4f68-46b7-bcc4-90ac9f11740e",
+    "approveDate": "2023-10-24T17:24:12.000Z",
+    "urlImage": "url image hóa đơn 1",
+    "supplier": "Saigon LED 1",
+    "description": "Thuê sảnh từ 8h00 - 12h00 ",
+    "userName": "test"
+  },
+  {
+    "id": "0a160c2b-1188-4da9-8126-b2a7b3eb56a7",
+    "budgetName": "Tiền thuê mic 123",
+    "estExpense": 200000,
+    "realExpense": 400000,
+    "status": "ACCEPT",
+    "eventID": "2e361780-2d0c-481d-b541-fbe646521052",
+    "eventName": "Sự kiện 10 năm thành lập FBT",
+    "createBy": "332767d3-b77e-49ec-a595-b8c77f5d53f2",
+    "createAt": "2023-10-24T14:47:26.000Z",
+    "approveBy": "568c4cd7-4f68-46b7-bcc4-90ac9f11740e",
+    "approveDate": "2023-10-24T17:24:12.000Z",
+    "urlImage": "url image hóa đơn 1",
+    "supplier": "Saigon LED 1",
+    "description": "Thuê sảnh từ 8h00 - 12h00 ",
+    "userName": "test"
+  },
+  {
+    "id": "0a160c2b-1188-4da9-8126-b2a7b3eb56a8",
+    "budgetName": "Tiền thuê mic 123",
+    "estExpense": 200000,
+    "realExpense": 400000,
+    "status": "ACCEPT",
+    "eventID": "2e361780-2d0c-481d-b541-fbe646521052",
+    "eventName": "Sự kiện 10 năm thành lập FBT",
+    "createBy": "332767d3-b77e-49ec-a595-b8c77f5d53f2",
+    "createAt": "2023-10-24T14:47:26.000Z",
+    "approveBy": "568c4cd7-4f68-46b7-bcc4-90ac9f11740e",
+    "approveDate": "2023-10-24T17:24:12.000Z",
+    "urlImage": "url image hóa đơn 1",
+    "supplier": "Saigon LED 1",
+    "description": "Thuê sảnh từ 8h00 - 12h00 ",
+    "userName": "test"
+  },
+  {
+    "id": "0a160c2b-1188-4da9-8126-b2a7b3eb56a9",
+    "budgetName": "Tiền thuê mic 123",
+    "estExpense": 200000,
+    "realExpense": 400000,
+    "status": "ACCEPT",
+    "eventID": "2e361780-2d0c-481d-b541-fbe646521052",
+    "eventName": "Sự kiện 10 năm thành lập FBT",
+    "createBy": "332767d3-b77e-49ec-a595-b8c77f5d53f2",
+    "createAt": "2023-10-24T14:47:26.000Z",
+    "approveBy": "568c4cd7-4f68-46b7-bcc4-90ac9f11740e",
+    "approveDate": "2023-10-24T17:24:12.000Z",
+    "urlImage": "url image hóa đơn 1",
+    "supplier": "Saigon LED 1",
+    "description": "Thuê sảnh từ 8h00 - 12h00 ",
+    "userName": "test"
+  },
+]
+
 const ConfirmedBudget = () => {
   const [editingRowKey, setEditingRowKey] = useState("");
   const [sortedInfo, setSortedInfo] = useState({});
@@ -20,7 +125,7 @@ const ConfirmedBudget = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
-  const [data, setdata] = useState([1, 2, 3, 4]);
+  const [data, setdata] = useState(dummyData);
 
   const checkEditing = (record) => {
     return record.key === editingRowKey;
