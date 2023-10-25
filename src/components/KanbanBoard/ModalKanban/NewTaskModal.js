@@ -102,24 +102,12 @@ const NewTaskModal = ({
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
     useMutation(({ formData, task }) => uploadFile(formData), {
       onSuccess: (data, variables) => {
-        console.log(
-          "🚀 ~ file: NewTaskModal.js:105 ~ useMutation ~ variables:",
-          variables
-        );
-        console.log(
-          "🚀 ~ file: NewTaskModal.js:105 ~ useMutation ~ data:",
-          data
-        );
         const task = variables.task;
         variables.task = {
           file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
           ...task,
         };
-        console.log(
-          "🚀 ~ file: NewTaskModal.js:97 ~ NewTaskModal ~ variables.task:",
-          variables.task
-        );
-        // submitFormTask(variables.task);
+        submitFormTask(variables.task);
       },
       onError: () => {
         message.open({
@@ -181,45 +169,70 @@ const NewTaskModal = ({
     }
     return result;
   };
-  const disabledRangeTime = (_, type) => {
-    if (!today.isBefore(disableStartDate, "day")) {
-      if (type === "start") {
+  console.log("StartDate", disableStartDate);
+  console.log("EndDate", disableEndDate);
+  const disabledRangeTime = (current, type) => {
+    if (
+      !current?.isAfter(disableStartDate, "day") ||
+      !current?.isBefore(disableEndDate, "day")
+    ) {
+      //check ngày hôm nay có phải ngày bắt đầu không
+      if (!today.isBefore(disableStartDate, "day")) {
+        if (type === "start") {
+          if (!current?.isBefore(disableEndDate, "day")) {
+            return {
+              disabledHours: () => range(hourEndDate, 24),
+              disabledMinutes: () => range(minutesEndDate, 60),
+            };
+          } else if (!current?.isAfter(disableStartDate, "day")) {
+            return {
+              disabledHours: () => range(0, hourCurrentDate),
+              disabledMinutes: () => range(0, minutesCurrentDate),
+            };
+          }
+        }
         return {
-          disabledHours: () => range(0, hourCurrentDate),
-          disabledMinutes: () => range(0, minutesCurrentDate),
+          disabledHours: () => range(hourEndDate, 24),
+          disabledMinutes: () => range(minutesEndDate, 60),
+        };
+      } else if (
+        checkStartDateFormat.toString() === checkEndDateFormat.toString()
+      ) {
+        if (type === "start") {
+          return {
+            disabledHours: () => range(0, hourStartDate),
+            disabledMinutes: () => range(0, minutesStartDate),
+          };
+        }
+        return {
+          disabledHours: () =>
+            range(0, hourStartDate).concat(range(hourEndDate, 24)), // Sửa đoạn này
+          disabledMinutes: () =>
+            range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
+        };
+      } else {
+        if (type === "start") {
+          if (!current?.isBefore(disableEndDate, "day")) {
+            return {
+              disabledHours: () => range(hourEndDate, 24),
+              disabledMinutes: () => range(minutesEndDate, 60),
+            };
+          } else if (!current?.isAfter(disableStartDate, "day")) {
+            return {
+              disabledHours: () => range(0, hourStartDate),
+              disabledMinutes: () => range(0, minutesStartDate),
+            };
+          }
+        }
+        return {
+          disabledHours: () => range(hourEndDate, 24),
+          disabledMinutes: () => range(minutesEndDate, 60),
         };
       }
+    } else {
       return {
         disabledHours: () => range(0, 0),
         disabledMinutes: () => range(0, 0),
-      };
-    } else if (
-      checkStartDateFormat.toString() === checkEndDateFormat.toString()
-    ) {
-      if (type === "start") {
-        return {
-          disabledHours: () => range(0, hourStartDate),
-          disabledMinutes: () => range(0, minutesStartDate),
-        };
-      }
-      return {
-        // disabledHours: () => range(hourEndDate, 60),
-        disabledHours: () =>
-          range(0, hourStartDate).concat(range(hourEndDate, 24)), // Sửa đoạn này
-        disabledMinutes: () =>
-          range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
-      };
-    } else {
-      if (type === "start") {
-        return {
-          disabledHours: () => range(0, hourStartDate),
-          disabledMinutes: () => range(0, minutesStartDate),
-        };
-      }
-      return {
-        // disabledHours: () => range(hourEndDate, 60),
-        disabledHours: () => range(hourEndDate, 24), // Sửa đoạn này
-        disabledMinutes: () => range(minutesEndDate, 60),
       };
     }
   };

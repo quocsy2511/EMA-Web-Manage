@@ -77,6 +77,11 @@ code {
   background-color: transparent;
 }
 
+:where(.css-dev-only-do-not-override-18iikkb).ant-select-multiple
+  .ant-select-selection-item {
+  height: fit-content;
+}
+
 @layer utilities {
   @variants responsive {
     /* Hide scrollbar for Chrome, Safari and Opera */

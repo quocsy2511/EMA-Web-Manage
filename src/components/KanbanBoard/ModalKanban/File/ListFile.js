@@ -8,7 +8,7 @@ const ListFile = ({ file }) => {
       className="text-ellipsis max-w-full overflow-hidden flex mt-2 text-green-500"
     >
       <IoMdAttach className="cursor-pointer" size={20} />
-      Tài liệu đính kèm
+      {file.fileName}
     </a>
   );
 };

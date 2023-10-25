@@ -4,15 +4,20 @@ import React, { useState } from "react";
 import { uploadFile, uploadFileTask } from "../../../../apis/files";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const FileInput = ({ taskID, setIsOpenTaskModal }) => {
+const FileInput = ({ taskSelected, setUpdateFileList }) => {
+  const taskID = taskSelected?.id;
   const [fileList, setFileList] = useState("");
   const [disableSendButton, setDisableSendButton] = useState(true);
+  const [form] = Form.useForm();
+
   const queryClient = useQueryClient();
   const { mutate: uploadNewFileTask, isLoading: isLoadingPostFile } =
     useMutation((file) => uploadFileTask(file), {
       onSuccess: () => {
         queryClient.invalidateQueries(["tasks"]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
+        form.resetFields("");
+        setDisableSendButton(true);
         message.open({
           type: "success",
           content: "Cập nhật file  thành công",
@@ -29,12 +34,21 @@ const FileInput = ({ taskID, setIsOpenTaskModal }) => {
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
     useMutation(({ formData, task }) => uploadFile(formData), {
       onSuccess: (data) => {
-        setIsOpenTaskModal(false);
+        console.log("🚀 ~ file: FileInput.js:33 ~ useMutation ~ data:", data);
+        setUpdateFileList((prev) => [
+          ...prev,
+          { fileName: data.fileName, fileUrl: data.downloadUrl },
+        ]);
         const fileObj = {
           fileName: data.fileName,
           fileUrl: data.downloadUrl,
           taskID,
         };
+        console.log(
+          "🚀 ~ file: FileInput.js:41 ~ useMutation ~ fileObj:",
+          fileObj
+        );
+
         uploadNewFileTask(fileObj);
       },
       onError: () => {
@@ -54,7 +68,7 @@ const FileInput = ({ taskID, setIsOpenTaskModal }) => {
 
   return (
     <div>
-      <Form className="mb-0" onFinish={onFinish}>
+      <Form className="mb-0" onFinish={onFinish} form={form}>
         <Form.Item
           className="text-sm font-medium mb-2 "
           name="fileUrl"
