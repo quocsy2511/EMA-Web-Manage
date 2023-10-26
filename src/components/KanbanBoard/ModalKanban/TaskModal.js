@@ -2,11 +2,6 @@ import { Modal } from "antd";
 import React, { useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import TaskModalContent from "./TaskModalContent";
-import { useQuery } from "@tanstack/react-query";
-import { getTasks } from "../../../apis/tasks";
-import moment from "moment";
-import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
-import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 
 const TaskModal = ({
   disableEndDate,
@@ -19,35 +14,6 @@ const TaskModal = ({
   disableUpdate,
 }) => {
   const [selectedSubTask, setSelectedSubTask] = useState(null);
-  const {
-    data: subtaskDetails,
-    isError: isErrorSubtaskDetails,
-    isLoading: isLoadingSubtaskDetails,
-  } = useQuery(
-    ["subtaskDetails", selectedSubTask?.id],
-    () =>
-      getTasks({
-        fieldName: "id",
-        conValue: selectedSubTask?.id,
-        pageSize: 10,
-        currentPage: 1,
-      }),
-    {
-      select: (data) => {
-        if (data) {
-          const formatDate = data.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
-            return {
-              ...item,
-            };
-          });
-          return formatDate;
-        }
-      },
-      enabled: !!selectedSubTask?.id,
-    }
-  );
 
   const onCloseModal = () => {
     console.log("Click");
@@ -78,24 +44,18 @@ const TaskModal = ({
             disableEndDate={disableEndDate}
             disableStartDate={disableStartDate}
           />
-        ) : //task con
-        !isLoadingSubtaskDetails ? (
-          !isErrorSubtaskDetails ? (
-            <>
-              <TaskModalContent
-                disableUpdate={disableUpdate}
-                taskSelected={subtaskDetails?.[0]}
-                setIsOpenTaskModal={setIsOpenTaskModal}
-                taskParent={!taskParent}
-                disableEndDate={disableEndDate}
-                disableStartDate={disableStartDate}
-              />
-            </>
-          ) : (
-            <AnErrorHasOccured />
-          )
         ) : (
-          <LoadingComponentIndicator />
+          //task con
+          <>
+            <TaskModalContent
+              disableUpdate={disableUpdate}
+              taskSelected={selectedSubTask}
+              setIsOpenTaskModal={setIsOpenTaskModal}
+              taskParent={!taskParent}
+              disableEndDate={disableEndDate}
+              disableStartDate={disableStartDate}
+            />
+          </>
         )}
       </Modal>
     </div>

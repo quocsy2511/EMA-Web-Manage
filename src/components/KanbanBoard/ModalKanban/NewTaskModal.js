@@ -169,8 +169,6 @@ const NewTaskModal = ({
     }
     return result;
   };
-  console.log("StartDate", disableStartDate);
-  console.log("EndDate", disableEndDate);
   const disabledRangeTime = (current, type) => {
     if (
       !current?.isAfter(disableStartDate, "day") ||
@@ -255,16 +253,17 @@ const NewTaskModal = ({
       leader: assignee[0].toString(),
       desc: JSON.stringify(values.desc.ops),
     };
+    console.log("🚀 ~ file: NewTaskModal.js:250 ~ onFinish ~ task:", task);
 
     if (values.fileUrl === undefined || values.fileUrl?.length === 0) {
       console.log("NOOO FILE");
-      submitFormTask(task);
+      // submitFormTask(task);
     } else {
       console.log("HAS FILE");
       const formData = new FormData();
       formData.append("file", fileList);
       formData.append("folderName", "task");
-      uploadFileMutate({ formData, task });
+      // uploadFileMutate({ formData, task });
     }
   };
 
@@ -434,7 +433,6 @@ const NewTaskModal = ({
                 onChange={(content, delta, source, editor) => {
                   form.setFieldsValue({ desc: editor.getContents() });
                 }}
-                // onChange={(value) => descriptionDebounced(value)}
                 className="bg-transparent  py-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full "
               />
             </Form.Item>

@@ -1,4 +1,9 @@
-import { CloseOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  ExclamationCircleFilled,
+  SendOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Button, Input, Modal, message } from "antd";
 import React, { createContext, useState } from "react";
@@ -31,15 +36,40 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
     }
   );
   const config = {
-    title: "Delete Comment ?",
+    title: "Xoá bình luận  ?",
     content: (
       <>
         <ReachableContext.Consumer>
-          {(name) => `Deleting a comment is forever. There is no undo !`}
+          {(name) => `Xóa một bình luận là vĩnh viễn. Không có cách hoàn tác !`}
         </ReachableContext.Consumer>
         <br />
       </>
     ),
+    footer: (_, { OkBtn, CancelBtn }) => (
+      <>
+        {/* <Button>Huỷ</Button>
+        <Button>Xác nhận</Button> */}
+        <CancelBtn>Huỷ</CancelBtn>
+        <OkBtn>Xác nhận</OkBtn>
+      </>
+    ),
+  };
+  const { confirm } = Modal;
+  const showDeleteConfirm = () => {
+    confirm({
+      title: "Bạn có chắc chắn xóa bình luận này không?",
+      icon: <ExclamationCircleFilled />,
+      content: "Xóa một bình luận là vĩnh viễn. Không có cách hoàn tác",
+      okText: "Xác nhận",
+      okType: "danger",
+      cancelText: "Huỷ",
+      onOk() {
+        deletecommentMutate(id);
+      },
+      onCancel() {
+        console.log("Cancel");
+      },
+    });
   };
 
   return (
@@ -183,18 +213,9 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
               </>
             )}
             <div className="flex flex-row gap-x-2 text-text4 cursor-pointer ">
-              <p
-                className="hover:text-secondary underline underline-offset-2"
-                onClick={async () => {
-                  const confirmed = await modal.confirm(config);
-                  console.log("Confirmed: ", confirmed);
-                  if (confirmed === true) {
-                    deletecommentMutate(id);
-                  }
-                }}
-              >
+              <Button onClick={showDeleteConfirm} type="link">
                 Xoá
-              </p>
+              </Button>
             </div>
           </div>
         )}

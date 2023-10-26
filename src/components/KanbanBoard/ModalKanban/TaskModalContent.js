@@ -53,11 +53,9 @@ const TaskModalContent = ({
     },
   });
 
-  // const [title, setTitle] = useState(taskSelected.title);
-  const [description, setDescription] = useState(taskSelected.description);
-  const [subTasks, setSubTasks] = useState(taskSelected.subTask);
-  // Subtask
-  const onChangeSubtask = (id, newTitle) => {};
+  const [title, setTitle] = useState(taskSelected?.title);
+  const [description, setDescription] = useState(taskSelected?.description);
+  const [subTasks, setSubTasks] = useState(taskSelected?.subTask);
 
   let completed = 0;
   if (taskParent) {
@@ -69,7 +67,7 @@ const TaskModalContent = ({
   }
 
   useEffect(() => {
-    // setTitle(taskSelected.title);
+    setTitle(taskSelected.title);
     setDescription(taskSelected.description);
     setSubTasks(taskSelected.subTask);
   }, [taskSelected]);
@@ -77,9 +75,9 @@ const TaskModalContent = ({
   return (
     <div>
       <TitleSubtask
+        setTitle={setTitle}
+        title={title}
         disableUpdate={disableUpdate}
-        // setTitle={setTitle}
-        // title={title}
         taskParent={taskParent}
         taskSelected={taskSelected}
       />
@@ -105,6 +103,7 @@ const TaskModalContent = ({
 
       {/* task description */}
       <DescriptionSubtask
+        taskSelected={taskSelected}
         disableUpdate={disableUpdate}
         description={description}
         setDescription={setDescription}
@@ -130,7 +129,6 @@ const TaskModalContent = ({
               <Subtasks
                 disableUpdate={disableUpdate}
                 key={subTask.id}
-                onChangeSubtask={onChangeSubtask}
                 Subtask={subTask}
                 setSelectedSubTask={setSelectedSubTask}
               />
@@ -171,17 +169,14 @@ const TaskModalContent = ({
         {!isLoadingListComments ? (
           !isErrorListComments ? (
             listComments.length > 0 &&
-            listComments.map(
-              (comment, index) =>
-                taskParent === false && (
-                  <Comments
-                    disableUpdate={disableUpdate}
-                    key={index}
-                    comment={comment}
-                    taskSelected={taskSelected}
-                  />
-                )
-            )
+            listComments.map((comment, index) => (
+              <Comments
+                disableUpdate={disableUpdate}
+                key={index}
+                comment={comment}
+                taskSelected={taskSelected}
+              />
+            ))
           ) : (
             <AnErrorHasOccured />
           )

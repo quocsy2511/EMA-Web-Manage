@@ -8,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import { Avatar, Popover, Tooltip } from "antd";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import utc from "dayjs/plugin/utc";
 import "dayjs/locale/vi";
 import ListFile from "../File/ListFile";
@@ -44,6 +44,15 @@ const FieldSubtask = ({
   const [updateEndDate, setUpdateEndDate] = useState(taskSelected?.endDate);
   const [isOpenStatus, setIsOpenStatus] = useState(false);
   const [isOpenPriority, setIsOpenPriority] = useState(false);
+
+  useEffect(() => {
+    setUpdateFileList(taskSelected?.taskFiles);
+    setUpdatePriority(taskSelected?.priority);
+    setAssignTasks(taskSelected?.assignTasks);
+    setUpdateStatus(taskSelected?.status);
+    setUpdateStartDate(taskSelected?.startDate);
+    setUpdateEndDate(taskSelected?.endDate);
+  }, [taskSelected]);
 
   return (
     <div className="flex flex-col ">

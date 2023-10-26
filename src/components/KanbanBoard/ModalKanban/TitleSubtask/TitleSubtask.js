@@ -1,18 +1,23 @@
 import { ThunderboltOutlined } from "@ant-design/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Form, Input, message } from "antd";
 import { debounce } from "lodash";
-import React, { useRef, useState } from "react";
-import { updateTask } from "../../../../apis/tasks";
+import React, { useRef } from "react";
+import { getTasks, updateTask } from "../../../../apis/tasks";
 
-const TitleSubtask = ({ disableUpdate, taskParent, taskSelected }) => {
+const TitleSubtask = ({
+  disableUpdate,
+  taskParent,
+  taskSelected,
+  title,
+  setTitle,
+}) => {
   const inputRef = useRef(null);
   const taskID = taskSelected?.id;
-  const [title, setTitle] = useState(taskSelected.title);
 
   const descriptionDebounced = debounce((value) => {
     setTitle(value);
-  }, 500); // Thời gian chờ 500ms
+  }, 300); // Thời gian chờ 300ms
 
   const onPressEnter = (e) => {
     // Kiểm tra nếu người dùng nhấn phím "Enter"
@@ -21,11 +26,29 @@ const TitleSubtask = ({ disableUpdate, taskParent, taskSelected }) => {
       onFinish(title);
     }
   };
+
+  const { data: subtaskDetails } = useQuery(
+    ["subtaskDetails", taskID],
+    () =>
+      getTasks({
+        fieldName: "id",
+        conValue: taskID,
+        pageSize: 10,
+        currentPage: 1,
+      }),
+    {
+      select: (data) => {
+        return data;
+      },
+      enabled: !!taskID,
+    }
+  );
+
   const queryClient = useQueryClient();
   const { mutate: updateTitle } = useMutation(
     ({ taskID, task }) => updateTask({ taskID, task }),
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
         queryClient.invalidateQueries(["tasks"]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
         inputRef.current.blur(); //bỏ forcus vô input
@@ -92,14 +115,18 @@ const TitleSubtask = ({ disableUpdate, taskParent, taskSelected }) => {
         />
       ) : (
         <Form onFinish={onFinish} className="w-full">
-          <Form.Item name="title" initialValue={title} className="w-full mb-2">
+          <Form.Item
+            name="title"
+            initialValue={subtaskDetails?.[0].title}
+            className="w-full mb-2"
+          >
             <Input
               onPressEnter={onPressEnter}
               autoComplete="false"
               ref={inputRef}
               className="truncate bg-transparent px-4 py-2 rounded-md text-3xl font-bold border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer h-fit"
               placeholder="Tên công việc ...."
-              value={title}
+              value={subtaskDetails?.[0].title}
               onChange={(e) => descriptionDebounced(e.target.value)}
               id="board-name-input"
               type="text"

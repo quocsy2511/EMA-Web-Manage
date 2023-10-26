@@ -47,7 +47,6 @@ const Subtasks = ({
   disableUpdate,
 }) => {
   const { id } = Subtask;
-
   const {
     data: subtaskDetails,
     isError: isErrorSubtaskDetails,
@@ -81,8 +80,8 @@ const Subtasks = ({
     }
   );
 
-  const selectSubtaskHandler = (value) => {
-    setSelectedSubTask(value);
+  const selectSubtaskHandler = () => {
+    setSelectedSubTask(subtaskDetails?.[0]);
   };
 
   const [isOpenStatus, setIsOpenStatus] = useState(false);
@@ -178,7 +177,7 @@ const Subtasks = ({
 
           <EyeOutlined
             className="text-blue-500"
-            onClick={() => selectSubtaskHandler(Subtask)}
+            onClick={() => selectSubtaskHandler(subtaskDetails?.[0])}
           />
         </div>
         <div
@@ -262,7 +261,6 @@ const Subtasks = ({
                     d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-
                 {formattedDate(Subtask.endDate)}
               </span>
             </div>
