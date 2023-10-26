@@ -192,6 +192,7 @@ const TaskKanbanBoard = ({
           ) : (
             <LoadingComponentIndicator />
           )}
+          
         </div>
         <div className="flex justify-start items-center gap-x-2 cursor-pointer mt-1 flex-wrap">
           <Tag

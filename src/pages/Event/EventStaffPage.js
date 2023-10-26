@@ -11,8 +11,17 @@ import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
 import { filterTask } from "../../apis/tasks";
 import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
+import { getListBudget } from "../../apis/budgets";
 moment.suppressDeprecationWarnings = true;
 const EventStaffPage = () => {
+  const listStatus = [
+    "PENDING",
+    "PROCESSING",
+    "DONE",
+    "CONFIRM",
+    "CANCEL",
+    "OVERDUE",
+  ];
   const [isBoardTask, setIsBoardTask] = useState(true);
   const [searchText, setSearchText] = useState(null);
   const [sort, setSort] = useState("DESC");
@@ -42,14 +51,23 @@ const EventStaffPage = () => {
     },
   });
 
-  const listStatus = [
-    "PENDING",
-    "PROCESSING",
-    "DONE",
-    "CONFIRM",
-    "CANCEL",
-    "OVERDUE",
-  ];
+  const {
+    data: listBudget,
+    isError: isErrorListBudget,
+    isLoading: isLoadingListBudget,
+    refetch: refetchListBudget,
+  } = useQuery(
+    ["listBudget"],
+    () =>
+      getListBudget({ eventID: selectEvent?.id, pageSize: 10, currentPage: 1 }),
+    {
+      select: (data) => {
+        return data.data;
+      },
+      enabled: !!selectEvent?.id,
+    }
+  );
+
   const {
     data: listTaskParents,
     isError: isErrorListTask,
@@ -137,9 +155,11 @@ const EventStaffPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [staff?.id]);
+
   useEffect(() => {
     if (staff?.id) {
       refetchListTaskFilter();
+      refetchListBudget();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterMember]);
@@ -259,8 +279,17 @@ const EventStaffPage = () => {
                   isErrorListTask={isErrorListTask}
                   isLoadingListTask={isLoadingListTask}
                 />
+              ) : !isLoadingListBudget ? (
+                !isErrorListBudget ? (
+                  <BudgetStaff
+                    selectEvent={selectEvent}
+                    listBudget={listBudget}
+                  />
+                ) : (
+                  <AnErrorHasOccured />
+                )
               ) : (
-                <BudgetStaff selectEvent={selectEvent} />
+                <LoadingComponentIndicator />
               )}
             </>
           ) : (
