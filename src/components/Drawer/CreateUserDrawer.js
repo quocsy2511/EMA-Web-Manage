@@ -33,9 +33,9 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
       onSuccess: () => {
         queryClient.invalidateQueries(["users", 1]);
         queryClient.invalidateQueries(["divisions", 2]);
-        
+
         form.resetFields();
-        setDivisionMode(1)
+        setDivisionMode(1);
         setShowDrawer(false);
 
         messageApi.open({

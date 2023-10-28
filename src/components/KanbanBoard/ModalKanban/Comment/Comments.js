@@ -35,25 +35,7 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
       },
     }
   );
-  const config = {
-    title: "Xoá bình luận  ?",
-    content: (
-      <>
-        <ReachableContext.Consumer>
-          {(name) => `Xóa một bình luận là vĩnh viễn. Không có cách hoàn tác !`}
-        </ReachableContext.Consumer>
-        <br />
-      </>
-    ),
-    footer: (_, { OkBtn, CancelBtn }) => (
-      <>
-        {/* <Button>Huỷ</Button>
-        <Button>Xác nhận</Button> */}
-        <CancelBtn>Huỷ</CancelBtn>
-        <OkBtn>Xác nhận</OkBtn>
-      </>
-    ),
-  };
+
   const { confirm } = Modal;
   const showDeleteConfirm = () => {
     confirm({
@@ -74,7 +56,7 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
 
   return (
     <div className="flex flex-row mt-8 justify-start gap-x-4 " key={comment.id}>
-      {contextHolder}
+      {/* {contextHolder} */}
       {user?.profile === null ? (
         <Avatar icon={<UserOutlined />} className="bg-gray-500" />
       ) : (

@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
-  ConfigProvider,
   DatePicker,
   Form,
   Input,
@@ -26,7 +25,7 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
 import { UploadOutlined } from "@ant-design/icons";
-import viVN from "antd/locale/vi_VN";
+// import viVN from "antd/locale/vi_VN";
 
 const NewTaskModal = ({
   addNewTask,
@@ -102,9 +101,13 @@ const NewTaskModal = ({
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
     useMutation(({ formData, task }) => uploadFile(formData), {
       onSuccess: (data, variables) => {
+        console.log(
+          "🚀 ~ file: NewTaskModal.js:104 ~ useMutation ~ data:",
+          data
+        );
         const task = variables.task;
         variables.task = {
-          file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
+          file: [{ fileName: data?.fileName, fileUrl: data?.downloadUrl }],
           ...task,
         };
         submitFormTask(variables.task);
@@ -127,10 +130,6 @@ const NewTaskModal = ({
   };
 
   const onChangeDate = (value, dateString) => {
-    console.log(
-      "🚀 ~ file: NewTaskModal.js:134 ~ onChangeDate ~ dateString:",
-      dateString
-    );
     // Chuyển đổi thành định dạng ISO 8601
     const isoStartDate = moment(dateString[0]).toISOString();
     const isoEndDate = moment(dateString[1]).toISOString();
@@ -253,7 +252,6 @@ const NewTaskModal = ({
       leader: assignee[0].toString(),
       desc: JSON.stringify(values.desc.ops),
     };
-    console.log("🚀 ~ file: NewTaskModal.js:250 ~ onFinish ~ task:", task);
 
     if (values.fileUrl === undefined || values.fileUrl?.length === 0) {
       console.log("NOOO FILE");
@@ -263,7 +261,7 @@ const NewTaskModal = ({
       const formData = new FormData();
       formData.append("file", fileList);
       formData.append("folderName", "task");
-      // uploadFileMutate({ formData, task });
+      uploadFileMutate({ formData, task });
     }
   };
 

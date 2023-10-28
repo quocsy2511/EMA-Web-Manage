@@ -1,21 +1,56 @@
 import React from "react";
-import { Button, Card, Form, Input, InputNumber } from "antd";
+import { Button, Card, Form, Input, InputNumber, message } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
+import { useRouteLoaderData } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { postBudget } from "../../../../apis/budgets";
 
 const NewBudget = ({ selectEvent }) => {
-  console.log(
-    "🚀 ~ file: NewBudget.js:7 ~ NewBudget ~ selectEvent:",
-    selectEvent
-  );
   const [form] = Form.useForm();
-
+  const staffID = useRouteLoaderData("staff").id;
+  const { id } = selectEvent;
   const suffixSelector = (
     <Form.Item name="suffix" noStyle>
       <p>VND</p>
     </Form.Item>
   );
 
+  const queryClient = useQueryClient();
+  const { mutate: postListBudget } = useMutation(
+    (budget) => postBudget(budget),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("listBudgetConfirming");
+        queryClient.invalidateQueries("listBudgetConfirmed");
+        form.resetFields();
+        message.open({
+          type: "success",
+          content: "Tạo chi phí  mới thành công",
+        });
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Ko thể tạo chi phí mới lúc này! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
+  const onFinish = (values) => {
+    const listBudget = values.items;
+    const data = listBudget.map((budget) => {
+      return {
+        ...budget,
+        createBy: staffID,
+        eventID: id,
+      };
+    });
+    data.forEach((budget) => {
+      postListBudget(budget);
+    });
+  };
   return (
     <div className="w-full p-8 bg-white flex-1  rounded-xl overflow-y-auto flex justify-center items-center">
       <Form
@@ -35,6 +70,7 @@ const NewBudget = ({ selectEvent }) => {
           items: [{}],
         }}
         className="w-1/2"
+        onFinish={onFinish}
       >
         <Form.List name="items">
           {(fields, { add, remove }) => (
@@ -58,6 +94,7 @@ const NewBudget = ({ selectEvent }) => {
                     />
                   }
                 >
+                  {/* tên */}
                   <Form.Item
                     label="Tên chi phí"
                     name={[field.name, "budgetName"]}
@@ -72,15 +109,21 @@ const NewBudget = ({ selectEvent }) => {
                       },
                     ]}
                   >
-                    <Input />
+                    <Input placeholder="tên chi phí yêu cầu" />
                   </Form.Item>
+                  {/* chi phí ước chừng */}
                   <Form.Item
-                    label="Số tiền"
+                    label="Chi phí ước chừng"
                     name={[field.name, "estExpense"]}
                     rules={[
                       {
                         required: true,
                         message: "Số tiền bắt buộc nhập",
+                      },
+                      {
+                        type: "number",
+                        min: 1000,
+                        message: "Số tiền tối thiểu là 1000",
                       },
                     ]}
                   >
@@ -94,59 +137,30 @@ const NewBudget = ({ selectEvent }) => {
                       style={{
                         width: "100%",
                       }}
+                      placeholder="số tiền dự kiến phải chi"
                     />
                   </Form.Item>
-                  <Form.Item label="Mô tả" name={[field.name, "description"]}>
-                    <TextArea rows={4} />
+                  {/* nhà cung */}
+                  <Form.Item
+                    label="Nhà cung cấp"
+                    name={[field.name, "supplier"]}
+                    initialValue=""
+                  >
+                    <Input placeholder="tên nhà cung cấp" />
                   </Form.Item>
-
-                  {/* Nest Form.List */}
-                  {/* <Form.Item label="List">
-                    <Form.List name={[field.name, "list"]}>
-                      {(subFields, subOpt) => (
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            rowGap: 16,
-                          }}
-                        >
-                          {subFields.map((subField) => (
-                            <Space key={subField.key}>
-                              <Form.Item
-                                noStyle
-                                name={[subField.name, "first"]}
-                              >
-                                <Input placeholder="first" />
-                              </Form.Item>
-                              <Form.Item
-                                noStyle
-                                name={[subField.name, "second"]}
-                              >
-                                <Input placeholder="second" />
-                              </Form.Item>
-                              <CloseOutlined
-                                onClick={() => {
-                                  subOpt.remove(subField.name);
-                                }}
-                              />
-                            </Space>
-                          ))}
-
-                          <Button
-                            type="dashed"
-                            onClick={() => subOpt.add()}
-                            block
-                          >
-                            + Add Sub Item
-                          </Button>
-                        </div>
-                      )}
-                    </Form.List>
-                  </Form.Item> */}
+                  {/* mô tả */}
+                  <Form.Item
+                    label="Mô tả"
+                    name={[field.name, "description"]}
+                    initialValue=""
+                  >
+                    <TextArea
+                      rows={4}
+                      placeholder="chi tiết số tiền được dùng"
+                    />
+                  </Form.Item>
                 </Card>
               ))}
-
               <Button type="dashed" onClick={() => add()} block>
                 + Add Item
               </Button>
@@ -158,14 +172,6 @@ const NewBudget = ({ selectEvent }) => {
             Gửi chi phí
           </Button>
         </Form.Item>
-
-        {/* <Form.Item noStyle shouldUpdate>
-          {() => (
-            <Typography>
-              <pre>{JSON.stringify(form.getFieldsValue(), null, 2)}</pre>
-            </Typography>
-          )}
-        </Form.Item> */}
       </Form>
     </div>
   );

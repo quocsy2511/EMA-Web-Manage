@@ -7,12 +7,13 @@ import { authRequest } from "../utils/axios-utils";
     formData.append("folderName", "avatar");    => Select folder : avatar - comment - event - task
 
 */
-export const uploadFile = (formData) =>
+export const uploadFile = (formData) => {
   authRequest({
     url: `/file/upload`,
     method: "post",
     data: formData,
   });
+};
 
 export const uploadFileTask = (data) =>
   authRequest({

@@ -52,14 +52,19 @@ const EventStaffPage = () => {
   });
 
   const {
-    data: listBudget,
-    isError: isErrorListBudget,
-    isLoading: isLoadingListBudget,
-    refetch: refetchListBudget,
+    data: listBudgetConfirming,
+    isError: isErrorListBudgetConfirming,
+    isLoading: isLoadingListBudgetConfirming,
+    refetch: refetchListBudgetConfirming,
   } = useQuery(
-    ["listBudget"],
+    ["listBudgetConfirming"],
     () =>
-      getListBudget({ eventID: selectEvent?.id, pageSize: 10, currentPage: 1 }),
+      getListBudget({
+        eventID: selectEvent?.id,
+        pageSize: 50,
+        currentPage: 1,
+        mode: 1,
+      }),
     {
       select: (data) => {
         return data.data;
@@ -67,6 +72,24 @@ const EventStaffPage = () => {
       enabled: !!selectEvent?.id,
     }
   );
+
+  const { data: listBudgetConfirmed, refetch: refetchListBudgetConfirmed } =
+    useQuery(
+      ["listBudgetConfirmed"],
+      () =>
+        getListBudget({
+          eventID: selectEvent?.id,
+          pageSize: 50,
+          currentPage: 1,
+          mode: 2,
+        }),
+      {
+        select: (data) => {
+          return data.data;
+        },
+        enabled: !!selectEvent?.id,
+      }
+    );
 
   const {
     data: listTaskParents,
@@ -159,7 +182,6 @@ const EventStaffPage = () => {
   useEffect(() => {
     if (staff?.id) {
       refetchListTaskFilter();
-      refetchListBudget();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterMember]);
@@ -245,6 +267,8 @@ const EventStaffPage = () => {
 
   useEffect(() => {
     if (selectEvent.id) {
+      refetchListBudgetConfirming();
+      refetchListBudgetConfirmed();
       refetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -279,11 +303,13 @@ const EventStaffPage = () => {
                   isErrorListTask={isErrorListTask}
                   isLoadingListTask={isLoadingListTask}
                 />
-              ) : !isLoadingListBudget ? (
-                !isErrorListBudget ? (
+              ) : !isLoadingListBudgetConfirming ? (
+                !isErrorListBudgetConfirming ? (
                   <BudgetStaff
+                    listBudgetConfirmed={listBudgetConfirmed}
+                    listBudgetConfirming={listBudgetConfirming}
                     selectEvent={selectEvent}
-                    listBudget={listBudget}
+                    // listBudget={listBudget}
                   />
                 ) : (
                   <AnErrorHasOccured />

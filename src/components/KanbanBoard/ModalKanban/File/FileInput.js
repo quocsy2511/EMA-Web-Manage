@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const FileInput = ({ taskSelected, setUpdateFileList }) => {
   const taskID = taskSelected?.id;
-  const [fileList, setFileList] = useState("");
+  const [fileList, setFileList] = useState();
   const [disableSendButton, setDisableSendButton] = useState(true);
   const [form] = Form.useForm();
 
@@ -37,11 +37,11 @@ const FileInput = ({ taskSelected, setUpdateFileList }) => {
         console.log("🚀 ~ file: FileInput.js:33 ~ useMutation ~ data:", data);
         setUpdateFileList((prev) => [
           ...prev,
-          { fileName: data.fileName, fileUrl: data.downloadUrl },
+          { fileName: data?.fileName, fileUrl: data?.downloadUrl },
         ]);
         const fileObj = {
-          fileName: data.fileName,
-          fileUrl: data.downloadUrl,
+          fileName: data?.fileName,
+          fileUrl: data?.downloadUrl,
           taskID,
         };
         console.log(
