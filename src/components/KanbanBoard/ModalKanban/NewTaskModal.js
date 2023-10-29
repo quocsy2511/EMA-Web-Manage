@@ -255,7 +255,7 @@ const NewTaskModal = ({
 
     if (values.fileUrl === undefined || values.fileUrl?.length === 0) {
       console.log("NOOO FILE");
-      // submitFormTask(task);
+      submitFormTask(task);
     } else {
       console.log("HAS FILE");
       const formData = new FormData();
