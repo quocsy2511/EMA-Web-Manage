@@ -7,7 +7,7 @@ import ConfirmingBudget from "../../components/Budget/ConfirmingBudget";
 import { FcMoneyTransfer } from "react-icons/fc";
 import { useQuery } from "@tanstack/react-query";
 import { getDetailEvent } from "../../apis/events";
-import { getBudget } from "../../apis/budget";
+import { getBudget } from "../../apis/budgets";
 
 const EventBudgetPage = () => {
   const eventId = useParams().eventId;
@@ -19,23 +19,6 @@ const EventBudgetPage = () => {
     isError,
   } = useQuery(["event-detail", eventId], () => getDetailEvent(eventId));
   console.log("DATA : ", event);
-
-  // const {
-  //   data: confirmingBudgets,
-  //   isLoading: confirmingBudgetsIsLoading,
-  //   isError: confirmingBudgetsIsError,
-  // } = useQuery(
-  //   ["confirming-budgets", eventId],
-  //   () =>
-  //     getBudget({
-  //       eventID: eventId,
-  //       pageSize: 500,
-  //       currentPage: 1,
-  //       mode: 1,
-  //     }),
-  //   { select: (data) => data.data }
-  // );
-  // console.log("confirmingBudgets: ", confirmingBudgets);
 
   const {
     data: confirmedBudgets,
@@ -106,7 +89,7 @@ const EventBudgetPage = () => {
           <Card bordered={false} loading={isLoading}>
             <Statistic
               title="Ngân sách"
-              value={event?.estBudget.toLocaleString()}
+              value={event?.estBudget.toLocaleString() ?? "--"}
               // precision={10}
               valueStyle={{
                 color: "#3f8600",

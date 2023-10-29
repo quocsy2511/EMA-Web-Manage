@@ -16,10 +16,6 @@ import { MdOutlineCancel, MdOutlineSave } from "react-icons/md";
 import viVN from "antd/locale/vi_VN";
 import dayjs from "dayjs";
 import { BsSearch } from "react-icons/bs";
-import {
-  MdOutlineKeyboardArrowLeft,
-  MdOutlineKeyboardArrowRight,
-} from "react-icons/md";
 import Highlighter from "react-highlight-words";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUser } from "../../apis/users";
@@ -28,7 +24,7 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 import moment from "moment";
 
 const RolePage = () => {
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const { data, isLoading } = useQuery(
     ["users", page],
     () => getAllUser({ pageSize: 10, currentPage: page }),

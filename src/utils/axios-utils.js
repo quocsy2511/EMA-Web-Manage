@@ -17,6 +17,11 @@ export const authRequest = ({ ...options }) => {
   return client(options).then((response) => response.data.result);
 };
 
+export const uploadRequest = ({ ...options }) => {
+  client.defaults.headers.common.Authorization = `Bearer ${token}`;
+  return client(options);
+};
+
 export const normalRequest = ({ ...options }) => {
   return client(options);
 };
