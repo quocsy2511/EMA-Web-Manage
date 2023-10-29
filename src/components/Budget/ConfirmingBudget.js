@@ -78,7 +78,7 @@ const ConfirmingBudget = ({ eventId }) => {
 
   const searchGlobal = () => {
     if (searchText) {
-      const filterSearchedData = data.data.filter(
+      const filterSearchedData = budgets.filter(
         (value) =>
           value.budgetName.toLowerCase().includes(searchText.toLowerCase()) ||
           value.userName.toLowerCase().includes(searchText.toLowerCase())
