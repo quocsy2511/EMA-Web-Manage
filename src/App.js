@@ -36,7 +36,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <LoginPage />,
     errorElement: <ErrorPage />,
-    // loader: loginLoader,
+    loader: loginLoader,
   },
   {
     path: "/manager",
@@ -46,7 +46,7 @@ const router = createBrowserRouter([
       </Suspense>
     ),
     errorElement: <ErrorPage />,
-    // loader: checkAuthLoader, // Is call whenever a new navigation trigger
+    loader: checkAuthLoader, // Is call whenever a new navigation trigger
     children: [
       {
         index: true,
