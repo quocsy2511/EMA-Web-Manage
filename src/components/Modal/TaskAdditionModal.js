@@ -6,6 +6,7 @@ import {
   DatePicker,
   Form,
   Input,
+  InputNumber,
   Modal,
   Select,
   Upload,
@@ -36,9 +37,6 @@ const TaskAdditionModal = ({
   parentTaskId,
   staffId,
 }) => {
-  console.log("parentTaskId: ", parentTaskId);
-  console.log("staffId: ", staffId);
-
   const {
     data: staff,
     isLoading: staffIsLoading,
@@ -46,10 +44,8 @@ const TaskAdditionModal = ({
   } = useQuery(["user", staffId], () => getUserById(staffId), {
     enabled: !!parentTaskId && !!staffId,
   });
-  console.log("STAFF: ", staff);
 
   const divisionId = staff?.divisionId;
-  console.log("divisionId: ", divisionId);
 
   const {
     data: employees,
@@ -74,7 +70,6 @@ const TaskAdditionModal = ({
       enabled: !!divisionId,
     }
   );
-  console.log("employees: ", employees);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation((task) => createTask(task), {
@@ -118,9 +113,8 @@ const TaskAdditionModal = ({
     }
   );
 
-  const [isTime, setIsTime] = useState(false);
+  // const [isTime, setIsTime] = useState(false);
   const [fileList, setFileList] = useState();
-  console.log("fileList: ", fileList);
   const [selectedEmployeesId, setSelectedEmployeesId] = useState();
 
   const [form] = Form.useForm();
@@ -143,11 +137,17 @@ const TaskAdditionModal = ({
       endDate: moment(values.date[1].$d).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
       eventID: eventId,
       estimationTime: +values.estimationTime,
-      assignee: [values.assignee],
-      desc: JSON.stringify(values.desc.ops)
+      desc: JSON.stringify(values.desc.ops),
     };
 
-    if(parentTaskId) values = {...values, parentTask: parentTaskId}
+    if (parentTaskId) {
+      values = { ...values, parentTask: parentTaskId };
+    } else
+      values = {
+        ...values,
+        assignee: [values.assignee],
+        leader: values.assignee,
+      };
 
     const { fileUrl, date, ...restValue } = values;
 
@@ -155,6 +155,8 @@ const TaskAdditionModal = ({
       console.log("NOOO FILE");
 
       console.log("Transform data: ", restValue);
+
+      // call api
       mutate(restValue);
     } else {
       console.log("HAS FILE");
@@ -163,26 +165,19 @@ const TaskAdditionModal = ({
       formData.append("folderName", "task");
 
       console.log("Transform data: ", restValue);
+
+      //call api
       uploadFileMutate({ formData, task: restValue });
     }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
-  };
+  const onFinishFailed = (errorInfo) => {};
 
   const handleValuesChange = (changedValues) => {
-    console.log("changedValues: ", changedValues);
-
     const formFieldName = Object.keys(changedValues)[0];
-    console.log("formFieldName: ", formFieldName);
 
     if (formFieldName === "assignee") {
-      console.log("ASSIGNEE CHANGE");
-
-      console.log("setState assignee: ", changedValues[formFieldName]);
       setSelectedEmployeesId(changedValues[formFieldName]);
-      // form.set
     }
   };
 
@@ -201,13 +196,6 @@ const TaskAdditionModal = ({
       cancelText="Hủy"
       centered
       width={"50%"}
-      style={{
-        header: {
-          borderBottom: `5px solid red`,
-          borderRadius: 0,
-          paddingInlineStart: 5,
-        },
-      }}
     >
       {contextHolder}
       <Form
@@ -224,6 +212,10 @@ const TaskAdditionModal = ({
           }
         }}
         onValuesChange={handleValuesChange}
+        initialValues={{
+          estimationTime: 1,
+          priority: "LOW",
+        }}
       >
         <div className="flex gap-x-10">
           <Form.Item
@@ -241,17 +233,7 @@ const TaskAdditionModal = ({
           </Form.Item>
           <Form.Item
             className="w-[45%]"
-            label={
-              <div className="flex gap-x-5 items-center">
-                <Title title="Thời gian" />
-                <Checkbox
-                  checked={isTime}
-                  onChange={() => setIsTime((prev) => !prev)}
-                >
-                  Giờ cụ thể
-                </Checkbox>
-              </div>
-            }
+            label={<Title title="Thời gian" />}
             name="date"
             rules={[
               {
@@ -266,7 +248,7 @@ const TaskAdditionModal = ({
           >
             <ConfigProvider locale={viVN}>
               <RangePicker
-                showTime={isTime}
+                showTime
                 onChange={(value) => {
                   form.setFieldsValue({ date: value });
                 }}
@@ -279,6 +261,7 @@ const TaskAdditionModal = ({
 
                   return current && (current < startDate || current > endDate);
                 }}
+                format={"DD/MM/YYYY HH:mm:ss"}
                 className="w-full"
               />
             </ConfigProvider>
@@ -305,17 +288,17 @@ const TaskAdditionModal = ({
           />
         </Form.Item>
 
-        <div className="flex gap-x-8">
+        <div className="flex gap-x-10">
           {parentTaskId && staffId ? (
             <>
               {staffIsLoading && employeesIsLoading ? (
                 <LoadingComponentIndicator />
               ) : staffIsError || employeesIsError ? (
-                <p>Ko thể tải dữ liệu, vui lòng thử lại</p>
+                <p>Ko thể tải dữ liệu, vui lòng thử lại sau !</p>
               ) : (
                 <>
                   <Form.Item
-                    className="w-[50%]"
+                    className="w-[70%]"
                     label={<Title title="Các nhân viên phù hợp" />}
                     name="assignee"
                     rules={[
@@ -331,12 +314,14 @@ const TaskAdditionModal = ({
                       allowClear
                       options={employees}
                       onChange={(value) => {
+                        console.log("Chọn employee group : ", value);
                         form.setFieldsValue({ assignee: value });
+                        form.resetFields(["leader"]);
                       }}
                     />
                   </Form.Item>
                   <Form.Item
-                    className=""
+                    className="w-[30%]"
                     label={<Title title="Chịu trách nhiệm bởi" />}
                     name="leader"
                     rules={[
@@ -366,19 +351,20 @@ const TaskAdditionModal = ({
           ) : (
             <>
               <Form.Item
-                className="w-[40%]"
+                className="w-[50%]"
                 label={<Title title="Chịu trách nhiệm bởi" />}
                 name="assignee"
-                // rules={[
-                //   {
-                //     required: true,
-                //     message: "Chọn 1 trưởng phòng !",
-                //   },
-                // ]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Chọn 1 trưởng phòng !",
+                  },
+                ]}
               >
                 <Select
                   placeholder="Bộ phận"
                   onChange={(value) => {
+                    console.log("Chọn staff - division : ", value);
                     form.setFieldsValue({ assignee: value });
                   }}
                   options={staffs.map((staff) => ({
@@ -394,6 +380,7 @@ const TaskAdditionModal = ({
             </>
           )}
         </div>
+
         <div className="flex gap-x-10">
           <Form.Item
             className="w-[30%]"
@@ -427,22 +414,22 @@ const TaskAdditionModal = ({
               ]}
             />
           </Form.Item>
-          <Form.Item
-            className="w-[30%]"
-            label={<Title title="Thời gian ước tính" />}
-            name="estimationTime"
-            rules={[
-              {
-                required: true,
-                message: "Chưa điền thời gian hoặc sai định dạng !",
-              },
-            ]}
-          >
-            <div className="flex gap-x-3 items-center">
-              <Input type="number" min={1} />
-              Giờ
-            </div>
-          </Form.Item>
+          <div className="w-[30%] flex items-center gap-x-3">
+            <Form.Item
+              className=""
+              label={<Title title="Thời gian ước tính" />}
+              name="estimationTime"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa điền thời gian hoặc sai định dạng !",
+                },
+              ]}
+            >
+              <InputNumber className="w-full" min={1} />
+            </Form.Item>
+            Giờ
+          </div>
         </div>
 
         <div className="flex gap-x-5">

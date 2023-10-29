@@ -20,7 +20,7 @@ const EventItem = ({ event }) => {
 
   switch (event.status) {
     case "PENDING":
-      status = "Chờ bắt đầu";
+      status = "Đang chuẩn bị";
       statusColor = "text-slate-500";
       statusBgColor = "bg-slate-100";
       break;
@@ -125,7 +125,7 @@ const EventItem = ({ event }) => {
           <div className="w-2" />
 
           {event.taskCount > 0 && (
-            <p className="text-sm font-medium">{event.taskCount} đề mục</p>
+            <p className="text-sm font-medium">{event.taskCount} hạng mục</p>
           )}
         </div>
       </div>

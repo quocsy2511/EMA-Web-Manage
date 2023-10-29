@@ -26,7 +26,7 @@ const FileInput = ({ taskSelected, setUpdateFileList }) => {
       onError: () => {
         message.open({
           type: "error",
-          content: "Cập nhật file  lúc này! Hãy thử lại sau",
+          content: "không thể Cập nhật file  lúc này! Hãy thử lại sau",
         });
       },
     });

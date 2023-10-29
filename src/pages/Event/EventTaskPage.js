@@ -1,7 +1,21 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useRouteLoaderData,
+} from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Avatar, FloatButton, Progress, Tooltip } from "antd";
+import {
+  Avatar,
+  Button,
+  Collapse,
+  FloatButton,
+  Popconfirm,
+  Progress,
+  Tooltip,
+  message,
+} from "antd";
 import { FaLongArrowAltRight, FaUserFriends } from "react-icons/fa";
 import {
   BsHourglassSplit,
@@ -9,9 +23,9 @@ import {
   BsTagsFill,
   BsPlus,
 } from "react-icons/bs";
-import { RiAttachment2, RiEditFill } from "react-icons/ri";
+import { RiEditFill } from "react-icons/ri";
 import { LiaClipboardListSolid } from "react-icons/lia";
-import { MdFilterListAlt, MdLocationPin } from "react-icons/md";
+import { MdFilterListAlt, MdLocationPin, MdOutlineDone } from "react-icons/md";
 import {
   FcMoneyTransfer,
   FcHighPriority,
@@ -21,8 +35,8 @@ import {
 import EventTaskSelection from "../../components/Selection/EventTaskSelection";
 import TaskItem from "../../components/Task/TaskItem";
 import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
-import { useQuery } from "@tanstack/react-query";
-import { getDetailEvent } from "../../apis/events";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getDetailEvent, updateStatusEvent } from "../../apis/events";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
@@ -30,6 +44,7 @@ import "moment/locale/vi";
 import { filterTask, getTasks } from "../../apis/tasks";
 import EmptyList from "../../components/Error/EmptyList";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
+import EventUpdateModal from "../../components/Modal/EventUpdateModal";
 
 moment.locale("vi"); // Set the locale to Vietnam
 
@@ -50,10 +65,16 @@ const color = {
 
 const EventTaskPage = () => {
   const eventId = useParams().eventId;
+  const navigate = useNavigate();
+  const manager = useRouteLoaderData("manager");
 
   const [assigneeSelection, setAssigneeSelection] = useState();
   const [prioritySelection, setPrioritySelection] = useState();
   const [statusSelection, setStatusSelection] = useState();
+  const [isOpenModal, setIsOpenModal] = useState(false); // create Task
+  const [isModalOpen, setIsModalOpen] = useState(false); // update event
+
+  const [messageApi, contextHolder] = message.useMessage();
 
   const { data, isLoading, isError } = useQuery(["event-detail", eventId], () =>
     getDetailEvent(eventId)
@@ -103,13 +124,30 @@ const EventTaskPage = () => {
   );
   console.log("filterTasks: ", filterTasks);
 
+  const { mutate, isLoading: mutateIsLoading } = useMutation(
+    (eventId, status) => updateStatusEvent(eventId, status),
+    {
+      onSuccess: (data) => {
+        messageApi.open({
+          type: "success",
+          content: "Sự kiến đã kết thúc !!",
+        });
+        navigate("/manager/event");
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
   useEffect(() => {
     if (assigneeSelection || prioritySelection || statusSelection) {
       refetch();
     }
   }, [assigneeSelection, prioritySelection, statusSelection]);
-
-  const [isOpenModal, setIsOpenModal] = useState(false);
 
   let status, statusColor, statusBgColor;
 
@@ -123,25 +161,27 @@ const EventTaskPage = () => {
     setIsOpenModal((prev) => !prev);
   };
 
-  if (isLoading) {
+  const handleEndEvent = () => {
+    mutate(eventId, " DONE");
+  };
+
+  if (isLoading)
     return (
       <div className="h-[calc(100vh-128px)]">
         <LoadingComponentIndicator />;
       </div>
     );
-  }
 
-  if (isError) {
+  if (isError)
     return (
       <div className="h-[calc(100vh-128px)]">
         <AnErrorHasOccured />;
       </div>
     );
-  }
 
   switch (data.status) {
     case "PENDING":
-      status = "Chờ bắt đầu";
+      status = "Đang chuẩn bị";
       statusColor = "text-slate-500";
       statusBgColor = "bg-slate-100";
       break;
@@ -166,6 +206,7 @@ const EventTaskPage = () => {
 
   return (
     <Fragment>
+      {contextHolder}
       <FloatButton
         onClick={handleOpenModal}
         icon={<BsPlus />}
@@ -178,6 +219,11 @@ const EventTaskPage = () => {
         eventId={eventId}
         date={[data.startDate, data.endDate]}
         staffs={data.listDivision}
+      />
+      <EventUpdateModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        event={data}
       />
       <motion.div
         initial={{ y: -75 }}
@@ -201,12 +247,12 @@ const EventTaskPage = () => {
 
         <div className="w-5" />
 
-        <Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU" />
+        <Avatar src={manager.avatar} />
 
         <FaLongArrowAltRight className="mx-3" color="#9A9A9A" size={20} />
 
         <Avatar.Group
-          maxCount={3}
+          maxCount={data.listDivision.length}
           maxPopoverTrigger="hover"
           maxStyle={{ color: "#D25B68", backgroundColor: "#F4D7DA" }}
         >
@@ -217,10 +263,7 @@ const EventTaskPage = () => {
             >
               <Avatar
                 className="bg-slate-300 cursor-pointer"
-                src={
-                  // item.avatar ??
-                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
-                }
+                src={item.avatar}
                 alt="avatar"
               />
             </Tooltip>
@@ -253,7 +296,13 @@ const EventTaskPage = () => {
                 Ngân sách
               </motion.div>
             </Link>
-            <RiEditFill className="cursor-pointer text-slate-400" size={20} />
+            <motion.div whileHover={{ y: -4 }}>
+              <RiEditFill
+                onClick={() => setIsModalOpen(true)}
+                className="cursor-pointer text-slate-400"
+                size={20}
+              />
+            </motion.div>
           </div>
 
           <div
@@ -286,6 +335,7 @@ const EventTaskPage = () => {
             <div className="flex items-center flex-wrap gap-x-4 gap-y-3 mt-3">
               {data.listDivision.map((division) => (
                 <Tag
+                  // key={division.divisionId}
                   icon={<FaUserFriends size={20} color={color.blue} />}
                   text={`${division.fullName} - ${division.divisionName}`}
                   width={"truncate"}
@@ -341,16 +391,44 @@ const EventTaskPage = () => {
                   }/${tasks.length} hạng mục đã xong`}
                 >
                   <Progress
-                    percent={
-                      tasks.filter((item) => item.status === "DONE").length /
-                      tasks.length
-                    }
+                    percent={(
+                      (tasks.filter((item) => item.status === "DONE").length /
+                        tasks.length) *
+                      100
+                    ).toFixed(2)}
                   />
                 </Tooltip>
               ) : (
                 <p className="text-slate-500">Chưa có hạng mục</p>
               )}
             </div>
+            {tasks?.length !== 0 &&
+              tasks?.filter((item) => item.status === "CONFIRM").length ===
+                tasks?.length && (
+                <div className="flex-1 flex justify-end">
+                  <Popconfirm
+                    title="Kết thúc sự kiện này ?"
+                    onConfirm={handleEndEvent}
+                    okText="OK"
+                    cancelText="Không"
+                  >
+                    <motion.button
+                      initial={{ x: 100, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      whileHover={{ y: -5 }}
+                    >
+                      <Button
+                        icon={<MdOutlineDone size={15} />}
+                        type=""
+                        size="large"
+                        className="bg-green-400 text-white hover:text-white font-medium"
+                      >
+                        Kết thúc
+                      </Button>
+                    </motion.button>
+                  </Popconfirm>
+                </div>
+              )}
           </div>
         </div>
       </motion.div>
@@ -424,7 +502,7 @@ const EventTaskPage = () => {
                   options={[
                     {
                       value: "PENDING",
-                      label: <p className="text-gray-400">Đang kiểm thực</p>,
+                      label: <p className="text-gray-400">Đang chuẩn bị</p>,
                     },
                     {
                       value: "PROCESSING",
@@ -436,7 +514,7 @@ const EventTaskPage = () => {
                     },
                     {
                       value: "CONFIRM",
-                      label: <p className="text-pink-500">Đã xác thực</p>,
+                      label: <p className="text-purple-500">Đã xác thực</p>,
                     },
                     {
                       value: "CANCEL",
@@ -467,27 +545,116 @@ const EventTaskPage = () => {
               </div>
 
               <div className="flex flex-col gap-y-6 mt-8">
-                <AnimatePresence mode="await">
+                <AnimatePresence mode="wait">
                   {assigneeSelection || prioritySelection || statusSelection ? (
-                    filterTasks.length === 0 ? (
-                      <EmptyList
-                        key="empty-task"
-                        title="Chưa có công việc nào!"
-                      />
-                    ) : (
-                      filterTasks.map((task) => (
-                        <TaskItem key={task.id} task={task} isSubtask={false} />
-                      ))
-                    )
-                  ) : tasks.length === 0 ? (
-                    <EmptyList
-                      key="empty-task"
-                      title="Chưa có công việc nào!"
-                    />
+                    <AnimatePresence mode="wait">
+                      {filterTasks.length === 0 ? (
+                        <EmptyList
+                          key="empty-filter-task"
+                          title="Chưa có công việc nào!"
+                        />
+                      ) : (
+                        <AnimatePresence>
+                          {/* {filterTasks.map((task) => (
+                            <TaskItem
+                              key={task.id}
+                              task={task}
+                              isSubtask={false}
+                            />
+                          ))} */}
+                          <Collapse
+                            ghost
+                            expandIcon={() => null}
+                            items={filterTasks.map((task) => ({
+                              key: task.id,
+                              label: (
+                                <TaskItem
+                                  key={task.id}
+                                  task={task}
+                                  isSubtask={false}
+                                />
+                              ),
+                              children:
+                                task.subTask.length > 0 ? (
+                                  task.subTask.map((subtask) => {
+                                    return (
+                                      <div
+                                        key={subtask.id}
+                                        className="ml-5 scale-90"
+                                      >
+                                        <TaskItem
+                                          task={subtask}
+                                          isSubtask={true}
+                                          isDropdown={true}
+                                        />
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <p className="ml-28 font-medium">
+                                    Chưa có công việc
+                                  </p>
+                                ),
+                            }))}
+                          />
+                        </AnimatePresence>
+                      )}
+                    </AnimatePresence>
                   ) : (
-                    tasks.map((task) => (
-                      <TaskItem key={task.id} task={task} isSubtask={false} />
-                    ))
+                    <AnimatePresence mode="wait">
+                      {tasks.length === 0 ? (
+                        <EmptyList
+                          key="empty-task"
+                          title="Chưa có công việc nào!"
+                        />
+                      ) : (
+                        <AnimatePresence>
+                          {/* {tasks.map((task) => (
+                            <TaskItem
+                              key={task.id}
+                              task={task}
+                              isSubtask={false}
+                            />
+                          ))} */}
+                          <Collapse
+                            ghost
+                            expandIconPosition={"end"}
+                            expandIcon={() => null}
+                            items={tasks.map((task) => ({
+                              key: task.id,
+                              label: (
+                                <TaskItem
+                                  key={task.id}
+                                  task={task}
+                                  isSubtask={false}
+                                />
+                              ),
+                              children:
+                                task.subTask.length > 0 ? (
+                                  task.subTask.map((subtask) => {
+                                    return (
+                                      <div
+                                        key={subtask.id}
+                                        className="ml-5 scale-90"
+                                      >
+                                        <TaskItem
+                                          task={subtask}
+                                          isSubtask={true}
+                                          isDropdown={true}
+                                        />
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <p className="ml-28 font-medium">
+                                    Chưa có công việc
+                                  </p>
+                                ),
+                            }))}
+                          />
+                        </AnimatePresence>
+                      )}
+                    </AnimatePresence>
                   )}
                 </AnimatePresence>
               </div>
@@ -520,6 +687,7 @@ const EventTaskPage = () => {
           <LoadingComponentIndicator />
         )}
       </motion.div>
+      <FloatButton.BackTop className="right-24" />
     </Fragment>
   );
 };

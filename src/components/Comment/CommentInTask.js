@@ -11,11 +11,9 @@ import { uploadFile } from "../../apis/files";
 import { postComment, removeComment } from "../../apis/comments";
 
 const CommentInTask = ({ comments, taskId, isSubtask }) => {
-  const managerId = useRouteLoaderData("manager").id;
-  console.log("comments: ", comments);
+  const manager = useRouteLoaderData("manager");
 
   const [fileList, setFileList] = useState();
-  console.log("fileList: ", fileList);
 
   const queryClient = useQueryClient();
   const { mutate } = useMutation((comment) => postComment(comment), {
@@ -36,7 +34,6 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
     {
       onSuccess: (data, variables) => {
         const comment = variables.comment;
-        // variables.comment = { fileUrl: [data], ...comment };
         variables.comment = {
           file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
           ...comment,
@@ -108,10 +105,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
           requiredMark={false}
         >
           <div className={`flex items-center gap-x-3 ${!isSubtask && "mr-12"}`}>
-            <Avatar
-              size={40}
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
-            />
+            <Avatar size={40} src={manager.avatar} />
 
             <Form.Item
               className="w-[95%] mb-0"
@@ -209,15 +203,13 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
             <AnimatePresence>
               {comments.map((comment) => {
                 let time;
-                const currentDate = moment();
-                console.log("currentDate: ", currentDate);
-                const targetDate = moment(comment.createdAt).format(
-                  "YYYY-MM-DD HH:mm:ss"
-                );
-                console.log("targetDate: ", targetDate);
+                const currentDate = moment().utc();
+                const targetDate = moment(comment.createdAt);
                 const duration = moment.duration(currentDate.diff(targetDate));
 
-                if (duration.asDays() < 1) {
+                if (duration.asHours() < 1) {
+                  time = `${Math.floor(duration.asMinutes())} phút trước`;
+                } else if (duration.asDays() < 1) {
                   // Less than 1 day
                   time = `${Math.floor(duration.asHours())} giờ trước`;
                 } else if (duration.asDays() < 7) {
@@ -248,8 +240,8 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                         </span>{" "}
                         đã bình luận vào{" "}
                         <span className="font-bold">
-                          {/* {time} */}
-                          {targetDate}
+                          {time}
+                          {/* {targetDate} */}
                         </span>
                       </p>
                     </div>
@@ -258,7 +250,10 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
 
                     {comment.commentFiles.length > 0 &&
                       comment.commentFiles.map((file) => (
-                        <div className="ml-10 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block">
+                        <div
+                          key={file.id}
+                          className="ml-10 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                        >
                           <a
                             href={file.fileUrl}
                             target="_blank"
@@ -275,7 +270,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                     Chỉnh sửa
                   </motion.p> */}
 
-                      {comment.user.id === managerId && (
+                      {comment.user.id === manager.id && (
                         <motion.p
                           className="cursor-pointer"
                           whileHover={{ y: -2 }}
