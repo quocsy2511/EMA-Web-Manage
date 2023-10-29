@@ -1,11 +1,9 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useState } from "react";
 import { Layout } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Outlet, ScrollRestoration } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Header from "../components/Header/Header";
-import { useQuery } from "@tanstack/react-query";
-import { getProfile } from "../apis/users";
 
 const RootPage = () => {
   const [collapsed, setCollapsed] = useState(false);

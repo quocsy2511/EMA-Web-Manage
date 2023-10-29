@@ -1,19 +1,30 @@
 import { authRequest } from "../utils/axios-utils";
 
-export const getListBudget = ({ eventID, pageSize, currentPage, mode }) =>
+export const getBudget = ({ eventID, pageSize, currentPage, mode }) =>
   authRequest({
-    url: `/budget/${eventID}?&sizePage=${pageSize}&currentPage=${currentPage}&mode=${mode}`,
+    url: `/budget/${eventID}?sizePage=${pageSize}&currentPage=${currentPage}&mode=${mode}`,
   });
-export const postBudget = (budget) => {
-  authRequest({ url: `budget`, method: "post", data: budget });
-};
-export const updateBudget = ({ budgetsId, budget }) =>
+
+export const createBudget = (budget) =>
+  authRequest({ url: "/budget", method: "post", budget });
+
+export const updateBudget = ({ budgetsId, ...budget }) =>
   authRequest({
     url: `/budget/${budgetsId}`,
     method: "put",
-    data: budget,
+    data: {
+      eventID: budget.eventID,
+      budgetName: budget.budgetName,
+      estExpense: budget.estExpense,
+      realExpense: budget.realExpense,
+      description: budget.description,
+      urlImage: budget.urlImage,
+      supplier: budget.supplier,
+    },
   });
-export const updateBudgetStatus = ({ budgetsId, status }) =>
+
+// status: PROCESSING - ACCEPT - REJECT
+export const updateStatusBudget = ({ budgetsId, status }) =>
   authRequest({
     url: `/budget/${budgetsId}/${status}`,
     method: "put",

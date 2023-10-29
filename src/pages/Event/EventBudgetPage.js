@@ -7,7 +7,7 @@ import ConfirmingBudget from "../../components/Budget/ConfirmingBudget";
 import { FcMoneyTransfer } from "react-icons/fc";
 import { useQuery } from "@tanstack/react-query";
 import { getDetailEvent } from "../../apis/events";
-import { getBudget } from "../../apis/budget";
+import { getBudget } from "../../apis/budgets";
 
 const EventBudgetPage = () => {
   const eventId = useParams().eventId;

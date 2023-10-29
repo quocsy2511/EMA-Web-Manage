@@ -16,7 +16,7 @@ import {
 } from "antd";
 import moment from "moment";
 import React, { Fragment, useState } from "react";
-import { getBudget, updateStatusBudget } from "../../apis/budget";
+import { getBudget, updateStatusBudget } from "../../apis/budgets";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import emptyBudget from "../../assets/images/empty_budget.jpg";
 import AnErrorHasOccured from "../Error/AnErrorHasOccured";

@@ -11,7 +11,7 @@ import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
 import { filterTask } from "../../apis/tasks";
 import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
-import { getListBudget } from "../../apis/budgets";
+import { getBudget } from "../../apis/budgets";
 moment.suppressDeprecationWarnings = true;
 const EventStaffPage = () => {
   const listStatus = [
@@ -59,7 +59,7 @@ const EventStaffPage = () => {
   } = useQuery(
     ["listBudgetConfirming"],
     () =>
-      getListBudget({
+      getBudget({
         eventID: selectEvent?.id,
         pageSize: 50,
         currentPage: 1,
@@ -77,7 +77,7 @@ const EventStaffPage = () => {
     useQuery(
       ["listBudgetConfirmed"],
       () =>
-        getListBudget({
+        getBudget({
           eventID: selectEvent?.id,
           pageSize: 50,
           currentPage: 1,

@@ -4,7 +4,7 @@ import { CloseOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { useRouteLoaderData } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { postBudget } from "../../../../apis/budgets";
+import { createBudget } from "../../../../apis/budgets";
 
 const NewBudget = ({ selectEvent }) => {
   const [form] = Form.useForm();
@@ -18,7 +18,7 @@ const NewBudget = ({ selectEvent }) => {
 
   const queryClient = useQueryClient();
   const { mutate: postListBudget } = useMutation(
-    (budget) => postBudget(budget),
+    (budget) => createBudget(budget),
     {
       onSuccess: () => {
         queryClient.invalidateQueries("listBudgetConfirming");
