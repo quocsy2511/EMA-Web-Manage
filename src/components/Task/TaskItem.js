@@ -123,22 +123,12 @@ const TaskItem = ({
       className="flex items-center gap-y-6 px-10 py-6 rounded-2xl cursor-pointer"
       style={{ boxShadow: "0px 0px 18px 1px rgb(230 230 230)" }}
     >
-      {/* {priority} */}
-      {!isSubtask ? (
-        <Badge size="small" count={task.subTask?.length}>
-          {priority}
-        </Badge>
-      ) : (
-        priority
-      )}
+      {priority}
+
       <div className="w-[2%]" />
       <div className="w-[30%] space-y-1">
         <p className="text-xl font-semibold">
           {task.title}
-          {/* <Badge size="" count={1} /> */}
-          {/* <span className="text-sm font-normal">
-            {!isSubtask && `(${task.subTask.length})`}
-          </span> */}
         </p>
         <div className="flex items-center gap-x-5">
           {user ? (
@@ -183,7 +173,8 @@ const TaskItem = ({
           <p className="text-sm font-medium">
             {task.startDate
               ? moment(task.startDate)
-                  .tz("Asia/Ho_Chi_Minh")
+                  // .tz("Asia/Ho_Chi_Minh")
+                  .utc()
                   .format("DD/MM/YYYY HH:mm:ss")
               : "-- : --"}
           </p>
@@ -195,7 +186,8 @@ const TaskItem = ({
           <p className="text-sm font-medium">
             {task.endDate
               ? moment(task.endDate)
-                  .tz("Asia/Ho_Chi_Minh")
+                  // .tz("Asia/Ho_Chi_Minh")
+                  .utc()
                   .format("DD/MM/YYYY HH:mm:ss")
               : "-- : --"}
           </p>
@@ -203,7 +195,6 @@ const TaskItem = ({
       </div>
       <div className="w-[4%]" />
 
-      {/* {task.assignTasks?.length !== 0 && ( */}
       <Avatar
         size={35}
         alt="avatar"
@@ -212,18 +203,19 @@ const TaskItem = ({
           "https://static.vecteezy.com/system/resources/thumbnails/008/442/086/small/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg"
         }
       />
-      {/* )} */}
 
       <div className={`${!isSubtask ? "w-[4%]" : "w-[2%]"}`} />
       {!isSubtask ? (
-        <AiOutlineEye
-          onClick={(e) => {
-            e.stopPropagation();
-            goToSubTask();
-          }}
-          size={25}
-          className="text-slate-400 hover:text-blue-400"
-        />
+        <Badge size="small" count={task.subTask?.length}>
+          <AiOutlineEye
+            onClick={(e) => {
+              e.stopPropagation();
+              goToSubTask();
+            }}
+            size={25}
+            className="text-slate-400 hover:text-blue-400"
+          />
+        </Badge>
       ) : !isDropdown ? (
         <BiDetail
           onClick={(e) => {

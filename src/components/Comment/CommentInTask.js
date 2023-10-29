@@ -13,7 +13,6 @@ import { postComment, removeComment } from "../../apis/comments";
 const CommentInTask = ({ comments, taskId, isSubtask }) => {
   const manager = useRouteLoaderData("manager");
 
-
   const [fileList, setFileList] = useState();
 
   const queryClient = useQueryClient();
@@ -208,7 +207,6 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                 const targetDate = moment(comment.createdAt);
                 const duration = moment.duration(currentDate.diff(targetDate));
 
-                duration.as;
                 if (duration.asHours() < 1) {
                   time = `${Math.floor(duration.asMinutes())} phút trước`;
                 } else if (duration.asDays() < 1) {
@@ -252,7 +250,10 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
 
                     {comment.commentFiles.length > 0 &&
                       comment.commentFiles.map((file) => (
-                        <div key={file.id} className="ml-10 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block">
+                        <div
+                          key={file.id}
+                          className="ml-10 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                        >
                           <a
                             href={file.fileUrl}
                             target="_blank"

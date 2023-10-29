@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Checkbox,
   ConfigProvider,
   DatePicker,
   Form,
@@ -14,12 +13,17 @@ import viVN from "antd/locale/vi_VN";
 import ReactQuill from "react-quill";
 import moment from "moment";
 import dayjs from "dayjs";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateTask } from "../../apis/tasks";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { assignMember, updateTask } from "../../apis/tasks";
+import { getDetailEvent } from "../../apis/events";
+import { getAllUser } from "../../apis/users";
+import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 
 const { RangePicker } = DatePicker;
 
-const Title = ({ title }) => <p className="text-base font-medium">{title}</p>;
+const Title = ({ title }) => (
+  <p className="text-base font-medium truncate">{title}</p>
+);
 
 const TaskUpdateModal = ({
   isModalOpen,
@@ -27,23 +31,86 @@ const TaskUpdateModal = ({
   eventID,
   task,
   isSubTask,
+
+  staffId,
 }) => {
+  console.log("TaskUpdateModal: ", task);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
-  const [isTime, setIsTime] = useState(true);
   const [fileList, setFileList] = useState();
-  //   const [selectedEmployeesId, setSelectedEmployeesId] = useState();
+  const [selectedEmployeesId, setSelectedEmployeesId] = useState();
+  console.log("selectedEmployeesId: ", selectedEmployeesId);
 
   useEffect(() => {
     form.setFieldsValue({
       title: task.title,
-      date: [task.startDate, task.endDate],
-      description: { ops: JSON.parse(task.description) },
+      date:
+        task.startDate && task.endDate ? [task.startDate, task.endDate] : null,
+      description: task.description
+        ? { ops: JSON.parse(task.description) }
+        : null,
       priority: task.priority ?? null,
-      estimationTime: task.estimationTime,
+      estimationTime: task.estimationTime ?? null,
+
+      assignee: !isSubTask
+        ? task.assignTasks?.[0]?.user.id
+        : task.assignTasks?.map((item) => item.user.id),
+      leader: task.assignTasks?.filter((item) => item.isLeader === true)[0]
+        ?.user.id,
     });
+
+    divisionIdOfStaff = staffs?.find(
+      (staff) => staff.userId === staffId
+    )?.divisionId;
+
+    if (isSubTask)
+      setSelectedEmployeesId(task.assignTasks?.map((item) => item.user.id));
   }, [task]);
+
+  const {
+    data: staffs,
+    isLoading: staffsIsLoading,
+    isError: staffsIsError,
+  } = useQuery(["event-detail", eventID], () => getDetailEvent(eventID), {
+    select: (data) => {
+      return data.listDivision;
+    },
+    enabled: !isSubTask,
+  });
+  console.log("staffs: ", staffs);
+  console.log("id staff", staffId);
+
+  // const staffId = task.assignTasks[0].user.id;
+  let divisionIdOfStaff = staffs?.find(
+    (staff) => staff.userId === staffId
+  )?.divisionId;
+  console.log("divisionIdOfStaff: ", divisionIdOfStaff);
+
+  const {
+    data: employees,
+    isLoading: employeesIsLoading,
+    isError: employeesIsError,
+  } = useQuery(
+    ["employees", divisionIdOfStaff],
+    () =>
+      getAllUser({
+        divisionId: divisionIdOfStaff,
+        role: "EMPLOYEE",
+        pageSize: 50,
+        currentPage: 1,
+      }),
+    {
+      select: (data) => {
+        return data.data.map((employee) => ({
+          label: employee.fullName,
+          value: employee.id,
+        }));
+      },
+      enabled: isSubTask && !!staffId,
+    }
+  );
+  console.log("employees: ", employees);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation((task) => updateTask(task), {
@@ -63,6 +130,22 @@ const TaskUpdateModal = ({
     },
   });
 
+  const { mutate: assignMemberMutate } = useMutation(
+    ({ assign, updateTask }) => assignMember(assign),
+    {
+      onSuccess: (data, variables) => {
+        const task = variables.updateTask;
+        mutate(task);
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
   const handleOk = () => {
     form.submit();
   };
@@ -73,6 +156,7 @@ const TaskUpdateModal = ({
 
   const onFinish = (values) => {
     console.log("Success: ", values);
+    console.log("old staff : ", task.assignTasks?.[0]?.user.id);
 
     values = {
       ...values,
@@ -85,9 +169,54 @@ const TaskUpdateModal = ({
       parentTask: isSubTask ? task.id : null,
     };
 
-    const { date, ...restValues } = values;
-    console.log("transfer data : ", restValues);
+    // const { date, ...restValues } = values;
+    console.log("transfer data : ", values);
+
     // mutate(restValues);
+
+    if (!isSubTask) {
+      console.log("Update task");
+      // update Task
+      if (task.assignTasks?.[0]?.user.id === values.assignee) {
+        console.log("Same asignee");
+        const { assignee, date, ...updatedTask } = values;
+
+        // Not update assignee
+        console.log(updatedTask);
+        mutate(updatedTask);
+      } else {
+        console.log("Diff asignee");
+        const { assignee, date, ...task } = values;
+
+        const updatedTask = {
+          assign: {
+            assignee: [assignee],
+            taskID: values.taskID,
+            leader: assignee,
+          },
+          updateTask: task,
+        };
+        
+        // Update assignee
+        console.log(updatedTask);
+        assignMemberMutate(updatedTask);
+      }
+    } else {
+      console.log("Update subtask");
+      // update Subtask
+      const { assignee, leader, date, ...task } = values;
+
+      const updatedTask = {
+        assign: {
+          assignee: [assignee],
+          taskID: values.taskID,
+          leader: leader,
+        },
+        updateTask: task,
+      };
+      console.log(updatedTask);
+      // assignMemberMutate(updatedTask);
+    }
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -95,11 +224,12 @@ const TaskUpdateModal = ({
   };
 
   const handleValuesChange = (changedValues) => {
-    // const formFieldName = Object.keys(changedValues)[0];
-    // if (formFieldName === "assignee") {
-    //   setSelectedEmployeesId(changedValues[formFieldName]);
-    //   // form.set
-    // }
+    const formFieldName = Object.keys(changedValues)[0];
+    if (formFieldName === "assignee") {
+      setSelectedEmployeesId(changedValues[formFieldName]);
+      // form.set
+      form.resetFields(["leader"]);
+    }
   };
 
   return (
@@ -120,8 +250,8 @@ const TaskUpdateModal = ({
     >
       {contextHolder}
       <Form
-        className="p-5"
         form={form}
+        className="p-5"
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
@@ -135,11 +265,21 @@ const TaskUpdateModal = ({
         onValuesChange={handleValuesChange}
         initialValues={{
           title: task.title,
-          date: [task.startDate, task.endDate],
-          description: { ops: JSON.parse(task.description) },
-
+          date:
+            task.startDate && task.endDate
+              ? [task.startDate, task.endDate]
+              : null,
+          description: task.description
+            ? { ops: JSON.parse(task.description) }
+            : null,
           priority: task.priority ?? null,
-          estimationTime: task.estimationTime,
+          estimationTime: task.estimationTime ?? null,
+          effort: task.estimationTime ?? null,
+          assignee: !isSubTask
+            ? task.assignTasks?.[0]?.user.id
+            : task.assignTasks?.map((item) => item.user.id),
+          leader: task.assignTasks?.filter((item) => item.isLeader === true)[0]
+            ?.user.id,
         }}
       >
         <div className="flex gap-x-10">
@@ -158,17 +298,7 @@ const TaskUpdateModal = ({
           </Form.Item>
           <Form.Item
             className="w-[45%]"
-            label={
-              <div className="flex gap-x-5 items-center">
-                <Title title="Thời gian" />
-                <Checkbox
-                  checked={isTime}
-                  onChange={() => setIsTime((prev) => !prev)}
-                >
-                  Giờ cụ thể
-                </Checkbox>
-              </div>
-            }
+            label={<Title title="Thời gian" />}
             name="date"
             rules={[
               {
@@ -183,7 +313,7 @@ const TaskUpdateModal = ({
           >
             <ConfigProvider locale={viVN}>
               <RangePicker
-                showTime={isTime}
+                showTime={true}
                 onChange={(value) => {
                   form.setFieldsValue({
                     date: value.map((item) => moment.utc(item.$d).format()),
@@ -205,7 +335,7 @@ const TaskUpdateModal = ({
                   dayjs(task.startDate, "YYYY-MM-DD HH:mm:ss"),
                   dayjs(task.endDate, "YYYY-MM-DD HH:mm:ss"),
                 ]}
-                format={isTime ? "DD/MM/YYYY HH:mm:ss" : "DD/MM/YYYY"}
+                format={"DD/MM/YYYY HH:mm:ss"}
                 className="w-full"
               />
             </ConfigProvider>
@@ -232,39 +362,9 @@ const TaskUpdateModal = ({
           />
         </Form.Item>
 
-        {/* <div className="flex gap-x-10">
-          <Form.Item
-            className="w-[50%]"
-            label={<Title title="Chịu trách nhiệm bởi" />}
-            name="assignee"
-            rules={[
-              {
-                required: true,
-                message: "Chọn 1 trưởng phòng !",
-              },
-            ]}
-          >
-            <Select
-              placeholder="Bộ phận"
-              onChange={(value) => {
-                console.log("Chọn staff - division : ", value);
-                form.setFieldsValue({ assignee: value });
-              }}
-              options={staffs.map((staff) => ({
-                value: staff.userId,
-                label: (
-                  <p>
-                    {staff.fullName} - {staff.divisionName}
-                  </p>
-                ),
-              }))}
-            />
-          </Form.Item>
-        </div> */}
-
         <div className="flex gap-x-10">
           <Form.Item
-            className="w-[30%]"
+            className="w-[20%]"
             label={<Title title="Độ ưu tiên" />}
             name="priority"
             rules={[
@@ -295,23 +395,126 @@ const TaskUpdateModal = ({
               ]}
             />
           </Form.Item>
-          <Form.Item
-            className="w-[30%]"
-            label={<Title title="Thời gian ước tính" />}
-            name="estimationTime"
-            rules={[
-              {
-                required: true,
-                message: "Chưa điền thời gian hoặc sai định dạng !",
-              },
-            ]}
-          >
-            <div className="flex gap-x-3 items-center">
-              <InputNumber defaultValue={1} min={1} />
-              Giờ
-            </div>
-          </Form.Item>
+          <div className="w-[30%] flex items-center gap-x-3">
+            <Form.Item
+              label={<Title title="Thời gian ước tính" />}
+              name="estimationTime"
+              rules={
+                [
+                  // {
+                  //   required: true,
+                  //   message: "Chưa điền thời gian !",
+                  // },
+                ]
+              }
+            >
+              <InputNumber className="w-full" placeholder="1" min={1} />
+            </Form.Item>
+            Giờ
+          </div>
+          <div className="w-[30%] flex items-center gap-x-3">
+            <Form.Item
+              label={<Title title="Công số" />}
+              name="effort"
+              rules={
+                [
+                  // {
+                  //   required: true,
+                  //   message: "Chưa điền thời gian !",
+                  // },
+                ]
+              }
+            >
+              <InputNumber className="w-full" placeholder="1" min={1} />
+            </Form.Item>
+            Giờ
+          </div>
         </div>
+        {!isSubTask ? (
+          staffsIsLoading ? (
+            <LoadingComponentIndicator />
+          ) : (
+            <Form.Item
+              className="w-[50%]"
+              label={<Title title="Chịu trách nhiệm bởi" />}
+              name="assignee"
+              rules={[
+                {
+                  required: true,
+                  message: "Chọn 1 trưởng phòng !",
+                },
+              ]}
+            >
+              <Select
+                placeholder="Bộ phận"
+                options={
+                  staffs?.map((staff) => ({
+                    value: staff.userId,
+                    label: (
+                      <p>
+                        {staff.fullName} - {staff.divisionName}
+                      </p>
+                    ),
+                  })) ?? []
+                }
+              />
+            </Form.Item>
+          )
+        ) : employeesIsLoading ? (
+          <LoadingComponentIndicator />
+        ) : (
+          <>
+            <Form.Item
+              className="w-[70%]"
+              label={<Title title="Các nhân viên phù hợp" />}
+              name="assignee"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn nhân viên !",
+                },
+              ]}
+            >
+              <Select
+                placeholder="Chọn nhân viên phù hợp"
+                mode="multiple"
+                allowClear
+                options={employees ?? []}
+                // onChange={(value) => {
+                //   console.log("Chọn employee group : ", value);
+                //   // form.setFieldsValue({ assignee: value });
+                //   form.resetFields(["leader"]);
+                // }}
+              />
+            </Form.Item>
+            <Form.Item
+              className="w-[30%]"
+              label={<Title title="Chịu trách nhiệm bởi" />}
+              name="leader"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn nhóm trưởng !",
+                },
+              ]}
+            >
+              <Select
+                placeholder="Trưởng nhóm"
+                options={
+                  selectedEmployeesId
+                    ? employees.filter((employee) =>
+                        selectedEmployeesId.includes(employee.value)
+                      )
+                    : []
+                  // []
+                }
+                // onChange={(value) => {
+                //   form.setFieldsValue({ leader: value });
+                // }}
+              />
+            </Form.Item>
+          </>
+        )}
       </Form>
     </Modal>
   );

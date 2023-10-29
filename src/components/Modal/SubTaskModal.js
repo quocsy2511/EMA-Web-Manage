@@ -19,6 +19,7 @@ import { AnimatePresence } from "framer-motion";
 import { getUserById } from "../../apis/users";
 import moment from "moment";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
+import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 
 const ItemLayout = ({ children }) => (
   <div className="flex items-center gap-x-5">{children}</div>
@@ -38,7 +39,6 @@ const SubTaskModal = ({ isOpenModal, setIsOpenModal, selectedSubTask }) => {
   const { data: assigner } = useQuery(["user", selectedSubTask.createdBy], () =>
     getUserById(selectedSubTask.createdBy)
   );
-  console.log("assigner: ", assigner);
 
   const handleCancel = () => {
     setIsOpenModal(false);

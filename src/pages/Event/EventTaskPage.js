@@ -165,21 +165,19 @@ const EventTaskPage = () => {
     mutate(eventId, " DONE");
   };
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <div className="h-[calc(100vh-128px)]">
         <LoadingComponentIndicator />;
       </div>
     );
-  }
 
-  if (isError) {
+  if (isError)
     return (
       <div className="h-[calc(100vh-128px)]">
         <AnErrorHasOccured />;
       </div>
     );
-  }
 
   switch (data.status) {
     case "PENDING":

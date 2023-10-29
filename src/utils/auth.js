@@ -27,9 +27,11 @@ export function loginLoader() {
   const token = getAuthToken();
   console.log("loginLoader token: ", token);
 
-  if (!token || token === "EXPIRED") return;
+  if (!token || token === "EXPIRED") return null;
   if (token.role === "MANAGER") return redirect("/manager");
   if (token.role === "STAFF") return redirect("/staff");
+
+  return null;
 }
 
 export function checkAuthLoader(params) {
@@ -39,7 +41,7 @@ export function checkAuthLoader(params) {
 
   if (!token || token === "EXPIRED") return redirect("/");
   if (token.role.toLowerCase() !== authRole)
-    redirect(`/${token.role.toLowerCase()}`);
+    return redirect(`/${token.role.toLowerCase()}`);
 
   return token;
 }

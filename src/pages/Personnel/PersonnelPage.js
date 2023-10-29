@@ -14,7 +14,6 @@ import {
 } from "antd";
 import React, { Fragment, useState } from "react";
 import { PiTrash, PiNotePencilBold } from "react-icons/pi";
-import { MdOutlineCancel, MdOutlineSave } from "react-icons/md";
 import viVN from "antd/locale/vi_VN";
 import dayjs from "dayjs";
 import { BsSearch } from "react-icons/bs";
@@ -714,7 +713,7 @@ const PersonnelPage = () => {
                     }}
                     columns={mergedColumns}
                     dataSource={
-                      filteredData /* && filteredData.length*/
+                      filteredData
                         ? filteredData
                         : data.data
                     }

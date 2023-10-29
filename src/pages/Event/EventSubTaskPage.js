@@ -15,7 +15,7 @@ import { BsHourglassBottom, BsHourglassSplit, BsPlus } from "react-icons/bs";
 import { BiDetail } from "react-icons/bi";
 import { VscDebugStart } from "react-icons/vsc";
 import { MdOutlineDoneOutline } from "react-icons/md";
-import { Avatar, Button, FloatButton, message } from "antd";
+import { Avatar, Button, Card, FloatButton, message } from "antd";
 import TaskItem from "../../components/Task/TaskItem";
 import CommentInTask from "../../components/Comment/CommentInTask";
 import SubTaskModal from "../../components/Modal/SubTaskModal";
@@ -221,16 +221,6 @@ const EventSubTaskPage = () => {
         isSubTask={false}
       />
 
-      {/* {selectedSubTask && (
-        <TaskUpdateModal
-          isModalOpen={isOpenUpdateSubTaskModal}
-          setIsModalOpen={setIsOpenUpdateSubTaskModal}
-          eventID={eventId}
-          task={selectedSubTask}
-          isSubTask={true}
-        />
-      )} */}
-
       <motion.div
         initial={{ y: -75, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -332,7 +322,7 @@ const EventSubTaskPage = () => {
               <div className="w-4" />
               <p className="text-base font-medium">
                 {tasks.startDate
-                  ? moment(tasks.startDate).format("DD/MM/YYYY HH:mm:ss")
+                  ? moment(tasks.startDate).utc().format("DD/MM/YYYY HH:mm:ss")
                   : "-- : --"}
               </p>
             </motion.div>
@@ -345,7 +335,7 @@ const EventSubTaskPage = () => {
               <div className="w-4" />
               <p className="text-base font-medium">
                 {tasks.endDate
-                  ? moment(tasks.endDate).format("DD/MM/YYYY HH:mm:ss")
+                  ? moment(tasks.endDate).utc().format("DD/MM/YYYY HH:mm:ss")
                   : "-- : --"}
               </p>
             </motion.div>
@@ -368,20 +358,42 @@ const EventSubTaskPage = () => {
           </motion.div>
         </div>
 
-        <div className="mt-5 px-8 py-5 bg-slate-50 rounded-xl">
-          <p className="text-lg font-medium">Mô tả</p>
-          <div
-            className="text-sm"
-            dangerouslySetInnerHTML={{
-              __html: new QuillDeltaToHtmlConverter(
-                JSON.parse(tasks.description)
-              ).convert(),
-            }}
-          />
-          {tasks.taskFiles.length > 0 && (
-            <>
-              <p className="text-lg font-medium">Tệp đính kèm</p>
-              <div className="flex gap-x-3 items-center">
+        <div className="mt-5 flex gap-x-10">
+          <div className="space-y-5">
+            <Card>
+              <p className="text-base font-medium">
+                Thời gian ước lượng:{" "}
+                {tasks.estimationTime ? (
+                  <span className="underline">1{tasks.estimationTime} giờ</span>
+                ) : (
+                  "Chưa có"
+                )}
+              </p>
+            </Card>
+            <Card>
+              <p className="text-base font-medium">
+                Công số:{" "}
+                {tasks.effort ? (
+                  <span className="underline">{tasks.effort} giờ</span>
+                ) : (
+                  "Chưa có"
+                )}
+              </p>
+            </Card>
+          </div>
+          <Card title="Mô tả" className="flex-1">
+            <div
+              className="text-sm"
+              dangerouslySetInnerHTML={{
+                __html: new QuillDeltaToHtmlConverter(
+                  JSON.parse(tasks.description)
+                ).convert(),
+              }}
+            />
+          </Card>
+          <Card title="Tệp đính kèm" className="w-[20%]">
+            {tasks.taskFiles.length > 0 ? (
+              <div className="flex gap-x-3 items-center max-h-fit overflow-y-scroll">
                 {tasks.taskFiles.map((file) => (
                   <a
                     href={file.fileUrl}
@@ -393,8 +405,10 @@ const EventSubTaskPage = () => {
                   </a>
                 ))}
               </div>
-            </>
-          )}
+            ) : (
+              <p>Không có</p>
+            )}
+          </Card>
         </div>
 
         <div
@@ -410,24 +424,14 @@ const EventSubTaskPage = () => {
                   subtask.createdBy === manager.id
                 )
                   return (
-                    <div key={subtask.id}>
-                      <TaskItem
-                        task={subtask}
-                        isSubtask={true}
-                        setSelectedSubTask={setSelectedSubTask}
-                        setIsOpenUpdateSubTaskModal={
-                          setIsOpenUpdateSubTaskModal
-                        }
-                        setIsOpenModal={setIsOpenModal}
-                      />
-                      {/* <TaskUpdateModal
-                        isModalOpen={isOpenUpdateSubTaskModal}
-                        setIsModalOpen={setIsOpenUpdateSubTaskModal}
-                        eventID={eventId}
-                        task={subtask}
-                        isSubTask={true}
-                      /> */}
-                    </div>
+                    <TaskItem
+                      key={subtask.id}
+                      task={subtask}
+                      isSubtask={true}
+                      setSelectedSubTask={setSelectedSubTask}
+                      setIsOpenUpdateSubTaskModal={setIsOpenUpdateSubTaskModal}
+                      setIsOpenModal={setIsOpenModal}
+                    />
                   );
               })}
             {selectedSubTask && (
@@ -443,6 +447,7 @@ const EventSubTaskPage = () => {
                   eventID={eventId}
                   task={selectedSubTask}
                   isSubTask={true}
+                  staffId={tasks.assignTasks?.[0]?.user.id}
                 />
               </>
             )}
