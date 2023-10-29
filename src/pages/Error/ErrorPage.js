@@ -6,7 +6,7 @@ import { useNavigate, useRouteError } from "react-router-dom";
 const ErrorPage = () => {
   const navigate = useNavigate();
   const error = useRouteError();
-  console.log(error)
+  // console.log(error)
 
   return (
     <div className="w-screen h-screen flex justify-center items-center">
@@ -18,7 +18,8 @@ const ErrorPage = () => {
         </div>
         <div className="h-full flex-1 flex flex-col justify-between">
           <h1 className="text-[#f44336] font-black text-6xl md:text-left text-center">
-            {/* 404 */}{error.status || "404"}
+            {/* 404 */}
+            {error.status || "404"}
           </h1>
           <div>
             <h4 className="text-[#313435] font-semibold text-2xl mb-2">

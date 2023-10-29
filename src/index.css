@@ -16,6 +16,9 @@ body {
 :where(.css-dev-only-do-not-override-18iikkb).ant-btn-primary {
   background-color: #1677ff;
 }
+.anticon.anticon-down.ant-select-suffix {
+  color: black; /* Đổi màu icon thành màu đỏ (#ff0000) */
+}
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
@@ -59,4 +62,37 @@ code {
 
 .ant-menu.ant-menu-root.ant-menu-inline {
   border-right: 0;
+}
+.upload-list-inline .ant-upload-list-item {
+  float: left;
+  width: 200px;
+  margin-inline-end: 8px;
+}
+
+.ant-radio-group.ant-radio-group-outline.ant-picker-calendar-mode-switch.css-dev-only-do-not-override-18iikkb {
+  display: none;
+}
+:where(.css-dev-only-do-not-override-18iikkb).ant-input-disabled,
+:where(.css-dev-only-do-not-override-18iikkb).ant-input[disabled] {
+  background-color: transparent;
+}
+
+:where(.css-dev-only-do-not-override-18iikkb).ant-select-multiple
+  .ant-select-selection-item {
+  height: fit-content;
+}
+
+@layer utilities {
+  @variants responsive {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+  }
 }

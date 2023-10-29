@@ -1,412 +1,109 @@
-import React, { useRef, useState } from "react";
-import HeadingTitle from "../../components/common/HeadingTitle";
-import {
-  SearchOutlined,
-  EyeTwoTone,
-  DeleteTwoTone,
-  HeartTwoTone,
-} from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
-import { Button, Input, Space, Table, Tag } from "antd";
-
-const data = [
-  {
-    key: "1",
-    name: "John Brown",
-    age: 32,
-    address: "New York No. 1 Lake Park",
-    status: "active",
-  },
-  {
-    key: "2",
-    name: "Joe Black",
-    age: 42,
-    address: "London No. 1 Lake Park",
-    status: "active",
-  },
-  {
-    key: "3",
-    name: "Jim Green",
-    age: 32,
-    address: "Sydney No. 1 Lake Park",
-    status: "active",
-  },
-  {
-    key: "4",
-    name: "Jim Red",
-    age: 32,
-    address: "London No. 2 Lake Park",
-    status: "cancel",
-  },
-  {
-    key: "5",
-    name: "Jim Red",
-    age: 30,
-    address: "LA No. 2 Lake Park",
-    status: "cancel",
-  },
-  {
-    key: "6",
-    name: "Jim brown",
-    age: 31,
-    address: "LA No. 2 Lake Park",
-    status: "done",
-  },
-  {
-    key: "7",
-    name: "Jim Green",
-    age: 32,
-    address: "Sydney No. 1 Lake Park",
-    status: "active",
-  },
-  {
-    key: "8",
-    name: "Jim Red",
-    age: 32,
-    address: "London No. 2 Lake Park",
-    status: "cancel",
-  },
-  {
-    key: "9",
-    name: "Jim Red",
-    age: 30,
-    address: "LA No. 2 Lake Park",
-    status: "cancel",
-  },
-  {
-    key: "21",
-    name: "Jim brown",
-    age: 31,
-    address: "LA No. 2 Lake Park",
-    status: "done",
-  },
-  {
-    key: "10",
-    name: "Jim Green",
-    age: 32,
-    address: "Sydney No. 1 Lake Park",
-    status: "active",
-  },
-  {
-    key: "11",
-    name: "Jim Red",
-    age: 32,
-    address: "London No. 2 Lake Park",
-    status: "cancel",
-  },
-  {
-    key: "12",
-    name: "Jim Red",
-    age: 30,
-    address: "LA No. 2 Lake Park",
-    status: "cancel",
-  },
-  {
-    key: "13",
-    name: "Jim brown",
-    age: 31,
-    address: "LA No. 2 Lake Park",
-    status: "done",
-  },
-  {
-    key: "14",
-    name: "Jim Green",
-    age: 32,
-    address: "Sydney No. 1 Lake Park",
-    status: "active",
-  },
-  {
-    key: "15",
-    name: "Jim Red",
-    age: 32,
-    address: "London No. 2 Lake Park",
-    status: "cancel",
-  },
-  {
-    key: "16",
-    name: "Jim Red",
-    age: 30,
-    address: "LA No. 2 Lake Park",
-    status: "cancel",
-  },
-  {
-    key: "17",
-    name: "Jim brown",
-    age: 31,
-    address: "LA No. 2 Lake Park",
-    status: "done",
-  },
-  {
-    key: "18",
-    name: "Jim Red",
-    age: 32,
-    address: "London No. 2 Lake Park",
-    status: "cancel",
-  },
-  {
-    key: "19",
-    name: "Jim Red",
-    age: 30,
-    address: "LA No. 2 Lake Park",
-    status: "cancel",
-  },
-  {
-    key: "20",
-    name: "Jim brown",
-    age: 31,
-    address: "LA No. 2 Lake Park",
-    status: "done",
-  },
-];
+import React, { Fragment, useState } from "react";
+import { BsMailbox, BsTrash3 } from "react-icons/bs";
+import RequestsList from "../../components/RequestItem/RequestsList";
+import RequestDetail from "../../components/RequestItem/RequestDetail";
+import { AnimatePresence, motion } from "framer-motion";
 
 const RequestPage = () => {
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const searchInput = useRef(null);
+  const [requests, setRequests] = useState([
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+  ]);
+  const [selectedRequest, setSelectedRequest] = useState();
+  const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
+  const handleChangeRequestType = (type) => {
+    setSelectedRequestType(type);
+    if (type === "bin") setRequests([1, 2, 3]);
+    else setRequests([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
   };
-
-  const handleReset = (clearFilters) => {
-    clearFilters();
-    setSearchText("");
-  };
-
-  //Dropdown search filter chứa hàm xử lí và render cái popup
-  //Search nó khác thăng filter 1 chỗ là nó search nó xác định đc input trả ra ds và đóng popUp còn filter thì có thể nhiều input nhưng ko đóng cái popUp
-  const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-      close,
-    }) => (
-      //Popup
-      <div
-        style={{
-          padding: 8,
-        }}
-        onKeyDown={(e) => e.stopPropagation()} // hiểu đơn giản là nó ngăn chặn mình dùng bàn phím để điều khiển thành phần bên trong
-      >
-        <Input
-          ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{
-            marginBottom: 8,
-            display: "block",
-          }}
-        />
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            icon={<SearchOutlined />}
-            size="small"
-            style={{
-              width: 90,
-            }}
-          >
-            Search
-          </Button>
-          <Button
-            onClick={() => clearFilters && handleReset(clearFilters)}
-            size="small"
-            style={{
-              width: 90,
-            }}
-          >
-            Reset
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              //confirm của antd để xác nhận 1 action
-              confirm({
-                closeDropdown: false,
-              });
-              setSearchText(selectedKeys[0]);
-              setSearchedColumn(dataIndex);
-            }}
-          >
-            Filter
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              close();
-            }}
-          >
-            close
-          </Button>
-        </Space>
-      </div>
-    ),
-
-    //đơn giản forcus icon mà mình chọn theo bảng
-    filterIcon: (filtered) => (
-      <SearchOutlined
-        style={{
-          color: filtered ? "#1677ff" : undefined,
-        }}
-      />
-    ),
-
-    //kiểm tra xem cái input m search nó có trong bảng hay không
-    onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-
-    //set thời gian mở popUp search
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
-
-    // này render bảng và để bôi màu thằng có cùng input mà mình search
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
-
-  //đây là cột title
-  const columns = [
-    {
-      title: "No",
-      dataIndex: "",
-      width: 50,
-      render: (_, __, index) => index + 1, // Return the index of each row plus one
-      align: "center",
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      width: "20%",
-      ...getColumnSearchProps("name"),
-      // render: (_, { name }) => {
-      //   return <span className="text-[#1d39c4]">{name}</span>;
-      // },
-      sorter: (a, b) => a.name.length - b.name.length,
-      sortDirections: ["descend", "ascend"],
-      align: "center",
-    },
-    {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
-      width: "20%",
-      ...getColumnSearchProps("age"),
-      sorter: (a, b) => a.age - b.age,
-      sortDirections: ["descend", "ascend"],
-      align: "center",
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
-      width: "20%",
-      ...getColumnSearchProps("address"),
-      sorter: (a, b) => a.address.length - b.address.length,
-      sortDirections: ["descend", "ascend"],
-      align: "center",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      width: "20%",
-      ...getColumnSearchProps("status"),
-      render: (_, { status }) => {
-        let color = "geekblue";
-        if (status === "active") {
-          color = "green";
-        } else if (status === "done") {
-          color = "volcano";
-        } else {
-          color = "geekblue";
-        }
-        return (
-          <>
-            <Tag color={color}>{status.toUpperCase()}</Tag>
-          </>
-        );
-      },
-      sorter: (a, b) => a.status.length - b.status.length,
-      sortDirections: ["descend", "ascend"],
-      align: "center",
-    },
-    {
-      title: "Action",
-      key: "action",
-      // width: "10%",
-      render: (_, record) => (
-        <Space size="middle">
-          <EyeTwoTone
-            twoToneColor="#1d39c4"
-            className="cursor-pointer text-lg"
-          />
-          <DeleteTwoTone
-            twoToneColor="#eb2f96"
-            className="cursor-pointer text-lg"
-          />
-        </Space>
-      ),
-      align: "center",
-    },
-  ];
 
   return (
-    <>
-      <div className="p-10 min-h-screen bg-blue-300 min-w-full ">
-        <div className="flex-1">
-          <HeadingTitle> Danh sách phòng ban</HeadingTitle>
-          <div className="mt-10 px-4 ">
-            <Table
-              columns={columns}
-              dataSource={data}
-              bordered
-              pagination={{
-                // pageSize: 5,
-                total: data.length, // số trang tối đa hiện data
-                showSizeChanger: true,
-                pageSizeOptions: [1, 2, 3, 4, 10, 20, 30, 50, 100],
-                defaultPageSize: 5,
-                jumpPrevIcon: () => {
-                  return (
-                    <>
-                      <HeartTwoTone twoToneColor="#eb2f96" />
-                    </>
-                  );
-                },
-              }}
-              size="large"
-            />
+    <Fragment>
+      <div className="w-full h-[calc(100vh-64px)] bg-[#F0F6FF] py-12 px-20 ">
+        <div className="w-full h-full bg-white rounded-lg shadow-xl flex">
+          <div className="w-1/5 border-r">
+            <div className="h-10" />
+
+            <motion.div
+              layoutId="active-tab"
+              onClick={() => handleChangeRequestType("inbox")}
+              className={`flex items-center gap-x-4 border-l ${
+                selectedRequestType === "inbox" && "border-blue-600"
+              } px-5 py-3 cursor-pointer`}
+            >
+              <BsMailbox
+                className={`text-slate-500 ${
+                  selectedRequestType === "inbox" && "text-blue-600"
+                }`}
+                size={22}
+              />
+              <p
+                className={`text-sm font-medium text-slate-500 ${
+                  selectedRequestType === "inbox" && "text-blue-600"
+                } `}
+              >
+                Hộp thư đến
+              </p>
+            </motion.div>
+            <motion.div
+              layoutId="active-tab"
+              onClick={() => handleChangeRequestType("bin")}
+              className={`flex items-center gap-x-4 border-l ${
+                selectedRequestType === "bin" && "border-blue-600 text-blue-600"
+              } px-5 py-3 cursor-pointer`}
+            >
+              <BsTrash3
+                className={`text-slate-500 ${
+                  selectedRequestType === "bin" && "text-blue-600"
+                }`}
+                size={22}
+              />
+              <p
+                className={`text-sm font-medium text-slate-500 ${
+                  selectedRequestType === "bin" && "text-blue-600"
+                } `}
+              >
+                Đã xóa
+              </p>
+            </motion.div>
+
+            <div className="h-10" />
+
+            <p className="text-base text-slate-400 px-5">Loại đơn</p>
+
+            <div className="flex items-center gap-x-4 px-5 py-3 cursor-pointer">
+              <div className="w-2 h-2 bg-blue-400 rounded-full" />
+              <p className="text-sm font-medium text-slate-500">Đơn xin nghỉ</p>
+            </div>
+
+            <div className="flex items-center gap-x-4 px-5 py-3 cursor-pointer">
+              <div className="w-2 h-2 bg-red-400 rounded-full" />
+              <p className="text-sm font-medium text-slate-500">
+                Đơn xin làm ngoài
+              </p>
+            </div>
+          </div>
+
+          <div className="w-4/5 overflow-hidden">
+            <AnimatePresence mode="wait">
+              {!selectedRequest ? (
+                <RequestsList
+                  key="request-list"
+                  requests={requests}
+                  setSelectedRequest={setSelectedRequest}
+                />
+              ) : (
+                <RequestDetail
+                  key="request-detail"
+                  selectedRequest={selectedRequest}
+                  setSelectedRequest={setSelectedRequest}
+                />
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
-    </>
+    </Fragment>
   );
 };
 

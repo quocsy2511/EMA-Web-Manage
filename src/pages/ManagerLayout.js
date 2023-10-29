@@ -1,80 +1,28 @@
-import { Avatar, Breadcrumb, Layout, Menu, theme } from "antd";
-import React from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import logo from "../assets/images/logo.png";
+import { Layout } from "antd";
+import React, { useState } from "react";
+import { Outlet } from "react-router-dom";
+import HeaderStaff from "../components/Header/HeaderStaff";
+import SidebarStaff from "../components/Sidebar/SidebarStaff";
 
-const { Header, Content, Footer } = Layout;
+const { Content } = Layout;
 
 const ManagerLayout = () => {
-  const navigate = useNavigate();
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
-
-  const getItem = (label, key) => {
-    return {
-      label,
-      key,
-    };
-  };
-
-  const topBarItems = [
-    getItem("Sự kiện", "/staff"),
-    getItem("Thông kê", "/staff/dashboard"),
-    getItem("Yêu cầu", "/staff/request"),
-    getItem("Bảng Chấm công", "/staff/timekeeping"),
-  ];
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <>
-      <Layout>
-        <Header
-          style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 1,
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <div className="demo-logo mr-4">
-            <Avatar size={34} src={logo} />
-          </div>
-          <Menu
-            onClick={({ key }) => {
-              navigate(key);
-            }}
-            theme="dark"
-            mode="horizontal"
-            defaultSelectedKeys={["/staff"]}
-            items={topBarItems}
-          />
-        </Header>
-        <Content
-          className="site-layout"
-          style={{
-            padding: "0 50px",
-          }}
-        >
-          <div
-            style={{
-              background: colorBgContainer,
-            }}
-            className="p-6 min-h-screen"
-          >
-            <Outlet />
-          </div>
+    <div className="overflow-hidden overflow-y-scroll">
+      <Layout
+        style={{
+          minHeight: "100vh",
+        }}
+      >
+        <SidebarStaff collapsed={collapsed} />
+        <Content>
+          <HeaderStaff collapsed={collapsed} setCollapsed={setCollapsed} />
+          <Outlet />
         </Content>
-        <Footer
-          style={{
-            textAlign: "center",
-          }}
-        >
-          capstone project FPT
-        </Footer>
       </Layout>
-    </>
+    </div>
   );
 };
 

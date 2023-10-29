@@ -1,20 +1,29 @@
 import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Suspense, lazy } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { queryClient } from "./utils/http";
-import { checkAuthLoader, loginLoader, tokenLoader } from "./utils/auth";
+import { checkAuthLoader, loginLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
-import ProfilePage from "./pages/Profile/ProfilePage";
+import RolePage from "./pages/Role/RolePage";
+import BudgetStaffLayout from "./pages/Budget/BudgetStaffLayout";
+
+const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
 // Mana pages
 const RootPage = lazy(() => import("./pages/RootPage"));
 const DashboardPage = lazy(() => import("./pages/Dashboard/DashboardPage"));
+const EventLayout = lazy(() => import("./pages/Event/EventLayout"));
 const EventPage = lazy(() => import("./pages/Event/EventPage"));
 const PersonnelPage = lazy(() => import("./pages/Personnel/PersonnelPage"));
+const EventTaskPage = lazy(() => import("./pages/Event/EventTaskPage"));
+const EventBudgetPage = lazy(() => import("./pages/Event/EventBudgetPage"));
+const EventSubTaskPage = lazy(() => import("./pages/Event/EventSubTaskPage"));
+const EventCreationPage = lazy(() => import("./pages/Event/EventCreationPage"));
 const DivisionPage = lazy(() => import("./pages/Division/DivisionPage"));
-const RolePage = lazy(() => import("./pages/Role/RolePage"));
+const ChatPage = lazy(() => import("./pages/Chat/ChatPage"));
 const TimekeepingPage = lazy(() =>
   import("./pages/Timekeeping/TimekeepingPage")
 );
@@ -30,6 +39,7 @@ const TimekeepingStaffPage = lazy(() =>
 const DashboardPageStaff = lazy(() =>
   import("./pages/Dashboard/DashboardPageStaff")
 );
+const TaskPageStaff = lazy(() => import("./pages/Task/MyTaskPageStaff"));
 
 const router = createBrowserRouter([
   {
@@ -40,6 +50,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/manager",
+    id: "manager",
     element: (
       <Suspense fallback={<LoadingPageIndicator />}>
         <RootPage />
@@ -51,18 +62,71 @@ const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
+          <Suspense fallback={<LoadingPageIndicator title="trang chủ" />}>
             <DashboardPage />
           </Suspense>
         ),
       },
+
       {
         path: "event",
         element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
-            <EventPage />
+          <Suspense fallback={<LoadingPageIndicator title="trang sự kiện" />}>
+            <EventLayout />
           </Suspense>
         ),
+        children: [
+          {
+            index: true,
+            element: <EventPage />,
+          },
+          {
+            path: ":eventId",
+            element: (
+              <Suspense
+                fallback={<LoadingPageIndicator title="thông tin sự kiện" />}
+              >
+                <EventTaskPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: ":eventId/:taskId",
+            element: (
+              <Suspense
+                fallback={
+                  <LoadingPageIndicator title="công việc của sự kiện" />
+                }
+              >
+                <EventSubTaskPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: ":eventId/budget",
+            element: (
+              <Suspense
+                fallback={
+                  <LoadingPageIndicator title="ngân sách của sự kiện" />
+                }
+              >
+                <EventBudgetPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "addition",
+            element: (
+              <Suspense
+                fallback={
+                  <LoadingPageIndicator title="trang tạo mới sự kiện" />
+                }
+              >
+                <EventCreationPage />
+              </Suspense>
+            ),
+          },
+        ],
       },
       {
         path: "personnel",
@@ -85,6 +149,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <RolePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "chat",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <ChatPage />
           </Suspense>
         ),
       },
@@ -118,19 +190,20 @@ const router = createBrowserRouter([
   //Staff
   {
     path: "/staff",
+    id: "staff",
     element: (
       <Suspense fallback={<LoadingPageIndicator />}>
         <ManagerLayout />
       </Suspense>
     ),
     errorElement: <ErrorPage />,
-    // loader: checkAuthLoader,
+    loader: checkAuthLoader,
     children: [
       {
         index: true,
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <EventStaffPage />,
+            <EventStaffPage />
           </Suspense>
         ),
       },
@@ -138,7 +211,7 @@ const router = createBrowserRouter([
         path: "request",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <RequestStaffPage />,
+            <RequestStaffPage />
           </Suspense>
         ),
       },
@@ -146,7 +219,7 @@ const router = createBrowserRouter([
         path: "timekeeping",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <TimekeepingStaffPage />,
+            <TimekeepingStaffPage />
           </Suspense>
         ),
       },
@@ -154,7 +227,23 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <DashboardPageStaff />,
+            <DashboardPageStaff />
+          </Suspense>
+        ),
+      },
+      {
+        path: "task",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <TaskPageStaff />
+          </Suspense>
+        ),
+      },
+      {
+        path: "budget",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <BudgetStaffLayout />
           </Suspense>
         ),
       },
@@ -166,6 +255,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

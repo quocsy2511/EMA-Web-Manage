@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Avatar, Badge, Button, Dropdown } from "antd";
 import { Header as HeaderLayout } from "antd/es/layout/layout";
-import { HiOutlineBellAlert, HiOutlineBell } from "react-icons/hi2";
+import { HiOutlineBellAlert } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { IoLogOutOutline } from "react-icons/io5";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useRouteLoaderData } from "react-router-dom";
 
 const notiItems = [
   {
@@ -52,8 +52,9 @@ const notiItems = [
   },
 ];
 
-const Header = ({ collapsed, setCollapsed }) => {
+const Header = ({ collapsed, setCollapsed, data }) => {
   const navigate = useNavigate();
+  const manager = useRouteLoaderData("manager");
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -132,8 +133,16 @@ const Header = ({ collapsed, setCollapsed }) => {
             >
               <div className="flex items-center">
                 <div className="flex flex-col items-end">
-                  <p className="text-sm font-semibold">User Name</p>
-                  <p className="text-xs font-normal">Manager</p>
+                  <p className="text-sm font-semibold">
+                    {manager.fullName ?? "User Name"}
+                  </p>
+                  <p className="text-xs font-normal">
+                    {manager.role
+                      ? manager.role === "MANAGER"
+                        ? "Quản lý"
+                        : "Trưởng bộ phận"
+                      : "Vai trò"}
+                  </p>
                 </div>
                 <div className="w-2" />
                 <Avatar
@@ -141,6 +150,7 @@ const Header = ({ collapsed, setCollapsed }) => {
                   icon={<p>icon</p>}
                   alt="user_image"
                   src={
+                    manager.avatar ??
                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
                   }
                 />
