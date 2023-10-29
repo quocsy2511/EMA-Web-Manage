@@ -15,7 +15,11 @@ import {
 import moment from "moment";
 import React, { Fragment, useState } from "react";
 import { BiEdit } from "react-icons/bi";
-import { getBudget, updateBudget, updateStatusBudget } from "../../apis/budgets";
+import {
+  getBudget,
+  updateBudget,
+  updateStatusBudget,
+} from "../../apis/budgets";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import emptyBudget from "../../assets/images/empty_budget.jpg";
 import AnErrorHasOccured from "../Error/AnErrorHasOccured";
@@ -298,6 +302,7 @@ const ConfirmedBudget = ({ eventId }) => {
                 >
                   Xác nhận
                 </Button>
+
                 <Popconfirm
                   title="Hủy việc cập nhật ?"
                   onConfirm={onCancelEditing}

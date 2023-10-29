@@ -1,12 +1,14 @@
 import { authRequest } from "../utils/axios-utils";
 
-export const getBudget = ({ eventID, pageSize, currentPage, mode }) =>
+export const getBudget = ({ eventID, pageSize, currentPage, mode, userID }) =>
   authRequest({
-    url: `/budget/${eventID}?sizePage=${pageSize}&currentPage=${currentPage}&mode=${mode}`,
+    url: `/budget/${eventID}?sizePage=${pageSize}&currentPage=${currentPage}&mode=${mode}&userID=${
+      userID ? userID : ""
+    }`,
   });
 
 export const createBudget = (budget) =>
-  authRequest({ url: "/budget", method: "post", budget });
+  authRequest({ url: "/budget", method: "post", data: budget });
 
 export const updateBudget = ({ budgetsId, ...budget }) =>
   authRequest({
@@ -23,7 +25,7 @@ export const updateBudget = ({ budgetsId, ...budget }) =>
     },
   });
 
-// status: PROCESSING - ACCEPT - REJECT
+// status: PROCESSING - ACCEPT - REJECT - CANCEL
 export const updateStatusBudget = ({ budgetsId, status }) =>
   authRequest({
     url: `/budget/${budgetsId}/${status}`,

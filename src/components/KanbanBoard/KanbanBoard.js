@@ -15,7 +15,7 @@ const KanbanBoard = ({
     <>
       <div className="bg-bgG h-screen overflow-hidden overflow-y-scroll scrollbar-hide">
         <DescriptionEvent selectEvent={selectEvent} />
-        <div className="flex scrollbar-default overflow-x-scroll px-10 py-2 gap-x-3 ">
+        <div className="flex scrollbar-default overflow-x-scroll px-10 pb-8 gap-x-3 ">
           {!isLoadingListTask ? (
             !isErrorListTask ? (
               listTaskParents.map((taskParent, index) => (

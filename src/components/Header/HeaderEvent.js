@@ -1,7 +1,8 @@
 import {
-  AlignRightOutlined,
   CheckOutlined,
   ClearOutlined,
+  DollarOutlined,
+  FileDoneOutlined,
   SearchOutlined,
   StarFilled,
 } from "@ant-design/icons";
@@ -16,16 +17,17 @@ import AnErrorHasOccured from "../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { debounce } from "lodash";
 import { HiSortAscending, HiSortDescending } from "react-icons/hi";
-const settingHeader = [
-  {
-    key: "công việc",
-    label: "Bảng công việc",
-  },
-  {
-    key: "ngân sách",
-    label: "Ngân sách",
-  },
-];
+
+// const settingHeader = [
+//   {
+//     key: "công việc",
+//     label: "Bảng công việc",
+//   },
+//   {
+//     key: "ngân sách",
+//     label: "Ngân sách",
+//   },
+// ];
 
 const HeaderEvent = ({
   sort,
@@ -78,10 +80,10 @@ const HeaderEvent = ({
   }, 500);
 
   const listStatus = [
-    { label: "CHUẨN BỊ", value: "PENDING", color: "warning" },
+    { label: "CHUẨN BỊ", value: "PENDING", color: "default" },
     { label: "ĐANG DIỄN RA", value: "PROCESSING", color: "processing" },
     { label: "HOÀN THÀNH", value: "DONE", color: "green" },
-    { label: "XÁC NHẬN", value: "CONFIRM", color: "orange" },
+    { label: "XÁC NHẬN", value: "CONFIRM", color: "purple" },
     { label: "ĐÃ HUỶ", value: "CANCEL", color: "red" },
     { label: "QUÁ HẠN", value: "OVERDUE", color: "red" },
   ];
@@ -199,13 +201,13 @@ const HeaderEvent = ({
     },
   ];
 
-  const onClick = ({ key }) => {
-    if (key === "công việc") {
-      setIsBoardTask(true);
-    } else {
-      setIsBoardTask(false);
-    }
-  };
+  // const onClick = ({ key }) => {
+  //   if (key === "công việc") {
+  //     setIsBoardTask(true);
+  //   } else {
+  //     setIsBoardTask(false);
+  //   }
+  // };
 
   const onClickFilterMember = ({ key }) => {
     const isKeyInListStatus = listStatus.some((status) => status.value === key);
@@ -227,13 +229,12 @@ const HeaderEvent = ({
           <div className="flex items-center space-x-2 md:space-x-4">
             <header className="flex justify-between  items-center w-full ml-8 mr-1">
               {/* left header */}
-              <div className="flex items-center gap-x-4">
+              <div className="flex items-center gap-x-4 ">
                 <Select
                   defaultValue={{ label: events[0].eventName, value: events }}
-                  style={{
-                    width: 300,
-                  }}
-                  bordered={false}
+                  // bordered={false}
+                  className="min-w-[120px] shadow-md rounded-lg"
+                  popupMatchSelectWidth={false}
                   onChange={handleChangeEvent}
                   options={events.map((event) => {
                     const jsonString = JSON.stringify(event);
@@ -250,12 +251,11 @@ const HeaderEvent = ({
                   size="middle"
                 />
               </div>
-
               {/* search */}
               <div>
                 <Input
                   allowClear
-                  placeholder="tìm kiếm công việc trong bảng "
+                  placeholder="tìm kiếm công việc "
                   style={{
                     width: 400,
                   }}
@@ -264,22 +264,64 @@ const HeaderEvent = ({
                   suffix={<SearchOutlined />}
                 />
               </div>
-              <div className="flex justify-center items-center gap-x-3">
-                <div className="border-r-[1px] border-r-solid border-gray-400 pr-2 cursor-pointer">
-                  {sort === "DESC" ? (
-                    <HiSortDescending
-                      size={24}
-                      onClick={() => setSort("ASC")}
-                    />
+              <div className="flex justify-center items-center gap-x-3 ">
+                {/* budget */}
+                <div className="flex flex-row gap-x-2 hover:text-blue-500 cursor-pointer text-sm">
+                  {/* <Dropdown
+                    menu={{
+                      items: settingHeader,
+                      onClick,
+                    }}
+                    placement="bottomRight"
+                    arrow={{
+                      pointAtCenter: true,
+                    }}
+                  >
+                    <span className="cursor-pointer text-secondary text-sm">
+                      <AlignRightOutlined className="text-2xl" />
+                      Công việc
+                    </span>
+                  </Dropdown> */}
+                  {!isBoardTask ? (
+                    <span
+                      className="flex gap-x-2 justify-center items-center"
+                      onClick={() => setIsBoardTask(true)}
+                    >
+                      <FileDoneOutlined className="text-xl" />
+                      Công việc
+                    </span>
                   ) : (
-                    <HiSortAscending
-                      size={24}
-                      onClick={() => setSort("DESC")}
-                    />
+                    <span
+                      className=" flex gap-x-2 justify-center items-center"
+                      onClick={() => setIsBoardTask(false)}
+                    >
+                      <DollarOutlined className="text-xl" />
+                      Ngân sách
+                    </span>
                   )}
                 </div>
-
-                <div className="border-r-[1px] border-r-solid border-gray-400 pr-2">
+                {/* Sort task*/}
+                <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 ">
+                  {sort === "DESC" ? (
+                    <span
+                      className="flex flex-row gap-x-2 justify-center items-center"
+                      onClick={() => setSort("ASC")}
+                    >
+                      <HiSortDescending size={24} />
+                      Thời gian
+                    </span>
+                  ) : (
+                    <span
+                      className="flex flex-row gap-x-2 justify-center items-center"
+                      onClick={() => setSort("DESC")}
+                    >
+                      <HiSortAscending size={24} />
+                      Thời gian
+                    </span>
+                  )}
+                </div>
+                {/* filter user */}
+                <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 ">
                   {!isLoadingUsers ? (
                     !isErrorUsers ? (
                       <Dropdown
@@ -287,27 +329,27 @@ const HeaderEvent = ({
                           items: filterUser,
                           onClick: onClickFilterMember,
                         }}
-                        // trigger={["click"]}
+                        trigger={["click"]}
+                        placement="bottomRight"
+                        arrow
                       >
-                        <div className=" flex justify-center items-center gap-x-2 px-4 py-2 cursor-pointer  rounded-lg hover:bg-secondaryHover hover:text-secondary">
-                          <span>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth="1.5"
-                              stroke="currentColor"
-                              className="w-6 h-6"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-                              />
-                            </svg>
-                          </span>
-                          <p>Bộ lọc</p>
-                        </div>
+                        <span className="flex flex-row gap-x-2 justify-center items-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="w-6 h-6"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
+                            />
+                          </svg>
+                          Bộ lọc
+                        </span>
                       </Dropdown>
                     ) : (
                       <AnErrorHasOccured />
@@ -316,8 +358,8 @@ const HeaderEvent = ({
                     <LoadingComponentIndicator />
                   )}
                 </div>
-
-                <div className="hidden md:block border-r-[1px] border-r-solid border-gray-400 pr-2 cursor-pointer">
+                {/* member */}
+                <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer">
                   <Avatar.Group
                     maxCount={3}
                     maxStyle={{
@@ -337,23 +379,6 @@ const HeaderEvent = ({
                       );
                     })}
                   </Avatar.Group>
-                </div>
-
-                <div>
-                  <Dropdown
-                    menu={{
-                      items: settingHeader,
-                      onClick,
-                    }}
-                    placement="bottomRight"
-                    arrow={{
-                      pointAtCenter: true,
-                    }}
-                  >
-                    <span className="cursor-pointer text-secondary text-sm">
-                      <AlignRightOutlined className="text-2xl" />
-                    </span>
-                  </Dropdown>
                 </div>
               </div>
             </header>

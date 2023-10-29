@@ -456,7 +456,7 @@ const NewTaskModal = ({
               ]}
             >
               <Upload
-                className="upload-list-inline"
+                // className="upload-list-inline"
                 maxCount={1}
                 listType="picture"
                 action=""

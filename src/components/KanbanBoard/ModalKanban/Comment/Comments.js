@@ -6,13 +6,12 @@ import {
 } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Button, Input, Modal, message } from "antd";
-import React, { createContext, useState } from "react";
+import React, { useState } from "react";
 import { IoMdAttach } from "react-icons/io";
 import { removeComment } from "../../../../apis/comments";
-const ReachableContext = createContext(null);
 
 const Comments = ({ comment, taskSelected, disableUpdate }) => {
-  const { user, file, createdAt, id } = comment;
+  const { user, createdAt, id } = comment;
   const [input, setInput] = useState(comment.text);
   const [isOpenQuill, seItsOpenQuill] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
@@ -36,9 +35,8 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
     }
   );
 
-  const { confirm } = Modal;
   const showDeleteConfirm = () => {
-    confirm({
+    modal.confirm({
       title: "Bạn có chắc chắn xóa bình luận này không?",
       icon: <ExclamationCircleFilled />,
       content: "Xóa một bình luận là vĩnh viễn. Không có cách hoàn tác",
@@ -56,7 +54,7 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
 
   return (
     <div className="flex flex-row mt-8 justify-start gap-x-4 " key={comment.id}>
-      {/* {contextHolder} */}
+      {contextHolder}
       {user?.profile === null ? (
         <Avatar icon={<UserOutlined />} className="bg-gray-500" />
       ) : (

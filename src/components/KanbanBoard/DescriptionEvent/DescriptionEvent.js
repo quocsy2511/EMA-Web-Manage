@@ -43,7 +43,7 @@ const DescriptionEvent = ({ selectEvent }) => {
             avatar={
               <FaSearchLocation className=" text-blue-500 mt-1" size={20} />
             }
-            title="Địa Điểm diễn ra"
+            title="Địa điểm diễn ra"
             description={selectEvent?.location}
           />
         </Card>
@@ -72,40 +72,6 @@ const DescriptionEvent = ({ selectEvent }) => {
           />
         </Card>
       </div>
-
-      {/* <span className="relative z-20  flex flex-row justify-start items-start gap-x-2 mt-2 mb-5 ">
-        <Card
-          className="w-full"
-          title={
-            <div className="flex flex-row gap-x-4">
-              <BsFileEarmarkTextFill
-                className=" text-gray-500 mt-[2px]"
-                size={20}
-              />
-              <p>Mô tả sự kiện</p>
-            </div>
-          }
-          extra={
-            <Switch
-              checked={ellipsis}
-              onChange={() => {
-                setEllipsis(!ellipsis);
-              }}
-            />
-          }
-        >
-          {selectEvent?.description !== undefined && (
-            <p
-              className="text-base w-2/3  px-2 italic text-black break-words"
-              dangerouslySetInnerHTML={{
-                __html: new QuillDeltaToHtmlConverter(
-                  JSON.parse(selectEvent?.description)
-                ).convert(),
-              }}
-            ></p>
-          )}
-        </Card>
-      </span> */}
       <div className="relative z-20  flex flex-row justify-start items-start gap-x-2 mt-2 mb-5 ">
         <Collapse
           expandIconPosition="end"
