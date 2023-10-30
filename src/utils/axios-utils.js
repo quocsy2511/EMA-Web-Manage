@@ -2,7 +2,6 @@ import axios from "axios";
 import { URL } from "../constants/api";
 
 const client = axios.create({ baseURL: URL });
-const token = localStorage.getItem("token");
 
 /* 
 
@@ -13,13 +12,8 @@ const token = localStorage.getItem("token");
 */
 
 export const authRequest = ({ ...options }) => {
-  client.defaults.headers.common.Authorization = `Bearer ${token}`;
+  client.defaults.headers.common.Authorization = `Bearer ${localStorage.getItem("token")}`;
   return client(options).then((response) => response.data.result);
-};
-
-export const uploadRequest = ({ ...options }) => {
-  client.defaults.headers.common.Authorization = `Bearer ${token}`;
-  return client(options);
 };
 
 export const normalRequest = ({ ...options }) => {

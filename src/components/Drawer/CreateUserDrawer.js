@@ -49,6 +49,11 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             type: "error",
             content: "Email đã được sử dụng! Hãy thử lại sau",
           });
+        } else if (error.response?.data?.message.includes("Duplicate entry ")) {
+          messageApi.open({
+            type: "error",
+            content: "Số điện thoại đã được sử dụng! Hãy thử lại sau",
+          });
         } else {
           messageApi.open({
             type: "error",
@@ -151,7 +156,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
           initialValues={{
             gender: "MALE",
             role: "EMPLOYEE",
-            isFullTime: true,
+            typeEmployee: "FULL_TIME",
           }}
         >
           <Form.Item
@@ -393,11 +398,11 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             </Form.Item>
           </div>
 
-          <Form.Item name="isFullTime">
+          <Form.Item name="typeEmployee">
             {divisionMode === 1 && (
               <Radio.Group>
-                <Radio value={true}>Fulltime</Radio>
-                <Radio value={false}>Parttime</Radio>
+                <Radio value="FULL_TIME">Toàn thời gian</Radio>
+                <Radio value="PART_TIME">Bán thời gian</Radio>
               </Radio.Group>
             )}
           </Form.Item>

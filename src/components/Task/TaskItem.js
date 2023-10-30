@@ -2,12 +2,10 @@ import React from "react";
 import { Avatar, Badge } from "antd";
 import { BsHourglassBottom, BsHourglassSplit } from "react-icons/bs";
 import {
-  FcApprove,
   FcHighPriority,
   FcLowPriority,
   FcMediumPriority,
 } from "react-icons/fc";
-import { CgDanger } from "react-icons/cg";
 import { AiOutlineEye } from "react-icons/ai";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -127,9 +125,7 @@ const TaskItem = ({
 
       <div className="w-[2%]" />
       <div className="w-[30%] space-y-1">
-        <p className="text-xl font-semibold">
-          {task.title}
-        </p>
+        <p className="text-xl font-semibold">{task.title}</p>
         <div className="flex items-center gap-x-5">
           {user ? (
             <p className="text-xs">
