@@ -2,9 +2,30 @@ import { Avatar } from "antd";
 import React, { Fragment } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
 import defaultImage from "../../assets/images/pngwing.com.png";
+import { useQuery } from "@tanstack/react-query";
+import { getProfile } from "../../apis/users";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 
 const ProfilePage = () => {
   const dummy = [1, 2, 3, 4, 5, 6, 7, 8];
+
+  const { data, isLoading, isError } = useQuery(["profile"], getProfile);
+  console.log(data);
+
+  if (isLoading)
+    return (
+      <div className="w-full h-[calc(100vh-128px)]">
+        <LoadingComponentIndicator />;
+      </div>
+    );
+
+  if (isError)
+    return (
+      <div className="w-full h-[calc(100vh-128px)]">
+        <AnErrorHasOccured />;
+      </div>
+    );
 
   return (
     <Fragment>
@@ -17,20 +38,26 @@ const ProfilePage = () => {
             <Avatar
               // size={150}
               alt="user_image"
-              src={defaultImage}
+              src={data.avatar ?? defaultImage}
               className="w-32 h-32 m-0.5"
             />
           </div>
 
-          <p className="text-base font-semibold mt-4">User name</p>
-          <p className="text-sm font-normal text-slate-500 my-2">Chi nhánh</p>
-          <p className="text-sm font-normal text-slate-500 mb-4">Việt Nam</p>
+          <p className="text-2xl text-center font-semibold mt-4">
+            {data.fullName}
+          </p>
+          <p className="text-sm font-normal text-slate-500 my-2">
+            {data.email}
+          </p>
+          <p className="text-sm font-normal text-slate-500 mb-4">
+            {data.address}
+          </p>
 
           <div className="w-full h-0.5 bg-slate-100" />
         </div>
         <div className="bg-white w-1/2 p-6 rounded-2xl">
           <div className="flex items-center text-slate-500">
-            <p className="text-sm"> User name </p>
+            <p className="text-sm">{data.fullName}</p>
             <MdArrowForwardIos className="mx-2" />
             <p className="text-sm">Hồ sơ</p>
           </div>

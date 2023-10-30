@@ -1,23 +1,30 @@
-import moment from "moment";
 import React, { Fragment } from "react";
+import moment from "moment";
+
+import "moment/locale/vi";
 
 const listAllDatesInMonthWithWeek = (year, month) => {
-  const startDate = moment(`${year}-${month}-01`);
-  const endDate = moment(startDate).endOf("month");
-  const datesWithWeek = [];
+  const firstDayOfMonth = moment(`${year}-${month}-01`, 'YYYY-MM-DD');
+  const lastDayOfMonth = firstDayOfMonth.clone().endOf('month');
 
-  while (startDate.isSameOrBefore(endDate, "day")) {
-    datesWithWeek.push({
-      date: startDate.format("YYYY-MM-DD"),
-      week: startDate.week(),
+  const dates = [];
+  
+  let currentDay = firstDayOfMonth.clone();
+  while (currentDay.isSameOrBefore(lastDayOfMonth)) {
+    dates.push({
+      date: currentDay.format('YYYY-MM-DD'),
+      weekday: currentDay.format('dddd'),
+      weekdayVi: currentDay.format('dddd', 'vi'), // Get Vietnamese weekday
     });
-    startDate.add(1, "day");
+    currentDay.add(1, 'day');
   }
 
-  return datesWithWeek;
+  return dates;
 };
 
 const TimekeepingPage = () => {
+  const datesInMonthWithWeek = listAllDatesInMonthWithWeek(2023, 10);
+  console.log(datesInMonthWithWeek);
   return (
     <Fragment>
       <div className="w-full min-h-[calc(100vh-64px)]"></div>
