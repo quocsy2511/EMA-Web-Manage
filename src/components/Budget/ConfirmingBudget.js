@@ -1,9 +1,4 @@
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   FloatButton,
@@ -15,7 +10,7 @@ import {
   message,
 } from "antd";
 import moment from "moment";
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import { getBudget, updateStatusBudget } from "../../apis/budgets";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import emptyBudget from "../../assets/images/empty_budget.jpg";
@@ -24,6 +19,7 @@ import {
   MdOutlineKeyboardArrowLeft,
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
+import { AnimatePresence, motion } from "framer-motion";
 
 const ConfirmingBudget = ({ eventId }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,7 +74,7 @@ const ConfirmingBudget = ({ eventId }) => {
 
   const searchGlobal = () => {
     if (searchText) {
-      const filterSearchedData = budgets.filter(
+      const filterSearchedData = budgets.data.filter(
         (value) =>
           value.budgetName.toLowerCase().includes(searchText.toLowerCase()) ||
           value.userName.toLowerCase().includes(searchText.toLowerCase())
@@ -177,7 +173,11 @@ const ConfirmingBudget = ({ eventId }) => {
   if (budgetsIsError) return <AnErrorHasOccured />;
 
   return (
-    <Fragment>
+    <motion.div
+      initial={{ y: -50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 50, opacity: 0 }}
+    >
       {contextHolder}
       {budgets.data.length === 0 ? (
         <div className="mx-auto flex flex-col items-center py-5">
@@ -233,48 +233,58 @@ const ConfirmingBudget = ({ eventId }) => {
             }}
           />
 
-          {(budgets.nextPage || budgets.prevPage) && (
-            <div className="flex items-center justify-center gap-x-3 mt-8">
-              <MdOutlineKeyboardArrowLeft
-                className={`text-slate-500 ${
-                  budgets.prevPage
-                    ? "cursor-pointer hover:text-blue-600"
-                    : "cursor-not-allowed"
-                }`}
-                onClick={() =>
-                  budgets.prevPage && setCurrentPage((prev) => prev - 1)
-                }
-                size={25}
-              />
-              {Array.from({ length: budgets.lastPage }, (_, index) => (
-                <div
-                  key={index}
-                  className={`border border-slate-300 rounded-xl px-4 py-2 text-base font-medium cursor-pointer hover:bg-blue-200 ${
-                    currentPage === index + 1 &&
-                    "text-blue-600 border-blue-800 bg-blue-100"
+          <AnimatePresence>
+            {(budgets.nextPage || budgets.prevPage) && (
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 50, opacity: 0 }}
+                className="flex items-center justify-center gap-x-3 mt-8"
+              >
+                <MdOutlineKeyboardArrowLeft
+                  className={`text-slate-500 ${
+                    budgets.prevPage
+                      ? "cursor-pointer hover:text-blue-600"
+                      : "cursor-not-allowed"
                   }`}
-                  onClick={() => setCurrentPage(index + 1)}
-                >
-                  {index + 1}
-                </div>
-              ))}
-              <MdOutlineKeyboardArrowRight
-                className={`text-slate-500 ${
-                  budgets.nextPage
-                    ? "cursor-pointer hover:text-blue-600"
-                    : "cursor-not-allowed"
-                }`}
-                onClick={() =>
-                  budgets.nextPage && setCurrentPage((prev) => prev + 1)
-                }
-                size={25}
-              />
-            </div>
-          )}
+                  onClick={() =>
+                    budgets.prevPage && setCurrentPage((prev) => prev - 1)
+                  }
+                  size={25}
+                />
+                <AnimatePresence>
+                  {Array.from({ length: budgets.lastPage }, (_, index) => (
+                    <motion.div
+                      layout
+                      key={index}
+                      className={`border border-slate-300 rounded-xl px-4 py-2 text-base font-medium cursor-pointer hover:bg-blue-200 ${
+                        currentPage === index + 1 &&
+                        "text-blue-600 border-blue-800 bg-blue-100"
+                      }`}
+                      onClick={() => setCurrentPage(index + 1)}
+                    >
+                      {index + 1}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                <MdOutlineKeyboardArrowRight
+                  className={`text-slate-500 ${
+                    budgets.nextPage
+                      ? "cursor-pointer hover:text-blue-600"
+                      : "cursor-not-allowed"
+                  }`}
+                  onClick={() =>
+                    budgets.nextPage && setCurrentPage((prev) => prev + 1)
+                  }
+                  size={25}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
       <FloatButton.BackTop />
-    </Fragment>
+    </motion.div>
   );
 };
 

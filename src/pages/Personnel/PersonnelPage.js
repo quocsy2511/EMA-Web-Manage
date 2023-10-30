@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Button,
   ConfigProvider,
   DatePicker,
@@ -153,7 +154,12 @@ const PersonnelPage = () => {
       }
     })[0].id;
 
-    values = { ...values, userId, avatar, divisionId };
+    values = {
+      ...values,
+      userId,
+      avatar,
+      divisionId,
+    };
     const { divisionName, ...restValues } = values;
     console.log("restValue: ", restValues);
     mutate(restValues);
@@ -199,6 +205,7 @@ const PersonnelPage = () => {
   };
   // Editing mode
   const onEditing = (record) => {
+    console.log("On editing: ", record);
     form.setFieldsValue({
       fullName: "",
       phoneNumber: "",
@@ -311,6 +318,15 @@ const PersonnelPage = () => {
 
   const columns = [
     {
+      // title: "Họ và tên",
+      dataIndex: "avatar",
+      key: "avatar",
+      width: 50,
+      align: "center",
+      fixed: "left",
+      render: (_, record) => <Avatar src={record.avatar} />,
+    },
+    {
       title: "Họ và tên",
       dataIndex: "fullName",
       key: "fullName",
@@ -397,6 +413,27 @@ const PersonnelPage = () => {
       ),
     },
     {
+      title: "Loại",
+      dataIndex: "typeEmployee",
+      key: "typeEmployee",
+      width: 100,
+      editTable: true,
+      filters: [
+        { text: "Toàn thời gian", value: "FULL_TIME" },
+        { text: "Bán thời gian", value: "PART_TIME" },
+      ],
+      filteredValue: filteredInfo.typeEmployee || null,
+      onFilter: (value, record) => record.typeEmployee?.includes(value),
+      align: "center",
+      render: (_, record) => (
+        <Tag color={record.typeEmployee === "FULL_TIME" ? "cyan" : "orange"}>
+          {record.typeEmployee === "FULL_TIME"
+            ? "Toàn thời gian"
+            : "Bán thời gian"}
+        </Tag>
+      ),
+    },
+    {
       title: "Bộ phận",
       dataIndex: "divisionName",
       key: "divisionName",
@@ -470,7 +507,12 @@ const PersonnelPage = () => {
             <div className="flex items-center justify-center">
               {editable ? (
                 <Space size="middle">
-                  <Button type="primary" size="small" onClick={onSaveEditing}>
+                  <Button
+                    loading={updateUserIsLoading}
+                    type="primary"
+                    size="small"
+                    onClick={onSaveEditing}
+                  >
                     Cập nhật
                   </Button>
                   <Popconfirm
@@ -543,7 +585,8 @@ const PersonnelPage = () => {
             : col.dataIndex === "role" ||
               col.dataIndex === "divisionName" ||
               col.dataIndex === "status" ||
-              col.dataIndex === "gender"
+              col.dataIndex === "gender" ||
+              col.dataIndex === "typeEmployee"
             ? "selection"
             : "text",
       }),
@@ -588,6 +631,12 @@ const PersonnelPage = () => {
         options = [
           { value: "MALE", label: "Nam" },
           { value: "FEMALE", label: "Nữ" },
+        ];
+        break;
+      case "typeEmployee":
+        options = [
+          { value: "FULL_TIME", label: "Toàn thời gian" },
+          { value: "PART_TIME", label: "Bán thời gian" },
         ];
         break;
 
@@ -711,11 +760,7 @@ const PersonnelPage = () => {
                       },
                     }}
                     columns={mergedColumns}
-                    dataSource={
-                      filteredData
-                        ? filteredData
-                        : data.data
-                    }
+                    dataSource={filteredData ? filteredData : data.data}
                     onChange={handleTableChange}
                     pagination={false}
                     scroll={{

@@ -7,6 +7,7 @@ import {
   InputNumber,
   Modal,
   Select,
+  Tag,
   message,
 } from "antd";
 import viVN from "antd/locale/vi_VN";
@@ -16,8 +17,9 @@ import dayjs from "dayjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { assignMember, updateTask } from "../../apis/tasks";
 import { getDetailEvent } from "../../apis/events";
-import { getAllUser } from "../../apis/users";
+import { getAllUser, getUserById } from "../../apis/users";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
+import { SyncLoader } from "react-spinners";
 
 const { RangePicker } = DatePicker;
 
@@ -33,6 +35,7 @@ const TaskUpdateModal = ({
   isSubTask,
 
   staffId,
+  parentTaskId,
 }) => {
   console.log("TaskUpdateModal: ", task);
   const [form] = Form.useForm();
@@ -40,7 +43,6 @@ const TaskUpdateModal = ({
 
   const [fileList, setFileList] = useState();
   const [selectedEmployeesId, setSelectedEmployeesId] = useState();
-  console.log("selectedEmployeesId: ", selectedEmployeesId);
 
   useEffect(() => {
     form.setFieldsValue({
@@ -55,42 +57,48 @@ const TaskUpdateModal = ({
 
       assignee: !isSubTask
         ? task.assignTasks?.[0]?.user.id
-        : task.assignTasks?.map((item) => item.user.id),
-      leader: task.assignTasks?.filter((item) => item.isLeader === true)[0]
-        ?.user.id,
+        : divisionIdOfStaff === leader?.divisionId
+        ? task.assignTasks?.map((item) => item.user.id)
+        : undefined,
+      leader:
+        divisionIdOfStaff === leader?.divisionId
+          ? task.assignTasks?.filter((item) => item.isLeader === true)[0]?.user
+              .id
+          : null,
     });
 
-    divisionIdOfStaff = staffs?.find(
-      (staff) => staff.userId === staffId
-    )?.divisionId;
+    if (isSubTask) {
+      divisionIdOfStaff = staffs?.find(
+        (staff) => staff.userId === staffId
+      )?.divisionId;
 
-    if (isSubTask)
       setSelectedEmployeesId(task.assignTasks?.map((item) => item.user.id));
+    }
   }, [task]);
 
+  // Get staff in event
   const {
     data: staffs,
     isLoading: staffsIsLoading,
-    isError: staffsIsError,
+    // isError: staffsIsError,
   } = useQuery(["event-detail", eventID], () => getDetailEvent(eventID), {
     select: (data) => {
       return data.listDivision;
     },
-    enabled: !isSubTask,
   });
-  console.log("staffs: ", staffs);
-  console.log("id staff", staffId);
 
-  // const staffId = task.assignTasks[0].user.id;
+  //======================= SUBTASK ONLY =======================
+  // Get divisionId of the chosen staff / task
   let divisionIdOfStaff = staffs?.find(
     (staff) => staff.userId === staffId
   )?.divisionId;
   console.log("divisionIdOfStaff: ", divisionIdOfStaff);
 
+  // Get employees from divisionId
   const {
     data: employees,
     isLoading: employeesIsLoading,
-    isError: employeesIsError,
+    // isError: employeesIsError,
   } = useQuery(
     ["employees", divisionIdOfStaff],
     () =>
@@ -107,15 +115,41 @@ const TaskUpdateModal = ({
           value: employee.id,
         }));
       },
-      enabled: isSubTask && !!staffId,
+      enabled: isSubTask && !!staffId && !!divisionIdOfStaff,
     }
   );
-  console.log("employees: ", employees);
+
+  const {
+    data: leader,
+    isLoading: leaderIsLoading,
+    // isError: leaderIsError,
+  } = useQuery(
+    ["user", task.assignTasks.find((item) => item.isLeader === true)?.user.id],
+    () =>
+      getUserById(
+        task.assignTasks.find((item) => item.isLeader === true)?.user.id
+      ),
+    {
+      enabled:
+        isSubTask &&
+        !!staffId &&
+        !!task.assignTasks.find((item) => item.isLeader === true)?.user.id,
+    }
+  );
+  console.log(
+    "Check division is the same or not: ",
+    divisionIdOfStaff === leader?.divisionId
+  );
+  //============================================================
 
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation((task) => updateTask(task), {
     onSuccess: (data) => {
-      queryClient.invalidateQueries(["tasks", eventID, task.id]);
+      queryClient.invalidateQueries([
+        "tasks",
+        eventID,
+        isSubTask ? parentTaskId : task.id,
+      ]);
       handleCancel();
       messageApi.open({
         type: "success",
@@ -156,7 +190,6 @@ const TaskUpdateModal = ({
 
   const onFinish = (values) => {
     console.log("Success: ", values);
-    console.log("old staff : ", task.assignTasks?.[0]?.user.id);
 
     values = {
       ...values,
@@ -166,13 +199,8 @@ const TaskUpdateModal = ({
 
       eventID,
       taskID: task.id,
-      parentTask: isSubTask ? task.id : null,
+      parentTask: isSubTask ? parentTaskId : null,
     };
-
-    // const { date, ...restValues } = values;
-    console.log("transfer data : ", values);
-
-    // mutate(restValues);
 
     if (!isSubTask) {
       console.log("Update task");
@@ -196,7 +224,7 @@ const TaskUpdateModal = ({
           },
           updateTask: task,
         };
-        
+
         // Update assignee
         console.log(updatedTask);
         assignMemberMutate(updatedTask);
@@ -208,14 +236,14 @@ const TaskUpdateModal = ({
 
       const updatedTask = {
         assign: {
-          assignee: [assignee],
+          assignee: assignee,
           taskID: values.taskID,
           leader: leader,
         },
         updateTask: task,
       };
       console.log(updatedTask);
-      // assignMemberMutate(updatedTask);
+      assignMemberMutate(updatedTask);
     }
   };
 
@@ -227,7 +255,6 @@ const TaskUpdateModal = ({
     const formFieldName = Object.keys(changedValues)[0];
     if (formFieldName === "assignee") {
       setSelectedEmployeesId(changedValues[formFieldName]);
-      // form.set
       form.resetFields(["leader"]);
     }
   };
@@ -277,9 +304,14 @@ const TaskUpdateModal = ({
           effort: task.estimationTime ?? null,
           assignee: !isSubTask
             ? task.assignTasks?.[0]?.user.id
-            : task.assignTasks?.map((item) => item.user.id),
-          leader: task.assignTasks?.filter((item) => item.isLeader === true)[0]
-            ?.user.id,
+            : divisionIdOfStaff === leader?.divisionId
+            ? task.assignTasks?.map((item) => item.user.id)
+            : undefined,
+          leader:
+            divisionIdOfStaff === leader?.divisionId
+              ? task.assignTasks?.filter((item) => item.isLeader === true)[0]
+                  ?.user.id
+              : null,
         }}
       >
         <div className="flex gap-x-10">
@@ -432,7 +464,8 @@ const TaskUpdateModal = ({
         </div>
         {!isSubTask ? (
           staffsIsLoading ? (
-            <LoadingComponentIndicator />
+            // <LoadingComponentIndicator />
+            <SyncLoader color="#4096ff" />
           ) : (
             <Form.Item
               className="w-[50%]"
@@ -460,12 +493,15 @@ const TaskUpdateModal = ({
               />
             </Form.Item>
           )
-        ) : employeesIsLoading ? (
-          <LoadingComponentIndicator />
+        ) : staffsIsLoading ||
+          employeesIsLoading ||
+          (task.assignTasks.length > 0 && leaderIsLoading) ? (
+          // <LoadingComponentIndicator />
+          <SyncLoader color="#4096ff" />
         ) : (
           <>
             <Form.Item
-              className="w-[70%]"
+              className="w-[70%] mb-2"
               label={<Title title="Các nhân viên phù hợp" />}
               name="assignee"
               rules={[
@@ -480,13 +516,14 @@ const TaskUpdateModal = ({
                 mode="multiple"
                 allowClear
                 options={employees ?? []}
-                // onChange={(value) => {
-                //   console.log("Chọn employee group : ", value);
-                //   // form.setFieldsValue({ assignee: value });
-                //   form.resetFields(["leader"]);
-                // }}
               />
             </Form.Item>
+            <div className="mb-5">
+              {divisionIdOfStaff !== leader?.divisionId &&
+                task.assignTasks.map((item) => (
+                  <Tag>{item.user.profile.fullName}</Tag>
+                ))}
+            </div>
             <Form.Item
               className="w-[30%]"
               label={<Title title="Chịu trách nhiệm bởi" />}
@@ -506,7 +543,6 @@ const TaskUpdateModal = ({
                         selectedEmployeesId.includes(employee.value)
                       )
                     : []
-                  // []
                 }
                 // onChange={(value) => {
                 //   form.setFieldsValue({ leader: value });
