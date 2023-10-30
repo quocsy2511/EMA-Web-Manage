@@ -13,9 +13,13 @@ import {
   message,
 } from "antd";
 import moment from "moment";
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import { BiEdit } from "react-icons/bi";
-import { getBudget, updateBudget, updateStatusBudget } from "../../apis/budgets";
+import {
+  getBudget,
+  updateBudget,
+  updateStatusBudget,
+} from "../../apis/budgets";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import emptyBudget from "../../assets/images/empty_budget.jpg";
 import AnErrorHasOccured from "../Error/AnErrorHasOccured";
@@ -23,6 +27,7 @@ import {
   MdOutlineKeyboardArrowLeft,
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
+import { AnimatePresence, motion } from "framer-motion";
 
 const ConfirmedBudget = ({ eventId }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,10 +81,10 @@ const ConfirmedBudget = ({ eventId }) => {
             supplier: variables.supplier,
             status: variables.status,
           };
-
           return oldValue;
         }
       );
+      queryClient.invalidateQueries(["confirmed-budgets", eventId]);
       onCancelEditing();
       messageApi.open({
         type: "success",
@@ -140,7 +145,7 @@ const ConfirmedBudget = ({ eventId }) => {
 
   const searchGlobal = () => {
     if (searchText) {
-      const filterSearchedData = budgets.filter(
+      const filterSearchedData = budgets.data.filter(
         (value) =>
           value.budgetName.toLowerCase().includes(searchText.toLowerCase()) ||
           value.userName.toLowerCase().includes(searchText.toLowerCase())
@@ -359,16 +364,20 @@ const ConfirmedBudget = ({ eventId }) => {
         <Input size="small" allowClear />
       ) : inputType === "number" ? (
         <InputNumber
-          formatter={(value) =>
-            `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-          }
+          formatter={(value) => {
+            if (value.charAt(0) === "0" || value.charAt(0) === "-") return "0";
+            return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          }}
           parser={(value) => {
-            form.setFieldsValue({
-              [dataIndex]: value.replace(/,/g, ""),
-            });
+            if (value)
+              form.setFieldsValue({
+                [dataIndex]: value.replace(/,/g, ""),
+              });
             return `${value}`.replace(/,/g, "");
           }}
+          placeholder={record[dataIndex]}
           min={0}
+          allowClear
           size="small"
           step={null}
         />
@@ -393,10 +402,10 @@ const ConfirmedBudget = ({ eventId }) => {
                 required: true,
                 message: `Chưa nhập dữ liệu !`,
               },
-              // record.estExpense  && {
-              //   required: true,
-              //   message: `Chưa nhập dữ liệu !`,
-              // },
+              inputType === "number" && {
+                required: true,
+                message: `Chưa nhập dữ liệu !`,
+              },
             ]}
           >
             {inputNode}
@@ -413,7 +422,11 @@ const ConfirmedBudget = ({ eventId }) => {
   if (budgetsIsError) return <AnErrorHasOccured />;
 
   return (
-    <Fragment>
+    <motion.div
+      initial={{ y: -50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 50, opacity: 0 }}
+    >
       {contextHolder}
       {budgets.data.length === 0 ? (
         <div className="mx-auto flex flex-col items-center py-5">
@@ -482,47 +495,57 @@ const ConfirmedBudget = ({ eventId }) => {
             />
           </Form>
 
-          {(budgets.nextPage || budgets.prevPage) && (
-            <div className="flex items-center justify-center gap-x-3 mt-8">
-              <MdOutlineKeyboardArrowLeft
-                className={`text-slate-500 ${
-                  budgets.prevPage
-                    ? "cursor-pointer hover:text-blue-600"
-                    : "cursor-not-allowed"
-                }`}
-                onClick={() =>
-                  budgets.prevPage && setCurrentPage((prev) => prev - 1)
-                }
-                size={25}
-              />
-              {Array.from({ length: budgets.lastPage }, (_, index) => (
-                <div
-                  key={index}
-                  className={`border border-slate-300 rounded-xl px-4 py-2 text-base font-medium cursor-pointer hover:bg-blue-200 ${
-                    currentPage === index + 1 &&
-                    "text-blue-600 border-blue-800 bg-blue-100"
+          <AnimatePresence>
+            {(budgets.nextPage || budgets.prevPage) && (
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 50, opacity: 0 }}
+                className="flex items-center justify-center gap-x-3 mt-8"
+              >
+                <MdOutlineKeyboardArrowLeft
+                  className={`text-slate-500 ${
+                    budgets.prevPage
+                      ? "cursor-pointer hover:text-blue-600"
+                      : "cursor-not-allowed"
                   }`}
-                  onClick={() => setCurrentPage(index + 1)}
-                >
-                  {index + 1}
-                </div>
-              ))}
-              <MdOutlineKeyboardArrowRight
-                className={`text-slate-500 ${
-                  budgets.nextPage
-                    ? "cursor-pointer hover:text-blue-600"
-                    : "cursor-not-allowed"
-                }`}
-                onClick={() =>
-                  budgets.nextPage && setCurrentPage((prev) => prev + 1)
-                }
-                size={25}
-              />
-            </div>
-          )}
+                  onClick={() =>
+                    budgets.prevPage && setCurrentPage((prev) => prev - 1)
+                  }
+                  size={25}
+                />
+                <AnimatePresence>
+                  {Array.from({ length: budgets.lastPage }, (_, index) => (
+                    <motion.div
+                      alayout
+                      key={index}
+                      className={`border border-slate-300 rounded-xl px-4 py-2 text-base font-medium cursor-pointer hover:bg-blue-200 ${
+                        currentPage === index + 1 &&
+                        "text-blue-600 border-blue-800 bg-blue-100"
+                      }`}
+                      onClick={() => setCurrentPage(index + 1)}
+                    >
+                      {index + 1}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                <MdOutlineKeyboardArrowRight
+                  className={`text-slate-500 ${
+                    budgets.nextPage
+                      ? "cursor-pointer hover:text-blue-600"
+                      : "cursor-not-allowed"
+                  }`}
+                  onClick={() =>
+                    budgets.nextPage && setCurrentPage((prev) => prev + 1)
+                  }
+                  size={25}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
-    </Fragment>
+    </motion.div>
   );
 };
 

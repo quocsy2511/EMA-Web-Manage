@@ -13,7 +13,7 @@ const ErrorPage = () => {
       <div className="flex md:flex-row flex-col w-1/2 md:h-2/5 h-[55%] items-center">
         <div className="w-1/3">
           <div className="flex justify-center items-center w-full h-full">
-            <img src={img} />
+            <img src={img} alt="404 not found" />
           </div>
         </div>
         <div className="h-full flex-1 flex flex-col justify-between">

@@ -35,7 +35,6 @@ const EventBudgetPage = () => {
       }),
     { select: (data) => data.data.filter((item) => item.status === "ACCEPT") }
   );
-  console.log("confirmedBudgets: ", confirmedBudgets);
 
   let totalEstimateExpense = confirmedBudgets?.reduce((current, item) => {
     return (current += item.estExpense);
@@ -54,12 +53,20 @@ const EventBudgetPage = () => {
     {
       key: "1",
       label: "Đã duyệt",
-      children: <ConfirmedBudget eventId={eventId} />,
+      children: (
+        <AnimatePresence>
+          <ConfirmedBudget eventId={eventId} />,
+        </AnimatePresence>
+      ),
     },
     {
       key: "2",
       label: "Chờ duyệt",
-      children: <ConfirmingBudget eventId={eventId} />,
+      children: (
+        <AnimatePresence>
+          <ConfirmingBudget eventId={eventId} />,
+        </AnimatePresence>
+      ),
     },
   ];
 
@@ -82,9 +89,11 @@ const EventBudgetPage = () => {
         </p>
       </motion.div>
 
-      <div className="flex gap-x-5 mt-8">
-        {/* <Square title="Ngân sách" cash="500.000.000" /> */}
-
+      <motion.div
+        initial={{ y: -75, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="flex gap-x-5 mt-8"
+      >
         <div className="inline-block">
           <Card bordered={false} loading={isLoading}>
             <Statistic
@@ -110,7 +119,11 @@ const EventBudgetPage = () => {
             <Progress
               type="circle"
               percent={(totalEstimateExpense / event?.estBudget) * 100}
-              strokeColor={100 >= 100 ? "rgb(255 79 98)" : "#52c41a"}
+              strokeColor={
+                (totalEstimateExpense / event?.estBudget) * 100 >= 100
+                  ? "rgb(255 79 98)"
+                  : "#52c41a"
+              }
               format={(percent) => (
                 <span
                   className={`text-sm font-medium ${
@@ -133,11 +146,15 @@ const EventBudgetPage = () => {
             <Progress
               type="circle"
               percent={(totalRealExpense / totalEstimateExpense) * 100}
-              strokeColor={100 >= 100 ? "rgb(255 79 98)" : "#52c41a"}
+              strokeColor={
+                (totalRealExpense / totalEstimateExpense) * 100 >= 100
+                  ? "rgb(255 79 98)"
+                  : "#52c41a"
+              }
               format={(percent) => (
                 <span
                   className={`text-sm font-medium ${
-                    percent >= 100 && "text-red-500"
+                    percent >= 100 ? "text-red-500" : "text-[#3f8600]"
                   }`}
                 >
                   {totalRealExpense?.toLocaleString()}
@@ -148,18 +165,23 @@ const EventBudgetPage = () => {
             />
           </Card>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="min-h-[calc(100vh-300px)] bg-white mt-8 mb-20 pl-3 pr-8 py-8 rounded-2xl">
-        <Tabs
-          tabPosition="left"
-          defaultActiveKey="1"
-          items={items}
-          onChange={onChange}
-          style={{ height: "100%" }}
-          // centered
-        />
-      </div>
+      <motion.div
+        initial={{ y: 150, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="min-h-[calc(100vh-300px)] bg-white mt-8 mb-20 pl-3 pr-8 py-8 rounded-2xl"
+      >
+        <AnimatePresence>
+          <Tabs
+            tabPosition="left"
+            defaultActiveKey="1"
+            items={items}
+            onChange={onChange}
+            // style={{ height: "100%" }}
+          />
+        </AnimatePresence>
+      </motion.div>
     </Fragment>
   );
 };

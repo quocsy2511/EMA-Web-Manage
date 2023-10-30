@@ -448,6 +448,7 @@ const EventSubTaskPage = () => {
                   task={selectedSubTask}
                   isSubTask={true}
                   staffId={tasks.assignTasks?.[0]?.user.id}
+                  parentTaskId={tasks.id}
                 />
               </>
             )}

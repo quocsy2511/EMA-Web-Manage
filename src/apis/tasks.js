@@ -50,11 +50,10 @@ export const filterTask = ({ assignee, eventID, priority, sort, status }) =>
 // "parentTask": null,
 // "estimationTime": null,
 // "effort": null
-export const updateTask = ({ taskID, task }) =>
+export const updateTask = ({ taskID, ...task }) =>
   authRequest({
     url: `/task/updateTask?taskID=${taskID}`,
     method: "put",
-    // data: task,
     data: {
       title: task.title,
       eventID: task.eventID,

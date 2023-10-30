@@ -144,7 +144,7 @@ const EventPage = () => {
           size="large"
           options={[
             {
-              value: null,
+              value: "",
               label: "Tất cả",
             },
             {

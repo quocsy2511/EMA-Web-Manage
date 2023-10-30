@@ -1,6 +1,5 @@
 import { Avatar } from "antd";
 import React, { Fragment } from "react";
-import { IoMdArrowDropright } from "react-icons/io";
 import { MdArrowForwardIos } from "react-icons/md";
 import defaultImage from "../../assets/images/pngwing.com.png";
 
