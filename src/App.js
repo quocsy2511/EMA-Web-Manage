@@ -9,6 +9,8 @@ import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
 import RolePage from "./pages/Role/RolePage";
 import BudgetStaffLayout from "./pages/Budget/BudgetStaffLayout";
+import { useDispatch, useSelector } from "react-redux";
+import { socketActions } from "./store/socket";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -252,6 +254,11 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const dispatch = useDispatch();
+  const { socket } = useSelector((state) => state.socket);
+  console.log("Socket: ", socket);
+  // dispatch(socketActions.initSocket(io()));
+
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />

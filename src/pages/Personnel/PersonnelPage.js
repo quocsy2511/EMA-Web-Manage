@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Button,
   ConfigProvider,
   DatePicker,
@@ -316,6 +317,15 @@ const PersonnelPage = () => {
   // address - gender - nationalId
 
   const columns = [
+    {
+      // title: "Họ và tên",
+      dataIndex: "avatar",
+      key: "avatar",
+      width: 50,
+      align: "center",
+      fixed: "left",
+      render: (_, record) => <Avatar src={record.avatar} />,
+    },
     {
       title: "Họ và tên",
       dataIndex: "fullName",

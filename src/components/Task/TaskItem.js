@@ -9,7 +9,7 @@ import {
 import { AiOutlineEye } from "react-icons/ai";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import moment from "moment-timezone";
+import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import { getUserById } from "../../apis/users";
 import { RiAttachment2 } from "react-icons/ri";
