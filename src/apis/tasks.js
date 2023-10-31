@@ -83,3 +83,17 @@ export const assignMember = (data) =>
       leader: data.leader ?? "",
     },
   });
+
+export const createTaskFile = (taskFile) =>
+  authRequest({
+    url: "/taskFile",
+    method: "post",
+    data: {
+      taskID: taskFile.taskID,
+      fileName: taskFile.fileName,
+      fileUrl: taskFile.fileUrl,
+    },
+  });
+
+export const updateTaskFile = ({ taskId, ...files }) =>
+  authRequest({ url: `/taskFile/${taskId}`, method: "put", data: files });

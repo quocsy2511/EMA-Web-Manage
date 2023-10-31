@@ -109,8 +109,7 @@ const EventItem = ({ event }) => {
           >
             {event.listDivision.map((item) => (
               <Avatar
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
-                // src={item.avatar}
+                src={item.avatar}
               />
             ))}
           </Avatar.Group>
