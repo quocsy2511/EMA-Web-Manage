@@ -11,10 +11,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 :where(.css-dev-only-do-not-override-nnuwmp).ant-btn-primary {
-  background-color: #1677ff;
+  background-color: #1677ff !important;
 }
 :where(.css-dev-only-do-not-override-18iikkb).ant-btn-primary {
-  background-color: #1677ff;
+  background-color: #1677ff !important;
 }
 .anticon.anticon-down.ant-select-suffix {
   color: black; /* Đổi màu icon thành màu đỏ (#ff0000) */
@@ -80,6 +80,20 @@ code {
 :where(.css-dev-only-do-not-override-18iikkb).ant-select-multiple
   .ant-select-selection-item {
   height: fit-content;
+}
+
+.ant-badge-status-dot.ant-badge-status-success {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+.ant-badge-status-dot.ant-badge-status-error {
+  width: 10px !important;
+  height: 10px !important;
+}
+.ant-badge-status-dot.ant-badge-status-warning {
+  width: 10px !important;
+  height: 10px !important;
 }
 
 @layer utilities {

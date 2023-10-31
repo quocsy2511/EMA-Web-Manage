@@ -5,10 +5,12 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 
-import { Button, Input, Modal, Space, Table, Tag } from "antd";
+import { Button, Input, Modal, Space, Table, Tag, message } from "antd";
 import React, { useRef, useState } from "react";
 import EditBudget from "./ModalBudget/EditBudget";
 import Highlighter from "react-highlight-words";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateStatusBudget } from "../../../apis/budgets";
 
 const ComfirmingBudgetStaff = ({ selectEvent, listBudgetConfirming }) => {
   const [isOpenEditBudget, setIsOpenEditBudget] = useState(false);
@@ -120,6 +122,27 @@ const ComfirmingBudgetStaff = ({ selectEvent, listBudgetConfirming }) => {
         text
       ),
   });
+
+  const queryClient = useQueryClient();
+  const { mutate: changeStatusBudget } = useMutation(
+    ({ budgetsId, status }) => updateStatusBudget({ budgetsId, status }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("listBudgetConfirming");
+        message.open({
+          type: "success",
+          content: "xoá yêu câu chi phí thành công",
+        });
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
   const columns = [
     {
       title: "Tên thu chi",
@@ -190,24 +213,27 @@ const ComfirmingBudgetStaff = ({ selectEvent, listBudgetConfirming }) => {
           />
           <DeleteOutlined
             className="text-red-500"
-            onClick={() => showDeleteConfirm(record)}
+            onClick={() => {
+              showDeleteConfirm(record);
+            }}
           />
         </Space>
       ),
     },
   ];
-
-  const { confirm } = Modal;
-  const showDeleteConfirm = () => {
-    confirm({
-      title: "Bạn có chắc chắn muốn xoá yêu cầu này không?",
+  const [modal, contextHolder] = Modal.useModal();
+  // const { confirm } = Modal;
+  const showDeleteConfirm = (record) => {
+    modal.confirm({
+      title: "Xác nhận xoá yêu cầu ",
       icon: <ExclamationCircleFilled />,
       content: "Xóa một yêu cầu chi tiêu là vĩnh viễn. Không có cách hoàn tác",
       okText: "Xác nhận",
       okType: "danger",
       cancelText: "Huỷ",
       onOk() {
-        // deletecommentMutate(id);
+        const budgetsId = record.id;
+        changeStatusBudget({ budgetsId, status: "CANCEL" });
       },
       onCancel() {
         console.log("Cancel");
@@ -217,6 +243,7 @@ const ComfirmingBudgetStaff = ({ selectEvent, listBudgetConfirming }) => {
 
   return (
     <div>
+      {contextHolder}
       <div className="w-full bg-white p-8 rounded-xl">
         <>
           <Table

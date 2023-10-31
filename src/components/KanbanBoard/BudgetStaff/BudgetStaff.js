@@ -44,7 +44,7 @@ const BudgetStaff = ({
 
   return (
     <>
-      <div className="bg-bgG h-screen overflow-scroll">
+      <div className="bg-bgG h-screen overflow-scroll scrollbar-hide">
         <DescriptionEvent selectEvent={selectEvent} />
         <div className="py-2 pl-3 pr-8 mt-6">
           <Tabs

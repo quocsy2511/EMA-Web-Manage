@@ -1,12 +1,5 @@
-import React, { useState } from "react";
-import { Alert, Calendar, Tag } from "antd";
-import dayjs from "dayjs";
-import {
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  CloseCircleOutlined,
-  MinusCircleOutlined,
-} from "@ant-design/icons";
+import React from "react";
+import { Badge, Calendar } from "antd";
 
 const getListData = (value) => {
   let listData;
@@ -15,13 +8,9 @@ const getListData = (value) => {
       listData = [
         {
           type: "success",
-          content: "Bắt đầu ",
-          date: "08:00",
-        },
-        {
-          type: "processing",
-          content: "Kết thúc ",
-          date: "05:00",
+          content: "Làm cả ngày ",
+          checkinTime: "08:00",
+          checkoutTime: "05:00",
         },
       ];
       break;
@@ -29,13 +18,9 @@ const getListData = (value) => {
       listData = [
         {
           type: "success",
-          content: "Bắt đầu ",
-          date: "08:00",
-        },
-        {
-          type: "processing",
-          content: "Kết thúc ",
-          date: "05:00",
+          content: "Làm cả ngày ",
+          checkinTime: "08:00",
+          checkoutTime: "05:00",
         },
       ];
       break;
@@ -43,13 +28,9 @@ const getListData = (value) => {
       listData = [
         {
           type: "success",
-          content: "Bắt đầu ",
-          date: "08:00",
-        },
-        {
-          type: "processing",
-          content: "Kết thúc ",
-          date: "05:00",
+          content: "Làm cả ngày ",
+          checkinTime: "08:00",
+          checkoutTime: "05:00",
         },
       ];
       break;
@@ -57,13 +38,9 @@ const getListData = (value) => {
       listData = [
         {
           type: "success",
-          content: "Bắt đầu ",
-          date: "08:00",
-        },
-        {
-          type: "processing",
-          content: "Kết thúc ",
-          date: "05:00",
+          content: "Làm cả ngày ",
+          checkinTime: "08:00",
+          checkoutTime: "05:00",
         },
       ];
       break;
@@ -71,104 +48,74 @@ const getListData = (value) => {
       listData = [
         {
           type: "success",
-          content: "Bắt đầu ",
-          date: "08:00",
-        },
-        {
-          type: "processing",
-          content: "Kết thúc ",
-          date: "05:00",
-        },
-      ];
-      break;
-    case 6:
-      listData = [
-        {
-          type: "success",
-          content: "Bắt đầu ",
-          date: "08:00",
-        },
-        {
-          type: "processing",
-          content: "Kết thúc ",
-          date: "05:00",
+          content: "Làm cả ngày ",
+          checkinTime: "08:00",
+          checkoutTime: "05:00",
         },
       ];
       break;
     case 7:
       listData = [
         {
-          type: "success",
-          content: "Bắt đầu ",
-          date: "08:00",
-        },
-        {
-          type: "processing",
-          content: "Kết thúc ",
-          date: "05:00",
+          type: "warning",
+          content: "Làm cả ngày ",
+          checkinTime: "08:00",
+          checkoutTime: "--:--",
         },
       ];
       break;
-    case 10:
+    case 8:
       listData = [
         {
           type: "warning",
-          content: "Bắt đầu ",
-          date: "08:05",
-        },
-        {
-          type: "processing",
-          content: "Kết thúc ",
-          date: "05:00",
-        },
-      ];
-      break;
-    case 15:
-      listData = [
-        {
-          type: "error",
-          content: "Không chấm công",
+          content: "Làm cả ngày ",
+          checkinTime: "08:00",
+          checkoutTime: "--:--",
         },
       ];
       break;
     default:
   }
+
+  console.log(
+    "🚀 ~ file: TimekeepingStaffPage.js:139 ~ getListData ~ listData:",
+    listData
+  );
   return listData || [];
 };
 
 const TimekeepingStaffPage = () => {
-  const [selectedValue, setSelectedValue] = useState(() => dayjs());
-  const onSelect = (newValue) => {
-    setSelectedValue(newValue);
-  };
+  // const [selectedValue, setSelectedValue] = useState(() => dayjs());
+  // const onSelect = (newValue) => {
+
+  //   setSelectedValue(newValue);
+  // };
 
   const dateCellRender = (value) => {
     const listData = getListData(value);
     return (
-      <div className="events ">
-        {listData.map((item) => (
-          <Tag
-            icon={
-              item.type === "success" ? (
-                <CheckCircleOutlined />
-              ) : item.type === "warning" ? (
-                <ClockCircleOutlined />
-              ) : item.type === "processing" ? (
-                <MinusCircleOutlined />
-              ) : (
-                <CloseCircleOutlined />
-              )
-            }
-            color={item.type}
-            key={item.content}
-          >
-            {item.content}
-            {item.date}
-          </Tag>
+      <div className="events h-full w-full flex flex-col justify-between items-start pb-4">
+        {listData.map((item, index) => (
+          <div className="events">
+            {listData.map((item, index) => (
+              <div key={index}>
+                <Badge
+                  status={item.type}
+                  text={item.content?.toUpperCase()}
+                  className="font-bold text-lg "
+                />
+                <div className="flex flex-row gap-x-2 text-xs ml-4">
+                  <p className="">{item.checkinTime}</p>-
+                  <p className="text-red-400">{item.checkoutTime}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         ))}
       </div>
     );
   };
+
   const cellRender = (current, info) => {
     if (info.type === "date") return dateCellRender(current);
     return info.originNode;
@@ -176,16 +123,19 @@ const TimekeepingStaffPage = () => {
 
   return (
     <div className="bg-bgG h-screen overflow-hidden overflow-y-scroll scrollbar-hide">
-      <Alert
-        message={`You selected date: ${selectedValue?.format("YYYY-MM-DD")}`}
-      />
+      {/* <Alert
+        message={`các màu thể hiện trạng thái : ${selectedValue?.format(
+          "YYYY-MM-DD"
+        )}`}
+      /> */}
       <div className="p-5 rounded-lg">
         <Calendar
           className="rounded-lg px-2"
-          mode="month"
-          value={selectedValue}
+          // mode="month"
+          // value={selectedValue}
           cellRender={cellRender}
-          onSelect={onSelect}
+          // onSelect={onSelect}
+          // onPanelChange={onPanelChange}
         />
       </div>
     </div>

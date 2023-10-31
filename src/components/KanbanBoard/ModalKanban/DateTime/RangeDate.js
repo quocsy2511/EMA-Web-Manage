@@ -7,7 +7,7 @@ const RangeDate = ({ taskSelected, updateEndDate, updateStartDate }) => {
     return date;
   };
   return (
-    <div className="flex justify-start items-center mt-4">
+    <div className="flex justify-start items-center mt-4 px-3">
       <span
         className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
           taskSelected.status === "CANCEL" || taskSelected.status === "OVERDUE"

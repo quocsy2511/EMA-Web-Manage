@@ -12,6 +12,7 @@ import { filterTask } from "../../apis/tasks";
 import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
 import { getBudget } from "../../apis/budgets";
+import { useRouteLoaderData } from "react-router-dom";
 moment.suppressDeprecationWarnings = true;
 const EventStaffPage = () => {
   const listStatus = [
@@ -26,6 +27,8 @@ const EventStaffPage = () => {
   const [searchText, setSearchText] = useState(null);
   const [sort, setSort] = useState("DESC");
   const [statusSelected, setStatusSelected] = useState("clear");
+  const idStaff = useRouteLoaderData("staff").id;
+
   const {
     data: listEvent,
     isError,
@@ -51,6 +54,8 @@ const EventStaffPage = () => {
     },
   });
 
+  const [filterMember, setFilterMember] = useState(staff?.id);
+
   const {
     data: listBudgetConfirming,
     isError: isErrorListBudgetConfirming,
@@ -64,6 +69,7 @@ const EventStaffPage = () => {
         pageSize: 50,
         currentPage: 1,
         mode: 1,
+        userID: idStaff,
       }),
     {
       select: (data) => {
@@ -82,6 +88,7 @@ const EventStaffPage = () => {
           pageSize: 50,
           currentPage: 1,
           mode: 2,
+          userID: idStaff,
         }),
       {
         select: (data) => {
@@ -133,8 +140,6 @@ const EventStaffPage = () => {
       enabled: !!selectEvent?.id && !!staff?.id,
     }
   );
-
-  const [filterMember, setFilterMember] = useState(staff?.id);
 
   const { data: listTaskFilter, refetch: refetchListTaskFilter } = useQuery(
     ["tasks-filter-member"],

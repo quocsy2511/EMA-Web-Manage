@@ -1,19 +1,10 @@
-import { Image, Space, Table, Modal, Tag, Input, Button } from "antd";
+import { Image, Space, Table, Tag, Input, Button } from "antd";
 import React, { useRef, useState } from "react";
 import HeadingTitle from "../../../components/common/HeadingTitle";
-import {
-  DeleteOutlined,
-  ExclamationCircleFilled,
-  FormOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { FormOutlined, SearchOutlined } from "@ant-design/icons";
 import EditBudget from "./ModalBudget/EditBudget";
 import Highlighter from "react-highlight-words";
 const ConfirmedBudgetStaff = ({ selectEvent, listBudgetConfirmed }) => {
-  console.log(
-    "🚀 ~ file: ConfirmedBudgetStaff.js:11 ~ ConfirmedBudgetStaff ~ listBudgetConfirmed:",
-    listBudgetConfirmed
-  );
   const [isOpenEditBudget, setIsOpenEditBudget] = useState(false);
   const [isConfirmedBudget, setIsConfirmedBudget] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState("");
@@ -122,6 +113,15 @@ const ConfirmedBudgetStaff = ({ selectEvent, listBudgetConfirmed }) => {
         text
       ),
   });
+
+  const checkEditing = (record) => {
+    if (record.urlImage === null || record.realExpense === 0) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   const columns = [
     {
       title: "Tên thu chi",
@@ -206,42 +206,47 @@ const ConfirmedBudgetStaff = ({ selectEvent, listBudgetConfirmed }) => {
     {
       title: "Action",
       key: "action",
-      render: (_, record) => (
-        <Space size="middle">
-          <FormOutlined
-            className="text-blue-500"
-            onClick={() => {
-              setSelectedBudget(record);
-              setIsOpenEditBudget(true);
-              setIsConfirmedBudget(true);
-            }}
-          />
-          <DeleteOutlined
-            className="text-red-500"
-            onClick={() => showDeleteConfirm(record)}
-          />
-        </Space>
-      ),
+      render: (_, record) => {
+        const editable = checkEditing(record);
+        return (
+          <div className="flex">
+            <Button
+              type="link"
+              disabled={!editable}
+              className={!editable ? "opacity-30" : ""}
+            >
+              <FormOutlined
+                className="text-blue-500"
+                onClick={() => {
+                  setSelectedBudget(record);
+                  setIsOpenEditBudget(true);
+                  setIsConfirmedBudget(true);
+                }}
+              />
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
-  const { confirm } = Modal;
-  const showDeleteConfirm = () => {
-    confirm({
-      title: "Bạn có chắc chắn muốn xoá yêu cầu này không?",
-      icon: <ExclamationCircleFilled />,
-      content: "Xóa một yêu cầu chi tiêu là vĩnh viễn. Không có cách hoàn tác",
-      okText: "Xác nhận",
-      okType: "danger",
-      cancelText: "Huỷ",
-      onOk() {
-        // deletecommentMutate(id);
-      },
-      onCancel() {
-        console.log("Cancel");
-      },
-    });
-  };
+  // const { confirm } = Modal;
+  // const showDeleteConfirm = () => {
+  //   confirm({
+  //     title: "Bạn có chắc chắn muốn xoá yêu cầu này không?",
+  //     icon: <ExclamationCircleFilled />,
+  //     content: "Xóa một yêu cầu chi tiêu là vĩnh viễn. Không có cách hoàn tác",
+  //     okText: "Xác nhận",
+  //     okType: "danger",
+  //     cancelText: "Huỷ",
+  //     onOk() {
+  //       // deletecommentMutate(id);
+  //     },
+  //     onCancel() {
+  //       console.log("Cancel");
+  //     },
+  //   });
+  // };
 
   return (
     <div>

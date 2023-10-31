@@ -45,26 +45,23 @@ const TitleSubtask = ({
   );
 
   const queryClient = useQueryClient();
-  const { mutate: updateTitle } = useMutation(
-    ({ taskID, task }) => updateTask({ taskID, task }),
-    {
-      onSuccess: (data) => {
-        queryClient.invalidateQueries(["tasks"]);
-        queryClient.invalidateQueries(["subtaskDetails"], taskID);
-        inputRef.current.blur(); //bỏ forcus vô input
-        message.open({
-          type: "success",
-          content: "Cập nhật tên công việc mới thành công",
-        });
-      },
-      onError: () => {
-        message.open({
-          type: "error",
-          content: "Cập nhật tên công việc mới thất bại",
-        });
-      },
-    }
-  );
+  const { mutate: updateTitle } = useMutation((task) => updateTask(task), {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["tasks"]);
+      queryClient.invalidateQueries(["subtaskDetails"], taskID);
+      inputRef.current.blur(); //bỏ forcus vô input
+      message.open({
+        type: "success",
+        content: "Cập nhật tên công việc mới thành công",
+      });
+    },
+    onError: () => {
+      message.open({
+        type: "error",
+        content: "Cập nhật tên công việc mới thất bại",
+      });
+    },
+  });
 
   const onFinish = (values) => {
     const eventID = taskSelected.event.id;
@@ -90,8 +87,11 @@ const TitleSubtask = ({
       title: values,
       eventID: eventID,
       parentTask: parentTask,
+      taskID: taskID,
     };
-    updateTitle({ taskID, task: data });
+    console.log("🚀 ~ file: TitleSubtask.js:89 ~ onFinish ~ data:", data);
+    // updateTitle({ taskID, task: data });
+    updateTitle(data);
   };
 
   return (

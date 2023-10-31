@@ -19,7 +19,7 @@ const PriorityTag = ({ updatePriority, setIsOpenPriority }) => {
   };
 
   return (
-    <>
+    <div className="px-3">
       <Tag
         color={getColorStatusPriority(updatePriority)?.color}
         className="h-fit"
@@ -27,7 +27,7 @@ const PriorityTag = ({ updatePriority, setIsOpenPriority }) => {
       >
         {getColorStatusPriority(updatePriority)?.title}
       </Tag>
-    </>
+    </div>
   );
 };
 

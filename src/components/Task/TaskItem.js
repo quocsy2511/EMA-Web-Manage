@@ -171,7 +171,7 @@ const TaskItem = ({
               ? moment(task.startDate)
                   // .tz("Asia/Ho_Chi_Minh")
                   .utc()
-                  .format("DD/MM/YYYY HH:mm:ss")
+                  .format("DD/MM/YYYY HH:mm")
               : "-- : --"}
           </p>
         </div>
@@ -184,7 +184,7 @@ const TaskItem = ({
               ? moment(task.endDate)
                   // .tz("Asia/Ho_Chi_Minh")
                   .utc()
-                  .format("DD/MM/YYYY HH:mm:ss")
+                  .format("DD/MM/YYYY HH:mm")
               : "-- : --"}
           </p>
         </div>

@@ -24,6 +24,9 @@ const NewBudget = ({ selectEvent }) => {
         queryClient.invalidateQueries("listBudgetConfirming");
         queryClient.invalidateQueries("listBudgetConfirmed");
         form.resetFields();
+        form.setFieldsValue({
+          items: [{}],
+        });
         message.open({
           type: "success",
           content: "Tạo chi phí  mới thành công",
@@ -48,9 +51,14 @@ const NewBudget = ({ selectEvent }) => {
       };
     });
     data.forEach((budget) => {
+      console.log(
+        "🚀 ~ file: NewBudget.js:51 ~ data.forEach ~ budget:",
+        budget
+      );
       postListBudget(budget);
     });
   };
+
   return (
     <div className="w-full p-8 bg-white flex-1  rounded-xl overflow-y-auto flex justify-center items-center">
       <Form
@@ -118,7 +126,7 @@ const NewBudget = ({ selectEvent }) => {
                     rules={[
                       {
                         required: true,
-                        message: "Số tiền bắt buộc nhập",
+                        message: "Số tiền bắt buộc nhập số",
                       },
                       {
                         type: "number",
@@ -162,7 +170,7 @@ const NewBudget = ({ selectEvent }) => {
                 </Card>
               ))}
               <Button type="dashed" onClick={() => add()} block>
-                + Add Item
+                + Thêm 1 chi phí mới
               </Button>
             </div>
           )}

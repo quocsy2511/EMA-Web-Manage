@@ -149,8 +149,6 @@ const EventTaskPage = () => {
     }
   }, [assigneeSelection, prioritySelection, statusSelection]);
 
-  let status, statusColor, statusBgColor;
-
   const resetFilter = () => {
     setAssigneeSelection();
     setPrioritySelection();
@@ -179,6 +177,7 @@ const EventTaskPage = () => {
       </div>
     );
 
+  let status, statusColor, statusBgColor;
   switch (data.status) {
     case "PENDING":
       status = "Đang chuẩn bị";
@@ -609,13 +608,6 @@ const EventTaskPage = () => {
                         />
                       ) : (
                         <AnimatePresence>
-                          {/* {tasks.map((task) => (
-                            <TaskItem
-                              key={task.id}
-                              task={task}
-                              isSubtask={false}
-                            />
-                          ))} */}
                           <Collapse
                             ghost
                             expandIconPosition={"end"}

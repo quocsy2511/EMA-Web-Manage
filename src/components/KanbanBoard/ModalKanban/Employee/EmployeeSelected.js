@@ -9,7 +9,6 @@ import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndica
 import { assignMember } from "../../../../apis/tasks";
 
 const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
-  console.log("🚀 ~ file: FieldSubtask.js:37 ~ taskSelected:", taskSelected);
   const taskID = taskSelected?.id;
   const queryClient = useQueryClient();
   const membersInTask = assignTasks?.map((item) => item.user?.id);

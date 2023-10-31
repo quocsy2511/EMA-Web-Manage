@@ -25,7 +25,7 @@ const PrioritySegmented = ({
   );
 
   const { mutate: updatePriorityMutate } = useMutation(
-    ({ taskID, task }) => updateTask({ taskID, task }),
+    (task) => updateTask(task),
     {
       onSuccess: () => {
         setUpdatePriority(prioritySelected);
@@ -69,8 +69,9 @@ const PrioritySegmented = ({
       priority: value,
       eventID: eventID,
       parentTask: parentTask,
+      taskID: taskID,
     };
-    updatePriorityMutate({ taskID, task: data });
+    updatePriorityMutate(data);
   };
 
   return (

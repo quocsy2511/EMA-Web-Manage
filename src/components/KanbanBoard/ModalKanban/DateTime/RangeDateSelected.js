@@ -143,7 +143,7 @@ const RangeDateSelected = ({
   };
 
   const { mutate: updateDate, isLoading } = useMutation(
-    ({ taskID, task }) => updateTask({ taskID, task }),
+    (task) => updateTask(task),
     {
       onSuccess: () => {
         setUpdateStartDate(startDateUpdate);
@@ -188,14 +188,15 @@ const RangeDateSelected = ({
       endDate: endDateUpdate,
       eventID: eventID,
       parentTask: parentTask,
+      taskID: taskID,
     };
-    updateDate({ taskID, task: data });
+    updateDate(data);
   };
 
   return (
     <>
       {taskSelected?.startDate && taskSelected?.endDate !== null ? (
-        <div className="flex justify-start items-center mt-4">
+        <div className="flex justify-start items-center mt-4 px-3">
           {isOpenDate ? (
             <Form onFinish={updateTimeFinish} name="date">
               <Form.Item
@@ -258,7 +259,7 @@ const RangeDateSelected = ({
           )}
         </div>
       ) : (
-        <div className="flex justify-start items-center mt-4">
+        <div className="flex justify-start items-center mt-4 px-3">
           <RangePicker
             showTime={{
               format: "HH:mm:ss",

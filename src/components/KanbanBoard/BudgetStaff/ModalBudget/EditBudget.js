@@ -30,7 +30,8 @@ const EditBudget = ({
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const { mutate: updateBudgetMutate, isLoading } = useMutation(
-    ({ budgetsId, budget }) => updateBudget({ budgetsId, budget }),
+    // ({ budgetsId, ...budget }) => updateBudget({ budgetsId, ...budget }),
+    (budget) => updateBudget(budget),
     {
       onSuccess: () => {
         queryClient.invalidateQueries("listBudgetConfirming");
@@ -57,6 +58,7 @@ const EditBudget = ({
         const budget = variables.budget;
         variables.budget = {
           urlImage: data.downloadUrl,
+          budgetsId: budgetsId,
           ...budget,
         };
         updateBudgetMutate(variables.budget);
@@ -74,10 +76,11 @@ const EditBudget = ({
     const budget = {
       ...data,
       eventID: eventID,
+      budgetsId: budgetsId,
     };
     if (values.urlImage === undefined || values.urlImage?.length === 0) {
       console.log("NOOO FILE");
-      updateBudgetMutate({ budget, budgetsId });
+      updateBudgetMutate(budget);
     } else {
       console.log("HAS FILE");
       const formData = new FormData();
@@ -123,7 +126,10 @@ const EditBudget = ({
             ]}
             initialValue={selectedBudget?.budgetName}
           >
-            <Input placeholder="tên chi phí yêu cầu" />
+            <Input
+              placeholder="tên chi phí yêu cầu"
+              disabled={isConfirmedBudget}
+            />
           </Form.Item>
           {/* chi phí ước chừng */}
           <Form.Item
@@ -153,6 +159,7 @@ const EditBudget = ({
                 width: "100%",
               }}
               placeholder="số tiền dự kiến phải chi"
+              disabled={isConfirmedBudget}
             />
           </Form.Item>
           {/* chi  phí thực tế */}
@@ -188,7 +195,10 @@ const EditBudget = ({
             name="supplier"
             initialValue={selectedBudget.supplier}
           >
-            <Input placeholder="tên nhà cung cấp" />
+            <Input
+              placeholder="tên nhà cung cấp"
+              disabled={isConfirmedBudget}
+            />
           </Form.Item>
           {/* mô tả */}
           <Form.Item
@@ -196,7 +206,11 @@ const EditBudget = ({
             name="description"
             initialValue={selectedBudget.description}
           >
-            <TextArea rows={2} placeholder="chi tiết số tiền được dùng" />
+            <TextArea
+              rows={2}
+              placeholder="chi tiết số tiền được dùng"
+              disabled={isConfirmedBudget}
+            />
           </Form.Item>
           {/* tải file */}
           {isConfirmedBudget && (
