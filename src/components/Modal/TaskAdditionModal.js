@@ -235,9 +235,27 @@ const TaskAdditionModal = ({
             name="date"
             rules={[
               {
-                validator: (rule, value) => {
+                validator: async (rule, value) => {
                   if (value && value[0] && value[1]) {
-                    return Promise.resolve();
+                    console.log("value: ", value);
+                    const startDate = moment(value[0].$d);
+                    const endDate = moment(value[1].$d);
+
+                    console.log("startDate: ", startDate);
+                    console.log("endDate: ", endDate);
+
+                    // Calculate the difference in minutes
+                    const diffInMinutes = endDate.diff(startDate, "minutes");
+                    console.log("diffInMinutes: ", diffInMinutes);
+
+                    if (diffInMinutes >= 15) {
+                      return Promise.resolve();
+                    } else {
+                      return Promise.reject(
+                        "Khoảng thời gian phải ít nhất là 15 phút"
+                      );
+                    }
+                    // return Promise.resolve();
                   }
                   return Promise.reject("Chọn khoảng thời gian thực hiện");
                 },
@@ -333,7 +351,7 @@ const TaskAdditionModal = ({
                       placeholder="Trưởng nhóm"
                       options={
                         selectedEmployeesId
-                          ? employees.filter((employee) =>
+                          ? employees?.filter((employee) =>
                               selectedEmployeesId.includes(employee.value)
                             )
                           : []

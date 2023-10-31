@@ -238,9 +238,9 @@ const EventSubTaskPage = () => {
         </p>
         <div className="flex items-end">
           <AnimatePresence>
-            {tasks.subTask.length !== 0 &&
-              tasks.subTask.filter((task) => task.status === "CONFIRM")
-                .length === tasks.subTask.length &&
+            {tasks.subTask?.length !== 0 &&
+              tasks.subTask?.filter((task) => task.status === "CONFIRM")
+                .length === tasks.subTask?.length &&
               tasks.status === "DONE" && (
                 <motion.div
                   initial={{ x: 50, opacity: 0 }}
@@ -322,7 +322,7 @@ const EventSubTaskPage = () => {
               <div className="w-4" />
               <p className="text-base font-medium">
                 {tasks.startDate
-                  ? moment(tasks.startDate).utc().format("DD/MM/YYYY HH:mm:ss")
+                  ? moment(tasks.startDate).utc().format("DD/MM/YYYY HH:mm")
                   : "-- : --"}
               </p>
             </motion.div>
@@ -335,7 +335,7 @@ const EventSubTaskPage = () => {
               <div className="w-4" />
               <p className="text-base font-medium">
                 {tasks.endDate
-                  ? moment(tasks.endDate).utc().format("DD/MM/YYYY HH:mm:ss")
+                  ? moment(tasks.endDate).utc().format("DD/MM/YYYY HH:mm")
                   : "-- : --"}
               </p>
             </motion.div>

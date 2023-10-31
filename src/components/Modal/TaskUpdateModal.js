@@ -539,7 +539,7 @@ const TaskUpdateModal = ({
                 placeholder="Trưởng nhóm"
                 options={
                   selectedEmployeesId
-                    ? employees.filter((employee) =>
+                    ? employees?.filter((employee) =>
                         selectedEmployeesId.includes(employee.value)
                       )
                     : []

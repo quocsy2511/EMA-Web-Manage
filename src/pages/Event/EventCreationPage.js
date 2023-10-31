@@ -86,7 +86,7 @@ const EventCreationPage = () => {
 
   const columns = [
     {
-      title: "Nhân viên",
+      title: "Trưởng phòng",
       dataIndex: "staff",
       // width: 100,
     },
