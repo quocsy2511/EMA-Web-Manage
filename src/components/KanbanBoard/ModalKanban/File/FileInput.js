@@ -34,20 +34,19 @@ const FileInput = ({ taskSelected, setUpdateFileList }) => {
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
     useMutation(({ formData, task }) => uploadFile(formData), {
       onSuccess: (data) => {
-        console.log("🚀 ~ file: FileInput.js:33 ~ useMutation ~ data:", data);
         setUpdateFileList((prev) => [
           ...prev,
-          { fileName: data?.fileName, fileUrl: data?.downloadUrl },
+          {
+            fileName: data?.fileName,
+            fileUrl: data?.downloadUrl,
+            taskID: taskID,
+          },
         ]);
         const fileObj = {
           fileName: data?.fileName,
           fileUrl: data?.downloadUrl,
           taskID,
         };
-        console.log(
-          "🚀 ~ file: FileInput.js:41 ~ useMutation ~ fileObj:",
-          fileObj
-        );
 
         uploadNewFileTask(fileObj);
       },
