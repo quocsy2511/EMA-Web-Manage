@@ -11,6 +11,7 @@ const CommentInput = ({ staff, taskSelected }) => {
   const taskId = taskSelected.id;
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState();
+
   // bắt chưa nhập input ko cho nhấn submit
   const SubmitButton = ({ form }) => {
     const [submittable, setSubmittable] = React.useState(false);
@@ -118,9 +119,18 @@ const CommentInput = ({ staff, taskSelected }) => {
                   rules={[
                     {
                       validateTrigger: true,
-                      min: 1,
                       required: true,
                       message: "chưa nhập bình luận ",
+                    },
+                    {
+                      validateTrigger: true,
+                      whitespace: true,
+                      message: "nhập tối thiểu 1 kí tự",
+                    },
+                    {
+                      validateTrigger: true,
+                      min: 1,
+                      message: "nhập tối thiểu 1 kí tự bình luận ",
                     },
                   ]}
                 >
