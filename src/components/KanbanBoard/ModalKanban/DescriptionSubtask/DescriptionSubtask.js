@@ -44,7 +44,7 @@ const DescriptionSubtask = ({
   );
 
   const { mutate: updateDescription, isLoading } = useMutation(
-    ({ taskID, task }) => updateTask({ taskID, task }),
+    (task) => updateTask(task),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["tasks"]);
@@ -90,8 +90,9 @@ const DescriptionSubtask = ({
       description: JSON.stringify(value.desc.ops),
       eventID: eventID,
       parentTask: parentTask,
+      taskID: taskID,
     };
-    updateDescription({ taskID, task: data });
+    updateDescription(data);
   };
 
   return (

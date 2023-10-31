@@ -70,7 +70,7 @@ const FileInput = ({ taskSelected, setUpdateFileList }) => {
     <div>
       <Form className="mb-0" onFinish={onFinish} form={form}>
         <Form.Item
-          className="text-sm font-medium mb-2 "
+          className="text-sm font-medium mb-2 px-3"
           name="fileUrl"
           valuePropName="fileList"
           getValueFromEvent={(e) => e?.fileList}

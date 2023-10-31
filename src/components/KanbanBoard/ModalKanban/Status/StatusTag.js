@@ -1,8 +1,7 @@
 import { Tag } from "antd";
 import React from "react";
 
-const StatusTag = ({ taskSelected, setIsOpenStatus, updateStatus }) => {
-
+const StatusTag = ({ taskSelected, updateStatus }) => {
   const getColorStatusPriority = (value) => {
     const colorMapping = {
       DONE: { color: "green", title: "HOÀN THÀNH" },
@@ -22,7 +21,6 @@ const StatusTag = ({ taskSelected, setIsOpenStatus, updateStatus }) => {
     <>
       <Tag
         color={getColorStatusPriority(updateStatus)?.color}
-        onClick={() => setIsOpenStatus(true)}
         className="h-fit w-fit mt-4 cursor-pointer"
       >
         {getColorStatusPriority(updateStatus)?.title}

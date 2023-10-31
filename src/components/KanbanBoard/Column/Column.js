@@ -57,8 +57,8 @@ const Column = ({ TaskParent, selectedStatus }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startDate = moment(TaskParent?.startDate).format("YYYY/MM/DD ");
-  const endDate = moment(TaskParent?.endDate).format("YYYY/MM/DD ");
+  const startDate = moment(TaskParent?.startDate).format("DD/MM/YYYY");
+  const endDate = moment(TaskParent?.endDate).format("DD/MM/YYYY");
 
   return (
     <>

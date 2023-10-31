@@ -82,6 +82,20 @@ code {
   height: fit-content;
 }
 
+.ant-badge-status-dot.ant-badge-status-success {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+.ant-badge-status-dot.ant-badge-status-error {
+  width: 10px !important;
+  height: 10px !important;
+}
+.ant-badge-status-dot.ant-badge-status-warning {
+  width: 10px !important;
+  height: 10px !important;
+}
+
 @layer utilities {
   @variants responsive {
     /* Hide scrollbar for Chrome, Safari and Opera */

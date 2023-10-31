@@ -5,10 +5,10 @@ import {
   DatePicker,
   Form,
   Input,
+  InputNumber,
   Modal,
   Segmented,
   Select,
-  Slider,
   Space,
   Upload,
   message,
@@ -41,7 +41,7 @@ const NewTaskModal = ({
   const [endDate, setEndDate] = useState("");
   const [description, setDescription] = useState("");
   const [assignee, setAssignee] = useState([]);
-  const [estimationTime, setEstimationTime] = useState(1);
+  // const [estimationTime, setEstimationTime] = useState(1);
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
@@ -234,13 +234,6 @@ const NewTaskModal = ({
     }
   };
 
-  //Render Estimated Time
-  const onChangeEstimatedTime = (newValue) => {
-    setEstimationTime(newValue);
-  };
-  //tooltip estimateEstimationTime
-  const formatter = (value) => `${value} giờ`;
-
   const onFinish = (values) => {
     const { fileUrl, date, ...data } = values;
     const task = {
@@ -298,7 +291,7 @@ const NewTaskModal = ({
               rules={[
                 {
                   required: true,
-                  message: "Please input your Task Title!",
+                  message: "Hãy nhập nhập tên công việc!",
                 },
                 { whitespace: true },
                 { min: 3, max: 200 },
@@ -316,7 +309,7 @@ const NewTaskModal = ({
                 {
                   type: "array",
                   required: true,
-                  message: "Please select time!",
+                  message: "Hãy chọn thời gian!",
                 },
               ]}
               hasFeedback
@@ -335,21 +328,6 @@ const NewTaskModal = ({
               />
               {/* </ConfigProvider> */}
             </Form.Item>
-            {/* Estimated */}
-            <Form.Item
-              initialValue={estimationTime}
-              label="Ước tính giờ"
-              name="estimationTime"
-              className="text-sm font-medium "
-            >
-              <Slider
-                tooltip={{ formatter }}
-                min={1}
-                max={100}
-                onChange={onChangeEstimatedTime}
-                value={estimationTime}
-              />
-            </Form.Item>
             {/* member */}
             <Form.Item
               label="Phân công"
@@ -358,7 +336,7 @@ const NewTaskModal = ({
               rules={[
                 {
                   required: true,
-                  message: "Please select member for task!",
+                  message: "Hãy chọn nhân viên!",
                 },
               ]}
               hasFeedback
@@ -369,7 +347,7 @@ const NewTaskModal = ({
                     autoFocus
                     allowClear
                     mode="multiple"
-                    placeholder="The first Member you choose will be the leader "
+                    placeholder="Người được chọn đầu tiên là nhóm trưởng"
                     style={{
                       width: "100%",
                     }}
@@ -399,6 +377,27 @@ const NewTaskModal = ({
               ) : (
                 <LoadingComponentIndicator />
               )}
+            </Form.Item>
+            {/* Estimated */}
+            <Form.Item
+              initialValue={0.0}
+              label="Ước tính giờ làm"
+              name="estimationTime"
+              className="text-sm font-medium "
+              rules={[
+                {
+                  type: "float",
+                  message: "Chỉ được nhập số vd: 1.2",
+                },
+              ]}
+            >
+              <InputNumber
+                placeholder="Chọn thời gian ước tính làm"
+                className="w-1/3"
+                type="number"
+                // step="0.1"
+                // stringMode
+              />
             </Form.Item>
             {/* priority */}
             <Form.Item

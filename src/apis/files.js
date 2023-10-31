@@ -13,10 +13,17 @@ export const uploadFile = (formData) =>
     method: "post",
     data: formData,
   });
-  
+
 export const uploadFileTask = (data) =>
   authRequest({
     url: `/taskFile`,
     method: "post",
+    data: data,
+  });
+
+export const deleteFileTask = ({ taskId, data }) =>
+  authRequest({
+    url: `/taskFile/${taskId}`,
+    method: "put",
     data: data,
   });

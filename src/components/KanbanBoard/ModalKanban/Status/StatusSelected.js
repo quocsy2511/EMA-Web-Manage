@@ -6,7 +6,6 @@ import { updateTaskStatus } from "../../../../apis/tasks";
 const StatusSelected = ({
   taskSelected,
   taskParent,
-  setIsOpenStatus,
   updateStatus,
   setUpdateStatus,
 }) => {
@@ -59,7 +58,6 @@ const StatusSelected = ({
           type: "success",
           content: "Cập nhật trạng thái thành công",
         });
-        setIsOpenStatus(false);
       },
       onError: () => {
         message.open({
@@ -78,10 +76,13 @@ const StatusSelected = ({
   return (
     <>
       <Select
+        autoFocus={true}
+        suffixIcon={false}
         removeIcon={true}
         bordered={false}
         defaultValue={updateStatus}
-        className="w-[190px] mt-4"
+        style={{ padding: 0 }}
+        className="w-[190px] mt-4 "
         onChange={(value) => handleChangeStatus(value)}
       >
         {taskParent
