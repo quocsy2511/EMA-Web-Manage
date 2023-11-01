@@ -12,10 +12,11 @@ import { IoMdAttach } from "react-icons/io";
 import { removeComment, updateComment } from "../../../../apis/comments";
 import { uploadFile } from "../../../../apis/files";
 import { debounce } from "lodash";
+import { useRouteLoaderData } from "react-router-dom";
 
 const Comments = ({ comment, taskSelected, disableUpdate }) => {
   const { user, createdAt, id } = comment;
-
+  const staffID = useRouteLoaderData("staff").id;
   const [input, setInput] = useState(comment?.text);
   const [isOpenInput, seItsOpenInput] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
@@ -332,27 +333,29 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
                         </a>
                       </div>
                     ))}
-                  <div className="flex flex-row gap-x-2 text-text4 cursor-pointer items-center pt-2">
-                    <Button
-                      type="link"
-                      onClick={() => seItsOpenInput(true)}
-                      className="flex justify-center items-center"
-                    >
-                      Chỉnh sửa
-                    </Button>
-                    <Button
-                      onClick={() =>
-                        showDeleteConfirm({
-                          type: "comment",
-                          text: "bình luận",
-                        })
-                      }
-                      type="link"
-                      className="text-red-400 flex justify-center items-center"
-                    >
-                      Xoá
-                    </Button>
-                  </div>
+                  {user.id === staffID && (
+                    <div className="flex flex-row gap-x-2 text-text4 cursor-pointer items-center pt-2">
+                      <Button
+                        type="link"
+                        onClick={() => seItsOpenInput(true)}
+                        className="flex justify-center items-center"
+                      >
+                        Chỉnh sửa
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          showDeleteConfirm({
+                            type: "comment",
+                            text: "bình luận",
+                          })
+                        }
+                        type="link"
+                        className="text-red-400 flex justify-center items-center"
+                      >
+                        Xoá
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
