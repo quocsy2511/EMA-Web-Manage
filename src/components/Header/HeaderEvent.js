@@ -17,6 +17,7 @@ import AnErrorHasOccured from "../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { debounce } from "lodash";
 import { HiSortAscending, HiSortDescending } from "react-icons/hi";
+import { AnimatePresence, motion } from "framer-motion";
 
 // const settingHeader = [
 //   {
@@ -224,171 +225,192 @@ const HeaderEvent = ({
 
   return (
     <div className="p-4 left-0 bg-bgBoard z-50 right-0 top-14">
-      {!isLoadingUsers ? (
-        !isErrorUsers ? (
-          <div className="flex items-center space-x-2 md:space-x-4">
-            <header className="flex justify-between  items-center w-full ml-8 mr-1">
-              {/* left header */}
-              <div className="flex items-center gap-x-4 ">
-                <Select
-                  defaultValue={{ label: events[0].eventName, value: events }}
-                  // bordered={false}
-                  className="min-w-[120px] shadow-md rounded-lg"
-                  popupMatchSelectWidth={false}
-                  onChange={handleChangeEvent}
-                  options={events.map((event) => {
-                    const jsonString = JSON.stringify(event);
-                    return {
-                      label: (
-                        <p className="font-semibold text-gray-600">
-                          {event.eventName}
-                        </p>
-                      ),
-                      value: jsonString,
-                    };
-                  })}
-                  // onChange={handleChange}
-                  size="middle"
-                />
-              </div>
-              {/* search */}
-              <div>
-                <Input
-                  allowClear
-                  placeholder="tìm kiếm công việc "
-                  style={{
-                    width: 400,
-                  }}
-                  className=""
-                  onChange={(e) => debouncedSearch(e.target.value)}
-                  suffix={<SearchOutlined />}
-                />
-              </div>
-              <div className="flex justify-center items-center gap-x-3 ">
-                {/* budget */}
-                <div className="flex flex-row gap-x-2 hover:text-blue-500 cursor-pointer text-sm">
-                  {/* <Dropdown
-                    menu={{
-                      items: settingHeader,
-                      onClick,
-                    }}
-                    placement="bottomRight"
-                    arrow={{
-                      pointAtCenter: true,
-                    }}
-                  >
-                    <span className="cursor-pointer text-secondary text-sm">
-                      <AlignRightOutlined className="text-2xl" />
-                      Công việc
-                    </span>
-                  </Dropdown> */}
-                  {!isBoardTask ? (
-                    <span
-                      className="flex gap-x-2 justify-center items-center"
-                      onClick={() => setIsBoardTask(true)}
-                    >
-                      <FileDoneOutlined className="text-xl" />
-                      Công việc
-                    </span>
-                  ) : (
-                    <span
-                      className=" flex gap-x-2 justify-center items-center"
-                      onClick={() => setIsBoardTask(false)}
-                    >
-                      <DollarOutlined className="text-xl" />
-                      Ngân sách
-                    </span>
-                  )}
-                </div>
-                {/* Sort task*/}
-                <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 ">
-                  {sort === "DESC" ? (
-                    <span
-                      className="flex flex-row gap-x-2 justify-center items-center"
-                      onClick={() => setSort("ASC")}
-                    >
-                      <HiSortDescending size={24} />
-                      Thời gian
-                    </span>
-                  ) : (
-                    <span
-                      className="flex flex-row gap-x-2 justify-center items-center"
-                      onClick={() => setSort("DESC")}
-                    >
-                      <HiSortAscending size={24} />
-                      Thời gian
-                    </span>
-                  )}
-                </div>
-                {/* filter user */}
-                <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 ">
-                  {!isLoadingUsers ? (
-                    !isErrorUsers ? (
-                      <Dropdown
-                        menu={{
-                          items: filterUser,
-                          onClick: onClickFilterMember,
-                        }}
-                        trigger={["click"]}
-                        placement="bottomRight"
-                        arrow
-                      >
-                        <span className="flex flex-row gap-x-2 justify-center items-center">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            className="w-6 h-6"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-                            />
-                          </svg>
-                          Bộ lọc
-                        </span>
-                      </Dropdown>
-                    ) : (
-                      <AnErrorHasOccured />
-                    )
-                  ) : (
-                    <LoadingComponentIndicator />
-                  )}
-                </div>
-                {/* member */}
-                <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer">
-                  <Avatar.Group
-                    maxCount={3}
-                    maxStyle={{
-                      color: "#D25B68",
-                      backgroundColor: "#F4D7DA",
-                    }}
-                  >
-                    {users?.map((member) => {
-                      return (
-                        <Tooltip
-                          key={member?.id}
-                          title={member?.fullName}
-                          placement="top"
-                        >
-                          <Avatar src={member?.avatar ?? defaultImage} />
-                        </Tooltip>
-                      );
+      <AnimatePresence mode="wait">
+        {!isLoadingUsers ? (
+          !isErrorUsers ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center space-x-2 md:space-x-4"
+            >
+              <header className="flex justify-between  items-center w-full ml-8 mr-1">
+                {/* left header */}
+                <div className="flex items-center gap-x-4 ">
+                  <Select
+                    defaultValue={{ label: events[0].eventName, value: events }}
+                    // bordered={false}
+                    className="min-w-[120px] shadow-md rounded-lg"
+                    popupMatchSelectWidth={false}
+                    onChange={handleChangeEvent}
+                    options={events.map((event) => {
+                      const jsonString = JSON.stringify(event);
+                      return {
+                        label: (
+                          <p className="font-semibold text-gray-600">
+                            {event.eventName}
+                          </p>
+                        ),
+                        value: jsonString,
+                      };
                     })}
-                  </Avatar.Group>
+                    // onChange={handleChange}
+                    size="middle"
+                  />
                 </div>
-              </div>
-            </header>
-          </div>
+                {/* search */}
+                {/* <div>
+                  <Input
+                    allowClear
+                    placeholder="tìm kiếm công việc "
+                    style={{
+                      width: 400,
+                    }}
+                    className=""
+                    onChange={(e) => debouncedSearch(e.target.value)}
+                    suffix={<SearchOutlined />}
+                  />
+                </div> */}
+                <div className="flex-1 flex justify-end items-center gap-x-3">
+                  {/* budget */}
+                  <div className="flex-1 flex flex-row gap-x-2 text-sm">
+                    <AnimatePresence mode="wait">
+                      {!isBoardTask ? (
+                        <motion.span
+                          key="budget"
+                          initial={{ y: -10, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: 10, opacity: 0 }}
+                          transition={{ duration: 0.3, type: "tween" }}
+                          className="flex-1 text-end"
+                        >
+                          <div
+                            className="hover:text-blue-500 cursor-pointer inline-block"
+                            onClick={() => setIsBoardTask(true)}
+                          >
+                            <div className="flex items-center gap-x-2">
+                              <FileDoneOutlined className="text-xl" />
+                              Công việc
+                            </div>
+                          </div>
+                        </motion.span>
+                      ) : (
+                        <motion.div
+                          key="taskss"
+                          initial={{ y: -10, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: 10, opacity: 0 }}
+                          transition={{ duration: 0.3, type: "tween" }}
+                          className="flex-1 flex justify-end items-center gap-x-3"
+                        >
+                          <div className="flex-1 flex justify-center">
+                            <Input
+                              className="w-[50%]"
+                              allowClear
+                              placeholder="tìm kiếm công việc "
+                              onChange={(e) => debouncedSearch(e.target.value)}
+                              suffix={<SearchOutlined />}
+                            />
+                          </div>
+                          <div className="flex justify-end items-center gap-x-3">
+                            <span
+                              className=" flex gap-x-2 justify-center items-center hover:text-blue-500 cursor-pointer"
+                              onClick={() => setIsBoardTask(false)}
+                            >
+                              <DollarOutlined className="text-xl" />
+                              Ngân sách
+                            </span>
+                            <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 ">
+                              {sort === "DESC" ? (
+                                <span
+                                  className="flex flex-row gap-x-2 justify-center items-center"
+                                  onClick={() => setSort("ASC")}
+                                >
+                                  <HiSortDescending size={24} />
+                                  Thời gian
+                                </span>
+                              ) : (
+                                <span
+                                  className="flex flex-row gap-x-2 justify-center items-center"
+                                  onClick={() => setSort("DESC")}
+                                >
+                                  <HiSortAscending size={24} />
+                                  Thời gian
+                                </span>
+                              )}
+                            </div>
+                            <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 ">
+                              <Dropdown
+                                menu={{
+                                  items: filterUser,
+                                  onClick: onClickFilterMember,
+                                }}
+                                trigger={["click"]}
+                                placement="bottomRight"
+                                arrow
+                              >
+                                <span className="flex flex-row gap-x-2 justify-center items-center">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
+                                    stroke="currentColor"
+                                    className="w-6 h-6"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
+                                    />
+                                  </svg>
+                                  Bộ lọc
+                                </span>
+                              </Dropdown>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer">
+                    <Avatar.Group
+                      maxCount={3}
+                      maxStyle={{
+                        color: "#D25B68",
+                        backgroundColor: "#F4D7DA",
+                      }}
+                    >
+                      {users?.map((member) => {
+                        return (
+                          <Tooltip
+                            key={member?.id}
+                            title={member?.fullName}
+                            placement="top"
+                          >
+                            <Avatar src={member?.avatar ?? defaultImage} />
+                          </Tooltip>
+                        );
+                      })}
+                    </Avatar.Group>
+                  </div>
+                </div>
+              </header>
+            </motion.div>
+          ) : (
+            <AnErrorHasOccured />
+          )
         ) : (
-          <AnErrorHasOccured />
-        )
-      ) : (
-        <LoadingComponentIndicator />
-      )}
+          <motion.div
+            key="header-loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <LoadingComponentIndicator />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

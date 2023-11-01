@@ -11,6 +11,8 @@ import { getComment } from "../../../apis/comments";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 import { getTasks } from "../../../apis/tasks";
+import { AnimatePresence, motion } from "framer-motion";
+import { MoonLoader } from "react-spinners";
 
 const TaskKanbanBoard = ({
   setIsOpenTaskModal,
@@ -104,7 +106,12 @@ const TaskKanbanBoard = ({
   };
 
   return (
-    <>
+    <motion.div
+      key={`subtask-${task?.id}`}
+      initial={{ x: 20, y: 20, opacity: 0 }}
+      animate={{ x: 0, y: 0, opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       <div
         className="w-[250px] min-h-[138px] mx-auto my-5 rounded-lg bg-white  shadow-darkShadow py-3 px-3 shadow-lg hover:opacity-60  cursor-pointer"
         onClick={() => openTaskModalHandler()}
@@ -148,51 +155,66 @@ const TaskKanbanBoard = ({
             </span>
           )}
 
-          {!isLoadingListComments ? (
-            !isErrorListComments ? (
-              <>
-                <span className="flex justify-center items-center gap-x-1 text-xs font-medium">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
-                    />
-                  </svg>
-                  {listComments?.length}
-                </span>
-                <span className="flex justify-center items-center gap-x-1 text-xs font-medium">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                    />
-                  </svg>
-                  {totalFiles}
-                </span>
-              </>
+          <AnimatePresence>
+            {!isLoadingListComments ? (
+              !isErrorListComments ? (
+                <motion.div
+                  key={`subtask-${task.id}`}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 20, opacity: 0 }}
+                  className="flex gap-x-3"
+                >
+                  <span className="flex justify-center items-center gap-x-1 text-xs font-medium">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+                      />
+                    </svg>
+                    {listComments?.length}
+                  </span>
+                  <span className="flex justify-center items-center gap-x-1 text-xs font-medium">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                      />
+                    </svg>
+                    {totalFiles}
+                  </span>
+                </motion.div>
+              ) : (
+                <AnErrorHasOccured />
+              )
             ) : (
-              <AnErrorHasOccured />
-            )
-          ) : (
-            <LoadingComponentIndicator />
-          )}
-          
+              <motion.div
+                key={`loading-subtask-${task.id}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {/* <LoadingComponentIndicator /> */}
+                <MoonLoader color="#36d7b7" size={20} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         <div className="flex justify-start items-center gap-x-2 cursor-pointer mt-1 flex-wrap">
           <Tag
@@ -211,41 +233,56 @@ const TaskKanbanBoard = ({
               backgroundColor: "#F4D7DA",
             }}
           >
-            {!isLoadingSubtaskDetails ? (
-              !isErrorSubtaskDetails ? (
-                <>
-                  {subtaskDetails?.[0].assignTasks.length > 0 &&
-                    subtaskDetails?.[0].assignTasks.map((item, index) => (
-                      <Tooltip
-                        key="avatar"
-                        title={item.user?.profile?.fullName}
-                        placement="top"
-                      >
-                        {item?.user?.profile === null ? (
-                          <Avatar
-                            icon={<UserOutlined />}
-                            size="small"
-                            className="bg-gray-500"
-                          />
-                        ) : (
-                          <Avatar
-                            src={item.user?.profile?.avatar}
-                            size="small"
-                          />
-                        )}
-                      </Tooltip>
-                    ))}
-                </>
+            <AnimatePresence>
+              {!isLoadingSubtaskDetails ? (
+                !isErrorSubtaskDetails ? (
+                  <motion.div
+                    key={`cmt-subtask-${task.id}`}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 20, opacity: 0 }}
+                  >
+                    {subtaskDetails?.[0].assignTasks.length > 0 &&
+                      subtaskDetails?.[0].assignTasks.map((item, index) => (
+                        <Tooltip
+                          key="avatar"
+                          title={item.user?.profile?.fullName}
+                          placement="top"
+                        >
+                          {item?.user?.profile === null ? (
+                            <Avatar
+                              icon={<UserOutlined />}
+                              size="small"
+                              className="bg-gray-500"
+                            />
+                          ) : (
+                            <Avatar
+                              src={item.user?.profile?.avatar}
+                              size="small"
+                            />
+                          )}
+                        </Tooltip>
+                      ))}
+                  </motion.div>
+                ) : (
+                  <AnErrorHasOccured />
+                )
               ) : (
-                <AnErrorHasOccured />
-              )
-            ) : (
-              <LoadingComponentIndicator />
-            )}
+                <motion.div
+                  key={`loading-cmt-subtask-${task.id}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  {/* <LoadingComponentIndicator /> */}
+                  <MoonLoader color="#36d7b7" size={20} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Avatar.Group>
         </div>
       </div>
-    </>
+    </motion.div>
   );
 };
 

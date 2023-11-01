@@ -13,7 +13,11 @@ import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
 import { getBudget } from "../../apis/budgets";
 import { useRouteLoaderData } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+
 moment.suppressDeprecationWarnings = true;
+
 const EventStaffPage = () => {
   const listStatus = [
     "PENDING",
@@ -301,20 +305,26 @@ const EventStaffPage = () => {
                 setFilterMember={setFilterMember}
               />
               {isBoardTask ? (
-                <KanbanBoard
-                  selectedStatus={statusSelected}
-                  selectEvent={selectEvent}
-                  listTaskParents={searchFilterTask}
-                  isErrorListTask={isErrorListTask}
-                  isLoadingListTask={isLoadingListTask}
-                />
+                !isLoadingListTask ? (
+                  !isErrorListTask ? (
+
+                    <KanbanBoard
+                      selectedStatus={statusSelected}
+                      selectEvent={selectEvent}
+                      listTaskParents={searchFilterTask}
+                    />
+                  ) : (
+                    <AnErrorHasOccured />
+                  )
+                ) : (
+                  <LoadingComponentIndicator />
+                )
               ) : !isLoadingListBudgetConfirming ? (
                 !isErrorListBudgetConfirming ? (
                   <BudgetStaff
                     listBudgetConfirmed={listBudgetConfirmed}
                     listBudgetConfirming={listBudgetConfirming}
                     selectEvent={selectEvent}
-                    // listBudget={listBudget}
                   />
                 ) : (
                   <AnErrorHasOccured />
