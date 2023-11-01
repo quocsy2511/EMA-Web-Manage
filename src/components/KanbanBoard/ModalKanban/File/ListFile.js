@@ -30,7 +30,7 @@ const ListFile = ({ file, updateFileList, setUpdateFileList }) => {
     }
   );
 
-  const showDeleteConfirm = () => {
+  const showDeleteConfirm = (FileID) => {
     const filterFile = updateFileList.filter((file) => file.id !== FileID);
     const data = filterFile.map((file) => {
       return {
@@ -38,7 +38,14 @@ const ListFile = ({ file, updateFileList, setUpdateFileList }) => {
         fileUrl: file.fileUrl,
       };
     });
-
+    const newListFile = filterFile.map((file) => {
+      return {
+        fileName: file.fileName,
+        fileUrl: file.fileUrl,
+        taskID: file.taskID,
+        id: file.id,
+      };
+    });
     modal.confirm({
       title: "Bạn có chắc chắn xóa tài liệu này không?",
       icon: <ExclamationCircleFilled />,
@@ -47,7 +54,7 @@ const ListFile = ({ file, updateFileList, setUpdateFileList }) => {
       okType: "danger",
       cancelText: "Huỷ",
       onOk() {
-        setUpdateFileList(data);
+        setUpdateFileList(newListFile);
         deleteFileTaskMutate({ taskId: taskID, data });
       },
       onCancel() {
@@ -68,7 +75,7 @@ const ListFile = ({ file, updateFileList, setUpdateFileList }) => {
       </a>
       <DeleteOutlined
         // onClick={handleDeleteFile}
-        onClick={showDeleteConfirm}
+        onClick={() => showDeleteConfirm(FileID)}
         className="hover:text-red-400"
       />
     </div>

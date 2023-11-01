@@ -9,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import { Avatar, Popover, Tooltip } from "antd";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import utc from "dayjs/plugin/utc";
 import "dayjs/locale/vi";
 import ListFile from "../File/ListFile";
@@ -37,6 +37,10 @@ const FieldSubtask = ({
   setIsOpenTaskModal,
 }) => {
   const [updateFileList, setUpdateFileList] = useState(taskSelected?.taskFiles);
+  console.log(
+    "🚀 ~ file: FieldSubtask.js:40 ~ updateFileList:",
+    updateFileList
+  );
   const [updatePriority, setUpdatePriority] = useState(taskSelected?.priority);
   const [assignTasks, setAssignTasks] = useState(taskSelected?.assignTasks);
   const [updateStatus, setUpdateStatus] = useState(taskSelected?.status);
@@ -210,21 +214,6 @@ const FieldSubtask = ({
               />
             )}
           </div>
-          {/* !isOpenStatus ? (
-              <StatusTag
-                updateStatus={updateStatus}
-                taskSelected={taskSelected}
-                setIsOpenStatus={setIsOpenStatus}
-              />
-            ) : (
-              <StatusSelected
-                updateStatus={updateStatus}
-                setUpdateStatus={setUpdateStatus}
-                taskSelected={taskSelected}
-                taskParent={taskParent}
-                setIsOpenStatus={setIsOpenStatus}
-              />
-            ) */}
         </div>
       </div>
       {/* task EstimateTimeout */}
