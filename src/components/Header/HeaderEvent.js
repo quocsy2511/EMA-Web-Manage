@@ -70,6 +70,7 @@ const HeaderEvent = ({
       },
     }
   );
+
   const staffUsers = users?.filter((user) => user.role === "STAFF");
   const handleChangeEvent = (value) => {
     const event = JSON.parse(value);
@@ -201,14 +202,6 @@ const HeaderEvent = ({
       ),
     },
   ];
-
-  // const onClick = ({ key }) => {
-  //   if (key === "công việc") {
-  //     setIsBoardTask(true);
-  //   } else {
-  //     setIsBoardTask(false);
-  //   }
-  // };
 
   const onClickFilterMember = ({ key }) => {
     const isKeyInListStatus = listStatus.some((status) => status.value === key);
