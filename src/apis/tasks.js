@@ -96,4 +96,8 @@ export const createTaskFile = (taskFile) =>
   });
 
 export const updateTaskFile = ({ taskId, ...files }) =>
-  authRequest({ url: `/taskFile/${taskId}`, method: "put", data: files });
+  authRequest({
+    url: `/taskFile/${taskId}`,
+    method: "put",
+    data: files.files,
+  });

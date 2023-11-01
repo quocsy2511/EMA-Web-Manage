@@ -12,7 +12,7 @@ import {
   FcMediumPriority,
 } from "react-icons/fc";
 import { BsHourglassBottom, BsHourglassSplit, BsPlus } from "react-icons/bs";
-import { BiDetail } from "react-icons/bi";
+import { BiDetail,BiCheck } from "react-icons/bi";
 import { VscDebugStart } from "react-icons/vsc";
 import { MdOutlineDoneOutline } from "react-icons/md";
 import { Avatar, Button, Card, FloatButton, message } from "antd";
@@ -250,12 +250,12 @@ const EventSubTaskPage = () => {
                   <Button
                     isLoading={updateEventStatusIsLoading}
                     // size="large"
-                    icon={<MdOutlineDoneOutline size={15} />}
+                    icon={<BiCheck size={15} />}
                     type="primary"
                     onClick={() => handleUpdateStatusTask("CONFIRM")}
                     className="font-medium"
                   >
-                    Hoàn thành hạng mục
+                    Xác thực hạng mục
                   </Button>
                 </motion.div>
               )}
@@ -279,6 +279,28 @@ const EventSubTaskPage = () => {
                 </Button>
               </motion.div>
             )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {tasks.subTask?.length !== 0 &&
+              tasks.subTask?.filter((task) => task.status === "CONFIRM")
+                .length === tasks.subTask?.length && (
+                <motion.div
+                  initial={{ x: 50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: 50, opacity: 0 }}
+                >
+                  <Button
+                    isLoading={updateEventStatusIsLoading}
+                    // size="large"
+                    type="primary"
+                    icon={<VscDebugStart size={15} />}
+                    onClick={() => handleUpdateStatusTask("DONE")}
+                  >
+                    Hoàn thành hạng mục
+                  </Button>
+                </motion.div>
+              )}
           </AnimatePresence>
         </div>
       </motion.div>
@@ -364,7 +386,7 @@ const EventSubTaskPage = () => {
               <p className="text-base font-medium">
                 Thời gian ước lượng:{" "}
                 {tasks.estimationTime ? (
-                  <span className="underline">1{tasks.estimationTime} giờ</span>
+                  <span className="underline">{tasks.estimationTime} giờ</span>
                 ) : (
                   "Chưa có"
                 )}

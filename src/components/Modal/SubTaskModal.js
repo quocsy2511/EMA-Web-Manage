@@ -252,21 +252,21 @@ const SubTaskModal = ({ isOpenModal, setIsOpenModal, selectedSubTask }) => {
           <p className="text-lg font-medium">Tài liệu đính kèm</p>
 
           {selectedSubTask.taskFiles.length > 0 ? (
-            <div className="inline-block">
+            selectedSubTask.taskFiles.map((file) => (
               <div className="cursor-pointer group">
                 <a
                   className="flex gap-x-3"
-                  href={selectedSubTask.taskFiles[0].fileUrl}
+                  href={file.fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <IoMdAttach size={25} className="group-hover:text-blue-400" />
                   <p className="group-hover:text-blue-400 text-base">
-                    {selectedSubTask.taskFiles[0].fileName}
+                    {file.fileName}
                   </p>
                 </a>
               </div>
-            </div>
+            ))
           ) : (
             <p>Không có tệp tin</p>
           )}

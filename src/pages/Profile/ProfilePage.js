@@ -10,10 +10,7 @@ import moment from "moment";
 import { getFilterEvent } from "../../apis/events";
 
 const ProfilePage = () => {
-  const dummy = [1, 2, 3, 4, 5, 6, 7, 8];
-
   const { data, isLoading, isError } = useQuery(["profile"], getProfile);
-  console.log(data);
 
   const {
     data: staffs,
@@ -28,7 +25,6 @@ const ProfilePage = () => {
       },
     }
   );
-  console.log(staffs);
 
   const {
     data: events,
@@ -49,7 +45,6 @@ const ProfilePage = () => {
       },
     }
   );
-  console.log(events);
 
   if (isLoading || staffsIsLoading || eventsIsLoading)
     return (
@@ -64,32 +59,6 @@ const ProfilePage = () => {
         <AnErrorHasOccured />;
       </div>
     );
-
-  let status, statusColor, statusBgColor;
-  switch (events.status) {
-    case "PENDING":
-      status = "Đang chuẩn bị";
-      statusColor = "text-slate-500";
-      statusBgColor = "bg-slate-100";
-      break;
-    case "PROCESSING":
-      status = "Đang diễn ra";
-      statusColor = "text-orange-500";
-      statusBgColor = "bg-orange-100";
-      break;
-    case "DONE":
-      status = "Đã kết thúc";
-      statusColor = "text-green-500";
-      statusBgColor = "bg-green-100";
-      break;
-    case "CANCEL":
-      status = "Hủy bỏ";
-      statusColor = "text-red-500";
-      statusBgColor = "bg-red-100";
-      break;
-    default:
-      break;
-  }
 
   return (
     <Fragment>
@@ -151,7 +120,7 @@ const ProfilePage = () => {
               Đang làm việc với Trưởng phòng ( Bộ phận )
             </p>
             <div className="flex flex-wrap pt-8 gap-y-10">
-              {staffs.map((staff) => (
+              {staffs?.map((staff) => (
                 <div className="flex flex-col items-center w-[calc(100%/3)]">
                   <Avatar size={70} src={staff.avatar} />
                   <p className="text-base font-medium mt-2">{staff.fullName}</p>
@@ -164,7 +133,7 @@ const ProfilePage = () => {
         <div className="bg-white flex-1 p-6 rounded-2xl h-full">
           <p className="text-lg font-semibold">Sự kiện tham gia gần đây (5)</p>
           <div className="mt-5 space-y-3">
-            {events.map((event) => {
+            {events?.map((event) => {
               let status, statusColor, statusBgColor;
               switch (event.status) {
                 case "PENDING":
