@@ -69,6 +69,7 @@ const HeaderEvent = ({
       },
     }
   );
+
   const staffUsers = users?.filter((user) => user.role === "STAFF");
   const handleChangeEvent = (value) => {
     const event = JSON.parse(value);
@@ -201,14 +202,6 @@ const HeaderEvent = ({
     },
   ];
 
-  // const onClick = ({ key }) => {
-  //   if (key === "công việc") {
-  //     setIsBoardTask(true);
-  //   } else {
-  //     setIsBoardTask(false);
-  //   }
-  // };
-
   const onClickFilterMember = ({ key }) => {
     const isKeyInListStatus = listStatus.some((status) => status.value === key);
     if (isKeyInListStatus === false && key !== "clear") {
@@ -267,21 +260,6 @@ const HeaderEvent = ({
               <div className="flex justify-center items-center gap-x-3 ">
                 {/* budget */}
                 <div className="flex flex-row gap-x-2 hover:text-blue-500 cursor-pointer text-sm">
-                  {/* <Dropdown
-                    menu={{
-                      items: settingHeader,
-                      onClick,
-                    }}
-                    placement="bottomRight"
-                    arrow={{
-                      pointAtCenter: true,
-                    }}
-                  >
-                    <span className="cursor-pointer text-secondary text-sm">
-                      <AlignRightOutlined className="text-2xl" />
-                      Công việc
-                    </span>
-                  </Dropdown> */}
                   {!isBoardTask ? (
                     <span
                       className="flex gap-x-2 justify-center items-center"

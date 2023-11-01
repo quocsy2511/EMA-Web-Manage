@@ -7,14 +7,60 @@ import { getAllUser, getProfile } from "../../apis/users";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
-import { getFilterEvent } from "../../apis/events";
+import { getEventDivisions, getFilterEvent } from "../../apis/events";
 
 const ProfilePage = () => {
-  const dummy = [1, 2, 3, 4, 5, 6, 7, 8];
-
   const { data, isLoading, isError } = useQuery(["profile"], getProfile);
-  console.log(data);
+  const divisionId = data?.divisionId;
+  //Staff
+  const {
+    data: employees,
+    isError: isErrorEmployees,
+    isLoading: isLoadingEmployees,
+  } = useQuery(
+    ["employees"],
+    () =>
+      getAllUser({
+        divisionId,
+        pageSize: 10,
+        currentPage: 1,
+        role: "EMPLOYEE",
+      }),
+    {
+      select: (data) => {
+        const listUsers = data.data.map(({ ...item }) => {
+          item.dob = moment(item.dob).format("YYYY-MM-DD");
+          return {
+            key: item.id,
+            ...item,
+          };
+        });
+        return listUsers;
+      },
+      enabled: !!divisionId,
+    }
+  );
 
+  const {
+    data: listEvent,
+    isError: isErrorEvent,
+    isLoading: isLoadingEvent,
+  } = useQuery(["events"], () => getEventDivisions(), {
+    select: (data) => {
+      const filteredEvents = data.filter((item) => item.status !== "DONE");
+      const event = filteredEvents.map(({ ...item }) => {
+        item.startDate = moment(item.startDate).format("DD/MM/YYYY");
+        item.endDate = moment(item.endDate).format("DD/MM/YYYY");
+        return {
+          ...item,
+        };
+      });
+      return event;
+    },
+    enabled: !!divisionId,
+  });
+
+  //manager
   const {
     data: staffs,
     isLoading: staffsIsLoading,
@@ -28,7 +74,6 @@ const ProfilePage = () => {
       },
     }
   );
-  console.log(staffs);
 
   const {
     data: events,
@@ -49,7 +94,6 @@ const ProfilePage = () => {
       },
     }
   );
-  console.log(events);
 
   if (isLoading || staffsIsLoading || eventsIsLoading)
     return (
@@ -141,82 +185,174 @@ const ProfilePage = () => {
 
           <div className="mt-5">
             <p className="text-2xl font-bold">Quản lý</p>
-            <p className="text-sm bg-[#F0F6FF] py-2 px-4 mt-2 rounded-xl">
-              Bạn đã giữ chức vụ quản lý trong 3 năm
-            </p>
+            {data.role === "STAFF" ? (
+              <p className="text-sm bg-[#F0F6FF] py-2 px-4 mt-2 rounded-xl">
+                Bạn đã giữ chức vụ trưởng bộ trong 4 năm
+              </p>
+            ) : (
+              <p className="text-sm bg-[#F0F6FF] py-2 px-4 mt-2 rounded-xl">
+                Bạn đã giữ chức vụ quản lý trong 3 năm
+              </p>
+            )}
           </div>
 
           <div className="mt-12">
-            <p className="text-lg font-semibold">
-              Đang làm việc với Trưởng phòng ( Bộ phận )
-            </p>
-            <div className="flex flex-wrap pt-8 gap-y-10">
-              {staffs.map((staff) => (
-                <div className="flex flex-col items-center w-[calc(100%/3)]">
-                  <Avatar size={70} src={staff.avatar} />
-                  <p className="text-base font-medium mt-2">{staff.fullName}</p>
-                  <p className="text-xs text-slate-500">{staff.divisionName}</p>
+            {data.role === "STAFF" ? (
+              <>
+                <p className="text-lg font-semibold">
+                  Đang làm việc với các nhân viên
+                </p>
+                <div className="flex flex-wrap pt-8 gap-y-10">
+                  {!isLoadingEmployees ? (
+                    !isErrorEmployees ? (
+                      <>
+                        {employees.map((employee, index) => (
+                          <div
+                            className="flex flex-col items-center w-[calc(100%/3)]"
+                            key={index}
+                          >
+                            <Avatar size={70} src={employee?.avatar} />
+                            <p className="text-base font-medium mt-2">
+                              {employee?.fullName}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {employee?.divisionName}
+                            </p>
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      <AnErrorHasOccured />
+                    )
+                  ) : (
+                    <LoadingComponentIndicator />
+                  )}
                 </div>
-              ))}
-            </div>
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-semibold">
+                  Đang làm việc với Trưởng phòng ( Bộ phận )
+                </p>
+                <div className="flex flex-wrap pt-8 gap-y-10">
+                  {staffs.map((staff, index) => (
+                    <div
+                      className="flex flex-col items-center w-[calc(100%/3)]"
+                      key={index}
+                    >
+                      <Avatar size={70} src={staff.avatar} />
+                      <p className="text-base font-medium mt-2">
+                        {staff.fullName}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {staff.divisionName}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
         <div className="bg-white flex-1 p-6 rounded-2xl h-full">
           <p className="text-lg font-semibold">Sự kiện tham gia gần đây (5)</p>
-          <div className="mt-5 space-y-3">
-            {events.map((event) => {
-              let status, statusColor, statusBgColor;
-              switch (event.status) {
-                case "PENDING":
-                  status = "Đang chuẩn bị";
-                  statusColor = "text-slate-500";
-                  statusBgColor = "bg-slate-100";
-                  break;
-                case "PROCESSING":
-                  status = "Đang diễn ra";
-                  statusColor = "text-orange-500";
-                  statusBgColor = "bg-orange-100";
-                  break;
-                case "DONE":
-                  status = "Đã kết thúc";
-                  statusColor = "text-green-500";
-                  statusBgColor = "bg-green-100";
-                  break;
-                case "CANCEL":
-                  status = "Hủy bỏ";
-                  statusColor = "text-red-500";
-                  statusBgColor = "bg-red-100";
-                  break;
-                default:
-                  break;
-              }
-              return (
-                <div className="flex border rounded-lg gap-x-2 p-2">
-                  <Image
-                    src={event.coverUrl}
-                    fallback="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
-                    width={50}
-                    height={50}
-                  />
-                  <div className="flex-1 flex flex-col justify-center">
-                    <p className="text-base font-medium truncate">
-                      {event.eventName}
-                    </p>
-                    <div className="flex justify-between">
-                      <p className="text-xs text-slate-400">
-                        {moment(event.startDate).format("DD-MM-YYYY")}
+          {data.role === "STAFF" ? (
+            <div className="mt-5 space-y-3">
+              {!isLoadingEvent ? (
+                !isErrorEvent ? (
+                  <>
+                    {listEvent.map((event, index) => {
+                      return (
+                        <div
+                          className="flex border rounded-lg gap-x-2 p-2"
+                          key={index}
+                        >
+                          <Image
+                            src={event.coverUrl}
+                            fallback="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
+                            width={50}
+                            height={50}
+                          />
+                          <div className="flex-1 flex flex-col justify-center">
+                            <p className="text-base font-medium truncate">
+                              {event.eventName}
+                            </p>
+                            <div className="flex justify-between">
+                              <p className="text-xs text-slate-400">
+                                {moment(event.startDate).format("DD-MM-YYYY")}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <AnErrorHasOccured />
+                )
+              ) : (
+                <LoadingComponentIndicator />
+              )}
+            </div>
+          ) : (
+            <div className="mt-5 space-y-3">
+              {events.map((event, index) => {
+                let status, statusColor, statusBgColor;
+                switch (event.status) {
+                  case "PENDING":
+                    status = "Đang chuẩn bị";
+                    statusColor = "text-slate-500";
+                    statusBgColor = "bg-slate-100";
+                    break;
+                  case "PROCESSING":
+                    status = "Đang diễn ra";
+                    statusColor = "text-orange-500";
+                    statusBgColor = "bg-orange-100";
+                    break;
+                  case "DONE":
+                    status = "Đã kết thúc";
+                    statusColor = "text-green-500";
+                    statusBgColor = "bg-green-100";
+                    break;
+                  case "CANCEL":
+                    status = "Hủy bỏ";
+                    statusColor = "text-red-500";
+                    statusBgColor = "bg-red-100";
+                    break;
+                  default:
+                    break;
+                }
+                return (
+                  <div
+                    className="flex border rounded-lg gap-x-2 p-2"
+                    key={index}
+                  >
+                    <Image
+                      src={event.coverUrl}
+                      fallback="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
+                      width={50}
+                      height={50}
+                    />
+                    <div className="flex-1 flex flex-col justify-center">
+                      <p className="text-base font-medium truncate">
+                        {event.eventName}
                       </p>
-                      {/* <div
+                      <div className="flex justify-between">
+                        <p className="text-xs text-slate-400">
+                          {moment(event.startDate).format("DD-MM-YYYY")}
+                        </p>
+                        {/* <div
                         className={`flex justify-center items-center ${statusBgColor} px-4 py- rounded-lg`}
                       >
                         <p className={`text-xs ${statusColor}`}>{status}</p>
                       </div> */}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </Fragment>

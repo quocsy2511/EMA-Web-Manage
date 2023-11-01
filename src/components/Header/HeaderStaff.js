@@ -20,7 +20,7 @@ const HeaderStaff = ({ collapsed, setCollapsed }) => {
   const userItems = [
     {
       key: "1",
-      label: <Link to="/manager/profile">Hồ sơ</Link>,
+      label: <Link to="/staff/profile">Hồ sơ</Link>,
     },
 
     {

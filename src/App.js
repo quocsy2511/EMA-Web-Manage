@@ -249,6 +249,14 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      {
+        path: "profile",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <ProfilePage />
+          </Suspense>
+        ),
+      },
     ],
   },
 ]);
