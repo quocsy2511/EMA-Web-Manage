@@ -66,11 +66,11 @@ const TaskModalContent = ({
     });
   }
 
-  useEffect(() => {
-    setTitle(taskSelected.title);
-    setDescription(taskSelected.description);
-    setSubTasks(taskSelected.subTask);
-  }, [taskSelected]);
+  // useEffect(() => {
+  //   setTitle(taskSelected.title);
+  //   setDescription(taskSelected.description);
+  //   setSubTasks(taskSelected.subTask);
+  // }, [taskSelected]);
 
   return (
     <div>
@@ -168,15 +168,16 @@ const TaskModalContent = ({
         {/* comment of task */}
         {!isLoadingListComments ? (
           !isErrorListComments ? (
-            listComments.length > 0 &&
-            listComments.map((comment, index) => (
-              <Comments
-                disableUpdate={disableUpdate}
-                key={index}
-                comment={comment}
-                taskSelected={taskSelected}
-              />
-            ))
+            listComments?.map((comment) => {
+              return (
+                <Comments
+                  disableUpdate={disableUpdate}
+                  key={comment.id}
+                  comment={comment}
+                  taskSelected={taskSelected}
+                />
+              );
+            })
           ) : (
             <AnErrorHasOccured />
           )

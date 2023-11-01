@@ -16,6 +16,10 @@ body {
 :where(.css-dev-only-do-not-override-18iikkb).ant-btn-primary {
   background-color: #1677ff !important;
 }
+.ant-btn-primary {
+  background-color: #1677ff;
+}
+
 .anticon.anticon-down.ant-select-suffix {
   color: black; /* Đổi màu icon thành màu đỏ (#ff0000) */
 }
