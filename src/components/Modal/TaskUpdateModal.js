@@ -8,6 +8,7 @@ import {
   Modal,
   Select,
   Tag,
+  Upload,
   message,
 } from "antd";
 import viVN from "antd/locale/vi_VN";
@@ -15,11 +16,19 @@ import ReactQuill from "react-quill";
 import moment from "moment";
 import dayjs from "dayjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { assignMember, updateTask } from "../../apis/tasks";
+import {
+  assignMember,
+  createTaskFile,
+  updateTask,
+  updateTaskFile,
+} from "../../apis/tasks";
 import { getDetailEvent } from "../../apis/events";
 import { getAllUser, getUserById } from "../../apis/users";
-import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { SyncLoader } from "react-spinners";
+import { IoMdAttach } from "react-icons/io";
+import { uploadFile } from "../../apis/files";
+import { GiCancel } from "react-icons/gi";
+import { BsCheckCircle } from "react-icons/bs";
 
 const { RangePicker } = DatePicker;
 
@@ -43,6 +52,8 @@ const TaskUpdateModal = ({
 
   const [fileList, setFileList] = useState();
   const [selectedEmployeesId, setSelectedEmployeesId] = useState();
+  const [updateFileList, setUpdateFileList] = useState(task?.taskFiles ?? []);
+  console.log("updateFileList : ", updateFileList);
 
   useEffect(() => {
     form.setFieldsValue({
@@ -66,6 +77,8 @@ const TaskUpdateModal = ({
               .id
           : null,
     });
+
+    setUpdateFileList(task?.taskFiles ?? []);
 
     if (isSubTask) {
       divisionIdOfStaff = staffs?.find(
@@ -151,6 +164,7 @@ const TaskUpdateModal = ({
         isSubTask ? parentTaskId : task.id,
       ]);
       handleCancel();
+      form.resetFields(["fileUrl"]);
       messageApi.open({
         type: "success",
         content: "Cập nhật sự kiện thành công.",
@@ -180,6 +194,57 @@ const TaskUpdateModal = ({
     }
   );
 
+  const { mutate: updateTaskFileMutate } = useMutation(
+    (updateFileList) => updateTaskFile(updateFileList),
+    {
+      onSuccess: (data, variables) => {},
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
+  const { mutate: createTakeFileMutate } = useMutation(
+    (taskFile) => createTaskFile(taskFile),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries([
+          "tasks",
+          eventID,
+          isSubTask ? parentTaskId : task.id,
+        ]);
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
+  const { mutate: uploadFileMutate, isLoading: uploadIsLoading } = useMutation(
+    ({ formData, taskID }) => uploadFile(formData),
+    {
+      onSuccess: (data, variables) => {
+        createTakeFileMutate({
+          taskID: variables.taskID,
+          fileName: data.fileName,
+          fileUrl: data.downloadUrl,
+        });
+      },
+      onError: () => {
+        messageApi.open({
+          type: "error",
+          content: "Không thể tải tệp tin lên! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
   const handleOk = () => {
     form.submit();
   };
@@ -201,6 +266,33 @@ const TaskUpdateModal = ({
       taskID: task.id,
       parentTask: isSubTask ? parentTaskId : null,
     };
+
+    // Update new file
+    if (!values.fileUrl || values.fileUrl?.length === 0) {
+      console.log("NOOO FILE");
+    } else {
+      console.log("HAS FILE");
+      const formData = new FormData();
+      formData.append("file", fileList);
+      formData.append("folderName", "task");
+
+      uploadFileMutate({ formData, taskID: values.taskID });
+    }
+
+    // Update existed file list
+    if (
+      task.taskFiles.length !== 0 &&
+      task.taskFiles.length !== updateFileList.length
+    ) {
+      console.log("Update new file list");
+      updateTaskFileMutate({
+        taskId: task.id,
+        files: updateFileList.map((file) => ({
+          fileName: file.fileName,
+          fileUrl: file.fileUrl,
+        })),
+      });
+    }
 
     if (!isSubTask) {
       console.log("Update task");
@@ -256,6 +348,14 @@ const TaskUpdateModal = ({
     if (formFieldName === "assignee") {
       setSelectedEmployeesId(changedValues[formFieldName]);
       form.resetFields(["leader"]);
+    }
+  };
+
+  const modifyFileList = (file) => {
+    if (updateFileList.some((item) => item.id === file.id)) {
+      setUpdateFileList((prev) => prev.filter((item) => item.id !== file.id));
+    } else {
+      setUpdateFileList((prev) => [...prev, file]);
     }
   };
 
@@ -544,13 +644,88 @@ const TaskUpdateModal = ({
                       )
                     : []
                 }
-                // onChange={(value) => {
-                //   form.setFieldsValue({ leader: value });
-                // }}
               />
             </Form.Item>
           </>
         )}
+        <div className="my-2 flex flex-wrap gap-x-3">
+          {task?.taskFiles.length > 0 &&
+            task?.taskFiles.map((file) => (
+              <div
+                className={`flex items-center gap-x-3 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg ${
+                  !updateFileList.some((item) => item.id === file.id) &&
+                  "opacity-50"
+                }`}
+                onClick={() => modifyFileList(file)}
+              >
+                <a
+                  href={file.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {file.fileName}
+                </a>
+                {updateFileList.some((item) => item.id === file.id) ? (
+                  <GiCancel className="text-blue-400" />
+                ) : (
+                  <BsCheckCircle className="text-blue-400" />
+                )}
+              </div>
+            ))}
+        </div>
+
+        <Form.Item
+          className="mb-0"
+          name="fileUrl"
+          valuePropName="fileList"
+          getValueFromEvent={(e) => e?.fileList}
+          rules={[
+            {
+              validator(_, fileList) {
+                return new Promise((resolve, reject) => {
+                  if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                    reject("File quá lớn ( dung lượng < 10MB )");
+                  } else {
+                    resolve();
+                  }
+                });
+              },
+            },
+          ]}
+        >
+          <Upload
+            className="flex items-center gap-x-3"
+            maxCount={1}
+            listType="picture"
+            customRequest={({ file, onSuccess }) => {
+              setTimeout(() => {
+                onSuccess("ok");
+              }, 0);
+            }}
+            showUploadList={{
+              showPreviewIcon: false,
+            }}
+            beforeUpload={(file) => {
+              return new Promise((resolve, reject) => {
+                if (file && file?.size > 10 * 1024 * 1024) {
+                  reject("File quá lớn ( <10MB )");
+                  return false;
+                } else {
+                  setFileList(file);
+                  resolve();
+                  return true;
+                }
+              });
+            }}
+          >
+            <div className="flex items-center">
+              <IoMdAttach className="cursor-pointer" size={20} />
+              <p className="text-sm font-medium">Thêm tài liệu đính kèm</p>
+            </div>
+          </Upload>
+        </Form.Item>
       </Form>
     </Modal>
   );

@@ -11,6 +11,7 @@ import { getEventDivisions, getFilterEvent } from "../../apis/events";
 
 const ProfilePage = () => {
   const { data, isLoading, isError } = useQuery(["profile"], getProfile);
+
   const divisionId = data?.divisionId;
   //Staff
   const {
@@ -108,32 +109,6 @@ const ProfilePage = () => {
         <AnErrorHasOccured />;
       </div>
     );
-
-  let status, statusColor, statusBgColor;
-  switch (events.status) {
-    case "PENDING":
-      status = "Đang chuẩn bị";
-      statusColor = "text-slate-500";
-      statusBgColor = "bg-slate-100";
-      break;
-    case "PROCESSING":
-      status = "Đang diễn ra";
-      statusColor = "text-orange-500";
-      statusBgColor = "bg-orange-100";
-      break;
-    case "DONE":
-      status = "Đã kết thúc";
-      statusColor = "text-green-500";
-      statusBgColor = "bg-green-100";
-      break;
-    case "CANCEL":
-      status = "Hủy bỏ";
-      statusColor = "text-red-500";
-      statusBgColor = "bg-red-100";
-      break;
-    default:
-      break;
-  }
 
   return (
     <Fragment>

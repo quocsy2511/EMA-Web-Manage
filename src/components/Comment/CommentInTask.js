@@ -1,19 +1,29 @@
-import { Avatar, Form, Input, Upload, message } from "antd";
+import { Avatar, Button, Form, Input, Upload, message } from "antd";
 import React, { useState } from "react";
-import { IoMdAttach, IoIosSend } from "react-icons/io";
-import { BsSendFill } from "react-icons/bs";
+import { IoMdAttach } from "react-icons/io";
+import { GiCancel } from "react-icons/gi";
+import { BsSendFill, BsCheckCircle } from "react-icons/bs";
 import { AnimatePresence, motion } from "framer-motion";
 import EmptyComment from "../Error/EmptyComment";
 import moment from "moment";
 import { useRouteLoaderData } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadFile } from "../../apis/files";
-import { postComment, removeComment } from "../../apis/comments";
+import {
+  createCommentFile,
+  postComment,
+  removeComment,
+  updateComment,
+} from "../../apis/comments";
 
 const CommentInTask = ({ comments, taskId, isSubtask }) => {
   const manager = useRouteLoaderData("manager");
 
   const [fileList, setFileList] = useState();
+
+  const [updatedFileList, setUpdatedFileList] = useState();
+  const [selectedCommentId, setSelectedCommentId] = useState();
+  const [listSelectedCommentFiles, setListSelectedCommentFiles] = useState();
 
   const queryClient = useQueryClient();
   const { mutate } = useMutation((comment) => postComment(comment), {
@@ -64,11 +74,86 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
     }
   );
 
+  const { mutate: updateCommentMutate, isLoading: updateCommentIsLoading } =
+    useMutation((updatedComment) => updateComment(updatedComment), {
+      onSuccess: () => {
+        setSelectedCommentId();
+        setUpdatedFileList();
+        setListSelectedCommentFiles();
+        queryClient.invalidateQueries(["comment", taskId]);
+        messageApi.open({
+          type: "success",
+          content: "Đã cập nhật bình luận.",
+        });
+      },
+      onError: () => {
+        messageApi.open({
+          type: "error",
+          content: "Ko thể xóa bình luận! Hãy thử lại sau",
+        });
+      },
+    });
+
+  const {
+    mutate: createCommentFileMutate,
+    isLoading: createCommentFileIsLoading,
+  } = useMutation(
+    ({ commentId, files, newComment }) => createCommentFile(commentId, files),
+    {
+      onSuccess: (data, variables) => {
+        updateCommentMutate({
+          commentId: variables.commentId,
+          ...variables.newComment,
+        });
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
+  const {
+    mutate: uploadUpdateFileMutate,
+    isLoading: uploadUpdateFileIsLoading,
+  } = useMutation(
+    ({ formData, commentId, newComment }) => uploadFile(formData),
+    {
+      onSuccess: (data, variables) => {
+        const newFileList = [
+          { fileName: data.fileName, fileUrl: data.downloadUrl },
+          ...variables.newComment.file,
+        ];
+
+        variables.newComment.file = newFileList;
+
+        createCommentFileMutate({
+          commentId: variables.commentId,
+          files: newFileList,
+          newComment: variables.newComment,
+        });
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
   const [form] = Form.useForm();
+  const [updateForm] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
   const handleOnClick = () => {
     form.submit();
+  };
+
+  const handleUpdateClick = () => {
+    updateForm.submit();
   };
 
   const handleDelete = (id) => {
@@ -91,6 +176,48 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
       formData.append("folderName", "comment");
 
       uploadFileMutate({ formData, comment: restValue });
+    }
+  };
+
+  const onUpdateFormFinish = (value) => {
+    console.log("Success: ", value);
+
+    const newComment = {
+      content: value.content,
+      file: listSelectedCommentFiles.map((item) => {
+        const { id, ...restItem } = item;
+        return restItem;
+      }),
+    };
+    console.log(newComment);
+
+    if (updatedFileList) {
+      console.log("Update có file");
+      const formData = new FormData();
+      formData.append("file", updatedFileList);
+      formData.append("folderName", "comment");
+
+      uploadUpdateFileMutate({
+        formData,
+        commentId: value.commentId,
+        newComment,
+      });
+    } else {
+      console.log("Update ko file");
+      updateCommentMutate({
+        commentId: value.commentId,
+        ...newComment,
+      });
+    }
+  };
+
+  const modifyFileList = (file) => {
+    if (listSelectedCommentFiles.some((item) => item.id === file.id)) {
+      setListSelectedCommentFiles((prev) =>
+        prev.filter((item) => item.id !== file.id)
+      );
+    } else {
+      setListSelectedCommentFiles((prev) => [...prev, file]);
     }
   };
 
@@ -198,7 +325,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
             exit={{ y: -50, opacity: 0 }}
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="ml-12 mt-8"
+            className="ml-12 mt-8 pb-10"
           >
             <AnimatePresence>
               {comments.map((comment) => {
@@ -207,7 +334,10 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                 const targetDate = moment(comment.createdAt);
                 const duration = moment.duration(currentDate.diff(targetDate));
 
-                if (duration.asHours() < 1) {
+                if (duration.asMinutes() < 1) {
+                  // Less than 1 minute
+                  time = `bây giờ`;
+                } else if (duration.asHours() < 1) {
                   time = `${Math.floor(duration.asMinutes())} phút trước`;
                 } else if (duration.asDays() < 1) {
                   // Less than 1 day
@@ -239,45 +369,257 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                           {comment.user.profile.fullName}
                         </span>{" "}
                         đã bình luận vào{" "}
-                        <span className="font-bold">
-                          {time}
-                          {/* {targetDate} */}
-                        </span>
+                        <span className="font-bold">{time}</span>
                       </p>
                     </div>
 
-                    <p className="text-sm ml-10">{comment.text}</p>
-
-                    {comment.commentFiles.length > 0 &&
-                      comment.commentFiles.map((file) => (
-                        <div
-                          key={file.id}
-                          className="ml-10 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                    <AnimatePresence mode="wait">
+                      {comment.id === selectedCommentId ? (
+                        <motion.div
+                          key="update-comment"
+                          initial={{ y: -10, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: 10, opacity: 0 }}
                         >
-                          <a
-                            href={file.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500"
+                          <Form
+                            form={updateForm}
+                            onFinish={onUpdateFormFinish}
+                            autoComplete="off"
+                            requiredMark={false}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                              }
+                            }}
+                            initialValues={{
+                              content: comment.text,
+                              oldFileList: comment.commentFiles,
+                              commentId: comment.id,
+                            }}
                           >
-                            Tệp đính kèm
-                          </a>
-                        </div>
-                      ))}
+                            <div className="flex items-center gap-x-5">
+                              <Form.Item
+                                className="w-[50%] mb-0 ml-8"
+                                name="content"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: `Chưa nhập bình luận!`,
+                                  },
+                                ]}
+                              >
+                                <Input
+                                  placeholder="Nhập bình luận"
+                                  size="large"
+                                  allowClear
+                                />
+                              </Form.Item>
 
-                    <div className="flex gap-x-3 text-sm font-bold ml-3">
-                      {/* <motion.p whileHover={{ y: -2 }} className="cursor-pointer">
-                    Chỉnh sửa
-                  </motion.p> */}
+                              <Button
+                                size="large"
+                                type="primary"
+                                onClick={handleUpdateClick}
+                                loading={
+                                  updatedFileList
+                                    ? uploadUpdateFileIsLoading ||
+                                      createCommentFileIsLoading ||
+                                      updateCommentIsLoading
+                                    : updateCommentIsLoading
+                                }
+                              >
+                                Chỉnh sửa
+                              </Button>
+                            </div>
 
-                      {comment.user.id === manager.id && (
-                        <motion.p
-                          className="cursor-pointer"
-                          whileHover={{ y: -2 }}
-                          onClick={() => handleDelete(comment.id)}
+                            <Form.Item
+                              name="oldFileList"
+                              className="hidden"
+                            ></Form.Item>
+                            <Form.Item
+                              name="commentId"
+                              className="hidden"
+                            ></Form.Item>
+
+                            <div className="ml-8 mt-3 flex flex-wrap gap-x-3">
+                              {comment.commentFiles.length > 0 &&
+                                comment.commentFiles.map((file) => (
+                                  <div
+                                    key={file.id}
+                                    className={`flex items-center gap-x-3 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg ${
+                                      !listSelectedCommentFiles.some(
+                                        (item) => item.id === file.id
+                                      ) && "opacity-50"
+                                    }`}
+                                    onClick={() => modifyFileList(file)}
+                                  >
+                                    <a
+                                      href={file.fileUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-500"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {file.fileName}
+                                    </a>
+                                    {listSelectedCommentFiles.some(
+                                      (item) => item.id === file.id
+                                    ) ? (
+                                      <GiCancel className="text-blue-400" />
+                                    ) : (
+                                      <BsCheckCircle className="text-blue-400" />
+                                    )}
+                                  </div>
+                                ))}
+                            </div>
+
+                            <div className="flex items-center gap-x-3 mt-3 ml-8">
+                              <Form.Item
+                                className="mb-0"
+                                name="updateFileUrl"
+                                valuePropName="updatedFileList"
+                                getValueFromEvent={(e) => e?.updatedFileList}
+                                rules={[
+                                  {
+                                    validator(_, updatedFileList) {
+                                      return new Promise((resolve, reject) => {
+                                        if (
+                                          updatedFileList &&
+                                          updatedFileList[0]?.size >
+                                            10 * 1024 * 1024
+                                        ) {
+                                          reject(
+                                            "File quá lớn ( dung lượng < 10MB )"
+                                          );
+                                        } else {
+                                          resolve();
+                                        }
+                                      });
+                                    },
+                                  },
+                                ]}
+                              >
+                                <Upload
+                                  className="flex items-center gap-x-3 "
+                                  maxCount={1}
+                                  listType="picture"
+                                  customRequest={({ file, onSuccess }) => {
+                                    setTimeout(() => {
+                                      onSuccess("ok");
+                                    }, 0);
+                                  }}
+                                  showUploadList={{
+                                    showPreviewIcon: false,
+                                    showRemoveIcon: false,
+                                  }}
+                                  beforeUpload={(file) => {
+                                    return new Promise((resolve, reject) => {
+                                      if (
+                                        file &&
+                                        file?.size > 10 * 1024 * 1024
+                                      ) {
+                                        reject("File quá lớn ( <10MB )");
+                                        return false;
+                                      } else {
+                                        setUpdatedFileList(file);
+                                        resolve();
+                                        return true;
+                                      }
+                                    });
+                                  }}
+                                >
+                                  <div className="flex items-center">
+                                    <IoMdAttach
+                                      className="cursor-pointer"
+                                      size={20}
+                                    />
+                                    <p className="text-sm font-medium">
+                                      Thêm tài liệu đính kèm
+                                    </p>
+                                  </div>
+                                </Upload>
+                              </Form.Item>
+                            </div>
+                          </Form>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="comment-item"
+                          initial={{ y: -10, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: 10, opacity: 0 }}
                         >
-                          Xóa
-                        </motion.p>
+                          <p className="text-sm ml-10 mb-2">{comment.text}</p>
+
+                          <div className="ml-10 flex flex-wrap gap-x-3">
+                            {comment.commentFiles.length > 0 &&
+                              comment.commentFiles.map((file) => (
+                                <div
+                                  key={file.id}
+                                  className="px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
+                                >
+                                  <a
+                                    href={file.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500"
+                                  >
+                                    {file.fileName}
+                                  </a>
+                                </div>
+                              ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    <div>
+                      {comment.user.id === manager.id && (
+                        <div className="flex font-medium gap-x-3 text-base">
+                          <motion.p
+                            className="cursor-pointer"
+                            whileHover={{ scale: 1.1 }}
+                            onClick={() => handleDelete(comment.id)}
+                          >
+                            Xóa
+                          </motion.p>
+
+                          <AnimatePresence mode="wait">
+                            {comment.id === selectedCommentId ? (
+                              <motion.p
+                                key="cancel-update-comment"
+                                whileHover={{ scale: 1.1 }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="cursor-pointer text-red-500"
+                                onClick={() => {
+                                  setSelectedCommentId();
+                                  setUpdatedFileList();
+                                  setListSelectedCommentFiles();
+                                }}
+                              >
+                                Hủy
+                              </motion.p>
+                            ) : (
+                              <motion.p
+                                key="update-comment"
+                                whileHover={{ scale: 1.1 }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="cursor-pointer"
+                                onClick={() => {
+                                  setSelectedCommentId(comment.id);
+                                  setListSelectedCommentFiles(
+                                    comment.commentFiles
+                                  );
+                                }}
+                              >
+                                Chỉnh sửa
+                              </motion.p>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       )}
                     </div>
                   </motion.div>

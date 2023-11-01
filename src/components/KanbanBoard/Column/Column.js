@@ -3,6 +3,7 @@ import TaskKanbanBoard from "../TaskKanban/TaskKanbanBoard";
 import TaskModal from "../ModalKanban/TaskModal";
 import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
+import { AnimatePresence, motion } from "framer-motion";
 import moment from "moment";
 
 const Column = ({ TaskParent, selectedStatus }) => {
@@ -85,8 +86,9 @@ const Column = ({ TaskParent, selectedStatus }) => {
           </div>
 
           {/* subtask */}
-          {subTask.length > 0
-            ? filteredSubTask.map((subTask, index) => (
+          <AnimatePresence mode="wait">
+            {subTask.length > 0 &&
+              filteredSubTask.map((subTask, index) => (
                 <TaskKanbanBoard
                   setTaskSelected={setTaskSelected}
                   task={subTask}
@@ -94,8 +96,9 @@ const Column = ({ TaskParent, selectedStatus }) => {
                   setIsOpenTaskModal={setIsOpenTaskModal}
                   key={subTask.id}
                 />
-              ))
-            : ""}
+              ))}
+          </AnimatePresence>
+
           {!disableUpdate && (
             <div
               className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow"

@@ -2,7 +2,7 @@ import { Avatar, Badge, Button, Dropdown } from "antd";
 import React from "react";
 import { HiOutlineBellAlert } from "react-icons/hi2";
 import { IoLogOutOutline } from "react-icons/io5";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useRouteLoaderData } from "react-router-dom";
 import { Header } from "antd/es/layout/layout";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { getProfile } from "../../apis/users";
@@ -12,6 +12,8 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 
 const HeaderStaff = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
+  const staff = useRouteLoaderData("staff");
+
   const logout = () => {
     localStorage.removeItem("token");
     navigate("/");
@@ -80,15 +82,15 @@ const HeaderStaff = ({ collapsed, setCollapsed }) => {
     },
   ];
 
-  const {
-    data: staff,
-    isError: isErrorStaff,
-    isLoading: isLoadingStaff,
-  } = useQuery(["staff"], () => getProfile(), {
-    select: (data) => {
-      return data;
-    },
-  });
+  // const {
+  //   data: staff,
+  //   isError: isErrorStaff,
+  //   isLoading: isLoadingStaff,
+  // } = useQuery(["staff"], () => getProfile(), {
+  //   select: (data) => {
+  //     return data;
+  //   },
+  // });
 
   return (
     <Header className="p-0 bg-white border-b-2 h-[70px]">
@@ -143,7 +145,7 @@ const HeaderStaff = ({ collapsed, setCollapsed }) => {
               arrow
             >
               <div className="flex items-center">
-                {!isLoadingStaff ? (
+                {/* {!isLoadingStaff ? (
                   !isErrorStaff ? (
                     <>
                       <div className="flex flex-col items-end">
@@ -168,7 +170,24 @@ const HeaderStaff = ({ collapsed, setCollapsed }) => {
                   )
                 ) : (
                   <LoadingComponentIndicator />
-                )}
+                )} */}
+
+                <div className="flex flex-col items-end">
+                  <p className="text-sm font-semibold text-black">
+                    {staff.fullName}
+                  </p>
+                  <p className="text-xs font-normal text-black">
+                    Trưởng bộ phận
+                  </p>
+                </div>
+                <div className="w-2" />
+
+                <Avatar
+                  size={40}
+                  icon={<p>icon</p>}
+                  alt="user_image"
+                  src={staff.avatar}
+                />
               </div>
             </Dropdown>
           </div>

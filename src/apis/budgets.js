@@ -2,8 +2,8 @@ import { authRequest } from "../utils/axios-utils";
 
 export const getBudget = ({ eventID, pageSize, currentPage, mode, userID }) =>
   authRequest({
-    url: `/budget/${eventID}?sizePage=${pageSize}&currentPage=${currentPage}&mode=${mode}&userID=${
-      userID ? userID : ""
+    url: `/budget/${eventID}?sizePage=${pageSize}&currentPage=${currentPage}&mode=${mode}${
+      userID ? `&userID=${userID}` : ""
     }`,
   });
 

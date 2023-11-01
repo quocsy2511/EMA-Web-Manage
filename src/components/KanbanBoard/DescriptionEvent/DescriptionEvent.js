@@ -6,6 +6,7 @@ import React from "react";
 import { BsCalendarHeart, BsFileEarmarkTextFill } from "react-icons/bs";
 import { FaMoneyBillWave, FaSearchLocation } from "react-icons/fa";
 import { SiFastapi } from "react-icons/si";
+import { motion } from "framer-motion";
 
 const DescriptionEvent = ({ selectEvent }) => {
   const getColorStatusPriority = (value) => {
@@ -22,7 +23,9 @@ const DescriptionEvent = ({ selectEvent }) => {
   };
 
   return (
-    <div
+    <motion.div
+      animate={{ opacity: [1, 0.2, 1] }}
+      transition={{ duration: 0.5 }}
       className={`min-h-[150px] relative group md:w-[100%] w-[45%] bg-bgG cursor-pointer bg-auto bg-center px-16 pt-3 mt-5`}
     >
       <h2 className="text-4xl font-semibold  mb-3 italic">
@@ -111,7 +114,7 @@ const DescriptionEvent = ({ selectEvent }) => {
           ]}
         />
       </div>
-    </div>
+    </motion.div>
   );
 };
 
