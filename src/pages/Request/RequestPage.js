@@ -7,6 +7,7 @@ import { Button } from "antd";
 import NewRequestModal from "./Modal/NewRequestModal";
 import { useQuery } from "@tanstack/react-query";
 import { getAllRequests } from "../../apis/request";
+import { useRouteLoaderData } from "react-router-dom";
 
 const RequestPage = () => {
   // const [requests, setRequests] = useState([
@@ -69,6 +70,7 @@ const RequestPage = () => {
   const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
   const [isOpenNewRequest, setIsOpenNewRequest] = useState(false);
   const [selectedType, setSelectedType] = useState("All");
+  const staff = useRouteLoaderData("staff");
 
   const {
     data: requests,
@@ -76,7 +78,7 @@ const RequestPage = () => {
     isError,
     refetch,
   } = useQuery(["requests"], () =>
-    getAllRequests({ curentPage: 1, pageSize: 10, type: "L" })
+    getAllRequests({ curentPage: 1, pageSize: 10 })
   );
   console.log("REQUEST: ", requests);
 
@@ -96,11 +98,17 @@ const RequestPage = () => {
         <div className="w-full h-full bg-white rounded-lg shadow-xl flex">
           <div className="w-1/5 border-r overflow-hidden overflow-y-scroll scrollbar-hide">
             <div className="h-10" />
-            <motion.div className="w-full flex justify-center items-center mb-3">
-              <Button type="primary" onClick={() => setIsOpenNewRequest(true)}>
-                Tạo đơn
-              </Button>
-            </motion.div>
+            {staff?.role && (
+              <motion.div className="w-full flex justify-center items-center mb-3">
+                <Button
+                  type="primary"
+                  onClick={() => setIsOpenNewRequest(true)}
+                >
+                  Tạo đơn
+                </Button>
+              </motion.div>
+            )}
+
             <div
               onClick={() => handleChangeRequestType("inbox")}
               className="flex items-center gap-x-4 border-l cursor-pointer"

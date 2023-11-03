@@ -13,6 +13,7 @@ import {
 import TextArea from "antd/es/input/TextArea";
 import moment from "moment";
 import React, { useState } from "react";
+import { createRequest } from "../../../apis/request";
 
 const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
   const handleCancel = () => {
@@ -35,25 +36,22 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
 
   const queryClient = useQueryClient();
   const { mutate: submitFormRequest, isLoading: isLoadingSubmitForm } =
-    useMutation(
-      // (task) => createTask(task),
-      {
-        onSuccess: () => {
-          //   queryClient.invalidateQueries("tasks");
-          message.open({
-            type: "success",
-            content: "Tạo một đơn yêu cầu mới thành công",
-          });
-          setIsOpenNewRequest(false);
-        },
-        onError: () => {
-          message.open({
-            type: "error",
-            content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-          });
-        },
-      }
-    );
+    useMutation((request) => createRequest(request), {
+      onSuccess: () => {
+        queryClient.invalidateQueries("requests");
+        message.open({
+          type: "success",
+          content: "Tạo một đơn yêu cầu mới thành công",
+        });
+        setIsOpenNewRequest(false);
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    });
 
   const onFinish = (values) => {
     const { date, ...data } = values;
@@ -68,7 +66,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
   return (
     <Modal
       title="Tạo mới yêu cầu "
-      width={900}
+      width={700}
       open={isOpenNewRequest}
       footer={false}
       mask={false}
@@ -152,6 +150,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
           hasFeedback
         >
           <RangePicker
+            placeholder={["Ngày bắt đầu ", "ngày kết thúc"]}
             formatDate="YYYY/MM/DD"
             disabledDate={(current) =>
               current && current < today.startOf("day")
@@ -159,26 +158,50 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
             onChange={onChangeDate}
           />
         </Form.Item>
-        {/* Cả ngày */}
-        <Form.Item label="Cả ngày" name="isFull" valuePropName="checked">
-          <Checkbox
-            checked={isFull}
-            onChange={(e) => setIsFull(e.target.checked)}
-          />
-        </Form.Item>
-        {/* Buổi trong ngày */}
-        <Form.Item label="Buổi trong ngày" name="isPM" initialValue={isPM}>
-          <Radio.Group disabled={isFull}>
-            <Radio value="false" onChange={() => setIsPM("false")}>
-              {" "}
-              Buổi sáng{" "}
-            </Radio>
-            <Radio value="true" onChange={() => setIsPM("true")}>
-              {" "}
-              Buổi chiều{" "}
-            </Radio>
-          </Radio.Group>
-        </Form.Item>
+        <div className="flex gap-x-2 justify-center w-full items-center">
+          {/* Cả ngày */}
+          <Form.Item
+            label="Cả ngày"
+            name="isFull"
+            valuePropName="checked"
+            labelCol={{
+              span: 4,
+            }}
+            wrapperCol={{
+              span: 18,
+            }}
+            style={{
+              display: "inline-block",
+              width: "60%",
+            }}
+          >
+            <Checkbox
+              checked={isFull}
+              onChange={(e) => setIsFull(e.target.checked)}
+            />
+          </Form.Item>
+          {/* Buổi trong ngày */}
+          <Form.Item
+            //   label="Buổi"
+            name="isPM"
+            initialValue={isPM}
+            style={{
+              display: "inline-block",
+              width: "25%",
+            }}
+          >
+            <Radio.Group disabled={isFull} className="">
+              <Radio value="false" onChange={() => setIsPM("false")}>
+                {" "}
+                Buổi sáng{" "}
+              </Radio>
+              <Radio value="true" onChange={() => setIsPM("true")}>
+                {" "}
+                Buổi chiều{" "}
+              </Radio>
+            </Radio.Group>
+          </Form.Item>
+        </div>
         <Form.Item
           labelCol={{
             span: 4,
@@ -194,7 +217,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
             htmlType="submit"
             loading={isLoadingSubmitForm}
           >
-            Submit
+            Gửi đơn
           </Button>
         </Form.Item>
       </Form>
