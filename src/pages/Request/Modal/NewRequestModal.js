@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Checkbox,
@@ -7,6 +8,7 @@ import {
   Modal,
   Radio,
   Select,
+  message,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import moment from "moment";
@@ -31,6 +33,28 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
     setEndDate(isoEndDate);
   };
 
+  const queryClient = useQueryClient();
+  const { mutate: submitFormRequest, isLoading: isLoadingSubmitForm } =
+    useMutation(
+      // (task) => createTask(task),
+      {
+        onSuccess: () => {
+          //   queryClient.invalidateQueries("tasks");
+          message.open({
+            type: "success",
+            content: "Tạo một đơn yêu cầu mới thành công",
+          });
+          setIsOpenNewRequest(false);
+        },
+        onError: () => {
+          message.open({
+            type: "error",
+            content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+          });
+        },
+      }
+    );
+
   const onFinish = (values) => {
     const { date, ...data } = values;
     const request = {
@@ -38,10 +62,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
       startDate: startDate,
       endDate: endDate,
     };
-    console.log(
-      "🚀 ~ file: NewRequestModal.js:38 ~ onFinish ~ request:",
-      request
-    );
+    submitFormRequest(request);
   };
 
   return (
@@ -132,7 +153,6 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
         >
           <RangePicker
             formatDate="YYYY/MM/DD"
-            // disabledDate={disabledDate}
             disabledDate={(current) =>
               current && current < today.startOf("day")
             }
@@ -169,7 +189,11 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
           label=" "
           colon={false}
         >
-          <Button type="primary" htmlType="submit">
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={isLoadingSubmitForm}
+          >
             Submit
           </Button>
         </Form.Item>
