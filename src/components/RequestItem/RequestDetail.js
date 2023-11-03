@@ -6,8 +6,8 @@ import { Avatar, Button } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
-const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
-  const handleSelectedRequest = () => {
+const RequestDetail = ({ request, setSelectedRequest }) => {
+  const handleBackSelectedRequest = () => {
     setSelectedRequest();
   };
 
@@ -23,7 +23,7 @@ const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
     >
       <div className="w-full h-14 border-b px-5 flex items-center gap-x-5">
         <IoChevronBackSharp
-          onClick={handleSelectedRequest}
+          onClick={handleBackSelectedRequest}
           size={18}
           className="text-slate-500 cursor-pointer"
         />
