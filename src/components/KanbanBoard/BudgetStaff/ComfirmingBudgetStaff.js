@@ -10,7 +10,7 @@ import React, { useRef, useState } from "react";
 import EditBudget from "./ModalBudget/EditBudget";
 import Highlighter from "react-highlight-words";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateStatusBudget } from "../../../apis/budgets";
+import { deleteBudget } from "../../../apis/budgets";
 
 const ComfirmingBudgetStaff = ({ selectEvent, listBudgetConfirming }) => {
   const [isOpenEditBudget, setIsOpenEditBudget] = useState(false);
@@ -124,8 +124,8 @@ const ComfirmingBudgetStaff = ({ selectEvent, listBudgetConfirming }) => {
   });
 
   const queryClient = useQueryClient();
-  const { mutate: changeStatusBudget } = useMutation(
-    ({ budgetsId, status }) => updateStatusBudget({ budgetsId, status }),
+  const { mutate: deleteBudgetMutate } = useMutation(
+    ({ budgetID }) => deleteBudget({ budgetID }),
     {
       onSuccess: () => {
         queryClient.invalidateQueries("listBudgetConfirming");
@@ -232,8 +232,8 @@ const ComfirmingBudgetStaff = ({ selectEvent, listBudgetConfirming }) => {
       okType: "danger",
       cancelText: "Huỷ",
       onOk() {
-        const budgetsId = record.id;
-        changeStatusBudget({ budgetsId, status: "CANCEL" });
+        const budgetID = record.id;
+        deleteBudgetMutate({ budgetID });
       },
       onCancel() {
         console.log("Cancel");

@@ -31,3 +31,9 @@ export const updateStatusBudget = ({ budgetsId, status }) =>
     url: `/budget/${budgetsId}/${status}`,
     method: "put",
   });
+
+export const deleteBudget = ({ budgetID }) =>
+  authRequest({
+    url: `/budget/detail/${budgetID}`,
+    method: "delete",
+  });

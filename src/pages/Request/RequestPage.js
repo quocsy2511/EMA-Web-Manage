@@ -3,6 +3,8 @@ import { BsMailbox, BsTrash3 } from "react-icons/bs";
 import RequestsList from "../../components/RequestItem/RequestsList";
 import RequestDetail from "../../components/RequestItem/RequestDetail";
 import { AnimatePresence, motion } from "framer-motion";
+import { Button } from "antd";
+import NewRequestModal from "./Modal/NewRequestModal";
 
 const RequestPage = () => {
   const [requests, setRequests] = useState([
@@ -10,6 +12,7 @@ const RequestPage = () => {
   ]);
   const [selectedRequest, setSelectedRequest] = useState();
   const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
+  const [isOpenNewRequest, setIsOpenNewRequest] = useState(false);
 
   const handleChangeRequestType = (type) => {
     setSelectedRequestType(type);
@@ -24,6 +27,11 @@ const RequestPage = () => {
           <div className="w-1/5 border-r">
             <div className="h-10" />
 
+            <motion.div className="w-full flex justify-center items-center mb-3">
+              <Button type="primary" onClick={() => setIsOpenNewRequest(true)}>
+                Tạo đơn
+              </Button>
+            </motion.div>
             <motion.div
               layoutId="active-tab"
               onClick={() => handleChangeRequestType("inbox")}
@@ -102,6 +110,12 @@ const RequestPage = () => {
             </AnimatePresence>
           </div>
         </div>
+        {isOpenNewRequest && (
+          <NewRequestModal
+            isOpenNewRequest={isOpenNewRequest}
+            setIsOpenNewRequest={setIsOpenNewRequest}
+          />
+        )}
       </div>
     </Fragment>
   );
