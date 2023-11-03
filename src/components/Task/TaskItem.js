@@ -125,10 +125,10 @@ const TaskItem = ({
 
       <div className="w-[2%]" />
       <div className="w-[30%] space-y-1">
-        <p className="text-xl font-semibold">{task.title}</p>
+        <p className="text-2xl font-semibold">{task.title}</p>
         <div className="flex items-center gap-x-5">
           {user ? (
-            <p className="text-xs">
+            <p className="text-sm">
               Chịu trách nhiệm bởi{" "}
               <span className="font-medium">{user.fullName}</span>
             </p>
@@ -156,43 +156,45 @@ const TaskItem = ({
       </div>
       <div className="flex-1 flex justify-end">
         <div
-          className={`text-center font-medium flex justify-center items-center px-3 ${statusColor} border-2  ${statusBorder} rounded-full`}
+          className={`text-center font-medium flex justify-center items-center px-3 my-2 ${statusColor} border-2  ${statusBorder} rounded-full`}
         >
           {status}
         </div>
 
         <div className="w-[4%]" />
 
-        <div className="flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-lg">
-          <BsHourglassSplit size={15} />
-          <div className="w-4" />
-          <p className="text-sm font-medium">
-            {task.startDate
-              ? moment(task.startDate)
-                  // .tz("Asia/Ho_Chi_Minh")
-                  .utc()
-                  .format("DD/MM/YYYY HH:mm")
-              : "-- : --"}
-          </p>
+        <div className="space-y-1">
+          <p className="text-center">Thời gian bắt đầu</p>
+          <div className="flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-lg">
+            <BsHourglassSplit size={15} />
+            <div className="w-4" />
+            <p className="text-sm font-medium">
+              {task.startDate
+                ? moment(task.startDate).utc().format("DD/MM/YYYY HH:mm")
+                : "-- : --"}
+            </p>
+          </div>
         </div>
+
         <div className="w-[4%]" />
-        <div className="flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-lg">
-          <BsHourglassBottom size={15} />
-          <div className="w-4" />
-          <p className="text-sm font-medium">
-            {task.endDate
-              ? moment(task.endDate)
-                  // .tz("Asia/Ho_Chi_Minh")
-                  .utc()
-                  .format("DD/MM/YYYY HH:mm")
-              : "-- : --"}
-          </p>
+
+        <div className="space-y-1">
+          <p className="text-center">Thời gian kết thúc</p>
+          <div className="flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-lg">
+            <BsHourglassBottom size={15} />
+            <div className="w-4" />
+            <p className="text-sm font-medium">
+              {task.endDate
+                ? moment(task.endDate).utc().format("DD/MM/YYYY HH:mm")
+                : "-- : --"}
+            </p>
+          </div>
         </div>
       </div>
       <div className="w-[4%]" />
 
       <Avatar
-        size={35}
+        size={40}
         alt="avatar"
         src={
           user?.avatar ??
@@ -208,7 +210,7 @@ const TaskItem = ({
               e.stopPropagation();
               goToSubTask();
             }}
-            size={25}
+            size={30}
             className="text-slate-400 hover:text-blue-400"
           />
         </Badge>
@@ -220,7 +222,7 @@ const TaskItem = ({
             e.stopPropagation();
           }}
           className="text-slate-400"
-          size={25}
+          size={30}
         />
       ) : null}
     </motion.div>

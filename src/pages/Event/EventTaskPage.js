@@ -160,7 +160,7 @@ const EventTaskPage = () => {
   };
 
   const handleEndEvent = () => {
-    mutate(eventId, " DONE");
+    mutate(eventId, "DONE");
   };
 
   if (isLoading)
