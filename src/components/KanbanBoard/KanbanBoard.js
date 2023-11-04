@@ -18,6 +18,7 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
               selectedStatus={selectedStatus}
               TaskParent={taskParent}
               idEvent={selectEvent.id}
+              key={taskParent.id}
             />
           ))}
         </div>

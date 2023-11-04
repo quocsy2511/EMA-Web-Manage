@@ -245,7 +245,7 @@ const TaskKanbanBoard = ({
                     {subtaskDetails?.[0].assignTasks.length > 0 &&
                       subtaskDetails?.[0].assignTasks.map((item, index) => (
                         <Tooltip
-                          key="avatar"
+                          key={index}
                           title={item.user?.profile?.fullName}
                           placement="top"
                         >
