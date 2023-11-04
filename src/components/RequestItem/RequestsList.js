@@ -1,17 +1,46 @@
 import React from "react";
-import { Avatar, Input, Popconfirm } from "antd";
+import { Avatar, Input, Popconfirm, Tag, message } from "antd";
 import {
   AiOutlineSearch,
   AiOutlineCheckSquare,
   AiOutlineCloseSquare,
 } from "react-icons/ai";
-import { LuMailOpen, LuMail } from "react-icons/lu";
-import { AnimatePresence, motion } from "framer-motion";
+import { LuMailOpen, LuMail, LuMailCheck, LuMailX } from "react-icons/lu";
+import { TbMailStar, TbMailX } from "react-icons/tb";
+import { motion } from "framer-motion";
 import moment from "moment/moment";
+import { useRouteLoaderData } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { approveRequest } from "../../apis/requests";
 
 const RequestsList = ({ requests, setSelectedRequest }) => {
-  const handleSelectedRequest = (request) => {
-    setSelectedRequest(request);
+  const staff = useRouteLoaderData("staff");
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation((request) => approveRequest(request), {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["requests"]);
+      messageApi.open({
+        type: "success",
+        content: "Duyệt đơn thành công.",
+      });
+    },
+    onError: (data) => {
+      messageApi.open({
+        type: "error",
+        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+      });
+    },
+  });
+
+  const handleApproveRequest = (id, status) => {
+    mutate({
+      requestID: id,
+      replyMessage: "",
+      status: status,
+    });
   };
 
   return (
@@ -21,6 +50,7 @@ const RequestsList = ({ requests, setSelectedRequest }) => {
       exit={{ opacity: 0 }}
       className="w-full h-full overflow-hidden flex flex-col bg-white"
     >
+      {contextHolder}
       <div className="w-full h-14 border-b px-2 flex items-center">
         <Input
           placeholder="Tìm kiếm"
@@ -30,17 +60,15 @@ const RequestsList = ({ requests, setSelectedRequest }) => {
           // onPressEnter={}
         />
       </div>
-      <div className="overflow-y-scroll flex-1">
-        {/* <AnimatePresence> */}
-        {requests?.map((request, index) => (
+      <div className="flex-1">
+        {requests.map((request, index) => (
           <motion.div
-            // layout
             key={index}
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 10, opacity: 0 }}
             className="py-3 px-5 border-b cursor-pointer group"
-            onClick={handleSelectedRequest}
+            onClick={() => setSelectedRequest(request)}
           >
             <motion.div
               whileHover={{ x: 2, y: -2 }}
@@ -50,42 +78,120 @@ const RequestsList = ({ requests, setSelectedRequest }) => {
               <p className="text-sm font-medium">
                 {request.user?.profile?.fullName}
               </p>
+
               <p className="text-sm text-slate-500 w-[50%] whitespace-nowrap overflow-hidden overflow-ellipsis">
                 {request.title}
               </p>
+
               <div className="flex items-center justify-end gap-x-2 text-xs text-slate-500 flex-1">
-                <div className="w-2 h-2 bg-red-400 rounded-full block group-hover:hidden" />
+                <div className="group-hover:hidden">
+                  {request.type === "L" && request.isFull ? (
+                    <Tag color="cyan" className="w-20 text-center">
+                      Cả ngày
+                    </Tag>
+                  ) : request.isPM ? (
+                    <Tag color="geekblue" className="w-20 text-center">
+                      Buổi chiều
+                    </Tag>
+                  ) : (
+                    <Tag color="orange" className="w-20 text-center">
+                      Buổi sáng
+                    </Tag>
+                  )}
+                </div>
+
+                <div
+                  className={`w-2 h-2 ${
+                    request.type === "A"
+                      ? "bg-green-600"
+                      : request.type === "L"
+                      ? "bg-red-500"
+                      : request.type === "M" && "bg-purple-400"
+                  } rounded-full block group-hover:hidden`}
+                />
                 <p className="group-hover:hidden">
                   {moment(request.createdAt).format("DD [tháng] MM, YYYY")}
                 </p>
-                <p className="group-hover:hidden">
+                <p className="group-hover:hidden mr-3">
                   {moment(request.createdAt).format("HH:mm")}
                 </p>
-                {/* <Popconfirm onClick={(e) => e.stopPropagation()}>
-                  <HiOutlineTrash
-                    className="hidden group-hover:block"
-                    size={20}
-                  />
-                </Popconfirm> */}
-                <AiOutlineCheckSquare
-                  onClick={(e) => e.stopPropagation()}
-                  className="hidden group-hover:block mr-2 text-blue-500"
-                  size={20}
-                />
-                <AiOutlineCloseSquare
-                  onClick={(e) => e.stopPropagation()}
-                  className="hidden group-hover:block mr-2 text-red-500"
-                  size={20}
-                />
 
-                <LuMailOpen size={18} />
-                <LuMail size={18} />
+                {request.approver && request.status === "ACCEPT" ? (
+                  <LuMailCheck
+                    size={20}
+                    className="group-hover:hidden text-blue-500"
+                  />
+                ) : request.approver && request.status === "REJECT" ? (
+                  <LuMailX
+                    size={20}
+                    className="group-hover:hidden text-red-500"
+                  />
+                ) : (
+                  <div className="w-5" />
+                )}
+
+                {!staff ? (
+                  <>
+                    {!request.approver && (
+                      <>
+                        <AiOutlineCheckSquare
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleApproveRequest(request.id, "ACCEPT");
+                          }}
+                          className="hidden group-hover:block mr-2 text-blue-500"
+                          size={20}
+                        />
+                        <AiOutlineCloseSquare
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleApproveRequest(request.id, "REJECT");
+                          }}
+                          className="hidden group-hover:block mr-2 text-red-500"
+                          size={20}
+                        />
+                        <LuMail
+                          className="hidden group-hover:block"
+                          size={18}
+                        />
+                      </>
+                    )}
+                    {request.approver && (
+                      <LuMailOpen
+                        className="hidden group-hover:block"
+                        size={18}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <TbMailX
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        // Delete nè
+                      }}
+                      className="hidden group-hover:block mr-2 text-red-500"
+                      size={20}
+                    />
+                    <TbMailStar
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        // Update nè
+                      }}
+                      className="hidden group-hover:block mr-2 text-blue-500"
+                      size={20}
+                    />
+                    <LuMail className="hidden group-hover:block" size={18} />
+                  </>
+                )}
               </div>
             </motion.div>
           </motion.div>
         ))}
-        {/* </AnimatePresence> */}
       </div>
+      <div className="bg-[#f5f4f7] flex justify-end pt-4">1</div>
     </motion.div>
   );
 };
