@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "antd";
 import NewRequestModal from "./Modal/NewRequestModal";
 import { useQuery } from "@tanstack/react-query";
-import { getAllRequests } from "../../apis/request";
+import { getAllRequests } from "../../apis/requests";
 import { useRouteLoaderData } from "react-router-dom";
 
 const RequestPage = () => {

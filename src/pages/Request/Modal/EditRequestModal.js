@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Checkbox,
@@ -8,24 +7,27 @@ import {
   Modal,
   Radio,
   Select,
-  message,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
+import dayjs from "dayjs";
 import moment from "moment";
 import React, { useState } from "react";
-import { createRequest } from "../../../apis/requests";
 
-const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
+const EditRequestModal = ({
+  isOpenEditRequest,
+  setIsOpenEditRequest,
+  requestSelected,
+}) => {
   const handleCancel = () => {
-    setIsOpenNewRequest(false);
+    setIsOpenEditRequest(false);
   };
-  const [form] = Form.useForm();
   const { RangePicker } = DatePicker;
+  const today = moment();
+  const [form] = Form.useForm();
   const [isFull, setIsFull] = useState(false);
-  const [isPM, setIsPM] = useState("false");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const today = moment();
+  const [isPM, setIsPM] = useState("false");
   const onChangeDate = (value, dateString) => {
     // Chuyển đổi thành định dạng ISO 8601
     const isoStartDate = moment(dateString[0]).toISOString();
@@ -33,69 +35,14 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
     setStartDate(isoStartDate);
     setEndDate(isoEndDate);
   };
-
-  const queryClient = useQueryClient();
-  const { mutate: submitFormRequest, isLoading: isLoadingSubmitForm } =
-    useMutation((request) => createRequest(request), {
-      onSuccess: () => {
-        queryClient.invalidateQueries("requests");
-        message.open({
-          type: "success",
-          content: "Tạo một đơn yêu cầu mới thành công",
-        });
-        setIsOpenNewRequest(false);
-      },
-      onError: () => {
-        message.open({
-          type: "error",
-          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-        });
-      },
-    });
-
-  const onFinish = (values) => {
-    const { date, ...data } = values;
-    const request = {
-      ...data,
-      startDate: startDate,
-      endDate: endDate,
-    };
-
-    if (!request.isFull) {
-      const newRequest = {
-        ...request,
-        isFull: "false",
-        isPM: "true",
-      };
-      console.log(
-        "🚀 ~ file: NewRequestModal.js:69 ~ onFinish ~ newRequest:",
-        newRequest
-      );
-      submitFormRequest(newRequest);
-    } else {
-      console.log(
-        "🚀 ~ file: requestModal.js:59 ~ onFinish ~ request:",
-        request
-      );
-      submitFormRequest(request);
-    }
-  };
-
+  const onFinish = (values) => {};
   return (
     <Modal
-      title="Tạo mới yêu cầu "
+      title="Cập nhật yêu cầu "
       width={700}
-      open={isOpenNewRequest}
+      open={isOpenEditRequest}
       footer={false}
-      mask={false}
-      //   maskClosable={false}
       onCancel={handleCancel}
-      style={{
-        position: "fixed",
-        right: 30,
-        top: "44%",
-        margin: 0,
-      }}
     >
       <Form
         form={form}
@@ -109,7 +56,6 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
         autoComplete="off"
         onFinish={onFinish}
       >
-        {/* tên */}
         <Form.Item
           name="title"
           label="Tên đơn"
@@ -120,6 +66,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
             },
           ]}
           hasFeedback
+          initialValue={requestSelected?.title}
         >
           <Input placeholder="Tên đơn " />
         </Form.Item>
@@ -134,6 +81,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
             },
           ]}
           hasFeedback
+          initialValue={requestSelected?.content}
         >
           <TextArea rows={4} placeholder="Nội dung đơn " />
         </Form.Item>
@@ -147,6 +95,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
               message: "Loại đơn bắt buộc chọn!",
             },
           ]}
+          initialValue={requestSelected?.type}
         >
           <Select placeholder="Loại đơn ">
             <Select.Option value="A">Nghỉ phép có lương</Select.Option>
@@ -154,26 +103,30 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
             <Select.Option value="M">Đi công tác</Select.Option>
           </Select>
         </Form.Item>
-        {/* Thời gian */}
+        {/* thời gian */}
         <Form.Item
-          label="Thời gian"
           name="date"
+          className="mb-0"
           rules={[
             {
               type: "array",
               required: true,
-              message: "Hãy chọn thời gian!",
+              message: "Please select time!",
             },
           ]}
-          hasFeedback
+          initialValue={[
+            dayjs(requestSelected.startDate).utcOffset(7).local(),
+            dayjs(requestSelected.endDate).utcOffset(7).local(),
+          ]}
         >
           <RangePicker
-            placeholder={["Ngày bắt đầu ", "ngày kết thúc"]}
-            formatDate="YYYY/MM/DD"
+            placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
             disabledDate={(current) =>
               current && current < today.startOf("day")
             }
             onChange={onChangeDate}
+            format="YYYY/MM/DD"
+            allowClear={false}
           />
         </Form.Item>
         <div className="flex gap-x-2 justify-center w-full items-center">
@@ -192,6 +145,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
               display: "inline-block",
               width: "60%",
             }}
+            initialValue={requestSelected?.isFull}
           >
             <Checkbox
               checked={isFull}
@@ -200,9 +154,8 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
           </Form.Item>
           {/* Buổi trong ngày */}
           <Form.Item
-            //   label="Buổi"
+            initialValue={requestSelected?.isPM}
             name="isPM"
-            initialValue={isPM}
             style={{
               display: "inline-block",
               width: "25%",
@@ -233,7 +186,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
           <Button
             type="primary"
             htmlType="submit"
-            loading={isLoadingSubmitForm}
+            // loading={isLoadingSubmitForm}
           >
             Gửi đơn
           </Button>
@@ -243,4 +196,4 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
   );
 };
 
-export default NewRequestModal;
+export default EditRequestModal;
