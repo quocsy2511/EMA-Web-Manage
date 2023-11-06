@@ -300,10 +300,17 @@ const NewTaskModal = ({
               rules={[
                 {
                   required: true,
-                  message: "Hãy nhập nhập tên công việc!",
+                  message: "Hãy nhập  tên công việc!",
                 },
-                { whitespace: true },
-                { min: 3, max: 200 },
+                {
+                  whitespace: true,
+                  message: " Tên công việc không được để trống!",
+                },
+                {
+                  min: 3,
+                  max: 200,
+                  message: "tên công việc từ 3 đến 200 kí tự!",
+                },
               ]}
               hasFeedback
             >

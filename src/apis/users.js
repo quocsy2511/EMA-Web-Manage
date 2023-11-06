@@ -31,3 +31,6 @@ export const updateUser = ({ userId, ...user }) =>
 
 export const getMember = ({ userId }) =>
   authRequest({ url: `/user/${userId}` });
+
+export const updateProfile = (user) =>
+  authRequest({ url: `/user/profile`, method: "put", data: user });

@@ -43,7 +43,7 @@ const RequestPage = () => {
       },
     }
   );
-  console.log("REQUEST: ", requests);
+
 
   useEffect(() => {
     refetch();

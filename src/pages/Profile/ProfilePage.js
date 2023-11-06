@@ -1,5 +1,5 @@
-import { Avatar, Image } from "antd";
-import React, { Fragment } from "react";
+import { Avatar, Button, Image } from "antd";
+import React, { Fragment, useState } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
 import defaultImage from "../../assets/images/pngwing.com.png";
 import { useQuery } from "@tanstack/react-query";
@@ -8,9 +8,13 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
 import { getEventDivisions, getFilterEvent } from "../../apis/events";
+import { SettingOutlined } from "@ant-design/icons";
+import EditProfileModal from "./Modal/EditProfileModal";
 
 const ProfilePage = () => {
   const { data, isLoading, isError } = useQuery(["profile"], getProfile);
+  // console.log("🚀 ~ file: ProfilePage.js:16 ~ ProfilePage ~ data:", data);
+  const [isOpenEditModal, setIsOpenEditModal] = useState(false);
 
   const divisionId = data?.divisionId;
   const {
@@ -148,6 +152,16 @@ const ProfilePage = () => {
                 {moment(data.dob).format("DD-MM-YYYY")}
               </span>
             </p>
+          </div>
+          <div className="w-full flex justify-center mt-3">
+            <Button
+              type="link"
+              className="flex justify-center items-center gap-x-3 flex-row"
+              onClick={() => setIsOpenEditModal(true)}
+            >
+              <SettingOutlined />
+              <p>Cập nhật thông tin</p>
+            </Button>
           </div>
         </div>
         <div className="bg-white w-1/2 p-6 rounded-2xl">
@@ -313,6 +327,13 @@ const ProfilePage = () => {
             </div>
           )}
         </div>
+        {isOpenEditModal && (
+          <EditProfileModal
+            isOpenEditModal={isOpenEditModal}
+            setIsOpenEditModal={setIsOpenEditModal}
+            data={data}
+          />
+        )}
       </div>
     </Fragment>
   );

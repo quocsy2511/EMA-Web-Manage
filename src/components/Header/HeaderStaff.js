@@ -2,17 +2,18 @@ import { Avatar, Badge, Button, Dropdown } from "antd";
 import React from "react";
 import { HiOutlineBellAlert } from "react-icons/hi2";
 import { IoLogOutOutline } from "react-icons/io5";
-import { Link, useNavigate, useRouteLoaderData } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Header } from "antd/es/layout/layout";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { getProfile } from "../../apis/users";
 import { useQuery } from "@tanstack/react-query";
-import AnErrorHasOccured from "../Error/AnErrorHasOccured";
-import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
+// import AnErrorHasOccured from "../Error/AnErrorHasOccured";
+// import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 
 const HeaderStaff = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
-  const staff = useRouteLoaderData("staff");
+  // const staff = useRouteLoaderData("staff");
+  const { data } = useQuery(["profile"], getProfile);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -174,7 +175,7 @@ const HeaderStaff = ({ collapsed, setCollapsed }) => {
 
                 <div className="flex flex-col items-end">
                   <p className="text-sm font-semibold text-black">
-                    {staff.fullName}
+                    {data?.fullName}
                   </p>
                   <p className="text-xs font-normal text-black">
                     Trưởng bộ phận
@@ -186,7 +187,7 @@ const HeaderStaff = ({ collapsed, setCollapsed }) => {
                   size={40}
                   icon={<p>icon</p>}
                   alt="user_image"
-                  src={staff.avatar}
+                  src={data?.avatar}
                 />
               </div>
             </Dropdown>
