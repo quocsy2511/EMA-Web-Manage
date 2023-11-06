@@ -13,6 +13,7 @@ import EditRequestModal from "./Modal/EditRequestModal";
 
 const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
+  // console.log("🚀 ~ file: RequestPage.js:16 ~ RequestPage ~ staff:", staff);
 
   const [selectedRequest, setSelectedRequest] = useState();
   const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
@@ -31,15 +32,18 @@ const RequestPage = () => {
     () =>
       getAllRequests({
         curentPage: 1,
-        pageSize: 10,
+        pageSize: 50,
         type: selectedType,
         requestor: staff ? staff.id : undefined,
       }),
     {
       refetchOnWindowFocus: false,
+      select: (data) => {
+        return data.data;
+      },
     }
   );
-  // console.log("REQUEST: ", requests);
+  console.log("REQUEST: ", requests);
 
   useEffect(() => {
     refetch();
