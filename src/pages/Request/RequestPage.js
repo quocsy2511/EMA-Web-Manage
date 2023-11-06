@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllRequests } from "../../apis/requests";
 import { useRouteLoaderData } from "react-router-dom";
 import { MoonLoader } from "react-spinners";
+import EditRequestModal from "./Modal/EditRequestModal";
 
 const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
@@ -17,7 +18,8 @@ const RequestPage = () => {
   const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
   const [isOpenNewRequest, setIsOpenNewRequest] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
-  // const staff = useRouteLoaderData("staff");
+  const [isOpenEditRequest, setIsOpenEditRequest] = useState(false);
+  const [requestSelected, setRequestSelected] = useState("");
 
   const {
     data: requests,
@@ -37,7 +39,7 @@ const RequestPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("REQUEST: ", requests);
+  // console.log("REQUEST: ", requests);
 
   useEffect(() => {
     refetch();
@@ -227,6 +229,8 @@ const RequestPage = () => {
                         key="request-list"
                         requests={requests}
                         setSelectedRequest={setSelectedRequest}
+                        setIsOpenEditRequest={setIsOpenEditRequest}
+                        setRequestSelected={setRequestSelected}
                       />
                     ) : (
                       <RequestDetail
@@ -249,6 +253,13 @@ const RequestPage = () => {
           <NewRequestModal
             isOpenNewRequest={isOpenNewRequest}
             setIsOpenNewRequest={setIsOpenNewRequest}
+          />
+        )}
+        {isOpenEditRequest && (
+          <EditRequestModal
+            isOpenEditRequest={isOpenEditRequest}
+            setIsOpenEditRequest={setIsOpenEditRequest}
+            requestSelected={requestSelected}
           />
         )}
       </div>

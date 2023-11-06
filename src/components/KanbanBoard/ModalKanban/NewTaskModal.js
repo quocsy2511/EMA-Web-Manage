@@ -145,20 +145,23 @@ const NewTaskModal = ({
   const hourStartDate = moment(disableStartDate).format("HH");
   const minutesStartDate = moment(disableStartDate).format("mm");
   const hourCurrentDate = moment(todayFormat).format("HH");
+
   const minutesCurrentDate = moment(todayFormat).format("mm");
 
   const hourEndDate = moment(disableEndDate).format("HH");
   const minutesEndDate = moment(disableEndDate).format("mm");
 
   const disabledDate = (current) => {
-    if (current.isBefore(disableStartDate, "day")) {
-      return (
-        current.isBefore(disableEndDate, "day") ||
-        current.isAfter(disableEndDate, "day")
-      );
-    } else {
-      return current.isBefore(today) || current.isAfter(disableEndDate, "day");
-    }
+    // if (current.isBefore(disableStartDate, "day")) {
+    //   return (
+    //     current.isBefore(disableEndDate, "day") ||
+    //     current.isAfter(disableEndDate, "day")
+    //   );
+    // } else {
+    //   return current.isBefore(today) || current.isAfter(disableEndDate, "day");
+    // }
+
+    return current.isBefore(today) || current.isAfter(disableEndDate, "day");
   };
   //validate pick timess
   const range = (start, end) => {
@@ -178,8 +181,10 @@ const NewTaskModal = ({
         if (type === "start") {
           if (!current?.isBefore(disableEndDate, "day")) {
             return {
-              disabledHours: () => range(hourEndDate, 24),
-              disabledMinutes: () => range(minutesEndDate, 60),
+              // disabledHours: () => range(hourEndDate, 24),
+              // disabledMinutes: () => range(minutesEndDate, 60),
+              disabledHours: () => range(0, hourCurrentDate),
+              disabledMinutes: () => range(0, minutesCurrentDate),
             };
           } else if (!current?.isAfter(disableStartDate, "day")) {
             return {
@@ -210,14 +215,18 @@ const NewTaskModal = ({
       } else {
         if (type === "start") {
           if (!current?.isBefore(disableEndDate, "day")) {
+            // nếu chọn ngày enđate
             return {
               disabledHours: () => range(hourEndDate, 24),
               disabledMinutes: () => range(minutesEndDate, 60),
             };
           } else if (!current?.isAfter(disableStartDate, "day")) {
+            //ngày bắt đầu startdate
             return {
-              disabledHours: () => range(0, hourStartDate),
-              disabledMinutes: () => range(0, minutesStartDate),
+              // disabledHours: () => range(0, hourStartDate),
+              // disabledMinutes: () => range(0, minutesStartDate),
+              disabledHours: () => range(0, hourCurrentDate),
+              disabledMinutes: () => range(0, minutesCurrentDate),
             };
           }
         }

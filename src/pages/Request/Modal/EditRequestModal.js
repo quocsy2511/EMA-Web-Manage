@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Checkbox,
@@ -7,11 +8,13 @@ import {
   Modal,
   Radio,
   Select,
+  message,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import dayjs from "dayjs";
 import moment from "moment";
 import React, { useState } from "react";
+import { updateRequest } from "../../../apis/requests";
 
 const EditRequestModal = ({
   isOpenEditRequest,
@@ -21,13 +24,15 @@ const EditRequestModal = ({
   const handleCancel = () => {
     setIsOpenEditRequest(false);
   };
+  const idRequestSelected = requestSelected.id;
   const { RangePicker } = DatePicker;
   const today = moment();
   const [form] = Form.useForm();
-  const [isFull, setIsFull] = useState(false);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [isPM, setIsPM] = useState("false");
+  const [isFull, setIsFull] = useState(requestSelected.isFull);
+  const [startDate, setStartDate] = useState(requestSelected?.startDate);
+  const [endDate, setEndDate] = useState(requestSelected?.endDate);
+  const [isPM, setIsPM] = useState(requestSelected.isPM);
+
   const onChangeDate = (value, dateString) => {
     // Chuyển đổi thành định dạng ISO 8601
     const isoStartDate = moment(dateString[0]).toISOString();
@@ -35,7 +40,44 @@ const EditRequestModal = ({
     setStartDate(isoStartDate);
     setEndDate(isoEndDate);
   };
-  const onFinish = (values) => {};
+  const queryClient = useQueryClient();
+  const { mutate: submitFormRequest, isLoading: isLoadingSubmitForm } =
+    useMutation((request) => updateRequest(request), {
+      onSuccess: () => {
+        queryClient.invalidateQueries("requests");
+        message.open({
+          type: "success",
+          content: "Tạo một đơn yêu cầu mới thành công",
+        });
+        setIsOpenEditRequest(false);
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    });
+
+  const onFinish = (values) => {
+    const { date, ...data } = values;
+    const request = {
+      ...data,
+      startDate: startDate,
+      endDate: endDate,
+    };
+    console.log(
+      "🚀 ~ file: EditRequestModal.js:72 ~ onFinish ~ request:",
+      request
+    );
+    if (request.isFull && request.isPM === "AM") {
+      const newRequest = { ...request, isPM: false, id: idRequestSelected };
+      submitFormRequest(newRequest);
+    } else {
+      const newRequest = { ...request, isPM: true, id: idRequestSelected };
+      submitFormRequest(newRequest);
+    }
+  };
   return (
     <Modal
       title="Cập nhật yêu cầu "
@@ -105,6 +147,7 @@ const EditRequestModal = ({
         </Form.Item>
         {/* thời gian */}
         <Form.Item
+          label="Thời gian"
           name="date"
           className="mb-0"
           rules={[
@@ -114,10 +157,7 @@ const EditRequestModal = ({
               message: "Please select time!",
             },
           ]}
-          initialValue={[
-            dayjs(requestSelected.startDate).utcOffset(7).local(),
-            dayjs(requestSelected.endDate).utcOffset(7).local(),
-          ]}
+          initialValue={[dayjs(startDate), dayjs(endDate)]}
         >
           <RangePicker
             placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
@@ -125,7 +165,7 @@ const EditRequestModal = ({
               current && current < today.startOf("day")
             }
             onChange={onChangeDate}
-            format="YYYY/MM/DD"
+            format="YYYY/MM/DD "
             allowClear={false}
           />
         </Form.Item>
@@ -148,25 +188,25 @@ const EditRequestModal = ({
             initialValue={requestSelected?.isFull}
           >
             <Checkbox
-              checked={isFull}
+              // checked={isFull}
               onChange={(e) => setIsFull(e.target.checked)}
             />
           </Form.Item>
           {/* Buổi trong ngày */}
           <Form.Item
-            initialValue={requestSelected?.isPM}
+            initialValue={isPM ? "PM" : "AM"}
             name="isPM"
             style={{
               display: "inline-block",
               width: "25%",
             }}
           >
-            <Radio.Group disabled={isFull} className="">
-              <Radio value="false" onChange={() => setIsPM("true")}>
+            <Radio.Group disabled={isFull}>
+              <Radio value="AM" onChange={() => setIsPM("true")}>
                 {" "}
                 Buổi sáng{" "}
               </Radio>
-              <Radio value="true" onChange={() => setIsPM("true")}>
+              <Radio value="PM" onChange={() => setIsPM("true")}>
                 {" "}
                 Buổi chiều{" "}
               </Radio>
@@ -186,7 +226,7 @@ const EditRequestModal = ({
           <Button
             type="primary"
             htmlType="submit"
-            // loading={isLoadingSubmitForm}
+            loading={isLoadingSubmitForm}
           >
             Gửi đơn
           </Button>
