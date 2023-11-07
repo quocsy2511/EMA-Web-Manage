@@ -13,8 +13,6 @@ import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
 import { getBudget } from "../../apis/budgets";
 import { useRouteLoaderData } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
-import { motion } from "framer-motion";
 
 moment.suppressDeprecationWarnings = true;
 
@@ -307,7 +305,6 @@ const EventStaffPage = () => {
               {isBoardTask ? (
                 !isLoadingListTask ? (
                   !isErrorListTask ? (
-
                     <KanbanBoard
                       selectedStatus={statusSelected}
                       selectEvent={selectEvent}

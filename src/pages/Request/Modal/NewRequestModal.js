@@ -65,19 +65,22 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
       const newRequest = {
         ...request,
         isFull: "false",
-        isPM: "true",
       };
       console.log(
-        "🚀 ~ file: NewRequestModal.js:69 ~ onFinish ~ newRequest:",
+        "🚀 ~ file: NewRequestModal.js:69 ~ onFinish ~ newRequest 1:",
         newRequest
       );
       submitFormRequest(newRequest);
     } else {
+      const newRequest = {
+        ...request,
+        isPM: "false",
+      };
       console.log(
-        "🚀 ~ file: requestModal.js:59 ~ onFinish ~ request:",
-        request
+        "🚀 ~ file: NewRequestModal.js:77 ~ onFinish ~ newRequest 2:",
+        newRequest
       );
-      submitFormRequest(request);
+      submitFormRequest(newRequest);
     }
   };
 
@@ -209,7 +212,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
             }}
           >
             <Radio.Group disabled={isFull} className="">
-              <Radio value="false" onChange={() => setIsPM("true")}>
+              <Radio value="false" onChange={() => setIsPM("false")}>
                 {" "}
                 Buổi sáng{" "}
               </Radio>

@@ -11,6 +11,7 @@ import EditBudget from "./ModalBudget/EditBudget";
 import Highlighter from "react-highlight-words";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteBudget } from "../../../apis/budgets";
+import HeadingTitle from "../../common/HeadingTitle";
 
 const ComfirmingBudgetStaff = ({ selectEvent, listBudgetConfirming }) => {
   const [isOpenEditBudget, setIsOpenEditBudget] = useState(false);
@@ -246,6 +247,7 @@ const ComfirmingBudgetStaff = ({ selectEvent, listBudgetConfirming }) => {
       {contextHolder}
       <div className="w-full bg-white p-8 rounded-xl">
         <>
+          <HeadingTitle>Bảng chi phí</HeadingTitle>
           <Table
             pagination={{ pageSize: 10 }}
             rowKey="id"
