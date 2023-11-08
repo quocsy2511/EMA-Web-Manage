@@ -302,7 +302,6 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           />
         </Form.Item>
         <div className="flex justify-center">
-          {/* <img src={event.coverUrl} className="w-52 h-52" /> */}
           <Form.Item
             className="flex items-center justify-center"
             name="coverUrl"

@@ -18,8 +18,9 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getAllUser } from "../../apis/users";
-import { createEvent } from "../../apis/events";
+import { createEvent, getTemplateEvent } from "../../apis/events";
 import { uploadFile } from "../../apis/files";
+import { createTask, getTemplateTask } from "../../apis/tasks";
 
 const { RangePicker } = DatePicker;
 
@@ -45,22 +46,61 @@ const EventCreationPage = () => {
     }
   );
 
-  const { mutate, isLoading } = useMutation((event) => createEvent(event), {
-    onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Đã tạo 1 sự kiện",
-      });
-      form.resetFields();
-      navigate("/manager/event");
-    },
-    onError: () => {
-      messageApi.open({
-        type: "error",
-        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-      });
+  const {
+    data: templateEvent,
+    isLoading: templateEventIsLoading,
+    isError: templateEventIsError,
+  } = useQuery(["template-event"], getTemplateEvent);
+  console.log("templateEvent: ", templateEvent);
+
+  const {
+    data: templateTask,
+    isLoading: templateTaskIsLoading,
+    isError: templateTaskIsError,
+  } = useQuery(["template-tasks"], () => getTemplateTask(templateEvent?.id), {
+    enabled: !!templateEvent?.id,
+    select: (data) => {
+      return data.map((item) => ({
+        description: item.description,
+        title: item.title,
+      }));
     },
   });
+
+  const { mutate, isLoading } = useMutation(
+    ({ autoTask, ...event }) => createEvent(event),
+    {
+      onSuccess: (data, variables) => {
+        if (!variables.autoTask) {
+          messageApi.open({
+            type: "success",
+            content: "Đã tạo 1 sự kiện",
+          });
+          form.resetFields();
+          navigate("/manager/event");
+        } else {
+          createTemplateTask({
+            index: 0,
+            eventID: data,
+            task: {
+              ...templateTask[0],
+              startDate: moment().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
+              endDate: moment()
+                .add(15, "minutes")
+                .format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
+              eventID: data,
+            },
+          });
+        }
+      },
+      onError: () => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
 
   const { mutate: uploadFileMutate, isLoading: uploadIsLoading } = useMutation(
     ({ formData, event }) => uploadFile(formData),
@@ -79,7 +119,44 @@ const EventCreationPage = () => {
     }
   );
 
+  const { mutate: createTemplateTask, isLoading: createTemplateTaskIsLoading } =
+    useMutation(
+      ({ index, eventID, task }) => createTask({ ...task, eventID }),
+      {
+        onSuccess: (data, variables) => {
+          if (variables.index === 4) {
+            messageApi.open({
+              type: "success",
+              content: "Đã tạo 1 sự kiện",
+            });
+            form.resetFields();
+            navigate("/manager/event");
+          } else {
+            createTemplateTask({
+              index: variables.index + 1,
+              task: {
+                ...templateTask[variables.index + 1],
+                startDate: moment().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
+                endDate: moment()
+                  .add(15, "minutes")
+                  .format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
+                eventID: variables.eventID,
+              },
+              eventID: variables.eventID,
+            });
+          }
+        },
+        onError: () => {
+          messageApi.open({
+            type: "error",
+            content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
+          });
+        },
+      }
+    );
+
   const [fileList, setFileList] = useState();
+  const [useTemplateEvent, setUseTemplateEvent] = useState(false);
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
@@ -93,6 +170,20 @@ const EventCreationPage = () => {
     { title: "Phòng ban", dataIndex: "division" },
     Table.SELECTION_COLUMN,
   ];
+
+  const useTemplate = () => {
+    if (!useTemplateEvent) {
+      form.setFieldsValue({
+        eventName: templateEvent.eventName,
+        location: templateEvent.location,
+        description: { ops: JSON.parse(templateEvent.description) },
+      });
+      setUseTemplateEvent(true);
+    } else {
+      form.resetFields(["eventName", "location", "description"]);
+      setUseTemplateEvent(false);
+    }
+  };
 
   const onFinish = (values) => {
     console.log("Success:", values);
@@ -109,6 +200,7 @@ const EventCreationPage = () => {
       location: values.location,
       estBudget: +values.estBudget,
       divisionId: values.divisions.map((division) => division.key),
+      autoTask: values.autoTask,
     };
 
     console.log("TRANSORM: ", values);
@@ -228,7 +320,7 @@ const EventCreationPage = () => {
             ]}
           >
             <ReactQuill
-              className="h-24 mb-10"
+              className="h-36 mb-10"
               theme="snow"
               placeholder="Nhập mô tả"
               onChange={(content, delta, source, editor) => {
@@ -367,19 +459,64 @@ const EventCreationPage = () => {
             </Form.Item>
 
             <div className="flex-1 flex items-end justify-end gap-x-5 mb-0">
-              <Form.Item className="0">
-                <Button danger size="large">
-                  <Link to=".." relative="path">
-                    Trở về
-                  </Link>
-                </Button>
-              </Form.Item>
+              <div>
+                <Form.Item className="0">
+                  <Button
+                    disabled={templateEventIsLoading || templateEventIsError}
+                    size={"middle"}
+                    type={!useTemplateEvent ? "default" : "primary"}
+                    onClick={useTemplate}
+                  >
+                    Dùng sự kiện kiểu mẫu
+                  </Button>
+                </Form.Item>
+                <div className="flex justify-between">
+                  {/* <Form.Item className="0">
+                    <Button danger size="large">
+                      <Link to=".." relative="path">
+                        Trở về
+                      </Link>
+                    </Button>
+                  </Form.Item>
+                  <Form.Item className="0">
+                    <Button danger size="large">
+                      <Link to=".." relative="path">
+                        Trở về
+                      </Link>
+                    </Button>
+                  </Form.Item> */}
+                  <Form.Item className="" name="autoTask">
+                    <Button
+                      size="large"
+                      type="primary"
+                      loading={
+                        form.getFieldValue("autoTask") &&
+                        (isLoading ||
+                          uploadIsLoading ||
+                          createTemplateTaskIsLoading)
+                      }
+                      onClick={() => {
+                        form.setFieldsValue({ autoTask: true });
+                        form.submit();
+                      }}
+                    >
+                      Tạo kèm hạng mục mặc định
+                    </Button>
+                  </Form.Item>
+                </div>
+              </div>
               <Form.Item className="">
                 <Button
                   size="large"
                   type="primary"
-                  loading={isLoading || uploadIsLoading}
-                  onClick={() => form.submit()}
+                  loading={
+                    !form.getFieldValue("autoTask") &&
+                    (isLoading || uploadIsLoading)
+                  }
+                  onClick={() => {
+                    form.setFieldsValue({ autoTask: false });
+                    form.submit();
+                  }}
                 >
                   Tạo
                 </Button>

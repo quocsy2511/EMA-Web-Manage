@@ -11,33 +11,49 @@ import { MoonLoader } from "react-spinners";
 const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  console.log("currentPage: ", currentPage);
   const [selectedRequest, setSelectedRequest] = useState();
   const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
   const [selectedType, setSelectedType] = useState(null);
+  const [searchText, setSearchText] = useState();
 
   const {
     data: requests,
     isLoading,
     isError,
     refetch,
+    isRefetching,
   } = useQuery(
     ["requests"],
     () =>
       getAllRequests({
-        curentPage: 1,
+        curentPage: currentPage,
         pageSize: 10,
         type: selectedType,
         requestor: staff ? staff.id : undefined,
+        requestorName: searchText,
       }),
     {
       refetchOnWindowFocus: false,
     }
   );
   console.log("REQUEST: ", requests);
+  
 
   useEffect(() => {
     refetch();
-  }, [selectedType]);
+  }, [selectedType, currentPage]);
+
+  useEffect(() => {
+    const identifier = setTimeout(() => {
+      refetch();
+    }, 1500);
+
+    return () => {
+      clearTimeout(identifier);
+    };
+  }, [searchText]);
 
   const handleChangeRequestType = (type) => {
     setSelectedRequestType(type);
@@ -213,6 +229,11 @@ const RequestPage = () => {
                         key="request-list"
                         requests={requests}
                         setSelectedRequest={setSelectedRequest}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        searchText={searchText}
+                        setSearchText={setSearchText}
+                        isRefetching={isRefetching}
                       />
                     ) : (
                       <RequestDetail
