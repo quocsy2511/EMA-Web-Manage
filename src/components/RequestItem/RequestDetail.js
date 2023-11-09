@@ -1,84 +1,214 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { IoChevronBackSharp } from "react-icons/io5";
-import { LuSend } from "react-icons/lu";
-import { Avatar, Button } from "antd";
-import ReactQuill from "react-quill";
+import { BsArrow90DegLeft } from "react-icons/bs";
+import { AiOutlineCheck, AiOutlineClose } from "react-icons/ai";
+import { Avatar, Button, Form, Input, Radio, Tag, message } from "antd";
 import "react-quill/dist/quill.snow.css";
+import moment from "moment";
+import { useRouteLoaderData } from "react-router-dom";
+import { LuSend } from "react-icons/lu";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { approveRequest } from "../../apis/requests";
+
+const { TextArea } = Input;
 
 const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
-  const handleSelectedRequest = () => {
-    setSelectedRequest();
+  const manager = useRouteLoaderData("manager");
+  console.log(manager);
+
+  const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation((request) => approveRequest(request), {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["requests"]);
+      handleBackSelectedRequest();
+      messageApi.open({
+        type: "success",
+        content: "Duyệt đơn thành công.",
+      });
+    },
+    onError: (data) => {
+      messageApi.open({
+        type: "error",
+        content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+      });
+    },
+  });
+
+  const onFinish = (value) => {
+    console.log("Success: ", value);
+    value = { ...value, requestID: selectedRequest.id };
+    console.log("TRANSFORM: ", value);
+    mutate(value);
   };
 
-  const dummy = [1, 2, 3];
+  console.log("selectedRequest: ", selectedRequest);
+  const handleBackSelectedRequest = () => {
+    setSelectedRequest();
+  };
 
   return (
     <motion.div
       initial={{ x: "100%" }}
       animate={{ x: 0 }}
-      exit={{x: "100%"}}
+      exit={{ x: "100%" }}
       transition={{ type: "tween" }}
-      className="w-full h-full overflow-hidden flex flex-col"
+      className="w-full min-h-max overflow-hidden"
     >
-      <div className="w-full h-14 border-b px-5 flex items-center gap-x-5">
+      {contextHolder}
+      <div className="w-full h-14 bg-white border-b px-5 flex items-center gap-x-5">
         <IoChevronBackSharp
-          onClick={handleSelectedRequest}
+          onClick={handleBackSelectedRequest}
           size={18}
           className="text-slate-500 cursor-pointer"
         />
-        <p className="text-sm text-slate-500">
-          Focused impactful open issues from the project of GitHub
-        </p>
+        <p className="text-sm text-slate-500">{selectedRequest?.title}</p>
+        <div className="flex-1 flex justify-end items-center gap-x-2">
+          {selectedRequest.type === "L" && selectedRequest.isFull ? (
+            <Tag color="cyan" className="w-20 text-center">
+              Cả ngày
+            </Tag>
+          ) : selectedRequest.isPM ? (
+            <Tag color="geekblue" className="w-20 text-center">
+              Buổi chiều
+            </Tag>
+          ) : (
+            <Tag color="orange" className="w-20 text-center">
+              Buổi sáng
+            </Tag>
+          )}
+          <div
+            className={`w-2 h-2 rounded-full ${
+              selectedRequest.type === "A"
+                ? "bg-green-600"
+                : selectedRequest.type === "L"
+                ? "bg-red-500"
+                : selectedRequest.type === "M" && "bg-purple-400"
+            }`}
+          />
+          <p className="text-xs">
+            {selectedRequest.type === "A"
+              ? "Nghỉ có lương"
+              : selectedRequest.type === "L"
+              ? "Nghỉ không lương"
+              : selectedRequest.type === "M" && "Đi công tác"}
+          </p>
+        </div>
       </div>
-      <div className="overflow-y-scroll flex-1 bg-[#f5f4f7] p-5 space-y-5">
-        {dummy.map((item) => (
-          <div className="w-full bg-white rounded-lg p-5">
-            <div className="flex items-center gap-x-5">
-              <Avatar
-                size={38}
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3mvt8nCdl5Z0ebV9k3Pqo-BPJYTCEdLnirA&usqp=CAU"
-              />
-              <div>
-                <p className="text-sm text-slate-700 font-medium">
-                  Chandler Bing
-                </p>
-                <p className="text-xs text-slate-400">Chandler Bing</p>
-              </div>
-              <p className="flex-1 text-end text-xs text-slate-400">
-                15 Tháng 5, 08:40
+      <div className="p-5 space-y-10">
+        <div className="w-full bg-white rounded-lg p-5">
+          <div className="flex items-center gap-x-5">
+            <Avatar size={38} src={selectedRequest?.user?.profile.avatar} />
+            <div>
+              <p className="text-sm text-slate-700 font-medium">
+                {selectedRequest?.user?.profile.fullName}
+              </p>
+              <p className="text-xs text-slate-400">
+                {selectedRequest?.user?.profile.role === "STAFF"
+                  ? "Trưởng phòng"
+                  : "Nhân viên"}
               </p>
             </div>
-            <p className="pt-5">
-              Greetings! It is a long established fact that a reader will be
-              distracted by the readable content of a page when looking at its
-              layout.The point of using Lorem Ipsum is that it has a
-              more-or-less normal distribution of letters, as opposed to using
-              'Content here, content here',making it look like readable English.
-              There are many variations of passages of Lorem Ipsum available,
-              but the majority have suffered alteration in some form, by
-              injected humour, or randomised words which don't look even
-              slightly believable. Sincerely yours, Envato Design Team
+            <p className="flex-1 text-end text-xs text-slate-400">
+              {moment(selectedRequest?.createdAt).format(
+                "DD [tháng] MM, YYYY HH:mm"
+              )}
             </p>
           </div>
-        ))}
-        <div className="w-full  bg-white rounded-lg p-5 space-y-5">
-          <p className="text-sm text-slate-500 font-semibold">
-            Trả lời Chandler Bing
-          </p>
-          <ReactQuill
-            className="h-36 pb-10"
-            theme="snow"
-            placeholder="Nhập mô tả"
-          />
-          <Button
-            className="flex items-center px-5 py-1 ml-auto"
-            type="primary"
-          >
-            <LuSend />
-            Gửi
-          </Button>
+          <p className="pt-5">{selectedRequest?.content}</p>
         </div>
+
+        {selectedRequest?.approver && (
+          <div className="flex items-center ml-5 gap-x-5">
+            <BsArrow90DegLeft size={35} className="rotate-180 text-slate-300" />
+            <div className="flex-1 bg-white rounded-lg p-5">
+              <div className="flex items-center gap-x-5">
+                <Avatar size={38} src={manager.avatar} />
+                <div>
+                  <p className="text-sm text-slate-700 font-medium">
+                    {manager.fullName}
+                  </p>
+                  <p className="text-xs text-slate-400">Quản lý</p>
+                </div>
+                <p className="flex-1 text-end text-xs text-slate-400">
+                  {moment(selectedRequest?.updatedAt).format(
+                    "DD [tháng] MM, YYYY HH:mm"
+                  )}
+                </p>
+              </div>
+              {selectedRequest?.replyMessage &&
+              selectedRequest?.replyMessage !== "" ? (
+                selectedRequest?.replyMessage
+              ) : selectedRequest?.status === "ACCEPT" ? (
+                <div className="flex items-center gap-x-2 pt-5">
+                  <p className="">Đơn được chấp thuận</p>
+                  <AiOutlineCheck size={20} className="text-green-600" />
+                </div>
+              ) : (
+                <div className="flex items-center gap-x-2 pt-5">
+                  <p className="">Đơn bị từ chối</p>
+                  <AiOutlineClose size={20} className="text-red-500" />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {manager && (
+          <div className="h-96">
+            <div className="relative bg-white rounded-lg p-5">
+              <p className="text-sm text-slate-500 font-semibold mt-1 mb-3">
+                Trả lời {selectedRequest?.user?.profile.fullName}
+              </p>
+              <Form
+                form={form}
+                onFinish={onFinish}
+                initialValues={{
+                  replyMessage: "",
+                  status: !selectedRequest.approver && "REJECT",
+                }}
+              >
+                <Form.Item name="replyMessage">
+                  <TextArea rows={4} placeholder="Trả lời ..." />
+                </Form.Item>
+
+                <div className="flex items-center mb-3">
+                  <Form.Item name="status" className="mb-0">
+                    <Radio.Group
+                      options={[
+                        {
+                          label: "Chấp nhận",
+                          value: "ACCEPT",
+                        },
+                        {
+                          label: "Từ chối",
+                          value: "REJECT",
+                        },
+                      ]}
+                      optionType="button"
+                    />
+                  </Form.Item>
+
+                  <Button
+                    className="flex items-center gap-x-3 ml-auto"
+                    type={!!selectedRequest.approver ? "default" : "primary"}
+                    onClick={() => form.submit()}
+                    disabled={!!selectedRequest.approver}
+                  >
+                    Gửi
+                    <LuSend />
+                  </Button>
+                </div>
+              </Form>
+              {selectedRequest.approver && (
+                <div className="absolute top-0 left-0 bottom-0 right-0 bg-black opacity-5 rounded-lg" />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );

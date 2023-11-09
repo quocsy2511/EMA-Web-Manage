@@ -10,6 +10,7 @@ import {
   Avatar,
   Button,
   Collapse,
+  ConfigProvider,
   FloatButton,
   Popconfirm,
   Progress,
@@ -23,9 +24,17 @@ import {
   BsTagsFill,
   BsPlus,
 } from "react-icons/bs";
-import { RiEditFill } from "react-icons/ri";
+import { RiEditFill, RiAdvertisementFill } from "react-icons/ri";
+import { AiOutlinePlus } from "react-icons/ai";
+import { PiMicrophoneStageFill, PiTelevisionSimpleFill } from "react-icons/pi";
 import { LiaClipboardListSolid } from "react-icons/lia";
-import { MdFilterListAlt, MdLocationPin, MdOutlineDone } from "react-icons/md";
+import {
+  MdDesignServices,
+  MdFilterListAlt,
+  MdIntegrationInstructions,
+  MdLocationPin,
+  MdOutlineDone,
+} from "react-icons/md";
 import {
   FcMoneyTransfer,
   FcHighPriority,
@@ -36,12 +45,16 @@ import EventTaskSelection from "../../components/Selection/EventTaskSelection";
 import TaskItem from "../../components/Task/TaskItem";
 import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getDetailEvent, updateStatusEvent } from "../../apis/events";
+import {
+  getDetailEvent,
+  getTemplateEvent,
+  updateStatusEvent,
+} from "../../apis/events";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
 import "moment/locale/vi";
-import { filterTask, getTasks } from "../../apis/tasks";
+import { filterTask, getTasks, getTemplateTask } from "../../apis/tasks";
 import EmptyList from "../../components/Error/EmptyList";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import EventUpdateModal from "../../components/Modal/EventUpdateModal";
@@ -73,6 +86,7 @@ const EventTaskPage = () => {
   const [statusSelection, setStatusSelection] = useState();
   const [isOpenModal, setIsOpenModal] = useState(false); // create Task
   const [isModalOpen, setIsModalOpen] = useState(false); // update event
+  const [selectedTemplateTask, setSelectedTemplateTask] = useState();
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -124,6 +138,21 @@ const EventTaskPage = () => {
   );
   console.log("filterTasks: ", filterTasks);
 
+  const { data: templateEvent } = useQuery(
+    ["template-event"],
+    getTemplateEvent
+  );
+  console.log("templateEvent: ", templateEvent);
+
+  const {
+    data: templateTask,
+    isLoading: templateTaskIsLoading,
+    isError: templateTaskIsError,
+  } = useQuery(["template-tasks"], () => getTemplateTask(templateEvent?.id), {
+    enabled: !!templateEvent?.id,
+  });
+  console.log("templateTask: ", templateTask);
+
   const { mutate, isLoading: mutateIsLoading } = useMutation(
     (eventId, status) => updateStatusEvent(eventId, status),
     {
@@ -155,22 +184,25 @@ const EventTaskPage = () => {
     setStatusSelection();
   };
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (selectTaskIndex) => {
     setIsOpenModal((prev) => !prev);
+    setSelectedTemplateTask(
+      selectTaskIndex !== -1 ? templateTask[selectTaskIndex] : undefined
+    );
   };
 
   const handleEndEvent = () => {
-    mutate(eventId, " DONE");
+    mutate(eventId, "DONE");
   };
 
-  if (isLoading)
+  if (isLoading || templateTaskIsLoading)
     return (
       <div className="h-[calc(100vh-128px)]">
         <LoadingComponentIndicator />;
       </div>
     );
 
-  if (isError)
+  if (isError || templateTaskIsError)
     return (
       <div className="h-[calc(100vh-128px)]">
         <AnErrorHasOccured />;
@@ -206,18 +238,66 @@ const EventTaskPage = () => {
   return (
     <Fragment>
       {contextHolder}
-      <FloatButton
-        onClick={handleOpenModal}
-        icon={<BsPlus />}
+
+      <FloatButton.Group
+        trigger="hover"
         type="primary"
-        tooltip={<p>Tạo công việc</p>}
-      />
+        icon={<AiOutlinePlus />}
+      >
+        <FloatButton
+          onClick={() => handleOpenModal(4)}
+          icon={<MdDesignServices />}
+          type="primary"
+          tooltip={<p>Thiết kế sự kiện</p>}
+        />
+        <FloatButton
+          onClick={() => handleOpenModal(2)}
+          icon={<PiTelevisionSimpleFill />}
+          type="primary"
+          tooltip={<p>Quản lý chương trình</p>}
+        />
+        <FloatButton
+          onClick={() => handleOpenModal(1)}
+          icon={<MdIntegrationInstructions />}
+          type="primary"
+          tooltip={<p>Tiếp đón và hướng dẫn</p>}
+        />
+        <FloatButton
+          onClick={() => handleOpenModal(0)}
+          icon={<RiAdvertisementFill />}
+          type="primary"
+          tooltip={<p>Quảng bá & Tiếp thị</p>}
+        />
+        <FloatButton
+          onClick={() => handleOpenModal(3)}
+          icon={<PiMicrophoneStageFill />}
+          type="primary"
+          tooltip={<p>Dựng sân khấu</p>}
+        />
+        <ConfigProvider
+          theme={{
+            token: {
+              // colorPrimaryHover: "rgba(0, 0, 0, 0.3)",
+              colorPrimary: "white",
+              colorTextLightSolid: "black",
+            },
+          }}
+        ></ConfigProvider>
+        <FloatButton
+          onClick={() => handleOpenModal(-1)}
+          icon={<BsPlus />}
+          type="default"
+          tooltip={<p>Tạo công việc mới</p>}
+        />
+      </FloatButton.Group>
+
       <TaskAdditionModal
         isModalOpen={isOpenModal}
         setIsModalOpen={setIsOpenModal}
         eventId={eventId}
         date={[data.startDate, data.endDate]}
         staffs={data.listDivision}
+        selectedTemplateTask={selectedTemplateTask}
       />
       <EventUpdateModal
         isModalOpen={isModalOpen}
@@ -305,7 +385,7 @@ const EventTaskPage = () => {
           </div>
 
           <div
-            className="w-[60%] text-sm text-slate-400 mt-3"
+            className="w-[75%] text-sm text-slate-500 mt-3"
             dangerouslySetInnerHTML={{
               __html: new QuillDeltaToHtmlConverter(
                 JSON.parse(data.description)
@@ -386,12 +466,12 @@ const EventTaskPage = () => {
               {tasks && tasks?.length !== 0 ? (
                 <Tooltip
                   title={`${
-                    tasks.filter((item) => item.status === "DONE").length
+                    tasks.filter((item) => item.status === "CONFIRM").length
                   }/${tasks.length} hạng mục đã xong`}
                 >
                   <Progress
                     percent={(
-                      (tasks.filter((item) => item.status === "DONE").length /
+                      (tasks.filter((item) => item.status === "CONFIRM").length /
                         tasks.length) *
                       100
                     ).toFixed(2)}

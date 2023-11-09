@@ -13,7 +13,6 @@ const ProfilePage = () => {
   const { data, isLoading, isError } = useQuery(["profile"], getProfile);
 
   const divisionId = data?.divisionId;
-  //Staff
   const {
     data: employees,
     isError: isErrorEmployees,
@@ -96,14 +95,14 @@ const ProfilePage = () => {
     }
   );
 
-  if (isLoading || staffsIsLoading || eventsIsLoading)
+  if (isLoading || staffsIsLoading || eventsIsLoading || isLoadingEvent)
     return (
       <div className="w-full h-[calc(100vh-128px)]">
         <LoadingComponentIndicator />;
       </div>
     );
 
-  if (isError || staffsIssError || eventsIsError)
+  if (isError || staffsIssError || eventsIsError || isErrorEvent)
     return (
       <div className="w-full h-[calc(100vh-128px)]">
         <AnErrorHasOccured />;
@@ -233,41 +232,31 @@ const ProfilePage = () => {
           <p className="text-lg font-semibold">Sự kiện tham gia gần đây (5)</p>
           {data.role === "STAFF" ? (
             <div className="mt-5 space-y-3">
-              {!isLoadingEvent ? (
-                !isErrorEvent ? (
-                  <>
-                    {listEvent.map((event, index) => {
-                      return (
-                        <div
-                          className="flex border rounded-lg gap-x-2 p-2"
-                          key={index}
-                        >
-                          <Image
-                            src={event.coverUrl}
-                            fallback="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
-                            width={50}
-                            height={50}
-                          />
-                          <div className="flex-1 flex flex-col justify-center">
-                            <p className="text-base font-medium truncate">
-                              {event.eventName}
-                            </p>
-                            <div className="flex justify-between">
-                              <p className="text-xs text-slate-400">
-                                {moment(event.startDate).format("DD-MM-YYYY")}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </>
-                ) : (
-                  <AnErrorHasOccured />
-                )
-              ) : (
-                <LoadingComponentIndicator />
-              )}
+              {listEvent.map((event, index) => {
+                return (
+                  <div
+                    className="flex border rounded-lg gap-x-2 p-2"
+                    key={index}
+                  >
+                    <Image
+                      src={event.coverUrl}
+                      fallback="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
+                      width={50}
+                      height={50}
+                    />
+                    <div className="flex-1 flex flex-col justify-center">
+                      <p className="text-base font-medium truncate">
+                        {event.eventName}
+                      </p>
+                      <div className="flex justify-between">
+                        <p className="text-xs text-slate-400">
+                          {moment(event.startDate).format("DD-MM-YYYY")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="mt-5 space-y-3">
@@ -316,11 +305,6 @@ const ProfilePage = () => {
                         <p className="text-xs text-slate-400">
                           {moment(event.startDate).format("DD-MM-YYYY")}
                         </p>
-                        {/* <div
-                        className={`flex justify-center items-center ${statusBgColor} px-4 py- rounded-lg`}
-                      >
-                        <p className={`text-xs ${statusColor}`}>{status}</p>
-                      </div> */}
                       </div>
                     </div>
                   </div>

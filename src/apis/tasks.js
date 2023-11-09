@@ -101,3 +101,8 @@ export const updateTaskFile = ({ taskId, ...files }) =>
     method: "put",
     data: files.files,
   });
+
+export const getTemplateTask = (templateEventID) =>
+  authRequest({
+    url: `/task/template-task?fieldName=eventID&conValue=${templateEventID}&sizePage=5&currentPage=1`,
+  });
