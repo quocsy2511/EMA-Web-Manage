@@ -25,6 +25,7 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
 import { UploadOutlined } from "@ant-design/icons";
+// import dayjs from "dayjs";
 // import viVN from "antd/locale/vi_VN";
 
 const NewTaskModal = ({
@@ -41,7 +42,6 @@ const NewTaskModal = ({
   const [endDate, setEndDate] = useState("");
   const [description, setDescription] = useState("");
   const [assignee, setAssignee] = useState([]);
-  // const [estimationTime, setEstimationTime] = useState(1);
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
@@ -143,6 +143,7 @@ const NewTaskModal = ({
   const checkEndDateFormat = moment(disableEndDate).format("YYYY-MM-DD");
 
   const hourStartDate = moment(disableStartDate).format("HH");
+
   const minutesStartDate = moment(disableStartDate).format("mm");
   const hourCurrentDate = moment(todayFormat).format("HH");
 
@@ -152,16 +153,16 @@ const NewTaskModal = ({
   const minutesEndDate = moment(disableEndDate).format("mm");
 
   const disabledDate = (current) => {
-    // if (current.isBefore(disableStartDate, "day")) {
-    //   return (
-    //     current.isBefore(disableEndDate, "day") ||
-    //     current.isAfter(disableEndDate, "day")
-    //   );
-    // } else {
-    //   return current.isBefore(today) || current.isAfter(disableEndDate, "day");
-    // }
+    if (current.isBefore(disableStartDate, "day")) {
+      return (
+        current.isBefore(disableEndDate, "day") ||
+        current.isAfter(disableEndDate, "day")
+      );
+    } else {
+      return current.isBefore(today) || current.isAfter(disableEndDate, "day");
+    }
 
-    return current.isBefore(today) || current.isAfter(disableEndDate, "day");
+    // return current.isBefore(today) || current.isAfter(disableEndDate, "day");
   };
   //validate pick timess
   const range = (start, end) => {
@@ -171,39 +172,61 @@ const NewTaskModal = ({
     }
     return result;
   };
+
   const disabledRangeTime = (current, type) => {
+    //check xem có phải chọn ngày bắt đầu với kết thúc ko ? ko thì sẽ ko bắt time
     if (
       !current?.isAfter(disableStartDate, "day") ||
       !current?.isBefore(disableEndDate, "day")
     ) {
-      //check ngày hôm nay có phải ngày bắt đầu không
       if (!today.isBefore(disableStartDate, "day")) {
+        //Trường hợp  ngày hôm nay nó trùng ngày bắt đầu không ?
         if (type === "start") {
           if (!current?.isBefore(disableEndDate, "day")) {
+            //check xem có phải chọn ngày bắt đầu là ngày kết thúc của task ko ?
             return {
-              // disabledHours: () => range(hourEndDate, 24),
-              // disabledMinutes: () => range(minutesEndDate, 60),
-              disabledHours: () => range(0, hourCurrentDate),
-              disabledMinutes: () => range(0, minutesCurrentDate),
+              disabledHours: () => range(hourEndDate, 24),
+              disabledMinutes: () => range(minutesEndDate, 60),
             };
           } else if (!current?.isAfter(disableStartDate, "day")) {
+            //check xem có phải chọn ngày bắt đầu là ngày bắt đầu của task ko ?
             return {
               disabledHours: () => range(0, hourCurrentDate),
               disabledMinutes: () => range(0, minutesCurrentDate),
             };
           }
+        } else {
+          // đây là chọn ngày kết thúc
+          if (!current?.isAfter(disableStartDate, "day")) {
+            return {
+              disabledHours: () => range(0, hourCurrentDate),
+              disabledMinutes: () => range(0, minutesCurrentDate),
+            };
+          } else if (!current?.isBefore(disableEndDate, "day")) {
+            return {
+              disabledHours: () => range(hourEndDate, 24),
+              disabledMinutes: () => range(minutesEndDate, 60),
+            };
+          }
+          return {
+            disabledHours: () => range(hourEndDate, 24),
+            disabledMinutes: () => range(minutesEndDate, 60),
+          };
         }
-        return {
-          disabledHours: () => range(hourEndDate, 24),
-          disabledMinutes: () => range(minutesEndDate, 60),
-        };
       } else if (
         checkStartDateFormat.toString() === checkEndDateFormat.toString()
       ) {
+        //Trường hợp trong 1 ngày
         if (type === "start") {
+          // return {
+          //   disabledHours: () => range(0, hourStartDate),
+          //   disabledMinutes: () => range(0, minutesStartDate),
+          // };
           return {
-            disabledHours: () => range(0, hourStartDate),
-            disabledMinutes: () => range(0, minutesStartDate),
+            disabledHours: () =>
+              range(0, hourStartDate).concat(range(hourEndDate, 24)), // Sửa đoạn này
+            disabledMinutes: () =>
+              range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
           };
         }
         return {
@@ -213,6 +236,7 @@ const NewTaskModal = ({
             range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
         };
       } else {
+        // trường hợp ngày hôm nay trước ngày bắt đầu
         if (type === "start") {
           if (!current?.isBefore(disableEndDate, "day")) {
             // nếu chọn ngày enđate
@@ -223,19 +247,25 @@ const NewTaskModal = ({
           } else if (!current?.isAfter(disableStartDate, "day")) {
             //ngày bắt đầu startdate
             return {
-              // disabledHours: () => range(0, hourStartDate),
-              // disabledMinutes: () => range(0, minutesStartDate),
-              disabledHours: () => range(0, hourCurrentDate),
-              disabledMinutes: () => range(0, minutesCurrentDate),
+              disabledHours: () => range(0, hourStartDate),
+              disabledMinutes: () => range(0, minutesStartDate),
             };
           }
+          if (!current?.isAfter(disableStartDate, "day")) {
+            //chọn ngày kết thúc là ngày cuối
+            return {
+              disabledHours: () => range(0, hourStartDate),
+              disabledMinutes: () => range(0, minutesStartDate),
+            };
+          }
+          return {
+            disabledHours: () => range(hourEndDate, 24),
+            disabledMinutes: () => range(minutesEndDate, 60),
+          };
         }
-        return {
-          disabledHours: () => range(hourEndDate, 24),
-          disabledMinutes: () => range(minutesEndDate, 60),
-        };
       }
     } else {
+      //các ngày ở giữa ngày bắt đầu và kết thúc thì sẽ ko bắt gì cả
       return {
         disabledHours: () => range(0, 0),
         disabledMinutes: () => range(0, 0),
@@ -314,7 +344,7 @@ const NewTaskModal = ({
               ]}
               hasFeedback
             >
-              <Input placeholder="task title ..." />
+              <Input placeholder="Tên công việc  ..." />
             </Form.Item>
             {/* date */}
             <Form.Item
@@ -402,8 +432,8 @@ const NewTaskModal = ({
               className="text-sm font-medium "
               rules={[
                 {
-                  type: "float",
-                  message: "Chỉ được nhập số vd: 1.2",
+                  type: "number",
+                  message: "Chỉ được nhập số",
                 },
               ]}
             >

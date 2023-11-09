@@ -69,7 +69,7 @@ const FileInput = ({ taskSelected, setUpdateFileList }) => {
     <div>
       <Form className="mb-0" onFinish={onFinish} form={form}>
         <Form.Item
-          className="text-sm font-medium mb-2 px-3"
+          className="text-sm font-medium mb-0 px-3"
           name="fileUrl"
           valuePropName="fileList"
           getValueFromEvent={(e) => e?.fileList}
@@ -127,7 +127,7 @@ const FileInput = ({ taskSelected, setUpdateFileList }) => {
             size="small"
             type="primary"
             htmlType="submit"
-            loading={isLoadingUploadFile && isLoadingPostFile}
+            loading={isLoadingUploadFile || isLoadingPostFile}
             className="flex justify-center items-center"
           >
             <CheckOutlined />

@@ -52,3 +52,6 @@ export const getEventDetail = ({ eventId }) =>
   authRequest({
     url: `/event/${eventId}`,
   });
+
+export const getEventTemplate = () =>
+  authRequest({ url: "/event/template-event" });

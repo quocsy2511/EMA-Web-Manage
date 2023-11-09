@@ -45,11 +45,22 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
         });
         setIsOpenNewRequest(false);
       },
-      onError: () => {
-        message.open({
-          type: "error",
-          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-        });
+      onError: (data) => {
+        console.log(
+          "🚀 ~ file: NewRequestModal.js:49 ~ useMutation ~ data:",
+          data.response.data.message
+        );
+        if (data?.response?.data?.message === "Not enough vacation days") {
+          message.open({
+            type: "error",
+            content: "Bạn không còn đủ ngày nghỉ vui lòng kiểm tra lại đơn",
+          });
+        } else {
+          message.open({
+            type: "error",
+            content: "Đã xãy ra lỗi bất ngờ vui lòng thử lại sau",
+          });
+        }
       },
     });
 

@@ -37,10 +37,6 @@ const FieldSubtask = ({
   setIsOpenTaskModal,
 }) => {
   const [updateFileList, setUpdateFileList] = useState(taskSelected?.taskFiles);
-  console.log(
-    "🚀 ~ file: FieldSubtask.js:40 ~ updateFileList:",
-    updateFileList
-  );
   const [updatePriority, setUpdatePriority] = useState(taskSelected?.priority);
   const [assignTasks, setAssignTasks] = useState(taskSelected?.assignTasks);
   const [updateStatus, setUpdateStatus] = useState(taskSelected?.status);
@@ -127,6 +123,7 @@ const FieldSubtask = ({
                   file={file}
                   updateFileList={updateFileList}
                   setUpdateFileList={setUpdateFileList}
+                  taskParent={taskParent}
                 />
               ))}
             {!taskParent && !disableUpdate && (
@@ -211,6 +208,7 @@ const FieldSubtask = ({
                 setUpdateStatus={setUpdateStatus}
                 taskSelected={taskSelected}
                 taskParent={taskParent}
+                classNameStyle="w-[190px] mt-2"
               />
             )}
           </div>

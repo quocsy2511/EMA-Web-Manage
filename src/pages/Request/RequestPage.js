@@ -6,10 +6,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "antd";
 import NewRequestModal from "./Modal/NewRequestModal";
 import { useQuery } from "@tanstack/react-query";
-import { getAllRequests } from "../../apis/requests";
+import { getAllRequests, getAnnualLeave } from "../../apis/requests";
 import { useRouteLoaderData } from "react-router-dom";
 import { MoonLoader } from "react-spinners";
 import EditRequestModal from "./Modal/EditRequestModal";
+import moment from "moment";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 
 const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
@@ -44,6 +47,21 @@ const RequestPage = () => {
     }
   );
 
+  const {
+    data: annualLeave,
+
+    isLoading: isLoadingAnnualLeave,
+    isError: isErrorAnnualLeave,
+  } = useQuery(["annual-leave"], () => getAnnualLeave(), {
+    refetchOnWindowFocus: false,
+    select: (data) => {
+      return data;
+    },
+  });
+  console.log(
+    "🚀 ~ file: RequestPage.js:53 ~ RequestPage ~ annualLeave:",
+    annualLeave
+  );
 
   useEffect(() => {
     refetch();
@@ -102,7 +120,8 @@ const RequestPage = () => {
                 </p>
               </div>
             </div>
-            <div
+
+            {/* <div
               onClick={() => handleChangeRequestType("bin")}
               className="flex items-center gap-x-4 border-l cursor-pointer"
             >
@@ -129,7 +148,26 @@ const RequestPage = () => {
                   Đã xóa
                 </p>
               </div>
-            </div>
+            </div> */}
+
+            {!isLoadingAnnualLeave ? (
+              !isErrorAnnualLeave ? (
+                staff?.role && (
+                  <div className="flex items-center gap-x-4 border-l cursor-pointer">
+                    <div className="w-0.5" />
+                    <div className="flex items-center gap-x-4 px-5 py-3">
+                      <p className={`text-sm font-medium text-slate-500  `}>
+                        Ngày phép còn lại : {annualLeave?.amount}
+                      </p>
+                    </div>
+                  </div>
+                )
+              ) : (
+                <AnErrorHasOccured />
+              )
+            ) : (
+              <LoadingComponentIndicator />
+            )}
 
             <div className="h-10" />
 

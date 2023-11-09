@@ -5,7 +5,12 @@ import React from "react";
 import { IoMdAttach } from "react-icons/io";
 import { deleteFileTask } from "../../../../apis/files";
 
-const ListFile = ({ file, updateFileList, setUpdateFileList }) => {
+const ListFile = ({
+  file,
+  updateFileList,
+  setUpdateFileList,
+  taskParent = false,
+}) => {
   const FileID = file.id;
   const taskID = file.taskID;
   const [modal, contextHolder] = Modal.useModal();
@@ -64,20 +69,22 @@ const ListFile = ({ file, updateFileList, setUpdateFileList }) => {
   };
 
   return (
-    <div className="flex flex-row justify-between gap-x-2">
+    <div className="flex flex-row justify-between gap-x-2 mt-4">
       {contextHolder}
       <a
         href={file.fileUrl}
-        className="text-ellipsis max-w-full overflow-hidden flex mt-2 text-green-500"
+        className="text-ellipsis max-w-full overflow-hidden flex mt-1 text-green-500"
       >
         <IoMdAttach className="cursor-pointer" size={20} />
         {file.fileName}
       </a>
-      <DeleteOutlined
-        // onClick={handleDeleteFile}
-        onClick={() => showDeleteConfirm(FileID)}
-        className="hover:text-red-400"
-      />
+      {!taskParent && (
+        <DeleteOutlined
+          // onClick={handleDeleteFile}
+          onClick={() => showDeleteConfirm(FileID)}
+          className="hover:text-red-400"
+        />
+      )}
     </div>
   );
 };

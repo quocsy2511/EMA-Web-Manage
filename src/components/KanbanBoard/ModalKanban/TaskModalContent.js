@@ -21,6 +21,7 @@ const TaskModalContent = ({
   taskSelected,
   disableUpdate,
   setIsOpenTaskModal,
+  completed,
 }) => {
   const {
     data: listComments,
@@ -57,14 +58,14 @@ const TaskModalContent = ({
   const [description, setDescription] = useState(taskSelected?.description);
   const [subTasks, setSubTasks] = useState(taskSelected?.subTask);
 
-  let completed = 0;
-  if (taskParent) {
-    taskSelected.subTask.forEach((task) => {
-      if (task.status === "confirmed") {
-        completed++;
-      }
-    });
-  }
+  // let completed = 0;
+  // if (taskParent) {
+  //   taskSelected.subTask.forEach((task) => {
+  //     if (task.status === "CONFIRM") {
+  //       completed++;
+  //     }
+  //   });
+  // }
 
   // useEffect(() => {
   //   setTitle(taskSelected.title);
@@ -125,14 +126,22 @@ const TaskModalContent = ({
             <h3 className="text-lg font-bold">
               Công việc ({completed}/{subTasks.length})
             </h3>
-            {subTasks.map((subTask) => (
-              <Subtasks
-                disableUpdate={disableUpdate}
-                key={subTask.id}
-                Subtask={subTask}
-                setSelectedSubTask={setSelectedSubTask}
-              />
-            ))}
+            <div
+              className={
+                subTasks.length > 3
+                  ? `overflow-y-scroll max-h-[250px] pr-4`
+                  : `min-h-fit`
+              }
+            >
+              {subTasks.map((subTask) => (
+                <Subtasks
+                  disableUpdate={disableUpdate}
+                  key={subTask.id}
+                  Subtask={subTask}
+                  setSelectedSubTask={setSelectedSubTask}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}

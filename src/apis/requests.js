@@ -65,3 +65,7 @@ export const deleteRequest = (id) =>
     url: `/request/changeRequest/${id}`,
     method: "delete",
   });
+export const getAnnualLeave = () =>
+  authRequest({
+    url: `/annual-leave`,
+  });

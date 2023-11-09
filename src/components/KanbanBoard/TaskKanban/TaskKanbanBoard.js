@@ -9,7 +9,6 @@ import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import { getComment } from "../../../apis/comments";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
-import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 import { getTasks } from "../../../apis/tasks";
 import { AnimatePresence, motion } from "framer-motion";
 import { MoonLoader } from "react-spinners";
@@ -116,7 +115,13 @@ const TaskKanbanBoard = ({
         className="w-[250px] min-h-[138px] mx-auto my-5 rounded-lg bg-white  shadow-darkShadow py-3 px-3 shadow-lg hover:opacity-60  cursor-pointer"
         onClick={() => openTaskModalHandler()}
       >
-        <p className="font-normal text-sm tracking-wide hover:text-secondary break-words ">
+        <p
+          className={
+            task.status === "CANCEL" || task.status === "OVERDUE"
+              ? "font-normal text-sm tracking-wide hover:text-secondary break-words line-through decoration-red-700 decoration-2 opacity-30"
+              : "font-normal text-sm tracking-wide hover:text-secondary break-words"
+          }
+        >
           {task?.title}
         </p>
         {/* Sumary */}

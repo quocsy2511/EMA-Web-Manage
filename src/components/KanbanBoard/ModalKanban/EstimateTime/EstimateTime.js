@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Form, InputNumber, message } from "antd";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { getTasks, updateTask } from "../../../../apis/tasks";
 
 const EstimateTime = ({
@@ -13,16 +13,21 @@ const EstimateTime = ({
   const queryClient = useQueryClient();
   const inputRef = useRef(null);
   const taskID = taskSelected?.id;
+  const [isInputValid, setIsInputValid] = useState(false);
   const onPressEnter = (e) => {
     // Kiểm tra nếu người dùng nhấn phím "Enter"
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && isInputValid) {
       e.preventDefault();
       onFinish(updateEstimateTime);
+      setIsInputValid(false);
     }
   };
 
   const onChange = (value) => {
-    setUpdateEstimateTime(value);
+    if (value) {
+      setIsInputValid(true);
+      setUpdateEstimateTime(value);
+    }
   };
   const { data: subtaskDetails } = useQuery(
     ["subtaskDetails", taskID],
@@ -114,8 +119,12 @@ const EstimateTime = ({
             className="w-full mb-2 px-3"
             rules={[
               {
-                type: "float",
-                message: "Chỉ được nhập số vd: 1.2",
+                type: "number",
+                message: "Chỉ được nhập số ",
+              },
+              {
+                required: true,
+                message: "Bắt buộc nhập",
               },
             ]}
           >
@@ -132,7 +141,7 @@ const EstimateTime = ({
               }
               onChange={onChange}
               id="board-name-input"
-              // type="number"
+              type="number"
               disabled={disableUpdate}
               // step="0.1"
               // stringMode

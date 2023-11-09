@@ -3,10 +3,12 @@ import TaskKanbanBoard from "../TaskKanban/TaskKanbanBoard";
 import TaskModal from "../ModalKanban/TaskModal";
 import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import moment from "moment";
+import { Dropdown } from "antd";
+import NewTaskModalTemplate from "../ModalKanban/NewTaskModalTemplate";
 
-const Column = ({ TaskParent, selectedStatus }) => {
+const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
   const colors = [
     "bg-red-500",
     "bg-orange-500",
@@ -21,15 +23,12 @@ const Column = ({ TaskParent, selectedStatus }) => {
   const [color, setColor] = useState(null);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [addNewTask, setAddNewTask] = useState(false);
+  const [addNewTaskTemplate, setAddNewTaskTemplate] = useState(false);
+  const [taskTemplateModal, setTaskTemplateModal] = useState(null);
+
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
   const [disableUpdate, setDisableUpdate] = useState(false);
-
-  useEffect(() => {
-    if (TaskParent?.status === "CONFIRM") {
-      setDisableUpdate(true);
-    }
-  }, [TaskParent]);
 
   let completed = 0;
   let subTask = TaskParent.subTask;
@@ -51,6 +50,42 @@ const Column = ({ TaskParent, selectedStatus }) => {
     setIsTaskParent(true);
     setTaskSelected(TaskParent);
   };
+
+  const newTaskItems = [
+    {
+      key: "newTaskDefault",
+      label: <p>Thủ công</p>,
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: "newTaskTemplate",
+      label: "Công việc mẫu",
+      children: taskTemplate?.map((task, index) => {
+        return {
+          key: task.id,
+          label: task.title,
+        };
+      }),
+    },
+  ];
+
+  const handleSelectCreateTask = ({ key }) => {
+    if (key === "newTaskDefault") {
+      setAddNewTask(true);
+    } else {
+      const newTaskTemplate = taskTemplate?.find((task) => task.id === key);
+      setAddNewTaskTemplate(true);
+      setTaskTemplateModal(newTaskTemplate);
+    }
+  };
+
+  useEffect(() => {
+    if (TaskParent?.status === "CONFIRM") {
+      setDisableUpdate(true);
+    }
+  }, [TaskParent]);
 
   useEffect(() => {
     //là nó sẽ trộn random bảng màu của Colors rồi  -> pop() sẽ làm nhiệm vụ xoá thằng đó ra khỏi mảng và trả về cái đó
@@ -100,14 +135,22 @@ const Column = ({ TaskParent, selectedStatus }) => {
           </AnimatePresence>
 
           {!disableUpdate && (
-            <div
-              className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow"
-              onClick={() => setAddNewTask(true)}
+            <Dropdown
+              menu={{
+                items: newTaskItems,
+                onClick: handleSelectCreateTask,
+              }}
+              trigger={["click"]}
             >
-              <p className="text-sm font-semibold tracking-tighter">
-                + Thêm công việc mới
-              </p>
-            </div>
+              <div
+                className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow"
+                // onClick={() => setAddNewTask(true)}
+              >
+                <p className="text-sm font-semibold tracking-tighter">
+                  + Thêm công việc mới
+                </p>
+              </div>
+            </Dropdown>
           )}
         </div>
 
@@ -121,6 +164,7 @@ const Column = ({ TaskParent, selectedStatus }) => {
             taskParent={isTaskParent}
             isOpenTaskModal={isOpenTaskModal}
             setIsOpenTaskModal={setIsOpenTaskModal}
+            completed={completed}
           />
         )}
         {addNewTask && (
@@ -129,6 +173,14 @@ const Column = ({ TaskParent, selectedStatus }) => {
             disableEndDate={TaskParent?.endDate}
             addNewTask={addNewTask}
             setAddNewTask={setAddNewTask}
+            TaskParent={TaskParent}
+          />
+        )}
+        {addNewTaskTemplate && (
+          <NewTaskModalTemplate
+            addNewTaskTemplate={addNewTaskTemplate}
+            setAddNewTaskTemplate={setAddNewTaskTemplate}
+            taskTemplateModal={taskTemplateModal}
             TaskParent={TaskParent}
           />
         )}
