@@ -8,6 +8,7 @@ const StatusSelected = ({
   taskParent,
   updateStatus,
   setUpdateStatus,
+  classNameStyle,
 }) => {
   const statusTask = [
     {
@@ -82,8 +83,9 @@ const StatusSelected = ({
         bordered={false}
         defaultValue={updateStatus}
         style={{ padding: 0 }}
-        className="w-[190px] mt-4 "
+        className={classNameStyle}
         onChange={(value) => handleChangeStatus(value)}
+        popupMatchSelectWidth={false}
       >
         {taskParent
           ? StatusParentTask?.map((status) => (

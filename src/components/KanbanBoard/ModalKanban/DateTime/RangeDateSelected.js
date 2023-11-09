@@ -77,36 +77,59 @@ const RangeDateSelected = ({
     return result;
   };
   const disabledRangeTime = (current, type) => {
+    //check xem có phải chọn ngày bắt đầu với kết thúc ko ? ko thì sẽ ko bắt time
     if (
       !current?.isAfter(disableStartDate, "day") ||
       !current?.isBefore(disableEndDate, "day")
     ) {
-      //check ngày hôm nay có phải ngày bắt đầu không
       if (!today.isBefore(disableStartDate, "day")) {
+        //Trường hợp  ngày hôm nay nó trùng ngày bắt đầu không ?
         if (type === "start") {
           if (!current?.isBefore(disableEndDate, "day")) {
+            //check xem có phải chọn ngày bắt đầu là ngày kết thúc của task ko ?
             return {
               disabledHours: () => range(hourEndDate, 24),
               disabledMinutes: () => range(minutesEndDate, 60),
             };
           } else if (!current?.isAfter(disableStartDate, "day")) {
+            //check xem có phải chọn ngày bắt đầu là ngày bắt đầu của task ko ?
             return {
               disabledHours: () => range(0, hourCurrentDate),
               disabledMinutes: () => range(0, minutesCurrentDate),
             };
           }
+        } else {
+          // đây là chọn ngày kết thúc
+          if (!current?.isAfter(disableStartDate, "day")) {
+            return {
+              disabledHours: () => range(0, hourCurrentDate),
+              disabledMinutes: () => range(0, minutesCurrentDate),
+            };
+          } else if (!current?.isBefore(disableEndDate, "day")) {
+            return {
+              disabledHours: () => range(hourEndDate, 24),
+              disabledMinutes: () => range(minutesEndDate, 60),
+            };
+          }
+          return {
+            disabledHours: () => range(hourEndDate, 24),
+            disabledMinutes: () => range(minutesEndDate, 60),
+          };
         }
-        return {
-          disabledHours: () => range(hourEndDate, 24),
-          disabledMinutes: () => range(minutesEndDate, 60),
-        };
       } else if (
         checkStartDateFormat.toString() === checkEndDateFormat.toString()
       ) {
+        //Trường hợp trong 1 ngày
         if (type === "start") {
+          // return {
+          //   disabledHours: () => range(0, hourStartDate),
+          //   disabledMinutes: () => range(0, minutesStartDate),
+          // };
           return {
-            disabledHours: () => range(0, hourStartDate),
-            disabledMinutes: () => range(0, minutesStartDate),
+            disabledHours: () =>
+              range(0, hourStartDate).concat(range(hourEndDate, 24)), // Sửa đoạn này
+            disabledMinutes: () =>
+              range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
           };
         }
         return {
@@ -116,25 +139,36 @@ const RangeDateSelected = ({
             range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
         };
       } else {
+        // trường hợp ngày hôm nay trước ngày bắt đầu
         if (type === "start") {
           if (!current?.isBefore(disableEndDate, "day")) {
+            // nếu chọn ngày enđate
             return {
               disabledHours: () => range(hourEndDate, 24),
               disabledMinutes: () => range(minutesEndDate, 60),
             };
           } else if (!current?.isAfter(disableStartDate, "day")) {
+            //ngày bắt đầu startdate
             return {
               disabledHours: () => range(0, hourStartDate),
               disabledMinutes: () => range(0, minutesStartDate),
             };
           }
+          if (!current?.isAfter(disableStartDate, "day")) {
+            //chọn ngày kết thúc là ngày cuối
+            return {
+              disabledHours: () => range(0, hourStartDate),
+              disabledMinutes: () => range(0, minutesStartDate),
+            };
+          }
+          return {
+            disabledHours: () => range(hourEndDate, 24),
+            disabledMinutes: () => range(minutesEndDate, 60),
+          };
         }
-        return {
-          disabledHours: () => range(hourEndDate, 24),
-          disabledMinutes: () => range(minutesEndDate, 60),
-        };
       }
     } else {
+      //các ngày ở giữa ngày bắt đầu và kết thúc thì sẽ ko bắt gì cả
       return {
         disabledHours: () => range(0, 0),
         disabledMinutes: () => range(0, 0),

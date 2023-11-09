@@ -3,19 +3,29 @@ import { BsMailbox, BsTrash3 } from "react-icons/bs";
 import RequestsList from "../../components/RequestItem/RequestsList";
 import RequestDetail from "../../components/RequestItem/RequestDetail";
 import { AnimatePresence, motion } from "framer-motion";
+import { Button } from "antd";
+import NewRequestModal from "./Modal/NewRequestModal";
 import { useQuery } from "@tanstack/react-query";
-import { getAllRequests } from "../../apis/requests";
+import { getAllRequests, getAnnualLeave } from "../../apis/requests";
 import { useRouteLoaderData } from "react-router-dom";
 import { MoonLoader } from "react-spinners";
+import EditRequestModal from "./Modal/EditRequestModal";
+import moment from "moment";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 
 const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
+  // console.log("🚀 ~ file: RequestPage.js:16 ~ RequestPage ~ staff:", staff);
 
   const [currentPage, setCurrentPage] = useState(1);
   console.log("currentPage: ", currentPage);
   const [selectedRequest, setSelectedRequest] = useState();
   const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
+  const [isOpenNewRequest, setIsOpenNewRequest] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
+  const [isOpenEditRequest, setIsOpenEditRequest] = useState(false);
+  const [requestSelected, setRequestSelected] = useState("");
   const [searchText, setSearchText] = useState();
 
   const {
@@ -29,17 +39,35 @@ const RequestPage = () => {
     () =>
       getAllRequests({
         curentPage: currentPage,
-        pageSize: 10,
         type: selectedType,
         requestor: staff ? staff.id : undefined,
         requestorName: searchText,
       }),
     {
       refetchOnWindowFocus: false,
+      select: (data) => {
+        return data.data;
+      },
     }
   );
-  console.log("REQUEST: ", requests);
-  
+
+
+  const {
+    data: annualLeave,
+
+    isLoading: isLoadingAnnualLeave,
+    isError: isErrorAnnualLeave,
+  } = useQuery(["annual-leave"], () => getAnnualLeave(), {
+    refetchOnWindowFocus: false,
+    select: (data) => {
+      return data;
+    },
+  });
+  console.log(
+    "🚀 ~ file: RequestPage.js:53 ~ RequestPage ~ annualLeave:",
+    annualLeave
+  );
+
 
   useEffect(() => {
     refetch();
@@ -69,6 +97,16 @@ const RequestPage = () => {
         <div className="w-full h-full bg-white rounded-lg shadow-xl flex">
           <div className="w-1/5 border-r overflow-hidden overflow-y-scroll scrollbar-hide">
             <div className="h-10" />
+            {staff?.role && (
+              <motion.div className="w-full flex justify-center items-center mb-3">
+                <Button
+                  type="primary"
+                  onClick={() => setIsOpenNewRequest(true)}
+                >
+                  Tạo đơn
+                </Button>
+              </motion.div>
+            )}
 
             <div
               onClick={() => handleChangeRequestType("inbox")}
@@ -98,7 +136,8 @@ const RequestPage = () => {
                 </p>
               </div>
             </div>
-            <div
+
+            {/* <div
               onClick={() => handleChangeRequestType("bin")}
               className="flex items-center gap-x-4 border-l cursor-pointer"
             >
@@ -125,7 +164,26 @@ const RequestPage = () => {
                   Đã xóa
                 </p>
               </div>
-            </div>
+            </div> */}
+
+            {!isLoadingAnnualLeave ? (
+              !isErrorAnnualLeave ? (
+                staff?.role && (
+                  <div className="flex items-center gap-x-4 border-l cursor-pointer">
+                    <div className="w-0.5" />
+                    <div className="flex items-center gap-x-4 px-5 py-3">
+                      <p className={`text-sm font-medium text-slate-500  `}>
+                        Ngày phép còn lại : {annualLeave?.amount}
+                      </p>
+                    </div>
+                  </div>
+                )
+              ) : (
+                <AnErrorHasOccured />
+              )
+            ) : (
+              <LoadingComponentIndicator />
+            )}
 
             <div className="h-10" />
 
@@ -229,11 +287,16 @@ const RequestPage = () => {
                         key="request-list"
                         requests={requests}
                         setSelectedRequest={setSelectedRequest}
+
+                        setIsOpenEditRequest={setIsOpenEditRequest}
+                        setRequestSelected={setRequestSelected}
+
                         currentPage={currentPage}
                         setCurrentPage={setCurrentPage}
                         searchText={searchText}
                         setSearchText={setSearchText}
                         isRefetching={isRefetching}
+
                       />
                     ) : (
                       <RequestDetail
@@ -252,6 +315,19 @@ const RequestPage = () => {
             </AnimatePresence>
           </div>
         </div>
+        {isOpenNewRequest && (
+          <NewRequestModal
+            isOpenNewRequest={isOpenNewRequest}
+            setIsOpenNewRequest={setIsOpenNewRequest}
+          />
+        )}
+        {isOpenEditRequest && (
+          <EditRequestModal
+            isOpenEditRequest={isOpenEditRequest}
+            setIsOpenEditRequest={setIsOpenEditRequest}
+            requestSelected={requestSelected}
+          />
+        )}
       </div>
     </Fragment>
   );

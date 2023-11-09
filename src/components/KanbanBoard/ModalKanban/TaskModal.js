@@ -12,6 +12,7 @@ const TaskModal = ({
   taskSelected,
   setTaskSelected,
   disableUpdate,
+  completed,
 }) => {
   const [selectedSubTask, setSelectedSubTask] = useState(null);
 
@@ -43,6 +44,7 @@ const TaskModal = ({
             setSelectedSubTask={setSelectedSubTask}
             disableEndDate={disableEndDate}
             disableStartDate={disableStartDate}
+            completed={completed}
           />
         ) : (
           //task con
@@ -54,6 +56,7 @@ const TaskModal = ({
               taskParent={!taskParent}
               disableEndDate={disableEndDate}
               disableStartDate={disableStartDate}
+              completed={completed}
             />
           </>
         )}

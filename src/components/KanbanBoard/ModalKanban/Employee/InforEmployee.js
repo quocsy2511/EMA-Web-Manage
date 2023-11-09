@@ -6,7 +6,8 @@ import { getTasks } from "../../../../apis/tasks";
 import moment from "moment";
 
 const InforEmployee = ({ taskSelected }) => {
-  const taskID = taskSelected?.id;
+  let taskID = taskSelected?.id;
+
   const { data: subtaskDetails } = useQuery(
     ["subtaskDetails", taskID],
     () =>

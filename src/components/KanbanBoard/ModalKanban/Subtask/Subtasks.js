@@ -2,43 +2,11 @@ import { EyeOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Select, Tag, Tooltip, message } from "antd";
 import React, { useState } from "react";
 import moment from "moment";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getTasks, updateTaskStatus } from "../../../../apis/tasks";
+import { useQuery } from "@tanstack/react-query";
+import { getTasks } from "../../../../apis/tasks";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
-
-const statusTask = [
-  {
-    value: "PROCESSING",
-    label: "ĐANG DIỄN RA",
-    color: "processing",
-  },
-  {
-    value: "DONE",
-    label: "HOÀN THÀNH",
-    color: "green",
-  },
-  {
-    value: "CONFIRM",
-    label: "XÁC NHẬN",
-    color: "purple",
-  },
-  {
-    value: "PENDING",
-    label: "CHUẨN BỊ",
-    color: "default",
-  },
-  {
-    value: "CANCEL",
-    label: "ĐÃ HUỶ",
-    color: "red",
-  },
-  {
-    value: "OVERDUE",
-    label: "QUÁ HẠN",
-    color: "red",
-  },
-];
+import StatusSelected from "../Status/StatusSelected";
 
 const Subtasks = ({
   onChangeSubtask,
@@ -84,7 +52,7 @@ const Subtasks = ({
     setSelectedSubTask(subtaskDetails?.[0]);
   };
 
-  const [isOpenStatus, setIsOpenStatus] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState(Subtask?.status);
 
   const getColorStatus = (status) => {
     const colorMapping = {
@@ -99,32 +67,6 @@ const Subtasks = ({
     return colorMapping[status];
   };
 
-  const queryClient = useQueryClient();
-  const { mutate: UpdateStatus } = useMutation(
-    ({ taskID, status }) => updateTaskStatus({ taskID, status }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["tasks"]);
-        queryClient.invalidateQueries(["subtaskDetails"], id);
-        message.open({
-          type: "success",
-          content: "Cập nhật trạng thái thành công",
-        });
-      },
-      onError: () => {
-        message.open({
-          type: "error",
-          content: "Ko thể bình luận lúc này! Hãy thử lại sau",
-        });
-      },
-    }
-  );
-
-  const handleChangeStatus = (value) => {
-    const data = { status: value, taskID: id };
-    UpdateStatus(data);
-  };
-
   const formattedDate = (value) => {
     const date = moment(value).format("DD/MM HH:mm");
     return date;
@@ -133,11 +75,13 @@ const Subtasks = ({
   return (
     <div className="mt-2 flex flex-col gap-y-2 cursor-pointer ">
       <div className="mt-1 flex flex-col gap-y-2 pb-2">
-        <div className="flex flex-row gap-x-2 cursor-pointer justify-center items-center">
+        <div className="flex flex-row  cursor-pointer justify-center items-center">
           <input
             className={
-              Subtask.status === "DONE"
-                ? "line-through decoration-red-700 decoration-2 opacity-30 bg-transparent px-2 py-1 rounded-md text-sm font-medium border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer "
+              updateStatus === "CANCEL" || updateStatus === "OVERDUE"
+                ? "line-through decoration-red-500 decoration-2 opacity-30 bg-transparent px-2 py-1 rounded-md text-sm font-medium border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer "
+                : updateStatus === "CONFIRM"
+                ? "line-through decoration-purple-500 decoration-2 opacity-30 bg-transparent px-2 py-1 rounded-md text-sm font-medium border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer "
                 : "bg-transparent px-2 py-1 rounded-md text-sm font-medium border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer "
             }
             placeholder="title task"
@@ -148,31 +92,17 @@ const Subtasks = ({
             disabled
           />
           {disableUpdate ? (
-            <Tag color={getColorStatus(Subtask.status).color} className="h-fit">
-              {getColorStatus(Subtask.status).status}
-            </Tag>
-          ) : !isOpenStatus ? (
-            <Tag
-              color={getColorStatus(Subtask.status).color}
-              onClick={() => setIsOpenStatus(true)}
-              className="h-fit"
-            >
-              {getColorStatus(Subtask.status).status}
+            <Tag color={getColorStatus(updateStatus).color} className="h-fit">
+              {getColorStatus(updateStatus).status}
             </Tag>
           ) : (
-            <Select
-              removeIcon={true}
-              bordered={false}
-              defaultValue={Subtask.status}
-              className="w-[190px]"
-              onChange={(value) => handleChangeStatus(value)}
-            >
-              {statusTask.map((status) => (
-                <Select.Option key={status.value}>
-                  <Tag color={status.color}>{status.label}</Tag>
-                </Select.Option>
-              ))}
-            </Select>
+            <StatusSelected
+              updateStatus={updateStatus}
+              setUpdateStatus={setUpdateStatus}
+              taskSelected={Subtask}
+              taskParent={false}
+              classNameStyle="ml-6"
+            />
           )}
 
           <EyeOutlined
@@ -182,7 +112,7 @@ const Subtasks = ({
         </div>
         <div
           className={
-            Subtask.status === "confirmed"
+            updateStatus === "confirmed"
               ? "opacity-50 flex flex-row justify-start items-center"
               : "flex flex-row justify-start items-center"
           }
@@ -236,14 +166,14 @@ const Subtasks = ({
             <div className="flex justify-start items-center">
               <span
                 className={`px-[6px] py-[2px] w-fit text-xs font-medium flex justify-start items-center gap-x-1 ${
-                  Subtask.status === "processing"
+                  updateStatus === "PROCESSING"
                     ? "bg-blue-300 bg-opacity-20 text-blue-600 rounded-md"
-                    : Subtask.status === "done"
+                    : updateStatus === "DONE"
                     ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
-                    : Subtask.status === "confirmed"
-                    ? "bg-[#65a9a2] bg-opacity-20 text-[#13676a] rounded-md"
-                    : Subtask.status === "pending"
-                    ? "bg-[#f9d14c] bg-opacity-20 text-[#faad14] rounded-md"
+                    : updateStatus === "CONFIRM"
+                    ? "bg-purple-300 bg-opacity-20 text-purple-500 rounded-md"
+                    : updateStatus === "CANCEL" || updateStatus === "OVERDUE"
+                    ? "bg-red-300 bg-opacity-20 text-red-500 rounded-md"
                     : ""
                 }`}
               >

@@ -8,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Dropdown, Input, Select, Tag, Tooltip } from "antd";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouteLoaderData } from "react-router-dom";
 import { getAllUser } from "../../apis/users";
 import moment from "moment";
@@ -18,17 +18,6 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { debounce } from "lodash";
 import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 import { AnimatePresence, motion } from "framer-motion";
-
-// const settingHeader = [
-//   {
-//     key: "công việc",
-//     label: "Bảng công việc",
-//   },
-//   {
-//     key: "ngân sách",
-//     label: "Ngân sách",
-//   },
-// ];
 
 const HeaderEvent = ({
   sort,
@@ -46,6 +35,9 @@ const HeaderEvent = ({
   statusSelected,
 }) => {
   const divisionId = useRouteLoaderData("staff").divisionID;
+  const staffID = useRouteLoaderData("staff").id;
+  const [visible, setVisible] = useState(false);
+  const dropdownRef = useRef(null);
   const listRole = ["STAFF", "EMPLOYEE"];
   const {
     data: users,
@@ -53,7 +45,13 @@ const HeaderEvent = ({
     isLoading: isLoadingUsers,
   } = useQuery(
     ["users-division"],
-    () => getAllUser({ divisionId, pageSize: 10, currentPage: 1 }),
+    () =>
+      getAllUser({
+        divisionId,
+        pageSize: 10,
+        currentPage: 1,
+        role: "EMPLOYEE",
+      }),
     {
       select: (data) => {
         const listUsers = data.data.map(({ ...item }) => {
@@ -71,7 +69,7 @@ const HeaderEvent = ({
     }
   );
 
-  const staffUsers = users?.filter((user) => user.role === "STAFF");
+  // const staffUsers = users?.filter((user) => user.role === "STAFF");
   const handleChangeEvent = (value) => {
     const event = JSON.parse(value);
     setSelectEvent(event);
@@ -209,13 +207,26 @@ const HeaderEvent = ({
       setFilterMember(key);
     } else if (isKeyInListStatus === false && key === "clear") {
       setStatusSelected(key);
-      setFilterMember(staffUsers?.id);
+      // setFilterMember(staffUsers?.id);
+      setFilterMember(staffID);
     } else {
       setStatusSelected(key);
     }
     // setFilterMember(key);
   };
 
+  //tắt dropdown khi nó click ra ngoài vùng menu
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setVisible(false);
+    }
+  };
+  useEffect(() => {
+    window.addEventListener("click", handleClickOutside);
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
   return (
     <div className="p-4 left-0 bg-bgBoard z-50 right-0 top-14">
       <AnimatePresence mode="wait">
@@ -332,7 +343,10 @@ const HeaderEvent = ({
                                 </span>
                               )}
                             </div>
-                            <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 ">
+                            <div
+                              className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 "
+                              ref={dropdownRef}
+                            >
                               <Dropdown
                                 menu={{
                                   items: filterUser,
@@ -341,6 +355,8 @@ const HeaderEvent = ({
                                 trigger={["click"]}
                                 placement="bottomRight"
                                 arrow
+                                open={visible}
+                                onOpenChange={setVisible}
                               >
                                 <span className="flex flex-row gap-x-2 justify-center items-center">
                                   <svg

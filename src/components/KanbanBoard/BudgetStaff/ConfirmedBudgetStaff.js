@@ -252,7 +252,7 @@ const ConfirmedBudgetStaff = ({ selectEvent, listBudgetConfirmed }) => {
     <div>
       <div className="w-full bg-white p-8 rounded-xl">
         <>
-          <HeadingTitle>Bảng chờ chi phí đã xác nhận</HeadingTitle>
+          <HeadingTitle>Bảng chi phí đã duyệt</HeadingTitle>
           <Table
             rowKey="id"
             bordered
