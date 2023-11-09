@@ -4,6 +4,7 @@ export const getAllRequests = ({
   curentPage,
   pageSize,
   requestor,
+  requestorName,
   createdAt,
   status,
   type,
@@ -11,9 +12,9 @@ export const getAllRequests = ({
   authRequest({
     url: `/request/filterRequest/${curentPage}/${pageSize}?${
       requestor ? `requestor=${requestor}` : ""
-    }${createdAt ? `&requestor=${requestor}` : ""}${
-      status ? `&status=${status}` : ""
-    }${type ? `&type=${type}` : ""}`,
+    }${requestorName ? `&requestorName=${requestorName}` : ""}${
+      createdAt ? `&createdAt=${createdAt}` : ""
+    }${status ? `&status=${status}` : ""}${type ? `&type=${type}` : ""}`,
   });
 
 export const getRequestDetail = (id) =>

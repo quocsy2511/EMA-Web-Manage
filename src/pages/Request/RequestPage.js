@@ -18,26 +18,30 @@ const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
   // console.log("🚀 ~ file: RequestPage.js:16 ~ RequestPage ~ staff:", staff);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  console.log("currentPage: ", currentPage);
   const [selectedRequest, setSelectedRequest] = useState();
   const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
   const [isOpenNewRequest, setIsOpenNewRequest] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [isOpenEditRequest, setIsOpenEditRequest] = useState(false);
   const [requestSelected, setRequestSelected] = useState("");
+  const [searchText, setSearchText] = useState();
 
   const {
     data: requests,
     isLoading,
     isError,
     refetch,
+    isRefetching,
   } = useQuery(
     ["requests"],
     () =>
       getAllRequests({
-        curentPage: 1,
-        pageSize: 50,
+        curentPage: currentPage,
         type: selectedType,
         requestor: staff ? staff.id : undefined,
+        requestorName: searchText,
       }),
     {
       refetchOnWindowFocus: false,
@@ -46,6 +50,7 @@ const RequestPage = () => {
       },
     }
   );
+
 
   const {
     data: annualLeave,
@@ -63,9 +68,20 @@ const RequestPage = () => {
     annualLeave
   );
 
+
   useEffect(() => {
     refetch();
-  }, [selectedType]);
+  }, [selectedType, currentPage]);
+
+  useEffect(() => {
+    const identifier = setTimeout(() => {
+      refetch();
+    }, 1500);
+
+    return () => {
+      clearTimeout(identifier);
+    };
+  }, [searchText]);
 
   const handleChangeRequestType = (type) => {
     setSelectedRequestType(type);
@@ -271,8 +287,16 @@ const RequestPage = () => {
                         key="request-list"
                         requests={requests}
                         setSelectedRequest={setSelectedRequest}
+
                         setIsOpenEditRequest={setIsOpenEditRequest}
                         setRequestSelected={setRequestSelected}
+
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        searchText={searchText}
+                        setSearchText={setSearchText}
+                        isRefetching={isRefetching}
+
                       />
                     ) : (
                       <RequestDetail
