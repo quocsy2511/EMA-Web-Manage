@@ -97,7 +97,6 @@ const SubTaskModal = ({ isOpenModal, setIsOpenModal, selectedSubTask }) => {
 
   return (
     <Modal
-      // className="max-h-[80%] overflow-y-scroll no-scrollbar"
       bodyStyle={{ height: "85vh" }}
       open={isOpenModal}
       onCancel={handleCancel}
@@ -168,21 +167,6 @@ const SubTaskModal = ({ isOpenModal, setIsOpenModal, selectedSubTask }) => {
                 <p>Chưa phân việc</p>
               )}
             </Avatar.Group>
-            {/* <Avatar
-              size={35}
-              src={
-                selectedSubTask.assignTasks?.find(
-                  (item) => item.isLeader === true
-                )?.user?.profile.avatar
-              }
-            />
-            <p className="text-sm font-medium">
-              {
-                selectedSubTask.assignTasks?.find(
-                  (item) => item.isLeader === true
-                )?.user?.profile.fullName
-              }
-            </p> */}
           </ItemLayout>
 
           <div className="h-5" />
@@ -229,17 +213,17 @@ const SubTaskModal = ({ isOpenModal, setIsOpenModal, selectedSubTask }) => {
             <p className="text-base flex items-center gap-x-3">
               <span className="font-medium">
                 {selectedSubTask.startDate
-                  ? moment(selectedSubTask.startDate).format(
-                      "DD/MM/YYYY HH:mm:ss"
-                    )
+                  ? moment(selectedSubTask.startDate)
+                      .utc()
+                      .format("DD-MM-YYYY HH:mm")
                   : "-- : --"}
               </span>{" "}
               <HiMiniArrowLongRight />
               <span className="font-medium">
                 {selectedSubTask.endDate
-                  ? moment(selectedSubTask.endDate).format(
-                      "DD/MM/YYYY HH:mm:ss"
-                    )
+                  ? moment(selectedSubTask.endDate)
+                      .utc()
+                      .format("DD-MM-YYYY HH:mm")
                   : "-- : --"}
               </span>{" "}
             </p>

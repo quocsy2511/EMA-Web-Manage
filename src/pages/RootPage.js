@@ -18,15 +18,15 @@ const RootPage = () => {
         <Sidebar collapsed={collapsed} />
 
         <Layout>
-          <Header collapsed={collapsed} setCollapsed={setCollapsed} />
-          <Content>
-            <div className="bg-white flex items-center ">
-              <Outlet />
-            </div>
-            <ScrollRestoration getKey={(location) => location.pathname} />
-          </Content>
-
-
+          <div className={`${collapsed ? "ml-[80px]" : "ml-[230px]"}`}>
+            <Header collapsed={collapsed} setCollapsed={setCollapsed} />
+            <Content>
+              <div className="bg-white flex items-center mt-[64px]">
+                <Outlet />
+              </div>
+              <ScrollRestoration getKey={(location) => location.pathname} />
+            </Content>
+          </div>
         </Layout>
       </Layout>
     </Fragment>

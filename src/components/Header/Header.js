@@ -5,6 +5,8 @@ import { HiOutlineBellAlert } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { IoLogOutOutline } from "react-icons/io5";
 import { Link, useNavigate, useRouteLoaderData } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getAllNotification } from "../../apis/notifications";
 
 const notiItems = [
   {
@@ -52,13 +54,49 @@ const notiItems = [
   },
 ];
 
+const NotiLabel = () => (
+  <div className="flex items-center gap-x-3 min-w-[300px]">
+    <Avatar
+      size={40}
+      src="https://hips.hearstapps.com/hmg-prod/images/dwayne-the-rock-johnson-gettyimages-1061959920.jpg?crop=0.5625xw:1xh;center,top&resize=1200:*"
+    />
+    <div className="flex-1">
+      <p className="text-base font-medium">Nguyen Vu</p>
+      <p className="text-xs max-w-[200px] overflow-hidden truncate">
+        Đã bình luận vào việc của bạn ad sa sa dsa dá á dá á da
+      </p>
+    </div>
+    <div>
+      <div className="w-[8px] h-[8px] bg-blue-500 rounded-full" />
+    </div>
+  </div>
+);
+
 const Header = ({ collapsed, setCollapsed, data }) => {
   const navigate = useNavigate();
   const manager = useRouteLoaderData("manager");
+  // const [notiItems, setNotiItems] = useState();
+
+  const {
+    data: notifications,
+    isLoading,
+    isError,
+  } = useQuery(["notifications"], getAllNotification, {
+    select: (data) => {
+      return data.data;
+    },
+  });
+  console.log("notifications: ", notifications);
 
   const logout = () => {
     localStorage.removeItem("token");
     navigate("/");
+  };
+
+  const goToNotification = (e) => {
+    e.stopPropagation();
+    console.log(1);
+    // navigate("/");
   };
 
   const userItems = [
@@ -79,8 +117,16 @@ const Header = ({ collapsed, setCollapsed, data }) => {
     },
   ];
 
+  const onClickNotification = (key) => {
+    console.log("click noti : ", key);
+  };
+
   return (
-    <HeaderLayout className="p-0 bg-white border-b-2 h-16">
+    <HeaderLayout
+      className={`${
+        collapsed ? "w-[calc(100%-80px)]" : "w-[calc(100%-230px)]"
+      } p-0 bg-white border-b-2 h-16 fixed z-50`}
+    >
       <div className="flex justify-between items-center pr-8">
         <Button
           type="text"
@@ -102,7 +148,25 @@ const Header = ({ collapsed, setCollapsed, data }) => {
           <div className="cursor-pointer flex items-center">
             <Dropdown
               menu={{
-                items: notiItems,
+                // items: notiItems,
+                items: [
+                  ...(notifications?.map((noti) => ({
+                    key: noti.id,
+                    label: <NotiLabel />,
+                  })) ?? []),
+                  {
+                    key: "navigate",
+                    label: (
+                      <p
+                        className="text-center text-blue-400"
+                        onClick={goToNotification}
+                      >
+                        Xem tất cả
+                      </p>
+                    ),
+                  },
+                ],
+                onClick: onClickNotification,
               }}
               trigger={["click"]}
               placement="bottomRight"
@@ -110,11 +174,11 @@ const Header = ({ collapsed, setCollapsed, data }) => {
             >
               <Badge
                 size={"small"}
-                count={5}
+                count={notifications?.length ?? 0}
                 offset={[-2, 2]}
-                title="5 thông báo"
+                title={`${notifications?.length ?? 0} thông báo`}
+                onClick={(e) => e.preventDefault()}
               >
-                {/* <HiOutlineBell size={20} /> */}
                 <HiOutlineBellAlert size={20} />
               </Badge>
             </Dropdown>

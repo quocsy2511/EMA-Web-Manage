@@ -118,10 +118,20 @@ const Sidebar = ({ collapsed }) => {
         style={
           collapsed
             ? {
+                position: "fixed",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                zIndex: 1000,
                 background: colorTheme === "dark" ? "#fff" : "#001529",
                 minWidth: "80px", // Chiều rộng khi thu gọn
               }
             : {
+                position: "fixed",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                zIndex: 1000,
                 background: colorTheme === "dark" ? "#fff" : "#001529",
                 minWidth: "230px", // Chiều rộng khi mở rộng
               }

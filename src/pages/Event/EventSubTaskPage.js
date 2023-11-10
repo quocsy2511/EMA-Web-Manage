@@ -12,7 +12,7 @@ import {
   FcMediumPriority,
 } from "react-icons/fc";
 import { BsHourglassBottom, BsHourglassSplit, BsPlus } from "react-icons/bs";
-import { BiDetail,BiCheck } from "react-icons/bi";
+import { BiDetail, BiCheck, BiRightArrowAlt } from "react-icons/bi";
 import { VscDebugStart } from "react-icons/vsc";
 import { MdOutlineDoneOutline } from "react-icons/md";
 import { Avatar, Button, Card, FloatButton, message } from "antd";
@@ -335,32 +335,119 @@ const EventSubTaskPage = () => {
             >
               {status}
             </div>
+
             <div className="w-[4%]" />
-            <motion.div
-              whileHover={{ y: -5 }}
-              className="flex items-center px-4 py-2 bg-green-100 text-green-400 rounded-xl"
-            >
-              <BsHourglassSplit size={15} />
-              <div className="w-4" />
-              <p className="text-base font-medium">
-                {tasks.startDate
-                  ? moment(tasks.startDate).utc().format("DD/MM/YYYY HH:mm")
-                  : "-- : --"}
-              </p>
-            </motion.div>
-            <div className="w-[4%]" />
-            <motion.div
-              whileHover={{ y: -5 }}
-              className="flex items-center px-4 py-2 bg-red-100 text-red-400 rounded-xl"
-            >
-              <BsHourglassBottom size={15} />
-              <div className="w-4" />
-              <p className="text-base font-medium">
-                {tasks.endDate
-                  ? moment(tasks.endDate).utc().format("DD/MM/YYYY HH:mm")
-                  : "-- : --"}
-              </p>
-            </motion.div>
+
+            {moment(tasks?.startDate).isSame(moment(tasks?.endDate), "day") ? (
+              <div className="flex gap-x-2">
+                <motion.div
+                  whileHover={{ y: -5 }}
+                  className="flex items-center px-4 py-2 bg-blue-100 text-blue-400 rounded-xl"
+                >
+                  {/* <BsHourglassSplit size={15} /> */}
+                  {/* <div className="w-4" /> */}
+                  <p className="text-base font-medium">
+                    {tasks?.startDate
+                      ? moment(tasks?.startDate)
+                          .utc()
+                          .format("dddd, D [tháng] M")
+                      : "-- : --"}
+                  </p>
+                </motion.div>
+                <motion.div
+                  whileHover={{ y: -5 }}
+                  className="flex items-center gap-x-3 px-4 py-2 bg-green-100 text-green-500 rounded-xl"
+                >
+                  <BsHourglassSplit size={15} />
+                  <p className="text-base font-medium">
+                    {tasks?.startDate
+                      ? moment(tasks?.startDate).utc().format("HH:mm")
+                      : "-- : --"}
+                  </p>
+
+                  <BiRightArrowAlt size={25} />
+
+                  <BsHourglassBottom />
+                  <p className="text-base font-medium">
+                    {tasks?.endDate
+                      ? moment(tasks?.endDate).utc().format("HH:mm")
+                      : "-- : --"}
+                  </p>
+                </motion.div>
+                {/* <motion.div
+                  whileHover={{ y: -5 }}
+                  className="flex items-center px-4 py-2 bg-red-100 text-red-400 rounded-xl"
+                >
+                  <p className="text-base font-medium">
+                    {tasks.endDate
+                      ? moment(tasks.endDate).utc().format("HH:mm")
+                      : "-- : --"}
+                  </p>
+                </motion.div> */}
+              </div>
+            ) : (
+              <div className="flex items-center gap-x-2">
+                
+                  {/* <p className="">Thời gian bắt đầu</p> */}
+                  <div className="flex gap-x-2">
+                    <motion.div
+                      whileHover={{ y: -5 }}
+                      className="flex items-center px-4 py-2 bg-green-100 text-green-400 rounded-xl"
+                    >
+                      <BsHourglassSplit size={15} />
+                      <div className="w-4" />
+                      <p className="text-base font-medium">
+                        {tasks?.startDate
+                          ? moment(tasks?.startDate)
+                              .utc()
+                              .format("dddd, D [tháng] M")
+                          : "-- : --"}
+                      </p>
+                    </motion.div>
+                    <motion.div
+                      whileHover={{ y: -5 }}
+                      className="flex items-center px-4 py-2 bg-green-100 text-green-400 rounded-xl"
+                    >
+                      <p className="text-base font-medium">
+                        {tasks?.startDate
+                          ? moment(tasks?.startDate).utc().format("HH:mm")
+                          : "-- : --"}
+                      </p>
+                    </motion.div>
+                  </div>
+                
+
+                {/* <div className="w-[4%]" /> */}
+                <BiRightArrowAlt size={25} className="" />
+
+                <div className="flex gap-x-2">
+                  <motion.div
+                    whileHover={{ y: -5 }}
+                    className="flex items-center px-4 py-2 bg-red-100 text-red-400 rounded-xl"
+                  >
+                    <BsHourglassBottom size={15} />
+                    <div className="w-4" />
+                    <p className="text-base font-medium">
+                      {tasks?.endDate
+                        ? moment(tasks?.endDate)
+                            .utc()
+                            .format("dddd, D [tháng] M")
+                        : "-- : --"}
+                    </p>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ y: -5 }}
+                    className="flex items-center px-4 py-2 bg-red-100 text-red-400 rounded-xl"
+                  >
+                    <p className="text-base font-medium">
+                      {tasks?.endDate
+                        ? moment(tasks?.endDate).utc().format("HH:mm")
+                        : "-- : --"}
+                    </p>
+                  </motion.div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="w-[4%]" />

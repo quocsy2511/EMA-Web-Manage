@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ConfigProvider,
   DatePicker,
@@ -31,6 +31,7 @@ const TaskAdditionModal = ({
   eventId,
   date,
   staffs,
+  selectedTemplateTask,
 
   parentTaskId,
   staffId,
@@ -114,6 +115,17 @@ const TaskAdditionModal = ({
   // const [isTime, setIsTime] = useState(false);
   const [fileList, setFileList] = useState();
   const [selectedEmployeesId, setSelectedEmployeesId] = useState();
+
+  useEffect(() => {
+    if (selectedTemplateTask) {
+      form.setFieldsValue({
+        title: selectedTemplateTask.title,
+        desc: { ops: JSON.parse(selectedTemplateTask.description) },
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [selectedTemplateTask]);
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
@@ -241,12 +253,8 @@ const TaskAdditionModal = ({
                     const startDate = moment(value[0].$d);
                     const endDate = moment(value[1].$d);
 
-                    console.log("startDate: ", startDate);
-                    console.log("endDate: ", endDate);
-
                     // Calculate the difference in minutes
                     const diffInMinutes = endDate.diff(startDate, "minutes");
-                    console.log("diffInMinutes: ", diffInMinutes);
 
                     if (diffInMinutes >= 15) {
                       return Promise.resolve();
@@ -272,10 +280,16 @@ const TaskAdditionModal = ({
                   const startDate = moment(date[0]);
                   const endDate = moment(date[1]);
 
-                  if (startDate.isSame(endDate, "day"))
-                    return !current.isSame(startDate, "day");
-
-                  return current && (current < startDate || current > endDate);
+                  if (parentTaskId) {
+                    if (startDate.isSame(endDate, "day"))
+                      return !current.isSame(startDate, "day");
+                    return (
+                      current && (current < startDate || current > endDate)
+                    );
+                  } else {
+                    const today = moment().startOf("day");
+                    return current && current < today /*|| current > endDate*/;
+                  }
                 }}
                 format={"DD/MM/YYYY HH:mm:ss"}
                 className="w-full"
@@ -295,7 +309,7 @@ const TaskAdditionModal = ({
           ]}
         >
           <ReactQuill
-            className="h-20 mb-10"
+            className="h-28 mb-10"
             theme="snow"
             placeholder="Mô tả về công việc"
             onChange={(content, delta, source, editor) => {

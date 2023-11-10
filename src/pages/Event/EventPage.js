@@ -226,7 +226,7 @@ const EventPage = () => {
                     </div>
                   )}
                 </div>
-                {data.data.length === 6 && (
+                {/* {data.data.length === 6 && ( */}
                   <div className="flex items-center justify-center gap-x-3 mt-8">
                     <MdOutlineKeyboardArrowLeft
                       className={`text-slate-500 ${
@@ -263,7 +263,7 @@ const EventPage = () => {
                       size={25}
                     />
                   </div>
-                )}
+                {/* )} */}
               </motion.div>
             </>
           )
