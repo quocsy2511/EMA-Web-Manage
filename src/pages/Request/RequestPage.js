@@ -45,12 +45,11 @@ const RequestPage = () => {
       }),
     {
       refetchOnWindowFocus: false,
-      select: (data) => {
-        return data.data;
-      },
+      // select: (data) => {
+      //   return data;
+      // },
     }
   );
-
 
   const {
     data: annualLeave,
@@ -67,7 +66,6 @@ const RequestPage = () => {
     "🚀 ~ file: RequestPage.js:53 ~ RequestPage ~ annualLeave:",
     annualLeave
   );
-
 
   useEffect(() => {
     refetch();
@@ -136,35 +134,6 @@ const RequestPage = () => {
                 </p>
               </div>
             </div>
-
-            {/* <div
-              onClick={() => handleChangeRequestType("bin")}
-              className="flex items-center gap-x-4 border-l cursor-pointer"
-            >
-              {selectedRequestType === "bin" ? (
-                <motion.div
-                  layoutId="active-tab"
-                  className={`w-0.5 h-10 bg-blue-600`}
-                />
-              ) : (
-                <div className="w-0.5" />
-              )}
-              <div className="flex items-center gap-x-4 px-5 py-3">
-                <BsTrash3
-                  className={`text-slate-500 ${
-                    selectedRequestType === "bin" && "text-blue-600"
-                  }`}
-                  size={22}
-                />
-                <p
-                  className={`text-sm font-medium text-slate-500 ${
-                    selectedRequestType === "bin" && "text-blue-600"
-                  } `}
-                >
-                  Đã xóa
-                </p>
-              </div>
-            </div> */}
 
             {!isLoadingAnnualLeave ? (
               !isErrorAnnualLeave ? (
@@ -287,16 +256,13 @@ const RequestPage = () => {
                         key="request-list"
                         requests={requests}
                         setSelectedRequest={setSelectedRequest}
-
                         setIsOpenEditRequest={setIsOpenEditRequest}
                         setRequestSelected={setRequestSelected}
-
                         currentPage={currentPage}
                         setCurrentPage={setCurrentPage}
                         searchText={searchText}
                         setSearchText={setSearchText}
                         isRefetching={isRefetching}
-
                       />
                     ) : (
                       <RequestDetail

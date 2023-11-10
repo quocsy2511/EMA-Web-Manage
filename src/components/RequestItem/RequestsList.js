@@ -257,6 +257,7 @@ const RequestsList = ({
               </motion.div>
             </motion.div>
           ))}
+      </div>
       <AnimatePresence mode="wait">
         {isRefetching ? (
           <motion.div className="flex-1 h-40 text-center">loadingg</motion.div>
@@ -369,7 +370,7 @@ const RequestsList = ({
                         <TbMailX
                           onClick={(e) => {
                             e.stopPropagation();
-
+                            showDeleteConfirm(request.id);
                             // Delete nè
                           }}
                           className="hidden group-hover:block mr-2 text-red-500"
@@ -378,7 +379,8 @@ const RequestsList = ({
                         <TbMailStar
                           onClick={(e) => {
                             e.stopPropagation();
-
+                            setIsOpenEditRequest(true);
+                            setRequestSelected(request);
                             // Update nè
                           }}
                           className="hidden group-hover:block mr-2 text-blue-500"
@@ -415,7 +417,6 @@ const RequestsList = ({
             requests.nextPage && setCurrentPage(requests.nextPage);
           }}
         />
-
       </div>
     </motion.div>
   );
