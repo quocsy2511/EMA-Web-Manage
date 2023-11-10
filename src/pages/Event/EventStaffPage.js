@@ -25,6 +25,7 @@ const EventStaffPage = () => {
     "CANCEL",
     "OVERDUE",
   ];
+  // const [isDashBoard, setIsDashBoard] = useState(false);
   const [isBoardTask, setIsBoardTask] = useState(true);
   const [searchText, setSearchText] = useState(null);
   const [sort, setSort] = useState("DESC");
