@@ -28,6 +28,7 @@ const RequestsList = ({
   setSearchText,
   isRefetching,
 }) => {
+  console.log("request list : ", requests);
   const staff = useRouteLoaderData("staff");
   const [modal, contextHolderDelete] = Modal.useModal();
   const [messageApi, contextHolder] = message.useMessage();
