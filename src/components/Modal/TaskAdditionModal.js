@@ -73,9 +73,12 @@ const TaskAdditionModal = ({
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation((task) => createTask(task), {
     onSuccess: () => {
-      if (parentTaskId)
+      if (parentTaskId) {
         queryClient.invalidateQueries(["tasks", eventId, parentTaskId]);
-      else queryClient.invalidateQueries(["tasks", eventId]);
+      } else {
+        queryClient.invalidateQueries(["tasks", eventId]);
+        queryClient.invalidateQueries(["filter-tasks", eventId]);
+      }
 
       messageApi.open({
         type: "success",
@@ -275,10 +278,12 @@ const TaskAdditionModal = ({
                 onChange={(value) => {
                   form.setFieldsValue({ date: value });
                 }}
-                showTime={{
-                  hideDisabledOptions: true,
-                  defaultValue: [moment(date[0]), moment(date[1])],
-                }}
+                // showTime={{
+                //   hideDisabledOptions: true,
+                //   defaultValue: [moment(date[0]), moment(date[1])],
+                // }}
+                showTime
+                // showSecond={false}
                 disabledDate={(current) => {
                   const startDate = moment(date[0]);
                   const endDate = moment(date[1]);
@@ -294,52 +299,8 @@ const TaskAdditionModal = ({
                     return current && current < today /*|| current > endDate*/;
                   }
                 }}
-                // disabledTime={(current, type) => {
-                //   const start = moment(date[0]);
-                //   const end = moment(date[1]);
 
-                //   if (type === "start") {
-                //     return {
-                //       disabledHours: () =>
-                //         range(0, 24).filter((hour) => hour < start.hour()),
-                //       disabledMinutes: () =>
-                //         range(0, 60).filter(
-                //           (minute) => minute < start.minute()
-                //         ),
-                //       disabledSeconds: () => [],
-                //     };
-                //   }
-
-                //   if (type === "end") {
-                //     return {
-                //       disabledHours: () =>
-                //         range(0, 24).filter((hour) => hour > end.hour()),
-                //       disabledMinutes: () =>
-                //         range(0, 60).filter((minute) => minute > end.minute()),
-                //       disabledSeconds: () => [],
-                //     };
-                //   }
-
-                //   return {};
-                // }}
-                disabledTime={(_, type) => {
-                  if (type === "start") {
-                    // Disable times before the start of the day
-                    return {
-                      disabledHours: () =>
-                        [...Array(24).keys()].filter((hour) => hour < 0),
-                      disabledMinutes: () => [],
-                      disabledSeconds: () => [],
-                    };
-                  }
-                  // Disable times after the end of the day
-                  return {
-                    disabledHours: () =>
-                      [...Array(24).keys()].filter((hour) => hour > 7),
-                    disabledMinutes: () => [],
-                    disabledSeconds: () => [],
-                  };
-                }}
+                
                 format={"DD/MM/YYYY HH:mm:ss"}
                 className="w-full"
               />

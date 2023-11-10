@@ -37,10 +37,6 @@ const TaskItem = ({
     }
   );
 
-  // if (isSubtask) console.log("SUBTASK: ", task);
-  // if (isDropdown) console.log("DROPDOWN: ", task);
-  // console.log("TASK: ", task);
-
   const goToSubTask = () => {
     navigate(`${task.id}`);
   };
@@ -88,8 +84,8 @@ const TaskItem = ({
 
     case "CONFIRM":
       status = "Đã xác thực";
-      statusColor = "text-pink-400";
-      statusBorder = "border-pink-400";
+      statusColor = "text-purple-400";
+      statusBorder = "border-purple-400";
       break;
 
     case "CANCEL":
@@ -155,40 +151,61 @@ const TaskItem = ({
         </div>
       </div>
       <div className="flex-1 flex justify-end">
-        <div
-          className={`text-center font-medium flex justify-center items-center px-3 my-2 ${statusColor} border-2  ${statusBorder} rounded-full`}
-        >
-          {status}
+        <div className="flex flex-col gap-y-1 justify-center">
+          {/* <p className="text-center">Trạng thái</p> */}
+          <div
+            className={`text-center font-medium flex justify-center items-center px-3 py-1 ${statusColor} border-2  ${statusBorder} rounded-full`}
+          >
+            {status}
+          </div>
         </div>
 
         <div className="w-[4%]" />
 
         <div className="space-y-1">
           <p className="text-center">Thời gian bắt đầu</p>
-          <div className="flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-lg">
-            <BsHourglassSplit size={15} />
-            <div className="w-4" />
-            <p className="text-sm font-medium">
-              {task.startDate
-                ? moment(task.startDate).utc().format("DD/MM/YYYY HH:mm")
-                : "-- : --"}
-            </p>
-          </div>
+          <dib className="flex gap-x-2">
+            <div className="flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-lg">
+              <BsHourglassSplit size={15} />
+              <div className="w-4" />
+              <p className="text-sm font-medium">
+                {task.startDate
+                  ? moment(task.startDate).utc().format("DD/MM/YYYY")
+                  : "-- : --"}
+              </p>
+            </div>
+            <div className="flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-lg">
+              <p className="text-sm font-medium">
+                {task.startDate
+                  ? moment(task.startDate).utc().format("HH:mm")
+                  : "-- : --"}
+              </p>
+            </div>
+          </dib>
         </div>
 
         <div className="w-[4%]" />
 
         <div className="space-y-1">
           <p className="text-center">Thời gian kết thúc</p>
-          <div className="flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-lg">
-            <BsHourglassBottom size={15} />
-            <div className="w-4" />
-            <p className="text-sm font-medium">
-              {task.endDate
-                ? moment(task.endDate).utc().format("DD/MM/YYYY HH:mm")
-                : "-- : --"}
-            </p>
-          </div>
+          <dib className="flex gap-x-2">
+            <div className="flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-lg">
+              <BsHourglassBottom size={15} />
+              <div className="w-4" />
+              <p className="text-sm font-medium">
+                {task.endDate
+                  ? moment(task.endDate).utc().format("DD/MM/YYYY")
+                  : "-- : --"}
+              </p>
+            </div>
+            <div className="flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-lg">
+              <p className="text-sm font-medium">
+                {task.endDate
+                  ? moment(task.endDate).utc().format("HH:mm")
+                  : "-- : --"}
+              </p>
+            </div>
+          </dib>
         </div>
       </div>
       <div className="w-[4%]" />
@@ -198,8 +215,9 @@ const TaskItem = ({
         alt="avatar"
         src={
           user?.avatar ??
-          "https://static.vecteezy.com/system/resources/thumbnails/008/442/086/small/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg"
+          "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.pnghttps://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
         }
+        className="shadow-2xl"
       />
 
       <div className={`${!isSubtask ? "w-[4%]" : "w-[2%]"}`} />
