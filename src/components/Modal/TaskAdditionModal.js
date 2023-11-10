@@ -73,9 +73,12 @@ const TaskAdditionModal = ({
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation((task) => createTask(task), {
     onSuccess: () => {
-      if (parentTaskId)
+      if (parentTaskId) {
         queryClient.invalidateQueries(["tasks", eventId, parentTaskId]);
-      else queryClient.invalidateQueries(["tasks", eventId]);
+      } else {
+        queryClient.invalidateQueries(["tasks", eventId]);
+        queryClient.invalidateQueries(["filter-tasks", eventId]);
+      }
 
       messageApi.open({
         type: "success",
@@ -272,10 +275,15 @@ const TaskAdditionModal = ({
           >
             <ConfigProvider locale={viVN}>
               <RangePicker
-                showTime
                 onChange={(value) => {
                   form.setFieldsValue({ date: value });
                 }}
+                // showTime={{
+                //   hideDisabledOptions: true,
+                //   defaultValue: [moment(date[0]), moment(date[1])],
+                // }}
+                showTime
+                // showSecond={false}
                 disabledDate={(current) => {
                   const startDate = moment(date[0]);
                   const endDate = moment(date[1]);
@@ -291,6 +299,8 @@ const TaskAdditionModal = ({
                     return current && current < today /*|| current > endDate*/;
                   }
                 }}
+
+                
                 format={"DD/MM/YYYY HH:mm:ss"}
                 className="w-full"
               />

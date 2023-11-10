@@ -105,7 +105,7 @@ const EventTaskPage = () => {
       getTasks({
         fieldName: "eventID",
         conValue: eventId,
-        pageSize: 50,
+        pageSize: 100,
         currentPage: 1,
       }),
     {
@@ -122,7 +122,7 @@ const EventTaskPage = () => {
     isError: filterTaskIsError,
     refetch,
   } = useQuery(
-    ["filter-tasks"],
+    ["filter-tasks", eventId],
     () =>
       filterTask({
         assignee: assigneeSelection,
@@ -238,13 +238,45 @@ const EventTaskPage = () => {
   return (
     <Fragment>
       {contextHolder}
-
       <FloatButton.Group
         trigger="hover"
         type="primary"
         icon={<AiOutlinePlus />}
       >
-        <FloatButton
+        {templateTask?.length > 0 &&
+          templateTask?.map((item, index) => {
+            let icon;
+            switch (index) {
+              case 0:
+                icon = <RiAdvertisementFill />;
+                break;
+              case 1:
+                icon = <MdIntegrationInstructions />;
+                break;
+              case 2:
+                icon = <PiTelevisionSimpleFill />;
+                break;
+              case 3:
+                icon = <PiMicrophoneStageFill />;
+                break;
+              case 4:
+                icon = <MdDesignServices />;
+                break;
+
+              default:
+                break;
+            }
+
+            return (
+              <FloatButton
+                onClick={() => handleOpenModal(index)}
+                icon={icon}
+                type="primary"
+                tooltip={<p>{item.title}</p>}
+              />
+            );
+          })}
+        {/* <FloatButton
           onClick={() => handleOpenModal(4)}
           icon={<MdDesignServices />}
           type="primary"
@@ -273,7 +305,7 @@ const EventTaskPage = () => {
           icon={<PiMicrophoneStageFill />}
           type="primary"
           tooltip={<p>Dựng sân khấu</p>}
-        />
+        /> */}
         <ConfigProvider
           theme={{
             token: {
@@ -471,7 +503,8 @@ const EventTaskPage = () => {
                 >
                   <Progress
                     percent={(
-                      (tasks.filter((item) => item.status === "CONFIRM").length /
+                      (tasks.filter((item) => item.status === "CONFIRM")
+                        .length /
                         tasks.length) *
                       100
                     ).toFixed(2)}
