@@ -128,35 +128,6 @@ const RequestPage = () => {
               </div>
             </div>
 
-            {/* <div
-              onClick={() => handleChangeRequestType("bin")}
-              className="flex items-center gap-x-4 border-l cursor-pointer"
-            >
-              {selectedRequestType === "bin" ? (
-                <motion.div
-                  layoutId="active-tab"
-                  className={`w-0.5 h-10 bg-blue-600`}
-                />
-              ) : (
-                <div className="w-0.5" />
-              )}
-              <div className="flex items-center gap-x-4 px-5 py-3">
-                <BsTrash3
-                  className={`text-slate-500 ${
-                    selectedRequestType === "bin" && "text-blue-600"
-                  }`}
-                  size={22}
-                />
-                <p
-                  className={`text-sm font-medium text-slate-500 ${
-                    selectedRequestType === "bin" && "text-blue-600"
-                  } `}
-                >
-                  Đã xóa
-                </p>
-              </div>
-            </div> */}
-
             {!isLoadingAnnualLeave ? (
               !isErrorAnnualLeave ? (
                 staff?.role && (

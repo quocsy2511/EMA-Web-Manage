@@ -371,7 +371,7 @@ const RequestsList = ({
                         <TbMailX
                           onClick={(e) => {
                             e.stopPropagation();
-
+                            showDeleteConfirm(request.id);
                             // Delete nè
                           }}
                           className="hidden group-hover:block mr-2 text-red-500"
@@ -380,7 +380,8 @@ const RequestsList = ({
                         <TbMailStar
                           onClick={(e) => {
                             e.stopPropagation();
-
+                            setIsOpenEditRequest(true);
+                            setRequestSelected(request);
                             // Update nè
                           }}
                           className="hidden group-hover:block mr-2 text-blue-500"
