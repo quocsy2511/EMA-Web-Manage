@@ -28,6 +28,7 @@ const RequestsList = ({
   setSearchText,
   isRefetching,
 }) => {
+  console.log("request list : ", requests);
   const staff = useRouteLoaderData("staff");
   const [modal, contextHolderDelete] = Modal.useModal();
   const [messageApi, contextHolder] = message.useMessage();
@@ -257,6 +258,7 @@ const RequestsList = ({
               </motion.div>
             </motion.div>
           ))}
+      </div>
       <AnimatePresence mode="wait">
         {isRefetching ? (
           <motion.div className="flex-1 h-40 text-center">loadingg</motion.div>
@@ -415,7 +417,6 @@ const RequestsList = ({
             requests.nextPage && setCurrentPage(requests.nextPage);
           }}
         />
-
       </div>
     </motion.div>
   );

@@ -39,22 +39,18 @@ const RequestPage = () => {
     () =>
       getAllRequests({
         curentPage: currentPage,
+        pageSize: 10,
         type: selectedType,
         requestor: staff ? staff.id : undefined,
         requestorName: searchText,
       }),
     {
       refetchOnWindowFocus: false,
-      select: (data) => {
-        return data.data;
-      },
     }
   );
 
-
   const {
     data: annualLeave,
-
     isLoading: isLoadingAnnualLeave,
     isError: isErrorAnnualLeave,
   } = useQuery(["annual-leave"], () => getAnnualLeave(), {
@@ -63,11 +59,6 @@ const RequestPage = () => {
       return data;
     },
   });
-  console.log(
-    "🚀 ~ file: RequestPage.js:53 ~ RequestPage ~ annualLeave:",
-    annualLeave
-  );
-
 
   useEffect(() => {
     refetch();
@@ -287,16 +278,13 @@ const RequestPage = () => {
                         key="request-list"
                         requests={requests}
                         setSelectedRequest={setSelectedRequest}
-
                         setIsOpenEditRequest={setIsOpenEditRequest}
                         setRequestSelected={setRequestSelected}
-
                         currentPage={currentPage}
                         setCurrentPage={setCurrentPage}
                         searchText={searchText}
                         setSearchText={setSearchText}
                         isRefetching={isRefetching}
-
                       />
                     ) : (
                       <RequestDetail
