@@ -4,7 +4,12 @@ import { Header as HeaderLayout } from "antd/es/layout/layout";
 import { HiOutlineBellAlert } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { IoLogOutOutline } from "react-icons/io5";
-import { Link, useNavigate, useRouteLoaderData } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useRouteLoaderData,
+} from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAllNotification } from "../../apis/notifications";
 
@@ -74,6 +79,8 @@ const NotiLabel = () => (
 
 const Header = ({ collapsed, setCollapsed, data }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  console.log("locaion: ", location);
   const manager = useRouteLoaderData("manager");
   // const [notiItems, setNotiItems] = useState();
 
@@ -91,12 +98,6 @@ const Header = ({ collapsed, setCollapsed, data }) => {
   const logout = () => {
     localStorage.removeItem("token");
     navigate("/");
-  };
-
-  const goToNotification = (e) => {
-    e.stopPropagation();
-    console.log(1);
-    // navigate("/");
   };
 
   const userItems = [
@@ -119,6 +120,8 @@ const Header = ({ collapsed, setCollapsed, data }) => {
 
   const onClickNotification = (key) => {
     console.log("click noti : ", key);
+    if (key.key === "navigate" && location.pathname !== "/manager/notification")
+      navigate("/manager/notification");
   };
 
   return (
@@ -157,12 +160,7 @@ const Header = ({ collapsed, setCollapsed, data }) => {
                   {
                     key: "navigate",
                     label: (
-                      <p
-                        className="text-center text-blue-400"
-                        onClick={goToNotification}
-                      >
-                        Xem tất cả
-                      </p>
+                      <p className="text-center text-blue-400">Xem tất cả</p>
                     ),
                   },
                 ],
@@ -198,11 +196,11 @@ const Header = ({ collapsed, setCollapsed, data }) => {
               <div className="flex items-center">
                 <div className="flex flex-col items-end">
                   <p className="text-sm font-semibold">
-                    {manager.fullName ?? "User Name"}
+                    {manager?.fullName ?? "User Name"}
                   </p>
                   <p className="text-xs font-normal">
-                    {manager.role
-                      ? manager.role === "MANAGER"
+                    {manager?.role
+                      ? manager?.role === "MANAGER"
                         ? "Quản lý"
                         : "Trưởng bộ phận"
                       : "Vai trò"}
@@ -214,7 +212,7 @@ const Header = ({ collapsed, setCollapsed, data }) => {
                   icon={<p>icon</p>}
                   alt="user_image"
                   src={
-                    manager.avatar ??
+                    manager?.avatar ??
                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
                   }
                 />

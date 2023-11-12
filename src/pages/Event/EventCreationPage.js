@@ -24,7 +24,9 @@ import { createTask, getTemplateTask } from "../../apis/tasks";
 
 const { RangePicker } = DatePicker;
 
-const Title = ({ title }) => <p className="text-base font-medium">{title}</p>;
+const Title = ({ title }) => (
+  <p className="text-base font-medium truncate">{title}</p>
+);
 
 const EventCreationPage = () => {
   const navigate = useNavigate();
@@ -66,6 +68,7 @@ const EventCreationPage = () => {
       }));
     },
   });
+  console.log(templateTask)
 
   const { mutate, isLoading } = useMutation(
     ({ autoTask, ...event }) => createEvent(event),
@@ -107,7 +110,6 @@ const EventCreationPage = () => {
     {
       onSuccess: (data, variables) => {
         variables.event = { coverUrl: data.downloadUrl, ...variables.event };
-        console.log("EVENT: ", variables.event);
         mutate(variables.event);
       },
       onError: () => {
@@ -124,7 +126,7 @@ const EventCreationPage = () => {
       ({ index, eventID, task }) => createTask({ ...task, eventID }),
       {
         onSuccess: (data, variables) => {
-          if (variables.index === 4) {
+          if (variables.index === 3) {
             messageApi.open({
               type: "success",
               content: "Đã tạo 1 sự kiện",
@@ -201,6 +203,7 @@ const EventCreationPage = () => {
       estBudget: +values.estBudget,
       divisionId: values.divisions.map((division) => division.key),
       autoTask: values.autoTask,
+      processingDate: moment(values.processingDate.$d).format("YYYY-MM-DD"),
     };
 
     console.log("TRANSORM: ", values);
@@ -249,7 +252,7 @@ const EventCreationPage = () => {
         >
           <div className="flex justify-between">
             <Form.Item
-              className="w-[30%]"
+              className="w-[25%]"
               label={<Title title="Tên sự kiện" />}
               name="eventName"
               rules={[
@@ -263,7 +266,7 @@ const EventCreationPage = () => {
             </Form.Item>
 
             <Form.Item
-              className="w-[40%]"
+              className="w-[30%]"
               label={<Title title="Địa điểm" />}
               name="location"
               rules={[
@@ -283,8 +286,6 @@ const EventCreationPage = () => {
               rules={[
                 {
                   validator: (rule, value) => {
-                    console.log("range picker");
-                    console.log(value);
                     if (value && value[0] && value[1]) {
                       return Promise.resolve();
                     }
@@ -295,14 +296,59 @@ const EventCreationPage = () => {
             >
               <ConfigProvider locale={viVN}>
                 <RangePicker
+                  className="w-full"
                   onChange={(value) => {
-                    console.log(value);
                     form.setFieldsValue({ date: value });
+
+                    const startDate = moment(value?.[0].$d);
+                    const endDate = moment(value?.[1].$d);
+                    const selectedDate = moment(
+                      form.getFieldValue("processingDate")?.$d
+                    );
+                    if (
+                      !selectedDate.isBetween(startDate, endDate, null, "[]")
+                    ) {
+                      form.resetFields(["processingDate"]);
+                    }
                   }}
                   disabledDate={(current) => {
                     return current && current < moment().startOf("day");
                   }}
                   format={"DD/MM/YYYY"}
+                />
+              </ConfigProvider>
+            </Form.Item>
+            <Form.Item
+              className="w-[15%]"
+              label={<Title title="Thời gian bắt đầu" />}
+              name="processingDate"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn ngày bắt đầu!",
+                },
+              ]}
+            >
+              <ConfigProvider locale={viVN}>
+                <DatePicker
+                  className="w-full"
+                  onChange={(value) => {
+                    form.setFieldsValue({
+                      processingDate: value,
+                    });
+                  }}
+                  disabledDate={(current) => {
+                    const startDate = form.getFieldValue("date")?.[0].$d;
+                    if (!startDate) {
+                      return current && current < moment().startOf("day");
+                    }
+
+                    return (
+                      current &&
+                      (current < moment().startOf("day") ||
+                        current > moment(startDate).endOf("day"))
+                    );
+                  }}
                 />
               </ConfigProvider>
             </Form.Item>
@@ -355,11 +401,6 @@ const EventCreationPage = () => {
                 rowSelection={{
                   type: "checkbox",
                   onChange: (selectedRowKeys, selectedRows) => {
-                    console.log(
-                      `selectedRowKeys: ${selectedRowKeys}`,
-                      "selectedRows: ",
-                      selectedRows
-                    );
                     form.setFieldsValue({ divisions: selectedRows });
                   },
                   hideSelectAll: true,
@@ -405,7 +446,6 @@ const EventCreationPage = () => {
                   showPreviewIcon: false,
                 }}
                 beforeUpload={(file) => {
-                  console.log("file: ", file);
                   return new Promise((resolve, reject) => {
                     if (file && file?.size > 10 * 1024 * 1024) {
                       reject("File quá lớn ( <10MB )");
@@ -449,7 +489,6 @@ const EventCreationPage = () => {
                     return `${value}`.replace(/,/g, "");
                   }}
                   onStep={(value) => {
-                    console.log(value);
                     form.setFieldsValue({ estBudget: value });
                   }}
                   /*stringMode*/

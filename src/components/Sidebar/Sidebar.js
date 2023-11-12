@@ -1,10 +1,8 @@
-import { Avatar, ConfigProvider, Dropdown, Menu, Switch } from "antd";
-import Icon from "@ant-design/icons";
+import { Avatar, ConfigProvider, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
-// import { SunSvg, MoonSvg } from "../../constants/icon";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   HiOutlineHome,
@@ -75,14 +73,6 @@ const Sidebar = ({ collapsed }) => {
       "/manager/division",
       <p>
         <HiOutlineUserGroup className="text-[#4CAF50]" size={24} />
-      </p>
-    ),
-    getItem(
-      <LabelText text="Chức vụ" />,
-      "Chức vụ",
-      "/manager/role",
-      <p>
-        <BsPersonVcard className="text-[#007BFF]" size={24} />
       </p>
     ),
     getItem(
