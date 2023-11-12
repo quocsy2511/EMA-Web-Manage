@@ -198,14 +198,14 @@ const EventTaskPage = () => {
   if (isLoading || templateTaskIsLoading)
     return (
       <div className="h-[calc(100vh-128px)]">
-        <LoadingComponentIndicator />;
+        <LoadingComponentIndicator />
       </div>
     );
 
   if (isError || templateTaskIsError)
     return (
       <div className="h-[calc(100vh-128px)]">
-        <AnErrorHasOccured />;
+        <AnErrorHasOccured />
       </div>
     );
 

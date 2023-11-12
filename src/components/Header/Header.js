@@ -4,7 +4,12 @@ import { Header as HeaderLayout } from "antd/es/layout/layout";
 import { HiOutlineBellAlert } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { IoLogOutOutline } from "react-icons/io5";
-import { Link, useNavigate, useRouteLoaderData } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useRouteLoaderData,
+} from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAllNotification } from "../../apis/notifications";
 
@@ -72,10 +77,12 @@ const NotiLabel = () => (
   </div>
 );
 
-const Header = ({ collapsed, setCollapsed, data }) => {
+const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  console.log("locaion: ", location);
   const manager = useRouteLoaderData("manager");
-  // const [notiItems, setNotiItems] = useState();
+  const staff = useRouteLoaderData("staff");
 
   const {
     data: notifications,
@@ -93,16 +100,14 @@ const Header = ({ collapsed, setCollapsed, data }) => {
     navigate("/");
   };
 
-  const goToNotification = (e) => {
-    e.stopPropagation();
-    console.log(1);
-    // navigate("/");
-  };
-
   const userItems = [
     {
       key: "1",
-      label: <Link to="/manager/profile">Hồ sơ</Link>,
+      label: manager ? (
+        <Link to="/manager/profile">Hồ sơ</Link>
+      ) : (
+        <Link to="/staff/profile">Hồ sơ</Link>
+      ),
     },
 
     {
@@ -119,6 +124,8 @@ const Header = ({ collapsed, setCollapsed, data }) => {
 
   const onClickNotification = (key) => {
     console.log("click noti : ", key);
+    if (key.key === "navigate" && location.pathname !== "/manager/notification")
+      navigate("/manager/notification");
   };
 
   return (
@@ -157,12 +164,7 @@ const Header = ({ collapsed, setCollapsed, data }) => {
                   {
                     key: "navigate",
                     label: (
-                      <p
-                        className="text-center text-blue-400"
-                        onClick={goToNotification}
-                      >
-                        Xem tất cả
-                      </p>
+                      <p className="text-center text-blue-400">Xem tất cả</p>
                     ),
                   },
                 ],
@@ -198,14 +200,16 @@ const Header = ({ collapsed, setCollapsed, data }) => {
               <div className="flex items-center">
                 <div className="flex flex-col items-end">
                   <p className="text-sm font-semibold">
-                    {manager.fullName ?? "User Name"}
+                    {manager
+                      ? manager?.fullName ?? "User Name"
+                      : staff?.fullName ?? "User Name"}
                   </p>
                   <p className="text-xs font-normal">
-                    {manager.role
-                      ? manager.role === "MANAGER"
-                        ? "Quản lý"
-                        : "Trưởng bộ phận"
-                      : "Vai trò"}
+                    {manager
+                      ? manager?.role === "MANAGER" && "Quản lý"
+                      : staff
+                      ? staff.role === "STAFF" && "Trưởng bộ phận"
+                      : "Vai? trò"}
                   </p>
                 </div>
                 <div className="w-2" />
@@ -214,7 +218,7 @@ const Header = ({ collapsed, setCollapsed, data }) => {
                   icon={<p>icon</p>}
                   alt="user_image"
                   src={
-                    manager.avatar ??
+                    manager?.avatar ??
                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
                   }
                 />

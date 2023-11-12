@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 import { io } from "socket.io-client";
 
-const initialState = { socket: io("") ||null };
+const initialState = { socket: null };
 
 const socketSlice = createSlice({
   name: "socket",

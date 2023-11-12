@@ -108,9 +108,7 @@ const EventItem = ({ event }) => {
             maxStyle={{ color: "#D25B68", backgroundColor: "#F4D7DA" }}
           >
             {event.listDivision.map((item) => (
-              <Avatar
-                src={item.avatar}
-              />
+              <Avatar src={item.avatar} key={item.avatar} />
             ))}
           </Avatar.Group>
         </div>

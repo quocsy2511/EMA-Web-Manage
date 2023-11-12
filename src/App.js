@@ -7,7 +7,6 @@ import { checkAuthLoader, loginLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
-import RolePage from "./pages/Role/RolePage";
 import BudgetStaffLayout from "./pages/Budget/BudgetStaffLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { socketActions } from "./store/socket";
@@ -30,6 +29,9 @@ const TimekeepingPage = lazy(() =>
   import("./pages/Timekeeping/TimekeepingPage")
 );
 const RequestPage = lazy(() => import("./pages/Request/RequestPage"));
+const NotificationPage = lazy(() =>
+  import("./pages/Notification/NotificationPage")
+);
 
 // Staff pages
 const ManagerLayout = lazy(() => import("./pages/ManagerLayout"));
@@ -146,14 +148,7 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
-      {
-        path: "role",
-        element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
-            <RolePage />
-          </Suspense>
-        ),
-      },
+
       {
         path: "chat",
         element: (
@@ -183,6 +178,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <ProfilePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "notification",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <NotificationPage />
           </Suspense>
         ),
       },
@@ -263,10 +266,12 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  const dispatch = useDispatch();
-  const { socket } = useSelector((state) => state.socket);
-  console.log("Socket: ", socket);
-  // dispatch(socketActions.initSocket(io()));
+  // const dispatch = useDispatch();
+  // const { socket } = useSelector((state) => state.socket);
+  // console.log("Socket: ", socket);
+  // dispatch(
+  //   socketActions.initSocket(io())
+  // );
 
   return (
     <QueryClientProvider client={queryClient}>
