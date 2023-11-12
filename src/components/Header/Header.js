@@ -77,12 +77,12 @@ const NotiLabel = () => (
   </div>
 );
 
-const Header = ({ collapsed, setCollapsed, data }) => {
+const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
   console.log("locaion: ", location);
   const manager = useRouteLoaderData("manager");
-  // const [notiItems, setNotiItems] = useState();
+  const staff = useRouteLoaderData("staff");
 
   const {
     data: notifications,
@@ -103,7 +103,11 @@ const Header = ({ collapsed, setCollapsed, data }) => {
   const userItems = [
     {
       key: "1",
-      label: <Link to="/manager/profile">Hồ sơ</Link>,
+      label: manager ? (
+        <Link to="/manager/profile">Hồ sơ</Link>
+      ) : (
+        <Link to="/staff/profile">Hồ sơ</Link>
+      ),
     },
 
     {
@@ -196,14 +200,16 @@ const Header = ({ collapsed, setCollapsed, data }) => {
               <div className="flex items-center">
                 <div className="flex flex-col items-end">
                   <p className="text-sm font-semibold">
-                    {manager?.fullName ?? "User Name"}
+                    {manager
+                      ? manager?.fullName ?? "User Name"
+                      : staff?.fullName ?? "User Name"}
                   </p>
                   <p className="text-xs font-normal">
-                    {manager?.role
-                      ? manager?.role === "MANAGER"
-                        ? "Quản lý"
-                        : "Trưởng bộ phận"
-                      : "Vai trò"}
+                    {manager
+                      ? manager?.role === "MANAGER" && "Quản lý"
+                      : staff
+                      ? staff.role === "STAFF" && "Trưởng bộ phận"
+                      : "Vai? trò"}
                   </p>
                 </div>
                 <div className="w-2" />
