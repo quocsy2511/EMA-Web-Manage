@@ -266,12 +266,10 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   // const { socket } = useSelector((state) => state.socket);
   // console.log("Socket: ", socket);
-  // dispatch(
-  //   socketActions.initSocket(io())
-  // );
+  // dispatch(socketActions.initSocket(io()));
 
   return (
     <QueryClientProvider client={queryClient}>
