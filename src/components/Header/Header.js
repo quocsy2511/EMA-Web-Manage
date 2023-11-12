@@ -12,6 +12,7 @@ import {
 } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAllNotification } from "../../apis/notifications";
+import { useSelector } from "react-redux";
 
 const notiItems = [
   {
@@ -83,7 +84,15 @@ const Header = ({ collapsed, setCollapsed }) => {
   console.log("locaion: ", location);
   const manager = useRouteLoaderData("manager");
   const staff = useRouteLoaderData("staff");
+  const { socket } = useSelector((state) => state.socket);
+  console.log('socket:', socket);
+  // const [notiItems, setNotiItems] = useState();
 
+  useEffect(() => {
+    socket?.on('create-task', (data) => {
+      console.log("data:", data);
+    });
+  }, [socket])
   const {
     data: notifications,
     isLoading,
@@ -97,6 +106,7 @@ const Header = ({ collapsed, setCollapsed }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    socket?.disconnect()
     navigate("/");
   };
 
@@ -130,9 +140,8 @@ const Header = ({ collapsed, setCollapsed }) => {
 
   return (
     <HeaderLayout
-      className={`${
-        collapsed ? "w-[calc(100%-80px)]" : "w-[calc(100%-230px)]"
-      } p-0 bg-white border-b-2 h-16 fixed z-50`}
+      className={`${collapsed ? "w-[calc(100%-80px)]" : "w-[calc(100%-230px)]"
+        } p-0 bg-white border-b-2 h-16 fixed z-50`}
     >
       <div className="flex justify-between items-center pr-8">
         <Button
@@ -208,8 +217,8 @@ const Header = ({ collapsed, setCollapsed }) => {
                     {manager
                       ? manager?.role === "MANAGER" && "Quản lý"
                       : staff
-                      ? staff.role === "STAFF" && "Trưởng bộ phận"
-                      : "Vai? trò"}
+                        ? staff.role === "STAFF" && "Trưởng bộ phận"
+                        : "Vai? trò"}
                   </p>
                 </div>
                 <div className="w-2" />
