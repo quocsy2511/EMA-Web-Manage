@@ -12,6 +12,7 @@ import {
   Collapse,
   ConfigProvider,
   FloatButton,
+  Image,
   Popconfirm,
   Progress,
   Tooltip,
@@ -23,6 +24,8 @@ import {
   BsHourglassBottom,
   BsTagsFill,
   BsPlus,
+  BsCalendarWeekFill,
+  BsArrowRight,
 } from "react-icons/bs";
 import { RiEditFill, RiAdvertisementFill } from "react-icons/ri";
 import { AiOutlinePlus } from "react-icons/ai";
@@ -136,13 +139,11 @@ const EventTaskPage = () => {
       },
     }
   );
-  console.log("filterTasks: ", filterTasks);
 
   const { data: templateEvent } = useQuery(
     ["template-event"],
     getTemplateEvent
   );
-  console.log("templateEvent: ", templateEvent);
 
   const {
     data: templateTask,
@@ -151,7 +152,6 @@ const EventTaskPage = () => {
   } = useQuery(["template-tasks"], () => getTemplateTask(templateEvent?.id), {
     enabled: !!templateEvent?.id,
   });
-  console.log("templateTask: ", templateTask);
 
   const { mutate, isLoading: mutateIsLoading } = useMutation(
     (eventId, status) => updateStatusEvent(eventId, status),
@@ -395,7 +395,13 @@ const EventTaskPage = () => {
         animate={{ y: 0 }}
         className="bg-white rounded-2xl mt-8 overflow-hidden"
       >
-        <div className="bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center h-40" />
+        {/* <div className="bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center h-40" /> */}
+        <div className="h-40 w-full overflow-hidden">
+          <Image
+            src="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
+            width={"100%"}
+          />
+        </div>
         <div className="mx-10 my-8">
           <div className="flex items-center gap-x-5">
             <p className="flex-1 text-3xl font-bold">{data.eventName}</p>
@@ -455,7 +461,25 @@ const EventTaskPage = () => {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-x-20 gap-y-5 mt-10">
+          <div className="flex flex-wrap items-center gap-x-20 gap-y-5 mt-10">
+            <div>
+              <div className="flex items-center gap-x-2">
+                <BsCalendarWeekFill size={20} className="" color={color.green} />
+                <p className="text-lg font-semibold">Ngày bắt đầu</p>
+              </div>
+              <div className="flex items-center gap-x-2">
+                <div className="w-5" />
+                <p className="text-xs text-slate-400">
+                  {new Date(data.processingDate).toLocaleDateString("vi-VN", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+
             <div>
               <div className="flex items-center gap-x-2">
                 <BsHourglassSplit size={20} color={color.green} />
@@ -473,6 +497,8 @@ const EventTaskPage = () => {
                 </p>
               </div>
             </div>
+
+            {/* <BsArrowRight size={30} /> */}
 
             <div>
               <div className="flex items-center gap-x-2">

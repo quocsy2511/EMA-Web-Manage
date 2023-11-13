@@ -52,7 +52,7 @@ const ProfilePage = () => {
   } = useQuery(["events"], () => getEventDivisions(), {
     select: (data) => {
       const filteredEvents = data.filter((item) => item.status !== "DONE");
-      const event = filteredEvents.map(({ ...item }) => {
+      const event = filteredEvents?.map(({ ...item }) => {
         item.startDate = moment(item.startDate).format("DD/MM/YYYY");
         item.endDate = moment(item.endDate).format("DD/MM/YYYY");
         return {
@@ -99,7 +99,11 @@ const ProfilePage = () => {
     }
   );
 
-  if (isLoading || staffsIsLoading || eventsIsLoading || isLoadingEvent)
+  if (
+    isLoading ||
+    staffsIsLoading
+    //  || eventsIsLoading || isLoadingEvent
+  )
     return (
       <div className="w-full h-[calc(100vh-128px)]">
         <LoadingComponentIndicator />;
@@ -194,7 +198,7 @@ const ProfilePage = () => {
                   {!isLoadingEmployees ? (
                     !isErrorEmployees ? (
                       <>
-                        {employees.map((employee, index) => (
+                        {employees?.map((employee, index) => (
                           <div
                             className="flex flex-col items-center w-[calc(100%/3)]"
                             key={index}
@@ -223,7 +227,7 @@ const ProfilePage = () => {
                   Đang làm việc với Trưởng phòng ( Bộ phận )
                 </p>
                 <div className="flex flex-wrap pt-8 gap-y-10">
-                  {staffs.map((staff, index) => (
+                  {staffs?.map((staff, index) => (
                     <div
                       className="flex flex-col items-center w-[calc(100%/3)]"
                       key={index}
@@ -246,7 +250,7 @@ const ProfilePage = () => {
           <p className="text-lg font-semibold">Sự kiện tham gia gần đây (5)</p>
           {data.role === "STAFF" ? (
             <div className="mt-5 space-y-3">
-              {listEvent.map((event, index) => {
+              {listEvent?.map((event, index) => {
                 return (
                   <div
                     className="flex border rounded-lg gap-x-2 p-2"
@@ -274,7 +278,7 @@ const ProfilePage = () => {
             </div>
           ) : (
             <div className="mt-5 space-y-3">
-              {events.map((event, index) => {
+              {events?.map((event, index) => {
                 let status, statusColor, statusBgColor;
                 switch (event.status) {
                   case "PENDING":

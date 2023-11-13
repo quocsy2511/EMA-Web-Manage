@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Dropdown, message } from "antd";
 import { Fragment } from "react";
 import { BsCheck2, BsThreeDots } from "react-icons/bs";
@@ -21,7 +21,7 @@ const NotificationPage = () => {
     isLoading,
     isError,
     isRefetching,
-  } = useQuery(["notifications"], getAllNotification, {
+  } = useQuery(["notifications"], () => getAllNotification(100), {
     select: (data) => {
       return data.data;
     },
@@ -42,10 +42,22 @@ const NotificationPage = () => {
     },
   });
 
+  const queryClient = useQueryClient();
   const { mutate: seenNotificationMutate } = useMutation(
     (notificationId) => seenNotification(notificationId),
     {
-      onSuccess: (data) => {},
+      onSuccess: (data, variables) => {
+        queryClient.setQueryData(["notifications"], (oldValue) => {
+          console.log("oldValue: ", oldValue);
+          const updatedOldData = oldValue.data.map((item) => {
+            if (item.id === variables.notificationId) {
+              return { ...item, readFlag: 1 };
+            }
+            return item;
+          });
+          return updatedOldData;
+        });
+      },
       onError: (error) => {
         messageApi.open({
           type: "error",
@@ -137,11 +149,10 @@ const NotificationPage = () => {
           </div>
 
           <div className="mt-3 space-y-1">
-            {renderNotifications.map((noti) => {
+            {renderNotifications?.map((noti) => {
               return (
                 <motion.div
                   key={noti.id}
-                  // whileHover={{ backgroundColor: "rgb(255,255,255,0.5)" }}
                   className="flex items-center px-2 py-3 gap-x-3 cursor-pointer hover:bg-slate-100 rounded-lg"
                   onClick={() => {
                     hanleSeenNotification(noti.id);

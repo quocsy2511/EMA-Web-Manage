@@ -5,16 +5,28 @@ import { useMutation } from "@tanstack/react-query";
 import { login } from "../../apis/auths";
 import { useNavigate } from "react-router-dom";
 import jwt from "jwt-decode";
+import { io } from "socket.io-client";
+import { URL_SOCKET } from "../../constants/api";
+import { useDispatch } from "react-redux";
+import { socketActions } from "../../store/socket";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
+  
   const { mutate, isLoading } = useMutation(login, {
     onSuccess: (data) => {
       const accessToken = data.data.access_token;
       localStorage.setItem("token", accessToken);
 
       const role = jwt(accessToken).role;
+      const socket = io(URL_SOCKET, {
+        auth: {
+          access_token: localStorage.getItem("token")
+        }
+      });
+      dispatch(socketActions.saveSocket(socket));
+      console.log("socket:", socket);
 
       if (role === "MANAGER") navigate("/manager");
       else navigate("/staff");
