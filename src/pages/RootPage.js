@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Layout, notification } from "antd";
+import { Avatar, Layout, notification } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Outlet, ScrollRestoration } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
@@ -37,8 +37,18 @@ const RootPage = () => {
       console.log("data:", data);
       // queryClient.invalidateQueries([])
       api.open({
-        message: "Notification Title",
-        description: data.content,
+        message: <p className="text-base">Đã nhận 1 thông báo</p>,
+        description: (
+          <div className="flex items-center gap-x-3">
+            <Avatar src={data?.avatar} />
+            <p className="text-sm">
+              <span className="font-semibold">
+                {data?.content?.split("đã")[0]}{" "}
+              </span>
+              đã {data?.content?.split("đã")[1]}
+            </p>
+          </div>
+        ),
         duration: 5,
       });
     });

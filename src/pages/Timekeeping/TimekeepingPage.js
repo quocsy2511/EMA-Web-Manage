@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Button, ConfigProvider, DatePicker, Input, Select, Table } from "antd";
+import { ConfigProvider, Input, Select, Table } from "antd";
 import moment from "moment";
 import { FcCalendar } from "react-icons/fc";
 import { FiSearch } from "react-icons/fi";
@@ -7,34 +7,12 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { TbCalendarCog, TbCalendarEvent, TbCalendarX } from "react-icons/tb";
 import { AnimatePresence, motion } from "framer-motion";
 import EmptyTimeKeeping from "../../components/Error/EmptyTimeKeeping";
-
-import "moment/locale/vi";
 import { useQuery } from "@tanstack/react-query";
 import { getFilterEvent } from "../../apis/events";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 
-// const listAllDatesInMonthWithWeek = (date) => {
-//   if (!date) return [];
-//   const firstDayOfMonth = moment(
-//     `${date?.split("-")[0]}-${date?.split("-")[1]}-01`,
-//     "YYYY-MM-DD"
-//   );
-//   const lastDayOfMonth = firstDayOfMonth.clone().endOf("month");
-
-//   const dates = [];
-
-//   let currentDay = firstDayOfMonth.clone();
-//   while (currentDay.isSameOrBefore(lastDayOfMonth)) {
-//     dates.push({
-//       date: currentDay.format("YYYY-MM-DD"),
-//       weekdayVi: currentDay.format("dddd", "vi"), // Get Vietnamese weekday
-//     });
-//     currentDay.add(1, "day");
-//   }
-
-//   return dates;
-// };
+import "moment/locale/vi";
 
 const listDatesInRange = (startDate, endDate) => {
   if (!startDate || !endDate) return [];
@@ -65,7 +43,6 @@ const listDatesInRange = (startDate, endDate) => {
 };
 
 const TimekeepingPage = () => {
-  // const [datePicker, setDatePicker] = useState();
   const [selectedEvent, setSelectedEvent] = useState();
   const [columns, setColumns] = useState([]);
   const [searchText, setSearchText] = useState();
@@ -178,7 +155,12 @@ const TimekeepingPage = () => {
               onChange={onChange}
             />
           </div>
-          <div className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md">
+          <motion.div
+            key={selectedEvent?.id}
+            initial={{ y: -15, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
+          >
             <TbCalendarCog size={30} />
             <div>
               <p className="text-lg font-semibold">Ngày chuẩn bị</p>
@@ -186,8 +168,13 @@ const TimekeepingPage = () => {
                 {moment(selectedEvent?.processingDate).format("DD-MM-YYYY")}
               </p>
             </div>
-          </div>
-          <div className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md">
+          </motion.div>
+          <motion.div
+            key={selectedEvent?.id}
+            initial={{ y: -15, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
+          >
             <TbCalendarEvent size={30} />
             <div>
               <p className="text-lg font-semibold">Ngày diễn ra</p>
@@ -195,8 +182,13 @@ const TimekeepingPage = () => {
                 {moment(selectedEvent?.startDate).format("DD-MM-YYYY")}
               </p>
             </div>
-          </div>
-          <div className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md">
+          </motion.div>
+          <motion.div
+            key={selectedEvent?.id}
+            initial={{ y: -15, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
+          >
             <TbCalendarX size={30} />
             <div>
               <p className="text-lg font-semibold">Ngày kết thúc</p>
@@ -204,7 +196,7 @@ const TimekeepingPage = () => {
                 {moment(selectedEvent?.endDate).format("DD-MM-YYYY")}
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         <div className="flex-1 bg-white mt-5 overflow-hidden rounded-md">

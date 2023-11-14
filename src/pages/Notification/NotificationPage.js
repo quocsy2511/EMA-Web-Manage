@@ -11,6 +11,7 @@ import {
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import { AnimatePresence, motion } from "framer-motion";
+import moment from "moment";
 
 const NotificationPage = () => {
   const [isSeeAll, setIsSeeAll] = useState(true);
@@ -29,11 +30,14 @@ const NotificationPage = () => {
   console.log("isRefetching notifications: ", isRefetching);
   console.log("notifications: ", notifications);
 
+  const queryClient = useQueryClient();
   const {
     mutate: seenAllNotificationMutate,
     isLoading: seenAllNotificationIsLoading,
   } = useMutation(seenAllNotification, {
-    onSuccess: (data) => {},
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["notifications"]);
+    },
     onError: (error) => {
       messageApi.open({
         type: "error",
@@ -42,7 +46,6 @@ const NotificationPage = () => {
     },
   });
 
-  const queryClient = useQueryClient();
   const { mutate: seenNotificationMutate } = useMutation(
     (notificationId) => seenNotification(notificationId),
     {
@@ -110,7 +113,13 @@ const NotificationPage = () => {
                 items: [
                   {
                     label: (
-                      <div className="flex items-center gap-x-2">
+                      <div
+                        onClick={(e) => {
+                          // e.stopPropagation();
+                          seenAllNotificationMutate();
+                        }}
+                        className="flex items-center gap-x-2"
+                      >
                         <BsCheck2 size={15} />
                         <p className="text-xs font-medium">
                           Đánh dấu tất cả là đã đọc
@@ -150,6 +159,30 @@ const NotificationPage = () => {
 
           <div className="mt-3 space-y-1">
             {renderNotifications?.map((noti) => {
+              let time;
+              const currentDate = moment().subtract(7, "hours");
+              const targetDate = moment(noti.createdAt);
+              const duration = moment.duration(currentDate.diff(targetDate));
+
+              if (duration.asMinutes() < 1) {
+                // Less than 1 minute
+                time = `bây giờ`;
+              } else if (duration.asHours() < 1) {
+                time = `${Math.floor(duration.asMinutes())} phút trước`;
+              } else if (duration.asDays() < 1) {
+                // Less than 1 day
+                time = `${Math.floor(duration.asHours())} giờ trước`;
+              } else if (duration.asDays() < 7) {
+                // Less than 1 week
+                time = `${Math.floor(duration.asDays())} ngày trước`;
+              } else if (duration.asMonths() < 1) {
+                // Less than 1 month
+                time = `${Math.floor(duration.asDays() / 7)} tuần trước`;
+              } else {
+                // More than 1 month
+                time = `${Math.floor(duration.asMonths())} tháng trước`;
+              }
+
               return (
                 <motion.div
                   key={noti.id}
@@ -158,13 +191,15 @@ const NotificationPage = () => {
                     hanleSeenNotification(noti.id);
                   }}
                 >
-                  <Avatar size={40} />
+                  <Avatar size={40} src={noti.avatarSender} />
                   <div className="flex-1">
                     <p className="text-sm">
-                      <span className="font-semibold">Huy Đoàn </span>
-                      đã thêm bạn vào sự kiện đã thêm bạn vào sự kiện đã thêm
-                      bạn vào sự kiện đã thêm bạn vào sự kiện
+                      <span className="font-semibold">
+                        {noti.content?.split("đã")[0]}{" "}
+                      </span>
+                      đã {noti.content?.split("đã")[1]}
                     </p>
+                    <p className="text-blue-400">{time}</p>
                   </div>
                   {noti.readFlag === 0 ? (
                     <div className="w-[8px] h-[8px] bg-blue-600 rounded-full" />

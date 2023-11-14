@@ -35,15 +35,20 @@ const ManagerLayout = () => {
       return;
     }
 
-    socket?.on("create-task", (data) => {
+    socket?.on("notification", (data) => {
       console.log("data:", data);
       // queryClient.invalidateQueries([])
       api.open({
         message: <p className="text-base">Đã nhận 1 thông báo</p>,
         description: (
           <div className="flex items-center gap-x-3">
-            <Avatar src={data.avatar} />
-            <p className="text-sm">{data.content}</p>
+            <Avatar src={data?.avatar} />
+            <p className="text-sm">
+              <span className="font-semibold">
+                {data?.content?.split("đã")[0]}{" "}
+              </span>
+              đã {data?.content?.split("đã")[1]}
+            </p>
           </div>
         ),
         duration: 5,
