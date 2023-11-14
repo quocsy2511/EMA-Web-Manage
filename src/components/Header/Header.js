@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Avatar, Badge, Button, Dropdown } from "antd";
 import { Header as HeaderLayout } from "antd/es/layout/layout";
 import { HiOutlineBellAlert } from "react-icons/hi2";
@@ -17,13 +17,9 @@ import moment from "moment";
 
 const NotiLabel = ({ item }) => {
   let time;
-  const currentDate = moment().utc();
+  const currentDate = moment().subtract(7, "hours");
   const targetDate = moment(item.createdAt);
   const duration = moment.duration(currentDate.diff(targetDate));
-
-  // console.log("currentDate: ", currentDate);
-  // console.log("targetDate: ", targetDate);
-  // console.log("duration: ", duration);
 
   if (duration.asMinutes() < 1) {
     // Less than 1 minute

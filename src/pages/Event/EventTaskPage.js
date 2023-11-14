@@ -197,7 +197,7 @@ const EventTaskPage = () => {
 
   if (isLoading || templateTaskIsLoading)
     return (
-      <div className="h-[calc(100vh-128px)]">
+      <div className="h-[calc(100vh-128px)] w-full">
         <LoadingComponentIndicator />
       </div>
     );

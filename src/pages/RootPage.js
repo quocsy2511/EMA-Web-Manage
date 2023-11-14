@@ -33,7 +33,7 @@ const RootPage = () => {
       return;
     }
 
-    socket?.on("create-task", (data) => {
+    socket?.on("notification", (data) => {
       console.log("data:", data);
       // queryClient.invalidateQueries([])
       api.open({
