@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Avatar, Badge, Button, Dropdown, message } from "antd";
 import { Header as HeaderLayout } from "antd/es/layout/layout";
 import { HiOutlineBellAlert } from "react-icons/hi2";

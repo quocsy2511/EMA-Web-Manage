@@ -18,9 +18,7 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { debounce } from "lodash";
 import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 import { AnimatePresence, motion } from "framer-motion";
-import { useDispatch, useSelector } from "react-redux";
-import { getEventDetail } from "../../apis/events";
-import { addNotification } from "../../store/Slice/notificationsSlice";
+import { useSelector } from "react-redux";
 
 const HeaderEvent = ({
   sort,
@@ -45,7 +43,6 @@ const HeaderEvent = ({
   const dropdownRef = useRef(null);
   const listRole = ["STAFF", "EMPLOYEE"];
   const notification = useSelector((state) => state.notification);
-  const dispatch = useDispatch();
 
   const handleChangeEvent = (value) => {
     const event = JSON.parse(value);
@@ -59,8 +56,8 @@ const HeaderEvent = ({
       );
       const parseEvent = JSON.stringify(findEvent);
       handleChangeEvent(parseEvent);
-      // dispatch(addNotification({}));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notification?.id]);
 
   const {

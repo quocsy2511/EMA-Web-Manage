@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import HeaderEvent from "../../components/Header/HeaderEvent";
 import KanbanBoard from "../../components/KanbanBoard/KanbanBoard";
 import { useQuery } from "@tanstack/react-query";
-import { getEventDetail, getEventDivisions } from "../../apis/events";
+import { getEventDivisions } from "../../apis/events";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
@@ -13,14 +13,10 @@ import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
 import { getBudget } from "../../apis/budgets";
 import { useRouteLoaderData } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 moment.suppressDeprecationWarnings = true;
 
 const EventStaffPage = () => {
-  // const notification = useSelector((state) => state.notification);
-  // const eventId = notification?.eventId;
-
   const listStatus = [
     "PENDING",
     "PROCESSING",

@@ -15,10 +15,6 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
-  console.log(
-    "🚀 ~ file: KanbanBoard.js:148 ~ KanbanBoard ~ taskSelected?.startDate:",
-    taskSelected?.startDate
-  );
   // const { data: eventTemplate } = useQuery(
   //   ["events-template"],
   //   () => getEventTemplate(),
