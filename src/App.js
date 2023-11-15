@@ -67,7 +67,8 @@ const router = createBrowserRouter([
         index: true,
         element: (
           <Suspense fallback={<LoadingPageIndicator title="trang chủ" />}>
-            <DashboardPage />
+            {/* <DashboardPage /> */}
+            <DashboardPageStaff />
           </Suspense>
         ),
       },
@@ -245,14 +246,14 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
-      {
-        path: "budget",
-        element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
-            <BudgetStaffLayout />
-          </Suspense>
-        ),
-      },
+      // {
+      //   path: "budget",
+      //   element: (
+      //     <Suspense fallback={<LoadingPageIndicator />}>
+      //       <BudgetStaffLayout />
+      //     </Suspense>
+      //   ),
+      // },
       {
         path: "profile",
         element: (

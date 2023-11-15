@@ -229,7 +229,7 @@ const HeaderEvent = ({
     };
   }, []);
   return (
-    <div className="p-4 left-0 bg-bgBoard z-50 right-0 top-14">
+    <div className="p-4 left-0 bg-bgBoard z-40 right-0 top-14">
       <AnimatePresence mode="wait">
         {!isLoadingUsers ? (
           !isErrorUsers ? (

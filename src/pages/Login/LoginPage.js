@@ -13,7 +13,9 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { mutate, isLoading } = useMutation(login, {
+    
     onSuccess: (data) => {
+      console.log("🚀 ~ file: LoginPage.js:17 ~ LoginPage ~ data:", data)
       const accessToken = data.data.access_token;
       localStorage.setItem("token", accessToken);
 

@@ -222,6 +222,8 @@ const ComfirmingBudgetStaff = ({ selectEvent, listBudgetConfirming }) => {
       ),
     },
   ];
+
+  
   const [modal, contextHolder] = Modal.useModal();
   // const { confirm } = Modal;
   const showDeleteConfirm = (record) => {

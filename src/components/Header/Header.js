@@ -14,52 +14,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllNotification } from "../../apis/notifications";
 import { useSelector } from "react-redux";
 
-const notiItems = [
-  {
-    key: "1",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.antgroup.com"
-      >
-        1st menu item
-      </a>
-    ),
-  },
-  {
-    key: "2",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.aliyun.com"
-      >
-        2nd menu item (disabled)
-      </a>
-    ),
-    disabled: true,
-  },
-  {
-    key: "3",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.luohanacademy.com"
-      >
-        3rd menu item (disabled)
-      </a>
-    ),
-    disabled: true,
-  },
-  {
-    key: "4",
-    danger: true,
-    label: "a danger item",
-  },
-];
-
 const NotiLabel = () => (
   <div className="flex items-center gap-x-3 min-w-[300px]">
     <Avatar
@@ -83,16 +37,18 @@ const Header = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
   console.log("locaion: ", location);
   const manager = useRouteLoaderData("manager");
+  console.log("🚀 ~ file: Header.js:41 ~ Header ~ manager:", manager);
   const staff = useRouteLoaderData("staff");
+  console.log("🚀 ~ file: Header.js:42 ~ Header ~ staff:", staff);
   const { socket } = useSelector((state) => state.socket);
-  console.log('socket:', socket);
+  console.log("socket:", socket);
   // const [notiItems, setNotiItems] = useState();
 
   useEffect(() => {
-    socket?.on('create-task', (data) => {
+    socket?.on("create-task", (data) => {
       console.log("data:", data);
     });
-  }, [socket])
+  }, [socket]);
   const {
     data: notifications,
     isLoading,
@@ -106,7 +62,7 @@ const Header = ({ collapsed, setCollapsed }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
-    socket?.disconnect()
+    socket?.disconnect();
     navigate("/");
   };
 
@@ -140,8 +96,9 @@ const Header = ({ collapsed, setCollapsed }) => {
 
   return (
     <HeaderLayout
-      className={`${collapsed ? "w-[calc(100%-80px)]" : "w-[calc(100%-230px)]"
-        } p-0 bg-white border-b-2 h-16 fixed z-50`}
+      className={`${
+        collapsed ? "w-[calc(100%-80px)]" : "w-[calc(100%-230px)]"
+      } p-0 bg-white border-b-2 h-16 fixed z-50`}
     >
       <div className="flex justify-between items-center pr-8">
         <Button
@@ -217,8 +174,8 @@ const Header = ({ collapsed, setCollapsed }) => {
                     {manager
                       ? manager?.role === "MANAGER" && "Quản lý"
                       : staff
-                        ? staff.role === "STAFF" && "Trưởng bộ phận"
-                        : "Vai? trò"}
+                      ? staff.role === "STAFF" && "Trưởng bộ phận"
+                      : "Vai? trò"}
                   </p>
                 </div>
                 <div className="w-2" />
@@ -226,10 +183,7 @@ const Header = ({ collapsed, setCollapsed }) => {
                   size={40}
                   icon={<p>icon</p>}
                   alt="user_image"
-                  src={
-                    manager?.avatar ??
-                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
-                  }
+                  src={manager?.avatar ?? staff?.avatar}
                 />
               </div>
             </Dropdown>

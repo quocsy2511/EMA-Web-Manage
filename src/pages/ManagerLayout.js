@@ -11,7 +11,7 @@ const ManagerLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="overflow-hidden overflow-y-scroll">
+    <div>
       <Layout
         style={{
           minHeight: "100vh",
@@ -21,9 +21,14 @@ const ManagerLayout = () => {
         <Content>
           {/* <HeaderStaff collapsed={collapsed} setCollapsed={setCollapsed} /> */}
           <Header collapsed={collapsed} setCollapsed={setCollapsed} />
-          <div className="bg-white flex items-center mt-[64px]">
+          <div className="overflow-hidden overflow-y-scroll mt-[64px] ">
             <Outlet />
           </div>
+
+          {/* <Header collapsed={collapsed} setCollapsed={setCollapsed} /> */}
+          {/* <div className="bg-white flex items-center mt-[64px]">
+            <Outlet />
+          </div> */}
         </Content>
       </Layout>
     </div>

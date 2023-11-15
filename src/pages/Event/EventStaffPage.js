@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import HeaderEvent from "../../components/Header/HeaderEvent";
 import KanbanBoard from "../../components/KanbanBoard/KanbanBoard";
 import { useQuery } from "@tanstack/react-query";
-import { getEventDivisions, getEventTemplate } from "../../apis/events";
+import { getEventDivisions } from "../../apis/events";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";

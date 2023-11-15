@@ -23,7 +23,7 @@ const TimekeepingStaffPage = () => {
 
   return (
     <>
-      <div className="bg-[#F0F6FF] h-screen overflow-scroll scrollbar-hide">
+      <div className="bg-[#F0F6FF] h-screen overflow-scroll scrollbar-hide w-full">
         <div className="my-2 pl-3 pr-8 mt-6">
           <Tabs
             tabPosition="top"
