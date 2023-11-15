@@ -1,7 +1,7 @@
 import { authRequest } from "../utils/axios-utils";
 
-export const getAllNotification = () =>
-  authRequest({ url: `/notification?sizePage=100&currentPage=1` });
+export const getAllNotification = (pageSize) =>
+  authRequest({ url: `/notification?sizePage=${pageSize}&currentPage=1` });
 
 export const seenNotification = (notificationId) =>
   authRequest({

@@ -55,6 +55,7 @@ const StatusSelected = ({
         setUpdateStatus(uploadStatus);
         queryClient.invalidateQueries(["tasks"]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
+        queryClient.invalidateQueries(["parentTaskDetail"], taskID);
         message.open({
           type: "success",
           content: "Cập nhật trạng thái thành công",

@@ -37,6 +37,7 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
       completed++;
     }
   });
+
   const filteredSubTask = subTask.filter((task) => {
     if (selectedStatus === "clear") {
       return true;

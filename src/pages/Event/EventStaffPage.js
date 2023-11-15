@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import HeaderEvent from "../../components/Header/HeaderEvent";
 import KanbanBoard from "../../components/KanbanBoard/KanbanBoard";
 import { useQuery } from "@tanstack/react-query";
-import { getEventDivisions } from "../../apis/events";
+import { getEventDetail, getEventDivisions } from "../../apis/events";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
@@ -13,10 +13,14 @@ import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
 import { getBudget } from "../../apis/budgets";
 import { useRouteLoaderData } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 moment.suppressDeprecationWarnings = true;
 
 const EventStaffPage = () => {
+  // const notification = useSelector((state) => state.notification);
+  // const eventId = notification?.eventId;
+
   const listStatus = [
     "PENDING",
     "PROCESSING",
@@ -31,6 +35,39 @@ const EventStaffPage = () => {
   const [sort, setSort] = useState("DESC");
   const [statusSelected, setStatusSelected] = useState("clear");
   const idStaff = useRouteLoaderData("staff").id;
+  const [selectEvent, setSelectEvent] = useState({});
+  // const {
+  //   data: eventDetail,
+  //   refetch: refetchEventDetail,
+  //   isError: isErrorEventDetail,
+  //   isLoading: isLoadingEventDetail,
+  // } = useQuery(
+  //   ["event-detail"],
+  //   () => getEventDetail({ eventId: notification?.eventId }),
+  //   {
+  //     select: (data) => {
+  //       return data;
+  //     },
+  //     enabled: !!notification?.eventId,
+  //   }
+  // );
+
+  // useEffect(() => {
+  //   if (notification?.eventId) {
+  //     refetchEventDetail();
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [notification?.eventId]);
+  // useEffect(() => {
+  //   if (isLoadingEventDetail) {
+  //     console.log("Đang tải dữ liệu...");
+  //   } else if (isErrorEventDetail) {
+  //     console.log("Có lỗi khi tải dữ liệu...");
+  //   } else {
+  //     // Nếu không có lỗi và không đang tải, có thể setSelectEvent
+  //     setSelectEvent(eventDetail);
+  //   }
+  // }, [isLoadingEventDetail, isErrorEventDetail, eventDetail]);
 
   const {
     data: listEvent,
@@ -49,7 +86,6 @@ const EventStaffPage = () => {
       return event;
     },
   });
-  const [selectEvent, setSelectEvent] = useState({});
 
   const { data: staff } = useQuery(["staff"], () => getProfile(), {
     select: (data) => {

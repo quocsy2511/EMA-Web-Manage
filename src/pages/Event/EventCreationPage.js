@@ -68,7 +68,7 @@ const EventCreationPage = () => {
       }));
     },
   });
-  console.log(templateTask)
+  console.log(templateTask);
 
   const { mutate, isLoading } = useMutation(
     ({ autoTask, ...event }) => createEvent(event),

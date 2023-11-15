@@ -5,13 +5,15 @@ import { useMutation } from "@tanstack/react-query";
 import { login } from "../../apis/auths";
 import { useNavigate } from "react-router-dom";
 import jwt from "jwt-decode";
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import { URL_SOCKET } from "../../constants/api";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { socketActions } from "../../store/socket";
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
   const { mutate, isLoading } = useMutation(login, {
     onSuccess: (data) => {
       console.log("🚀 ~ file: LoginPage.js:17 ~ LoginPage ~ data:", data);
@@ -26,6 +28,7 @@ const LoginPage = () => {
       });
       dispatch(socketActions.saveSocket(socket));
       console.log("socket:", socket);
+
       if (role === "MANAGER") navigate("/manager");
       else navigate("/staff");
     },

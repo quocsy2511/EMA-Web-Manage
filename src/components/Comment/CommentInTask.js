@@ -19,6 +19,9 @@ import {
 const CommentInTask = ({ comments, taskId, isSubtask }) => {
   const manager = useRouteLoaderData("manager");
 
+  console.log("nỏmal: ", moment());
+  console.log("utc: ", moment().utc());
+
   const [fileList, setFileList] = useState();
 
   const [updatedFileList, setUpdatedFileList] = useState();
@@ -330,7 +333,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
             <AnimatePresence>
               {comments.map((comment) => {
                 let time;
-                const currentDate = moment().utc();
+                const currentDate = moment().subtract(7, "hours");
                 const targetDate = moment(comment.createdAt);
                 const duration = moment.duration(currentDate.diff(targetDate));
 

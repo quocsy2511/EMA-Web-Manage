@@ -253,6 +253,14 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      {
+        path: "notification",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <NotificationPage />
+          </Suspense>
+        ),
+      },
     ],
   },
 ]);

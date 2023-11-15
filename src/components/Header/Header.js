@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Avatar, Badge, Button, Dropdown } from "antd";
+import { Avatar, Badge, Button, Dropdown, message } from "antd";
 import { Header as HeaderLayout } from "antd/es/layout/layout";
 import { HiOutlineBellAlert } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
@@ -10,55 +10,99 @@ import {
   useNavigate,
   useRouteLoaderData,
 } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getAllNotification } from "../../apis/notifications";
-import { useSelector } from "react-redux";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getAllNotification, seenNotification } from "../../apis/notifications";
+import { useSelector, useDispatch } from "react-redux";
+import moment from "moment";
+import { addNotification } from "../../store/Slice/notificationsSlice";
 
-const NotiLabel = () => (
-  <div className="flex items-center gap-x-3 min-w-[300px]">
-    <Avatar
-      size={40}
-      src="https://hips.hearstapps.com/hmg-prod/images/dwayne-the-rock-johnson-gettyimages-1061959920.jpg?crop=0.5625xw:1xh;center,top&resize=1200:*"
-    />
-    <div className="flex-1">
-      <p className="text-base font-medium">Nguyen Vu</p>
-      <p className="text-xs max-w-[200px] overflow-hidden truncate">
-        Đã bình luận vào việc của bạn ad sa sa dsa dá á dá á da
-      </p>
-    </div>
-    <div>
-      <div className="w-[8px] h-[8px] bg-blue-500 rounded-full" />
-    </div>
-  </div>
-);
+const NotiLabel = ({ item }) => {
+  let time;
+  const currentDate = moment().subtract(7, "hours");
+  const targetDate = moment(item.createdAt);
+  const duration = moment.duration(currentDate.diff(targetDate));
 
+  if (duration.asMinutes() < 1) {
+    // Less than 1 minute
+    time = `bây giờ`;
+  } else if (duration.asHours() < 1) {
+    time = `${Math.floor(duration.asMinutes())} phút trước`;
+  } else if (duration.asDays() < 1) {
+    // Less than 1 day
+    time = `${Math.floor(duration.asHours())} giờ trước`;
+  } else if (duration.asDays() < 7) {
+    // Less than 1 week
+    time = `${Math.floor(duration.asDays())} ngày trước`;
+  } else if (duration.asMonths() < 1) {
+    // Less than 1 month
+    time = `${Math.floor(duration.asDays() / 7)} tuần trước`;
+  } else {
+    // More than 1 month
+    time = `${Math.floor(duration.asMonths())} tháng trước`;
+  }
+
+  return (
+    <div className="flex items-center gap-x-3 min-w-[300px]">
+      <Avatar size={45} src={item.avatarSender} />
+      <div className="flex-1">
+        <p className="text-sm max-w-[280px] overflow-hidden">
+          <span className="font-bold">{item.content.split("đã")[0]}</span>
+          đã {item.content.split("đã")[1]}
+        </p>
+        <p className="text-blue-400">{time}</p>
+      </div>
+      <div>
+        {item.readFlag === 0 ? (
+          <div className="w-[8px] h-[8px] bg-blue-500 rounded-full" />
+        ) : (
+          <div className="w-[8px] h-[8px] bg-transparent" />
+        )}
+      </div>
+    </div>
+  );
+};
 const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  // console.log("locaion: ", location);
   const manager = useRouteLoaderData("manager");
-  // console.log("🚀 ~ file: Header.js:41 ~ Header ~ manager:", manager);
   const staff = useRouteLoaderData("staff");
-  // console.log("🚀 ~ file: Header.js:42 ~ Header ~ staff:", staff);
+  const [messageApi, contextHolder] = message.useMessage();
   const { socket } = useSelector((state) => state.socket);
-  // console.log("socket:", socket);
-  // const [notiItems, setNotiItems] = useState();
 
-  useEffect(() => {
-    socket?.on("create-task", (data) => {
-      console.log("data:", data);
-    });
-  }, [socket]);
   const {
     data: notifications,
     isLoading,
     isError,
-  } = useQuery(["notifications"], getAllNotification, {
+  } = useQuery(["notifications", "10"], () => getAllNotification(10), {
     select: (data) => {
       return data.data;
     },
   });
   console.log("notifications: ", notifications);
+
+  const queryClient = useQueryClient();
+  const { mutate: seenNotificationMutate } = useMutation(
+    (notificationId) => seenNotification(notificationId),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.setQueryData(["notifications", "10"], (oldValue) => {
+          const updatedOldData = oldValue.map((item) => {
+            if (item.id === variables.notificationId) {
+              return { ...item, readFlag: 1 };
+            }
+            return item;
+          });
+          return updatedOldData;
+        });
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -88,10 +132,20 @@ const Header = ({ collapsed, setCollapsed }) => {
     },
   ];
 
+  const dispatch = useDispatch();
   const onClickNotification = (key) => {
-    console.log("click noti : ", key);
-    if (key.key === "navigate" && location.pathname !== "/manager/notification")
-      navigate("/manager/notification");
+    if (
+      key.key === "navigate" &&
+      location.pathname !== "/manager/notification"
+    ) {
+      if (manager) {
+        navigate("/manager/notification");
+      } else {
+        navigate("/staff/notification");
+      }
+    }
+    const findNoti = notifications.find((noti) => noti.id === key.key);
+    dispatch(addNotification(findNoti));
   };
 
   return (
@@ -125,7 +179,7 @@ const Header = ({ collapsed, setCollapsed }) => {
                 items: [
                   ...(notifications?.map((noti) => ({
                     key: noti.id,
-                    label: <NotiLabel />,
+                    label: <NotiLabel item={noti} />,
                   })) ?? []),
                   {
                     key: "navigate",
@@ -141,13 +195,17 @@ const Header = ({ collapsed, setCollapsed }) => {
               arrow
             >
               <Badge
-                size={"small"}
-                count={notifications?.length ?? 0}
+                size={"default"}
+                count={
+                  notifications?.length && notifications?.length >= 10
+                    ? "9+"
+                    : notifications?.length ?? 0
+                }
                 offset={[-2, 2]}
                 title={`${notifications?.length ?? 0} thông báo`}
                 onClick={(e) => e.preventDefault()}
               >
-                <HiOutlineBellAlert size={20} />
+                <HiOutlineBellAlert size={25} />
               </Badge>
             </Dropdown>
           </div>

@@ -110,6 +110,10 @@ code {
   overflow-y: scroll !important;
 }
 
+.ant-upload-list-item.ant-upload-list-item-done {
+  margin-top: 0 !important;
+}
+
 @layer utilities {
   @variants responsive {
     /* Hide scrollbar for Chrome, Safari and Opera */
