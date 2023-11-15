@@ -35,13 +35,13 @@ const NotiLabel = () => (
 const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("locaion: ", location);
+  // console.log("locaion: ", location);
   const manager = useRouteLoaderData("manager");
-  console.log("🚀 ~ file: Header.js:41 ~ Header ~ manager:", manager);
+  // console.log("🚀 ~ file: Header.js:41 ~ Header ~ manager:", manager);
   const staff = useRouteLoaderData("staff");
-  console.log("🚀 ~ file: Header.js:42 ~ Header ~ staff:", staff);
+  // console.log("🚀 ~ file: Header.js:42 ~ Header ~ staff:", staff);
   const { socket } = useSelector((state) => state.socket);
-  console.log("socket:", socket);
+  // console.log("socket:", socket);
   // const [notiItems, setNotiItems] = useState();
 
   useEffect(() => {

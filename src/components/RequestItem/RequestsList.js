@@ -28,7 +28,6 @@ const RequestsList = ({
   setSearchText,
   isRefetching,
 }) => {
-  console.log("request list : ", requests);
   const staff = useRouteLoaderData("staff");
   const [modal, contextHolderDelete] = Modal.useModal();
   const [messageApi, contextHolder] = message.useMessage();
@@ -167,12 +166,13 @@ const RequestsList = ({
                   </div>
 
                   <div
-                    className={`w-2 h-2 ${request.type === "A"
+                    className={`w-2 h-2 ${
+                      request.type === "A"
                         ? "bg-green-600"
                         : request.type === "L"
-                          ? "bg-red-500"
-                          : request.type === "M" && "bg-purple-400"
-                      } rounded-full block group-hover:hidden`}
+                        ? "bg-red-500"
+                        : request.type === "M" && "bg-purple-400"
+                    } rounded-full block group-hover:hidden`}
                   />
                   <p className="group-hover:hidden">
                     {moment(request.createdAt).format("DD [tháng] MM, YYYY")}
@@ -303,12 +303,13 @@ const RequestsList = ({
                     </div>
 
                     <div
-                      className={`w-2 h-2 ${request.type === "A"
+                      className={`w-2 h-2 ${
+                        request.type === "A"
                           ? "bg-green-600"
                           : request.type === "L"
-                            ? "bg-red-500"
-                            : request.type === "M" && "bg-purple-400"
-                        } rounded-full block group-hover:hidden`}
+                          ? "bg-red-500"
+                          : request.type === "M" && "bg-purple-400"
+                      } rounded-full block group-hover:hidden`}
                     />
                     <p className="group-hover:hidden">
                       {moment(request.createdAt).format("DD [tháng] MM, YYYY")}
@@ -409,8 +410,9 @@ const RequestsList = ({
         <p className="text-base font-medium">{requests.currentPage}</p>
         <IoIosArrowBack
           size={20}
-          className={`rotate-180 ${!requests.nextPage && "text-slate-300"
-            } cursor-pointer`}
+          className={`rotate-180 ${
+            !requests.nextPage && "text-slate-300"
+          } cursor-pointer`}
           onClick={() => {
             requests.nextPage && setCurrentPage(requests.nextPage);
           }}

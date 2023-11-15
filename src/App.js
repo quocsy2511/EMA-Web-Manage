@@ -7,7 +7,6 @@ import { checkAuthLoader, loginLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
-import BudgetStaffLayout from "./pages/Budget/BudgetStaffLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { socketActions } from "./store/socket";
 
@@ -246,14 +245,6 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
-      // {
-      //   path: "budget",
-      //   element: (
-      //     <Suspense fallback={<LoadingPageIndicator />}>
-      //       <BudgetStaffLayout />
-      //     </Suspense>
-      //   ),
-      // },
       {
         path: "profile",
         element: (

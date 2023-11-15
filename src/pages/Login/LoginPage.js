@@ -13,17 +13,16 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { mutate, isLoading } = useMutation(login, {
-    
     onSuccess: (data) => {
-      console.log("🚀 ~ file: LoginPage.js:17 ~ LoginPage ~ data:", data)
+      console.log("🚀 ~ file: LoginPage.js:17 ~ LoginPage ~ data:", data);
       const accessToken = data.data.access_token;
       localStorage.setItem("token", accessToken);
 
       const role = jwt(accessToken).role;
       const socket = io(URL_SOCKET, {
         auth: {
-          access_token: localStorage.getItem("token")
-        }
+          access_token: localStorage.getItem("token"),
+        },
       });
       dispatch(socketActions.saveSocket(socket));
       console.log("socket:", socket);
@@ -59,7 +58,7 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: "Please input your email!",
+                    message: "Hãy nhập email!",
                   },
                 ]}
               >
@@ -71,7 +70,7 @@ const LoginPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: "Please input your password!",
+                    message: "Hãy nhập mật khẩu!",
                   },
                 ]}
               >

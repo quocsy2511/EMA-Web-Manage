@@ -19,7 +19,6 @@ const RequestPage = () => {
   // console.log("🚀 ~ file: RequestPage.js:16 ~ RequestPage ~ staff:", staff);
 
   const [currentPage, setCurrentPage] = useState(1);
-  console.log("currentPage: ", currentPage);
   const [selectedRequest, setSelectedRequest] = useState();
   const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
   const [isOpenNewRequest, setIsOpenNewRequest] = useState(false);
