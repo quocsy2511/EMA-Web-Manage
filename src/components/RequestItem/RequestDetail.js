@@ -8,17 +8,36 @@ import "react-quill/dist/quill.snow.css";
 import moment from "moment";
 import { useRouteLoaderData } from "react-router-dom";
 import { LuSend } from "react-icons/lu";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { approveRequest } from "../../apis/requests";
+import { getMember } from "../../apis/users";
+import AnErrorHasOccured from "../Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 
 const { TextArea } = Input;
 
 const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
   const manager = useRouteLoaderData("manager");
-  console.log(manager);
-
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+
+  const {
+    data: approver,
+    isError: isErrorApprover,
+    isLoading: isLoadingApprover,
+  } = useQuery(
+    ["approver"],
+    () =>
+      getMember({
+        userId: selectedRequest?.approver,
+      }),
+    {
+      select: (data) => {
+        return data;
+      },
+      enabled: !!selectedRequest?.approver,
+    }
+  );
 
   const queryClient = useQueryClient();
   const { mutate } = useMutation((request) => approveRequest(request), {
@@ -45,7 +64,7 @@ const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
     mutate(value);
   };
 
-  console.log("selectedRequest: ", selectedRequest);
+  // console.log("selectedRequest: ", selectedRequest);
   const handleBackSelectedRequest = () => {
     setSelectedRequest();
   };
@@ -125,20 +144,29 @@ const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
           <div className="flex items-center ml-5 gap-x-5">
             <BsArrow90DegLeft size={35} className="rotate-180 text-slate-300" />
             <div className="flex-1 bg-white rounded-lg p-5">
-              <div className="flex items-center gap-x-5">
-                <Avatar size={38} src={manager.avatar} />
-                <div>
-                  <p className="text-sm text-slate-700 font-medium">
-                    {manager.fullName}
-                  </p>
-                  <p className="text-xs text-slate-400">Quản lý</p>
-                </div>
-                <p className="flex-1 text-end text-xs text-slate-400">
-                  {moment(selectedRequest?.updatedAt).format(
-                    "DD [tháng] MM, YYYY HH:mm"
-                  )}
-                </p>
-              </div>
+              {!isLoadingApprover ? (
+                !isErrorApprover ? (
+                  <div className="flex items-center gap-x-5">
+                    <Avatar size={38} src={approver?.avatar} />
+                    <div>
+                      <p className="text-sm text-slate-700 font-medium">
+                        {approver?.fullName}
+                      </p>
+                      <p className="text-xs text-slate-400">Quản lý</p>
+                    </div>
+                    <p className="flex-1 text-end text-xs text-slate-400">
+                      {moment(selectedRequest?.updatedAt).format(
+                        "DD [tháng] MM, YYYY HH:mm"
+                      )}
+                    </p>
+                  </div>
+                ) : (
+                  <AnErrorHasOccured />
+                )
+              ) : (
+                <LoadingComponentIndicator />
+              )}
+
               {selectedRequest?.replyMessage &&
               selectedRequest?.replyMessage !== "" ? (
                 selectedRequest?.replyMessage
