@@ -1,7 +1,7 @@
 import React from "react";
 import { Avatar, Badge, Button, Dropdown, message } from "antd";
 import { Header as HeaderLayout } from "antd/es/layout/layout";
-import { HiOutlineBellAlert } from "react-icons/hi2";
+import { HiOutlineBell, HiOutlineBellAlert } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { IoLogOutOutline } from "react-icons/io5";
 import {
@@ -15,59 +15,111 @@ import { getAllNotification, seenNotification } from "../../apis/notifications";
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
 import { addNotification } from "../../store/Slice/notificationsSlice";
+import { redirectionActions } from "../../store/redirection";
 
-const NotiLabel = ({ item }) => {
-  let time;
-  const currentDate = moment().subtract(7, "hours");
-  const targetDate = moment(item.createdAt);
-  const duration = moment.duration(currentDate.diff(targetDate));
-
-  if (duration.asMinutes() < 1) {
-    // Less than 1 minute
-    time = `bây giờ`;
-  } else if (duration.asHours() < 1) {
-    time = `${Math.floor(duration.asMinutes())} phút trước`;
-  } else if (duration.asDays() < 1) {
-    // Less than 1 day
-    time = `${Math.floor(duration.asHours())} giờ trước`;
-  } else if (duration.asDays() < 7) {
-    // Less than 1 week
-    time = `${Math.floor(duration.asDays())} ngày trước`;
-  } else if (duration.asMonths() < 1) {
-    // Less than 1 month
-    time = `${Math.floor(duration.asDays() / 7)} tuần trước`;
-  } else {
-    // More than 1 month
-    time = `${Math.floor(duration.asMonths())} tháng trước`;
-  }
-
-  return (
-    <div className="flex items-center gap-x-3 min-w-[300px]">
-      <Avatar size={45} src={item.avatarSender} />
-      <div className="flex-1">
-        <p className="text-sm max-w-[280px] overflow-hidden">
-          <span className="font-bold">{item.content.split("đã")[0]}</span>
-          đã {item.content.split("đã")[1]}
-        </p>
-        <p className="text-blue-400">{time}</p>
-      </div>
-      <div>
-        {item.readFlag === 0 ? (
-          <div className="w-[8px] h-[8px] bg-blue-500 rounded-full" />
-        ) : (
-          <div className="w-[8px] h-[8px] bg-transparent" />
-        )}
-      </div>
-    </div>
-  );
-};
 const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const manager = useRouteLoaderData("manager");
   const staff = useRouteLoaderData("staff");
-  const [messageApi, contextHolder] = message.useMessage();
+
+  const dispatch = useDispatch();
   const { socket } = useSelector((state) => state.socket);
+  const { redirect } = useSelector((state) => state.redirection);
+  console.log("redirection: ", redirect);
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const NotiLabel = ({ item }) => {
+    let time;
+    const currentDate = moment().subtract(7, "hours");
+    const targetDate = moment(item.createdAt);
+    const duration = moment.duration(currentDate.diff(targetDate));
+
+    console.log("item noti: ", item);
+
+    if (duration.asMinutes() < 1) {
+      // Less than 1 minute
+      time = `bây giờ`;
+    } else if (duration.asHours() < 1) {
+      time = `${Math.floor(duration.asMinutes())} phút trước`;
+    } else if (duration.asDays() < 1) {
+      // Less than 1 day
+      time = `${Math.floor(duration.asHours())} giờ trước`;
+    } else if (duration.asDays() < 7) {
+      // Less than 1 week
+      time = `${Math.floor(duration.asDays())} ngày trước`;
+    } else if (duration.asMonths() < 1) {
+      // Less than 1 month
+      time = `${Math.floor(duration.asDays() / 7)} tuần trước`;
+    } else {
+      // More than 1 month
+      time = `${Math.floor(duration.asMonths())} tháng trước`;
+    }
+
+    const handleNavigate = () => {
+      console.log("navigate: ", item);
+      if (item.type === "REQUEST") {
+        console.log("request");
+        dispatch(redirectionActions.requestChange(item.commonId));
+        if (location.pathname !== "/manager/request") {
+          navigate(`/manager/request`);
+        }
+      } else if (item.type === "TASK") {
+        console.log("task");
+        dispatch(
+          redirectionActions.taskChange({
+            commonId: item.commonId,
+            parentTaskId: item.parentTaskId,
+          })
+        );
+        if (item.parentTaskId) {
+          if (
+            location.pathname !==
+            `/manager/event/${item.eventId}/${item.parentTaskId}`
+          ) {
+            navigate(`/manager/event/${item.eventId}/${item.parentTaskId}`);
+          }
+        } else {
+          if (
+            location.pathname !==
+            `/manager/event/${item.eventId}/${item.commonId}`
+          ) {
+            navigate(`/manager/event/${item.eventId}/${item.commonId}`);
+          }
+        }
+      } else if (item.type === "COMMENT") {
+        console.log("comment");
+        dispatch(redirectionActions.commentChange(item.commonId));
+        if (location.pathname !== "/manager/request") {
+          navigate(`/manager/event/${item.eventId}/${item.commenId}`);
+        }
+      }
+    };
+
+    return (
+      <div
+        onClick={handleNavigate}
+        className="flex items-center gap-x-3 min-w-[300px]"
+      >
+        <Avatar size={45} src={item.avatarSender} />
+        <div className="flex-1">
+          <p className="text-sm max-w-[280px] overflow-hidden">
+            <span className="font-bold">{item.content.split("đã")[0]}</span>
+            đã {item.content.split("đã")[1]}
+          </p>
+          <p className="text-blue-400">{time}</p>
+        </div>
+        <div>
+          {item.readFlag === 0 ? (
+            <div className="w-[8px] h-[8px] bg-blue-500 rounded-full" />
+          ) : (
+            <div className="w-[8px] h-[8px] bg-transparent" />
+          )}
+        </div>
+      </div>
+    );
+  };
 
   const {
     data: notifications,
@@ -132,7 +184,6 @@ const Header = ({ collapsed, setCollapsed }) => {
     },
   ];
 
-  const dispatch = useDispatch();
   const onClickNotification = (key) => {
     if (
       key.key === "navigate" &&
@@ -179,7 +230,13 @@ const Header = ({ collapsed, setCollapsed }) => {
                 items: [
                   ...(notifications?.map((noti) => ({
                     key: noti.id,
-                    label: <NotiLabel item={noti} />,
+                    label: (
+                      <NotiLabel
+                        item={noti}
+                        navigate={navigate}
+                        location={location}
+                      />
+                    ),
                   })) ?? []),
                   {
                     key: "navigate",
@@ -193,6 +250,7 @@ const Header = ({ collapsed, setCollapsed }) => {
               trigger={["click"]}
               placement="bottomRight"
               arrow
+              disabled={notifications?.length === 0}
             >
               <Badge
                 size={"default"}
@@ -205,7 +263,11 @@ const Header = ({ collapsed, setCollapsed }) => {
                 title={`${notifications?.length ?? 0} thông báo`}
                 onClick={(e) => e.preventDefault()}
               >
-                <HiOutlineBellAlert size={25} />
+                {notifications?.length === 0 ? (
+                  <HiOutlineBell size={25} />
+                ) : (
+                  <HiOutlineBellAlert size={25} />
+                )}
               </Badge>
             </Dropdown>
           </div>

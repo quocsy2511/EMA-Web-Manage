@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   Link,
   useNavigate,
@@ -28,12 +28,31 @@ import { getComment } from "../../apis/comments";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import moment from "moment";
 import TaskUpdateModal from "../../components/Modal/TaskUpdateModal";
+import { useDispatch, useSelector } from "react-redux";
+import { redirectionActions } from "../../store/redirection";
 
 const EventSubTaskPage = () => {
   const eventId = useParams().eventId;
   const taskId = useParams().taskId;
   const manager = useRouteLoaderData("manager");
   const navigate = useNavigate();
+
+  const dispatch = useDispatch();
+  const { redirect } = useSelector((state) => state.redirection);
+  console.log("redirection: ", redirect);
+
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isOpenCreateTaskModal, setIsOpenCreateTaskModal] = useState(false);
+  const [selectedSubTask, setSelectedSubTask] = useState();
+  const [isOpenUpdateTaskModal, setIsOpenUpdateTaskModal] = useState(false);
+  const [isOpenUpdateSubTaskModal, setIsOpenUpdateSubTaskModal] =
+    useState(false);
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const resetTaskRedirect = () => {
+    if (redirect.task) dispatch(redirectionActions.taskChange(undefined));
+  };
 
   const {
     data: tasks,
@@ -88,14 +107,19 @@ const EventSubTaskPage = () => {
     }
   );
 
-  const [isOpenModal, setIsOpenModal] = useState(false);
-  const [isOpenCreateTaskModal, setIsOpenCreateTaskModal] = useState(false);
-  const [selectedSubTask, setSelectedSubTask] = useState();
-  const [isOpenUpdateTaskModal, setIsOpenUpdateTaskModal] = useState(false);
-  const [isOpenUpdateSubTaskModal, setIsOpenUpdateSubTaskModal] =
-    useState(false);
-
-  const [messageApi, contextHolder] = message.useMessage();
+  useEffect(() => {
+    console.log("inside useEffect: ", tasks?.subTask);
+    if (redirect.task && redirect.task.parentTaskId) {
+      const openSubtask = tasks?.subTask.find(
+        (subtask) => subtask.id === redirect.task.commonId
+      );
+      console.log("find to open subtask: ", openSubtask);
+      if (openSubtask) {
+        setSelectedSubTask(openSubtask);
+        setIsOpenModal(true);
+      }
+    }
+  }, [redirect.task, tasks]);
 
   const handleOpenModal = () => {
     setIsOpenCreateTaskModal((prev) => !prev);
@@ -555,6 +579,7 @@ const EventSubTaskPage = () => {
                   isOpenModal={isOpenModal}
                   setIsOpenModal={setIsOpenModal}
                   selectedSubTask={selectedSubTask}
+                  resetTaskRedirect={resetTaskRedirect}
                 />
                 <TaskUpdateModal
                   isModalOpen={isOpenUpdateSubTaskModal}

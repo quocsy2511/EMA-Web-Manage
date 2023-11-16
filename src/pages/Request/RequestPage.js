@@ -13,10 +13,14 @@ import EditRequestModal from "./Modal/EditRequestModal";
 import moment from "moment";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import { useDispatch, useSelector } from "react-redux";
+import { redirectionActions } from "../../store/redirection";
 
 const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
-  // console.log("🚀 ~ file: RequestPage.js:16 ~ RequestPage ~ staff:", staff);
+  const dispatch = useDispatch();
+  const { redirect } = useSelector((state) => state.redirection);
+  console.log("redirection: ", redirect);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState();
@@ -26,6 +30,11 @@ const RequestPage = () => {
   const [isOpenEditRequest, setIsOpenEditRequest] = useState(false);
   const [requestSelected, setRequestSelected] = useState("");
   const [searchText, setSearchText] = useState();
+
+  useEffect(() => {
+    if (redirect.request)
+      setSelectedRequest({ requestFromNotification: redirect.request });
+  }, [redirect.request]);
 
   const {
     data: requests,
@@ -79,6 +88,10 @@ const RequestPage = () => {
 
   const handleChangeType = (type) => {
     setSelectedType(type);
+  };
+
+  const resetRequestRedirect = () => {
+    if (redirect.request) dispatch(redirectionActions.requestChange(undefined));
   };
 
   return (
@@ -261,6 +274,7 @@ const RequestPage = () => {
                         key="request-detail"
                         selectedRequest={selectedRequest}
                         setSelectedRequest={setSelectedRequest}
+                        resetRequestRedirect={resetRequestRedirect}
                       />
                     )}
                   </AnimatePresence>
