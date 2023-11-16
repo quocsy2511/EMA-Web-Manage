@@ -10,6 +10,7 @@ import { useRouteLoaderData } from "react-router-dom";
 import { LuSend } from "react-icons/lu";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { approveRequest, getRequestDetail } from "../../apis/requests";
+import { getMember } from "../../apis/users";
 
 const { TextArea } = Input;
 
@@ -19,8 +20,6 @@ const RequestDetail = ({
   resetRequestRedirect,
 }) => {
   const manager = useRouteLoaderData("manager");
-  console.log("selectedRequest: ", selectedRequest);
-
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -32,6 +31,20 @@ const RequestDetail = ({
         return data?.[0];
       },
       enabled: !!selectedRequest?.requestFromNotification,
+    }
+  );
+
+  const { data: approver } = useQuery(
+    ["approver"],
+    () =>
+      getMember({
+        userId: selectedRequest?.approver,
+      }),
+    {
+      select: (data) => {
+        return data;
+      },
+      enabled: !!selectedRequest?.approver,
     }
   );
 
@@ -158,10 +171,13 @@ const RequestDetail = ({
             <BsArrow90DegLeft size={35} className="rotate-180 text-slate-300" />
             <div className="flex-1 bg-white rounded-lg p-5">
               <div className="flex items-center gap-x-5">
-                <Avatar size={38} src={manager.avatar} />
+                <Avatar
+                  size={38}
+                  src={manager ? manager.avatar : approver?.avatar}
+                />
                 <div>
                   <p className="text-sm text-slate-700 font-medium">
-                    {manager.fullName}
+                    {manager ? manager.fullName : approver?.fullName}
                   </p>
                   <p className="text-xs text-slate-400">Quản lý</p>
                 </div>
