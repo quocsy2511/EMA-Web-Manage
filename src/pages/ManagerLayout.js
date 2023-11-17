@@ -36,7 +36,7 @@ const ManagerLayout = () => {
 
     socket?.on("notification", (data) => {
       console.log("data:", data);
-      // queryClient.invalidateQueries([])
+      queryClient.invalidateQueries(["notifications", "10"]);
       api.open({
         message: <p className="text-base">Đã nhận 1 thông báo</p>,
         description: (

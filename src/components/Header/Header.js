@@ -145,7 +145,16 @@ const Header = ({ collapsed, setCollapsed }) => {
       }
     }
     const findNoti = notifications.find((noti) => noti.id === key.key);
+    console.log(
+      "🚀 ~ file: Header.js:148 ~ onClickNotification ~ findNoti:",
+      findNoti
+    );
     dispatch(addNotification(findNoti));
+    if (findNoti?.type === "REQUEST" && staff) {
+      navigate("/staff/request");
+    } else if (findNoti?.type === "TASK" && staff) {
+      navigate("/staff");
+    }
   };
 
   return (

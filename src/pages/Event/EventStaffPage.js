@@ -13,6 +13,7 @@ import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
 import { getBudget } from "../../apis/budgets";
 import { useRouteLoaderData } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 moment.suppressDeprecationWarnings = true;
 
@@ -32,6 +33,11 @@ const EventStaffPage = () => {
   const [statusSelected, setStatusSelected] = useState("clear");
   const idStaff = useRouteLoaderData("staff").id;
   const [selectEvent, setSelectEvent] = useState({});
+  const notification = useSelector((state) => state.notification);
+  console.log(
+    "🚀 ~ file: EventStaffPage.js:35 ~ EventStaffPage ~ selectEvent:",
+    selectEvent
+  );
   // const {
   //   data: eventDetail,
   //   refetch: refetchEventDetail,
@@ -71,7 +77,9 @@ const EventStaffPage = () => {
     isLoading,
   } = useQuery(["events"], () => getEventDivisions(), {
     select: (data) => {
-      const filteredEvents = data.filter((item) => item.status !== "DONE");
+      const filteredEvents = data.filter(
+        (item) => item.status !== "DONE" && item.status !== "CANCEL"
+      );
       const event = filteredEvents.map(({ ...item }) => {
         item.startDate = moment(item.startDate).format("DD/MM/YYYY");
         item.endDate = moment(item.endDate).format("DD/MM/YYYY");
@@ -299,11 +307,11 @@ const EventStaffPage = () => {
   );
 
   useEffect(() => {
-    if (listEvent && listEvent.length > 0) {
+    if (listEvent && listEvent.length > 0 && !notification) {
       setSelectEvent(listEvent[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listEvent]);
+  }, [listEvent, notification]);
 
   useEffect(() => {
     if (selectEvent.id) {

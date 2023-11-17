@@ -13,6 +13,8 @@ import EditRequestModal from "./Modal/EditRequestModal";
 import moment from "moment";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import { useDispatch, useSelector } from "react-redux";
+import { addNotification } from "../../store/Slice/notificationsSlice";
 
 const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
@@ -20,13 +22,17 @@ const RequestPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState();
+  console.log(
+    "🚀 ~ file: RequestPage.js:25 ~ RequestPage ~ selectedRequest:",
+    selectedRequest
+  );
   const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
   const [isOpenNewRequest, setIsOpenNewRequest] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [isOpenEditRequest, setIsOpenEditRequest] = useState(false);
   const [requestSelected, setRequestSelected] = useState("");
   const [searchText, setSearchText] = useState();
-
+  const notification = useSelector((state) => state.notification);
   const {
     data: requests,
     isLoading,
@@ -47,7 +53,21 @@ const RequestPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (
+      notification?.eventId === null &&
+      requests &&
+      requests.data.length > 0
+    ) {
+      const findRequest = requests?.data.find(
+        (item) => item.id === notification.commonId
+      );
+      setSelectedRequest(findRequest);
+      dispatch(addNotification({}));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notification?.id, requests]);
   const {
     data: annualLeave,
     isLoading: isLoadingAnnualLeave,

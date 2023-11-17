@@ -9,7 +9,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Dropdown, Input, Select, Tag, Tooltip } from "antd";
 import React, { useEffect, useRef, useState } from "react";
-import { useRouteLoaderData } from "react-router-dom";
+import { useLocation, useRouteLoaderData } from "react-router-dom";
 import { getAllUser } from "../../apis/users";
 import moment from "moment";
 import defaultImage from "../../assets/images/pngwing.com.png";
@@ -18,7 +18,8 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { debounce } from "lodash";
 import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { addNotification } from "../../store/Slice/notificationsSlice";
 
 const HeaderEvent = ({
   sort,
@@ -36,30 +37,13 @@ const HeaderEvent = ({
   statusSelected,
   isDashBoard = false,
 }) => {
-  // console.log("🚀 ~ file: HeaderEvent.js:40 ~ events:", events);
   const divisionId = useRouteLoaderData("staff").divisionID;
   const staffID = useRouteLoaderData("staff").id;
   const [visible, setVisible] = useState(false);
   const dropdownRef = useRef(null);
   const listRole = ["STAFF", "EMPLOYEE"];
   const notification = useSelector((state) => state.notification);
-
-  const handleChangeEvent = (value) => {
-    const event = JSON.parse(value);
-    setSelectEvent(event);
-  };
-
-  useEffect(() => {
-    if (notification?.eventId) {
-      const findEvent = events.find(
-        (item) => item.id === notification?.eventId
-      );
-      const parseEvent = JSON.stringify(findEvent);
-      handleChangeEvent(parseEvent);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notification?.id]);
-
+  const dispatch = useDispatch();
   const {
     data: users,
     isError: isErrorUsers,
@@ -89,6 +73,31 @@ const HeaderEvent = ({
       },
     }
   );
+
+  useEffect(() => {
+    if (notification?.eventId && events && events.length > 0 && users) {
+      const findEvent = events.find(
+        (item) => item.id === notification?.eventId
+      );
+
+      const parseEvent = JSON.stringify(findEvent);
+
+      // setSelectEvent(findEvent);
+      handleChangeEvent(parseEvent);
+      // dispatch(addNotification({}));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notification?.id, events, users]);
+
+  const handleChangeEvent = (value) => {
+    console.log("123");
+    const event = JSON.parse(value);
+    console.log(
+      "🚀 ~ file: HeaderEvent.js:101 ~ handleChangeEvent ~ event:",
+      event
+    );
+    setSelectEvent(event);
+  };
 
   const debouncedSearch = debounce((value) => {
     setSearchText(value);

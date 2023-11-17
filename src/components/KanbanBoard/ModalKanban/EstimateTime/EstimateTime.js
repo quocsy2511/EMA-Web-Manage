@@ -126,6 +126,10 @@ const EstimateTime = ({
                 required: true,
                 message: "Bắt buộc nhập",
               },
+              {
+                min: 0,
+                message: "Bắt buộc nhập số lớn hơn 0",
+              },
             ]}
           >
             <InputNumber

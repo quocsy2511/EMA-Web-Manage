@@ -35,7 +35,12 @@ const FieldSubtask = ({
   staff,
   disableUpdate,
   setIsOpenTaskModal,
+  disableDoneTaskParent,
 }) => {
+  console.log(
+    "🚀 ~ file: FieldSubtask.js:40 ~ disableDoneTaskParent:",
+    disableDoneTaskParent
+  );
   const [updateFileList, setUpdateFileList] = useState(taskSelected?.taskFiles);
   const [updatePriority, setUpdatePriority] = useState(taskSelected?.priority);
   const [assignTasks, setAssignTasks] = useState(taskSelected?.assignTasks);
@@ -203,13 +208,37 @@ const FieldSubtask = ({
                 updateStatus={updateStatus}
               />
             ) : (
-              <StatusSelected
-                updateStatus={updateStatus}
-                setUpdateStatus={setUpdateStatus}
-                taskSelected={taskSelected}
-                taskParent={taskParent}
-                classNameStyle="w-[190px] mt-2"
-              />
+              <>
+                {taskParent ? (
+                  <>
+                    {/* disableDoneTaskParent check xem cacs task con hoan thanh chua */}
+                    {!disableDoneTaskParent ? (
+                      <StatusSelected
+                        // disableDoneTaskParent={disableDoneTaskParent}
+                        updateStatus={updateStatus}
+                        setUpdateStatus={setUpdateStatus}
+                        taskSelected={taskSelected}
+                        taskParent={taskParent}
+                        classNameStyle="w-[190px] mt-2"
+                      />
+                    ) : (
+                      <StatusTag
+                        taskSelected={taskSelected}
+                        updateStatus={updateStatus}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <StatusSelected
+                    // disableDoneTaskParent={disableDoneTaskParent}
+                    updateStatus={updateStatus}
+                    setUpdateStatus={setUpdateStatus}
+                    taskSelected={taskSelected}
+                    taskParent={taskParent}
+                    classNameStyle="w-[190px] mt-2"
+                  />
+                )}
+              </>
             )}
           </div>
         </div>

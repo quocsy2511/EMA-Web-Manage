@@ -35,7 +35,6 @@ const NotificationPage = lazy(() =>
 // Staff pages
 const ManagerLayout = lazy(() => import("./pages/ManagerLayout"));
 const EventStaffPage = lazy(() => import("./pages/Event/EventStaffPage"));
-const RequestStaffPage = lazy(() => import("./pages/Request/RequestStaffPage"));
 const TimekeepingStaffPage = lazy(() =>
   import("./pages/Timekeeping/TimekeepingStaffPage")
 );
@@ -216,7 +215,6 @@ const router = createBrowserRouter([
         path: "request",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            {/* <RequestStaffPage /> */}
             <RequestPage />
           </Suspense>
         ),

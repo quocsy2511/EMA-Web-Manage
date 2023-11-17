@@ -90,7 +90,6 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
   useEffect(() => {
     if (notification?.commonId && notification?.type === "TASK") {
       if (!isErrorParentTaskDetail && !isLoadingParentTaskDetail) {
-        console.log("okokoko");
         setIsOpenTaskModal(true);
         setIsTaskParent(true);
         setTaskSelected(parentTaskDetail?.[0]);

@@ -22,6 +22,7 @@ const TaskModalContent = ({
   disableUpdate,
   setIsOpenTaskModal,
   completed,
+  disableDoneTaskParent,
 }) => {
   const {
     data: listComments,
@@ -94,6 +95,7 @@ const TaskModalContent = ({
             taskParent={taskParent}
             staff={staff}
             setIsOpenTaskModal={setIsOpenTaskModal}
+            disableDoneTaskParent={disableDoneTaskParent}
           />
         ) : (
           <AnErrorHasOccured />
