@@ -25,9 +25,12 @@ const ItemLayout = ({ children }) => (
   <div className="flex items-center gap-x-5">{children}</div>
 );
 
-const SubTaskModal = ({ isOpenModal, setIsOpenModal, selectedSubTask }) => {
-  console.log("selectedSubTask: ", selectedSubTask);
-
+const SubTaskModal = ({
+  isOpenModal,
+  setIsOpenModal,
+  selectedSubTask,
+  resetTaskRedirect,
+}) => {
   const {
     data: comments,
     isLoading: commentsIsLoading,
@@ -41,6 +44,7 @@ const SubTaskModal = ({ isOpenModal, setIsOpenModal, selectedSubTask }) => {
   );
 
   const handleCancel = () => {
+    resetTaskRedirect();
     setIsOpenModal(false);
   };
 

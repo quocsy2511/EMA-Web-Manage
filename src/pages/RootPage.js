@@ -21,8 +21,6 @@ const RootPage = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    console.log("Socket changed !!");
-    console.log("socket:", socket);
     if (!socket) {
       const saveSocket = io(URL_SOCKET, {
         auth: {
@@ -35,7 +33,7 @@ const RootPage = () => {
 
     socket?.on("notification", (data) => {
       console.log("data:", data);
-      // queryClient.invalidateQueries([])
+      queryClient.invalidateQueries(["notifications", "10"]);
       api.open({
         message: <p className="text-base">Đã nhận 1 thông báo</p>,
         description: (

@@ -15,10 +15,13 @@ import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import { useDispatch, useSelector } from "react-redux";
 import { addNotification } from "../../store/Slice/notificationsSlice";
+import { redirectionActions } from "../../store/redirection";
 
 const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
-  // console.log("🚀 ~ file: RequestPage.js:16 ~ RequestPage ~ staff:", staff);
+  const dispatch = useDispatch();
+  const { redirect } = useSelector((state) => state.redirection);
+  console.log("redirection: ", redirect);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState();
@@ -33,6 +36,12 @@ const RequestPage = () => {
   const [requestSelected, setRequestSelected] = useState("");
   const [searchText, setSearchText] = useState();
   const notification = useSelector((state) => state.notification);
+
+  useEffect(() => {
+    if (redirect.request)
+      setSelectedRequest({ requestFromNotification: redirect.request });
+  }, [redirect.request]);
+
   const {
     data: requests,
     isLoading,
@@ -53,7 +62,7 @@ const RequestPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  const dispatch = useDispatch();
+
   useEffect(() => {
     if (
       notification?.eventId === null &&
@@ -99,6 +108,10 @@ const RequestPage = () => {
 
   const handleChangeType = (type) => {
     setSelectedType(type);
+  };
+
+  const resetRequestRedirect = () => {
+    if (redirect.request) dispatch(redirectionActions.requestChange(undefined));
   };
 
   return (
@@ -281,6 +294,7 @@ const RequestPage = () => {
                         key="request-detail"
                         selectedRequest={selectedRequest}
                         setSelectedRequest={setSelectedRequest}
+                        resetRequestRedirect={resetRequestRedirect}
                       />
                     )}
                   </AnimatePresence>
