@@ -42,7 +42,7 @@ const EstimateTime = ({
       select: (data) => {
         return data;
       },
-      refetchOnMount: false,
+      refetchOnWindowFocus: false,
       enabled: !!taskID,
     }
   );

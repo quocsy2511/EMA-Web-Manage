@@ -69,7 +69,7 @@ const NewTaskModal = ({
         });
         return listUsers;
       },
-      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
   );
 

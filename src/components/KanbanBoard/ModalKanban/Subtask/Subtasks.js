@@ -44,7 +44,7 @@ const Subtasks = ({
         }
         return data;
       },
-      refetchOnMount: false,
+      refetchOnWindowFocus: false,
       enabled: !!Subtask?.id,
     }
   );

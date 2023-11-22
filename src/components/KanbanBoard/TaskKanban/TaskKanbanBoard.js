@@ -49,7 +49,7 @@ const TaskKanbanBoard = ({
         }
         return data;
       },
-      refetchOnMount: false,
+      
       refetchOnWindowFocus: false,
       enabled: !!task?.id,
     }
@@ -76,7 +76,7 @@ const TaskKanbanBoard = ({
       });
       return formatDate;
     },
-    refetchOnMount: false,
+    
     refetchOnWindowFocus: false,
     enabled: !!task,
   });

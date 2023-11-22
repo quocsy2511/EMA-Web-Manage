@@ -22,8 +22,8 @@ const ManagerLayout = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    console.log("Socket changed !!");
-    console.log("socket:", socket);
+    // console.log("Socket changed !!");
+    // console.log("socket:", socket);
     if (!socket) {
       const saveSocket = io(URL_SOCKET, {
         auth: {

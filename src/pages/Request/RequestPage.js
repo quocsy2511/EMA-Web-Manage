@@ -25,10 +25,6 @@ const RequestPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState();
-  console.log(
-    "🚀 ~ file: RequestPage.js:25 ~ RequestPage ~ selectedRequest:",
-    selectedRequest
-  );
   const [selectedRequestType, setSelectedRequestType] = useState("inbox"); // inbox - bin
   const [isOpenNewRequest, setIsOpenNewRequest] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
@@ -73,7 +69,7 @@ const RequestPage = () => {
         (item) => item.id === notification.commonId
       );
       setSelectedRequest(findRequest);
-      dispatch(addNotification({}));
+      dispatch(addNotification(null));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notification?.id, requests]);

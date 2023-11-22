@@ -69,7 +69,7 @@ const HeaderEvent = ({
         });
         return listUsers;
       },
-      refetchOnMount: false,
+
       refetchOnWindowFocus: false,
     }
   );
@@ -79,23 +79,15 @@ const HeaderEvent = ({
       const findEvent = events.find(
         (item) => item.id === notification?.eventId
       );
-
       const parseEvent = JSON.stringify(findEvent);
 
-      // setSelectEvent(findEvent);
       handleChangeEvent(parseEvent);
-      // dispatch(addNotification({}));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notification?.id, events, users]);
 
   const handleChangeEvent = (value) => {
-    console.log("123");
     const event = JSON.parse(value);
-    console.log(
-      "🚀 ~ file: HeaderEvent.js:101 ~ handleChangeEvent ~ event:",
-      event
-    );
     setSelectEvent(event);
   };
 

@@ -33,7 +33,9 @@ const EventStaffPage = () => {
   const [statusSelected, setStatusSelected] = useState("clear");
   const idStaff = useRouteLoaderData("staff").id;
   const [selectEvent, setSelectEvent] = useState({});
+
   const notification = useSelector((state) => state.notification);
+
   // const {
   //   data: eventDetail,
   //   refetch: refetchEventDetail,
@@ -85,7 +87,7 @@ const EventStaffPage = () => {
       });
       return event;
     },
-    refetchOnMount: false,
+
     refetchOnWindowFocus: false,
   });
 
@@ -93,7 +95,7 @@ const EventStaffPage = () => {
     select: (data) => {
       return data;
     },
-    refetchOnMount: false,
+
     refetchOnWindowFocus: false,
   });
 
@@ -118,7 +120,7 @@ const EventStaffPage = () => {
       select: (data) => {
         return data.data;
       },
-      refetchOnMount: false,
+
       refetchOnWindowFocus: false,
       enabled: !!selectEvent?.id,
     }
@@ -139,7 +141,8 @@ const EventStaffPage = () => {
         select: (data) => {
           return data.data;
         },
-        refetchOnMount: false,
+
+        refetchOnWindowFocus: false,
         enabled: !!selectEvent?.id,
       }
     );
@@ -183,7 +186,7 @@ const EventStaffPage = () => {
         }
         return data;
       },
-      refetchOnMount: false,
+
       refetchOnWindowFocus: false,
       enabled: !!selectEvent?.id && !!staff?.id,
     }
@@ -221,7 +224,6 @@ const EventStaffPage = () => {
         }
         return data;
       },
-      refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: !!staff?.id && !!selectEvent?.id,
     }
@@ -314,11 +316,11 @@ const EventStaffPage = () => {
   );
 
   useEffect(() => {
-    if (listEvent && listEvent.length > 0 && !notification) {
+    if (listEvent && listEvent.length > 0 && !!notification === false) {
       setSelectEvent(listEvent[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listEvent, notification]);
+  }, [listEvent]);
 
   useEffect(() => {
     if (selectEvent.id) {
