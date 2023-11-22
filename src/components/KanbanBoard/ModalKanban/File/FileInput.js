@@ -16,6 +16,7 @@ const FileInput = ({ taskSelected, setUpdateFileList }) => {
       onSuccess: () => {
         queryClient.invalidateQueries(["tasks"]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
+        queryClient.invalidateQueries(["parentTaskDetail"], taskID);
         form.resetFields("");
         setDisableSendButton(true);
         message.open({

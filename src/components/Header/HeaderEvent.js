@@ -9,7 +9,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Dropdown, Input, Select, Tag, Tooltip } from "antd";
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation, useRouteLoaderData } from "react-router-dom";
+import { useRouteLoaderData } from "react-router-dom";
 import { getAllUser } from "../../apis/users";
 import moment from "moment";
 import defaultImage from "../../assets/images/pngwing.com.png";
@@ -18,8 +18,7 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { debounce } from "lodash";
 import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 import { AnimatePresence, motion } from "framer-motion";
-import { useDispatch, useSelector } from "react-redux";
-import { addNotification } from "../../store/Slice/notificationsSlice";
+import { useSelector } from "react-redux";
 
 const HeaderEvent = ({
   sort,
@@ -43,7 +42,6 @@ const HeaderEvent = ({
   const dropdownRef = useRef(null);
   const listRole = ["STAFF", "EMPLOYEE"];
   const notification = useSelector((state) => state.notification);
-  const dispatch = useDispatch();
   const {
     data: users,
     isError: isErrorUsers,
@@ -71,6 +69,8 @@ const HeaderEvent = ({
         });
         return listUsers;
       },
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
   );
 

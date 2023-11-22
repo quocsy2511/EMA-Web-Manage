@@ -41,6 +41,7 @@ const TaskModalContent = ({
         });
         return formatDate;
       },
+      refetchOnMount: false,
       enabled: !!taskSelected.id,
     }
   );
@@ -53,6 +54,7 @@ const TaskModalContent = ({
     select: (data) => {
       return data;
     },
+    refetchOnMount: false,
   });
 
   const [title, setTitle] = useState(taskSelected?.title);

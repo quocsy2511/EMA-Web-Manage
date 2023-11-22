@@ -34,10 +34,6 @@ const EventStaffPage = () => {
   const idStaff = useRouteLoaderData("staff").id;
   const [selectEvent, setSelectEvent] = useState({});
   const notification = useSelector((state) => state.notification);
-  console.log(
-    "🚀 ~ file: EventStaffPage.js:35 ~ EventStaffPage ~ selectEvent:",
-    selectEvent
-  );
   // const {
   //   data: eventDetail,
   //   refetch: refetchEventDetail,
@@ -89,12 +85,16 @@ const EventStaffPage = () => {
       });
       return event;
     },
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const { data: staff } = useQuery(["staff"], () => getProfile(), {
     select: (data) => {
       return data;
     },
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const [filterMember, setFilterMember] = useState(staff?.id);
@@ -118,6 +118,8 @@ const EventStaffPage = () => {
       select: (data) => {
         return data.data;
       },
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
       enabled: !!selectEvent?.id,
     }
   );
@@ -137,6 +139,7 @@ const EventStaffPage = () => {
         select: (data) => {
           return data.data;
         },
+        refetchOnMount: false,
         enabled: !!selectEvent?.id,
       }
     );
@@ -180,6 +183,8 @@ const EventStaffPage = () => {
         }
         return data;
       },
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
       enabled: !!selectEvent?.id && !!staff?.id,
     }
   );
@@ -216,6 +221,8 @@ const EventStaffPage = () => {
         }
         return data;
       },
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
       enabled: !!staff?.id && !!selectEvent?.id,
     }
   );

@@ -25,6 +25,7 @@ const ListTimekeepingStaff = () => {
       });
       return event;
     },
+    refetchOnWindowFocus: false,
   });
 
   const columns = [

@@ -40,6 +40,7 @@ const TitleSubtask = ({
       select: (data) => {
         return data;
       },
+      refetchOnMount: false,
       enabled: !!taskID,
     }
   );

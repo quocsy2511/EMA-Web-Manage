@@ -69,6 +69,7 @@ const NewTaskModal = ({
         });
         return listUsers;
       },
+      refetchOnMount: false,
     }
   );
 
@@ -431,16 +432,28 @@ const NewTaskModal = ({
               name="estimationTime"
               className="text-sm font-medium "
               rules={[
+                // {
+                //   pattern: /^\d*$/,
+                //   message: "Chỉ được nhập số",
+                // },
+                {
+                  validator: async (_, value) => {
+                    if (!/^\d*$/.test(value)) {
+                      throw new Error("Chỉ được nhập số");
+                    }
+                  },
+                },
                 {
                   type: "number",
-                  message: "Chỉ được nhập số",
+                  min: 0,
+                  message: "Bắt buộc nhập số lớn hơn 0",
                 },
               ]}
             >
               <InputNumber
                 placeholder="Chọn thời gian ước tính làm"
                 className="w-1/3"
-                type="number"
+                // type="number"
                 // step="0.1"
                 // stringMode
               />

@@ -83,6 +83,8 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
         });
         return taskParent;
       },
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
       enabled: !!notification?.commonId && notification?.type === "TASK",
     }
   );

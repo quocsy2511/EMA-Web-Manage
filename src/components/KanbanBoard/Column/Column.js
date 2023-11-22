@@ -56,14 +56,14 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
   const newTaskItems = [
     {
       key: "newTaskDefault",
-      label: <p>Thủ công</p>,
+      label: <p>Thêm công việc mới</p>,
     },
     {
       type: "divider",
     },
     {
       key: "newTaskTemplate",
-      label: "Công việc mẫu",
+      label: "Các Công việc mẫu",
       children: taskTemplate?.map((task, index) => {
         return {
           key: task.id,

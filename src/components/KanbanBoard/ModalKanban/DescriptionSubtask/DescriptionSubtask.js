@@ -39,6 +39,7 @@ const DescriptionSubtask = ({
       select: (data) => {
         return data;
       },
+      refetchOnMount: false,
       enabled: !!taskID,
     }
   );

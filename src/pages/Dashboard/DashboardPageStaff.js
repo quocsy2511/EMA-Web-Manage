@@ -23,6 +23,7 @@ const DashboardPageStaff = () => {
     select: (data) => {
       return data;
     },
+    refetchOnWindowFocus: false,
   });
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {

@@ -37,10 +37,6 @@ const FieldSubtask = ({
   setIsOpenTaskModal,
   disableDoneTaskParent,
 }) => {
-  console.log(
-    "🚀 ~ file: FieldSubtask.js:40 ~ disableDoneTaskParent:",
-    disableDoneTaskParent
-  );
   const [updateFileList, setUpdateFileList] = useState(taskSelected?.taskFiles);
   const [updatePriority, setUpdatePriority] = useState(taskSelected?.priority);
   const [assignTasks, setAssignTasks] = useState(taskSelected?.assignTasks);
