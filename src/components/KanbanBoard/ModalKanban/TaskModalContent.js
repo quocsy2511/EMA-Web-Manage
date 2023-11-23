@@ -60,21 +60,14 @@ const TaskModalContent = ({
   const [title, setTitle] = useState(taskSelected?.title);
   const [description, setDescription] = useState(taskSelected?.description);
   const [subTasks, setSubTasks] = useState(taskSelected?.subTask);
-
-  // let completed = 0;
-  // if (taskParent) {
-  //   taskSelected.subTask.forEach((task) => {
-  //     if (task.status === "CONFIRM") {
-  //       completed++;
-  //     }
-  //   });
-  // }
-
-  // useEffect(() => {
-  //   setTitle(taskSelected.title);
-  //   setDescription(taskSelected.description);
-  //   setSubTasks(taskSelected.subTask);
-  // }, [taskSelected]);
+  let completionPercentage;
+  if (taskParent) {
+    completionPercentage = (completed / subTasks?.length) * 100;
+  }
+  console.log(
+    "🚀 ~ file: TaskModalContent.js:64 ~ completionPercentage:",
+    completionPercentage
+  );
 
   return (
     <div>
@@ -98,6 +91,7 @@ const TaskModalContent = ({
             staff={staff}
             setIsOpenTaskModal={setIsOpenTaskModal}
             disableDoneTaskParent={disableDoneTaskParent}
+            completionPercentage={completionPercentage}
           />
         ) : (
           <AnErrorHasOccured />

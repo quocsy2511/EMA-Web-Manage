@@ -34,3 +34,6 @@ export const getMember = ({ userId }) =>
 
 export const updateProfile = (user) =>
   authRequest({ url: `/user/profile`, method: "put", data: user });
+
+export const getEmployeeByDate = ({ startDate, endDate }) =>
+  authRequest({ url: `/user/getFreeEmployee/${startDate}/${endDate}` });
