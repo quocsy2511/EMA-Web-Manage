@@ -64,10 +64,6 @@ const TaskModalContent = ({
   if (taskParent) {
     completionPercentage = (completed / subTasks?.length) * 100;
   }
-  console.log(
-    "🚀 ~ file: TaskModalContent.js:64 ~ completionPercentage:",
-    completionPercentage
-  );
 
   return (
     <div>

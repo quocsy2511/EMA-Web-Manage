@@ -24,11 +24,7 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 // import { debounce } from "lodash";
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
-import {
-  UploadOutlined,
-  UserAddOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { UploadOutlined, UserOutlined } from "@ant-design/icons";
 // import dayjs from "dayjs";
 // import viVN from "antd/locale/vi_VN";
 
