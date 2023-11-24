@@ -48,6 +48,7 @@ const CommentInput = ({ staff, taskSelected }) => {
   const { mutate } = useMutation((comment) => postComment(comment), {
     onSuccess: () => {
       queryClient.invalidateQueries(["comments", taskId]);
+      queryClient.invalidateQueries(["parentTaskDetail"], taskId);
       form.resetFields();
       message.open({
         type: "success",

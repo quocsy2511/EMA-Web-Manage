@@ -13,6 +13,7 @@ import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../apis/users";
 import { getBudget } from "../../apis/budgets";
 import { useRouteLoaderData } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 moment.suppressDeprecationWarnings = true;
 
@@ -32,6 +33,9 @@ const EventStaffPage = () => {
   const [statusSelected, setStatusSelected] = useState("clear");
   const idStaff = useRouteLoaderData("staff").id;
   const [selectEvent, setSelectEvent] = useState({});
+
+  const notification = useSelector((state) => state.notification);
+
   // const {
   //   data: eventDetail,
   //   refetch: refetchEventDetail,
@@ -71,7 +75,9 @@ const EventStaffPage = () => {
     isLoading,
   } = useQuery(["events"], () => getEventDivisions(), {
     select: (data) => {
-      const filteredEvents = data.filter((item) => item.status !== "DONE");
+      const filteredEvents = data.filter(
+        (item) => item.status !== "DONE" && item.status !== "CANCEL"
+      );
       const event = filteredEvents.map(({ ...item }) => {
         item.startDate = moment(item.startDate).format("DD/MM/YYYY");
         item.endDate = moment(item.endDate).format("DD/MM/YYYY");
@@ -81,12 +87,16 @@ const EventStaffPage = () => {
       });
       return event;
     },
+
+    refetchOnWindowFocus: false,
   });
 
   const { data: staff } = useQuery(["staff"], () => getProfile(), {
     select: (data) => {
       return data;
     },
+
+    refetchOnWindowFocus: false,
   });
 
   const [filterMember, setFilterMember] = useState(staff?.id);
@@ -110,6 +120,8 @@ const EventStaffPage = () => {
       select: (data) => {
         return data.data;
       },
+
+      refetchOnWindowFocus: false,
       enabled: !!selectEvent?.id,
     }
   );
@@ -129,6 +141,8 @@ const EventStaffPage = () => {
         select: (data) => {
           return data.data;
         },
+
+        refetchOnWindowFocus: false,
         enabled: !!selectEvent?.id,
       }
     );
@@ -172,6 +186,8 @@ const EventStaffPage = () => {
         }
         return data;
       },
+
+      refetchOnWindowFocus: false,
       enabled: !!selectEvent?.id && !!staff?.id,
     }
   );
@@ -208,6 +224,7 @@ const EventStaffPage = () => {
         }
         return data;
       },
+      refetchOnWindowFocus: false,
       enabled: !!staff?.id && !!selectEvent?.id,
     }
   );
@@ -299,7 +316,7 @@ const EventStaffPage = () => {
   );
 
   useEffect(() => {
-    if (listEvent && listEvent.length > 0) {
+    if (listEvent && listEvent.length > 0 && !!notification === false) {
       setSelectEvent(listEvent[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

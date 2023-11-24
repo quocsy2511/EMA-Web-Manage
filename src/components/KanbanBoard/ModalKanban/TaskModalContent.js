@@ -22,6 +22,7 @@ const TaskModalContent = ({
   disableUpdate,
   setIsOpenTaskModal,
   completed,
+  disableDoneTaskParent,
 }) => {
   const {
     data: listComments,
@@ -40,6 +41,7 @@ const TaskModalContent = ({
         });
         return formatDate;
       },
+      refetchOnWindowFocus: false,
       enabled: !!taskSelected.id,
     }
   );
@@ -52,26 +54,16 @@ const TaskModalContent = ({
     select: (data) => {
       return data;
     },
+    refetchOnWindowFocus: false,
   });
 
   const [title, setTitle] = useState(taskSelected?.title);
   const [description, setDescription] = useState(taskSelected?.description);
   const [subTasks, setSubTasks] = useState(taskSelected?.subTask);
-
-  // let completed = 0;
-  // if (taskParent) {
-  //   taskSelected.subTask.forEach((task) => {
-  //     if (task.status === "CONFIRM") {
-  //       completed++;
-  //     }
-  //   });
-  // }
-
-  // useEffect(() => {
-  //   setTitle(taskSelected.title);
-  //   setDescription(taskSelected.description);
-  //   setSubTasks(taskSelected.subTask);
-  // }, [taskSelected]);
+  let completionPercentage;
+  if (taskParent) {
+    completionPercentage = (completed / subTasks?.length) * 100;
+  }
 
   return (
     <div>
@@ -94,6 +86,8 @@ const TaskModalContent = ({
             taskParent={taskParent}
             staff={staff}
             setIsOpenTaskModal={setIsOpenTaskModal}
+            disableDoneTaskParent={disableDoneTaskParent}
+            completionPercentage={completionPercentage}
           />
         ) : (
           <AnErrorHasOccured />

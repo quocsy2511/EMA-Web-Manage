@@ -26,7 +26,7 @@ const Header = ({ collapsed, setCollapsed }) => {
   const dispatch = useDispatch();
   const { socket } = useSelector((state) => state.socket);
   const { redirect } = useSelector((state) => state.redirection);
-  console.log("redirection: ", redirect);
+  // console.log("redirection: ", redirect);
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -58,7 +58,7 @@ const Header = ({ collapsed, setCollapsed }) => {
     }
 
     const handleNavigate = () => {
-      console.log("navigate: ", item);
+      // console.log("navigate: ", item);
       if (item.type === "REQUEST") {
         console.log("request");
         dispatch(redirectionActions.requestChange(item.commonId));
@@ -130,7 +130,7 @@ const Header = ({ collapsed, setCollapsed }) => {
       return data.data;
     },
   });
-  console.log("notifications: ", notifications);
+  // console.log("notifications: ", notifications);
 
   const queryClient = useQueryClient();
   const { mutate: seenNotificationMutate } = useMutation(
@@ -197,6 +197,11 @@ const Header = ({ collapsed, setCollapsed }) => {
     }
     const findNoti = notifications.find((noti) => noti.id === key.key);
     dispatch(addNotification(findNoti));
+    if (findNoti?.type === "REQUEST" && staff) {
+      navigate("/staff/request");
+    } else if (findNoti?.type === "TASK" && staff) {
+      navigate("/staff");
+    }
   };
 
   return (

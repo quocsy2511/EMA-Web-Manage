@@ -17,14 +17,14 @@ import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRouteLoaderData } from "react-router-dom";
-import { getAllUser } from "../../../apis/users";
+import { getAllUser, getEmployeeByDate } from "../../../apis/users";
 import moment from "moment";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 // import { debounce } from "lodash";
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, UserOutlined } from "@ant-design/icons";
 // import dayjs from "dayjs";
 // import viVN from "antd/locale/vi_VN";
 
@@ -39,37 +39,49 @@ const NewTaskModal = ({
   const { Option } = Select;
   const { id, eventID, title } = TaskParent;
   const [startDate, setStartDate] = useState("");
+  console.log("🚀 ~ file: NewTaskModal.js:42 ~ startDate:", startDate);
   const [endDate, setEndDate] = useState("");
+  console.log("🚀 ~ file: NewTaskModal.js:43 ~ endDate:", endDate);
+  const [disabledEmployee, setDisabledEmployee] = useState(true);
   const [description, setDescription] = useState("");
   const [assignee, setAssignee] = useState([]);
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
   const {
-    data: employees,
-    isError: isErrorEmployees,
-    isLoading: isLoadingEmployees,
+    data: employeesByDate,
+    isError: isErrorEmployeesByDate,
+    isLoading: isLoadingEmployeesByDate,
+    refetch: refetchEmployees,
   } = useQuery(
-    ["employees"],
+    ["employees-by-Date"],
     () =>
-      getAllUser({
-        divisionId,
-        pageSize: 10,
-        currentPage: 1,
-        role: "EMPLOYEE",
+      getEmployeeByDate({
+        startDate: startDate,
+        endDate: endDate,
       }),
     {
       select: (data) => {
-        const listUsers = data.data.map(({ ...item }) => {
+        const filteredData = data.filter(
+          (item) =>
+            item.division.id === divisionId && item.typeEmployee === "FULL_TIME"
+        );
+        const listEmployee = filteredData.map(({ ...item }) => {
           item.dob = moment(item.dob).format("YYYY-MM-DD");
           return {
             key: item.id,
             ...item,
           };
         });
-        return listUsers;
+        return listEmployee;
       },
+      refetchOnWindowFocus: false,
+      enabled: !!startDate && !!endDate,
     }
+  );
+  console.log(
+    "🚀 ~ file: NewTaskModal.js:56 ~ employeesByDate:",
+    employeesByDate
   );
 
   const queryClient = useQueryClient();
@@ -135,7 +147,16 @@ const NewTaskModal = ({
     const isoEndDate = moment(dateString[1]).toISOString();
     setStartDate(isoStartDate);
     setEndDate(isoEndDate);
+    if (isoStartDate && isoEndDate) {
+      console.log("ok");
+      setDisabledEmployee(false);
+      // refetchEmployees();
+    } else {
+      console.log("not");
+      setDisabledEmployee(true);
+    }
   };
+
   //validate pick date
   const today = moment();
   const todayFormat = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -378,51 +399,68 @@ const NewTaskModal = ({
             <Form.Item
               label="Phân công"
               name="assignee"
-              className="text-sm font-medium "
+              className="text-sm font-medium mb-8"
               rules={[
                 {
                   required: true,
                   message: "Hãy chọn nhân viên!",
                 },
               ]}
+              // validateStatus="warning"
+              help="Cần chọn thời gian để chọn nhân viên"
               hasFeedback
             >
-              {!isLoadingEmployees ? (
-                !isErrorEmployees ? (
-                  <Select
-                    autoFocus
-                    allowClear
-                    mode="multiple"
-                    placeholder="Người được chọn đầu tiên là nhóm trưởng"
-                    style={{
-                      width: "100%",
-                    }}
-                    onChange={(value) => handleChangeSelectMember(value)}
-                    optionLabelProp="label"
-                  >
-                    {employees?.map((item, index) => {
-                      return (
-                        <Option
-                          value={item.id}
-                          label={item.fullName}
-                          key={item.id}
-                        >
-                          <Space>
-                            <span role="img" aria-label={item.fullName}>
-                              <Avatar src={item.avatar} />
-                            </span>
-                            {item.fullName}
-                          </Space>
-                        </Option>
-                      );
-                    })}
-                  </Select>
-                ) : (
-                  <AnErrorHasOccured />
-                )
-              ) : (
-                <LoadingComponentIndicator />
-              )}
+              <Select
+                disabled={disabledEmployee}
+                autoFocus
+                allowClear
+                mode="multiple"
+                placeholder="Người được chọn đầu tiên là nhóm trưởng"
+                style={{
+                  width: "100%",
+                }}
+                onChange={(value) => handleChangeSelectMember(value)}
+                optionLabelProp="label"
+              >
+                <>
+                  {!isLoadingEmployeesByDate ? (
+                    !isErrorEmployeesByDate ? (
+                      <>
+                        {employeesByDate?.map((item, index) => {
+                          return (
+                            <Option
+                              value={item?.id}
+                              label={item?.profile.fullName}
+                              key={item?.id}
+                            >
+                              <Space>
+                                <span
+                                  role="img"
+                                  aria-label={item?.profile.fullName}
+                                >
+                                  {item.avatar ? (
+                                    <Avatar src={item?.avatar} />
+                                  ) : (
+                                    <Avatar
+                                      icon={<UserOutlined />}
+                                      size="small"
+                                    />
+                                  )}
+                                </span>
+                                {item?.profile.fullName}
+                              </Space>
+                            </Option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      <AnErrorHasOccured />
+                    )
+                  ) : (
+                    <LoadingComponentIndicator />
+                  )}
+                </>
+              </Select>
             </Form.Item>
             {/* Estimated */}
             <Form.Item
@@ -431,16 +469,28 @@ const NewTaskModal = ({
               name="estimationTime"
               className="text-sm font-medium "
               rules={[
+                // {
+                //   pattern: /^\d*$/,
+                //   message: "Chỉ được nhập số",
+                // },
+                {
+                  validator: async (_, value) => {
+                    if (!/^\d*$/.test(value)) {
+                      throw new Error("Chỉ được nhập số");
+                    }
+                  },
+                },
                 {
                   type: "number",
-                  message: "Chỉ được nhập số",
+                  min: 0,
+                  message: "Bắt buộc nhập số lớn hơn 0",
                 },
               ]}
             >
               <InputNumber
                 placeholder="Chọn thời gian ước tính làm"
                 className="w-1/3"
-                type="number"
+                // type="number"
                 // step="0.1"
                 // stringMode
               />

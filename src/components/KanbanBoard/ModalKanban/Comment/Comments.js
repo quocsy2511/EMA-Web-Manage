@@ -32,6 +32,7 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["comments", taskSelected.id]);
+        queryClient.invalidateQueries(["parentTaskDetail"], taskSelected.id);
         message.open({
           type: "success",
           content: "Bình luận đã được xoá",
@@ -50,6 +51,7 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
     useMutation((comment) => updateComment(comment), {
       onSuccess: (data) => {
         queryClient.invalidateQueries(["comments", taskSelected.id]);
+        queryClient.invalidateQueries(["parentTaskDetail"], taskSelected.id);
         seItsOpenInput(false);
         message.open({
           type: "success",

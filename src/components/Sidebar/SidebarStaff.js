@@ -1,17 +1,12 @@
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
 import { BsJournalCheck, BsMailbox, BsPersonVcard } from "react-icons/bs";
-import {
-  HiOutlineCalendarDays,
-  HiOutlineHome,
-  HiOutlineUserGroup,
-} from "react-icons/hi2";
+import { HiOutlineHome } from "react-icons/hi2";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
 import { Avatar, ConfigProvider, Menu } from "antd";
 import logo from "../../assets/images/logo.png";
 import { AnimatePresence, motion } from "framer-motion";
-import { LiaMoneyBillWaveAltSolid } from "react-icons/lia";
 
 const SidebarStaff = ({ collapsed }) => {
   const [colorTheme, setColorTheme] = useDarkMode();
@@ -148,6 +143,7 @@ const SidebarStaff = ({ collapsed }) => {
                 defaultSelectedKeys={location.pathname}
                 items={sideBarItems}
                 inlineIndent={30}
+                selectedKeys={location.pathname}
               />
             </ConfigProvider>
           </div>

@@ -25,6 +25,7 @@ const ConfirmTimekeepingStaff = () => {
       });
       return event;
     },
+    refetchOnWindowFocus: false,
   });
 
   const columns = [

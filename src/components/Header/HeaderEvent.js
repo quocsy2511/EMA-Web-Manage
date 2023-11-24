@@ -36,30 +36,12 @@ const HeaderEvent = ({
   statusSelected,
   isDashBoard = false,
 }) => {
-  // console.log("🚀 ~ file: HeaderEvent.js:40 ~ events:", events);
   const divisionId = useRouteLoaderData("staff").divisionID;
   const staffID = useRouteLoaderData("staff").id;
   const [visible, setVisible] = useState(false);
   const dropdownRef = useRef(null);
   const listRole = ["STAFF", "EMPLOYEE"];
   const notification = useSelector((state) => state.notification);
-
-  const handleChangeEvent = (value) => {
-    const event = JSON.parse(value);
-    setSelectEvent(event);
-  };
-
-  useEffect(() => {
-    if (notification?.eventId) {
-      const findEvent = events.find(
-        (item) => item.id === notification?.eventId
-      );
-      const parseEvent = JSON.stringify(findEvent);
-      handleChangeEvent(parseEvent);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notification?.id]);
-
   const {
     data: users,
     isError: isErrorUsers,
@@ -87,8 +69,27 @@ const HeaderEvent = ({
         });
         return listUsers;
       },
+
+      refetchOnWindowFocus: false,
     }
   );
+
+  useEffect(() => {
+    if (notification?.eventId && events && events.length > 0 && users) {
+      const findEvent = events.find(
+        (item) => item.id === notification?.eventId
+      );
+      const parseEvent = JSON.stringify(findEvent);
+
+      handleChangeEvent(parseEvent);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notification?.id, events, users]);
+
+  const handleChangeEvent = (value) => {
+    const event = JSON.parse(value);
+    setSelectEvent(event);
+  };
 
   const debouncedSearch = debounce((value) => {
     setSearchText(value);

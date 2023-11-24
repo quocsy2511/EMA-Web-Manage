@@ -40,6 +40,7 @@ const TitleSubtask = ({
       select: (data) => {
         return data;
       },
+      refetchOnWindowFocus: false,
       enabled: !!taskID,
     }
   );

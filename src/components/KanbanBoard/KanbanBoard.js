@@ -83,6 +83,7 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
         });
         return taskParent;
       },
+      refetchOnWindowFocus: false,
       enabled: !!notification?.commonId && notification?.type === "TASK",
     }
   );
@@ -90,14 +91,15 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
   useEffect(() => {
     if (notification?.commonId && notification?.type === "TASK") {
       if (!isErrorParentTaskDetail && !isLoadingParentTaskDetail) {
-        console.log("okokoko");
         setIsOpenTaskModal(true);
         setIsTaskParent(true);
         setTaskSelected(parentTaskDetail?.[0]);
-        dispatch(addNotification({}));
+        dispatch(addNotification(null));
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notification?.id, isErrorParentTaskDetail, isLoadingParentTaskDetail]);
+
   let completed = 0;
   let subTask = taskSelected?.subTask;
   subTask?.forEach((task) => {

@@ -29,6 +29,7 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
   const [disableUpdate, setDisableUpdate] = useState(false);
+  const [disableDoneTaskParent, setDisableDoneTaskParent] = useState(true);
 
   let completed = 0;
   let subTask = TaskParent.subTask;
@@ -55,14 +56,14 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
   const newTaskItems = [
     {
       key: "newTaskDefault",
-      label: <p>Thủ công</p>,
+      label: <p>Thêm công việc mới</p>,
     },
     {
       type: "divider",
     },
     {
       key: "newTaskTemplate",
-      label: "Công việc mẫu",
+      label: "Các Công việc mẫu",
       children: taskTemplate?.map((task, index) => {
         return {
           key: task.id,
@@ -85,6 +86,11 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
   useEffect(() => {
     if (TaskParent?.status === "CONFIRM") {
       setDisableUpdate(true);
+    }
+    if (completed === TaskParent?.subTask?.length) {
+      setDisableDoneTaskParent(false);
+    } else {
+      setDisableDoneTaskParent(true);
     }
   }, [TaskParent]);
 
@@ -166,6 +172,7 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
             isOpenTaskModal={isOpenTaskModal}
             setIsOpenTaskModal={setIsOpenTaskModal}
             completed={completed}
+            disableDoneTaskParent={disableDoneTaskParent}
           />
         )}
         {addNewTask && (

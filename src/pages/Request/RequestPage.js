@@ -14,6 +14,7 @@ import moment from "moment";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import { useDispatch, useSelector } from "react-redux";
+import { addNotification } from "../../store/Slice/notificationsSlice";
 import { redirectionActions } from "../../store/redirection";
 
 const RequestPage = () => {
@@ -30,6 +31,7 @@ const RequestPage = () => {
   const [isOpenEditRequest, setIsOpenEditRequest] = useState(false);
   const [requestSelected, setRequestSelected] = useState("");
   const [searchText, setSearchText] = useState();
+  const notification = useSelector((state) => state.notification);
 
   useEffect(() => {
     if (redirect.request)
@@ -57,6 +59,20 @@ const RequestPage = () => {
     }
   );
 
+  useEffect(() => {
+    if (
+      notification?.eventId === null &&
+      requests &&
+      requests.data.length > 0
+    ) {
+      const findRequest = requests?.data.find(
+        (item) => item.id === notification.commonId
+      );
+      setSelectedRequest(findRequest);
+      dispatch(addNotification(null));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notification?.id, requests]);
   const {
     data: annualLeave,
     isLoading: isLoadingAnnualLeave,
