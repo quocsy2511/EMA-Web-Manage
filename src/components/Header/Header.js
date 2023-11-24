@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
-import { Avatar, Badge, Button, Dropdown } from "antd";
+import React from "react";
+import { Avatar, Badge, Button, Dropdown, message } from "antd";
 import { Header as HeaderLayout } from "antd/es/layout/layout";
-import { HiOutlineBellAlert } from "react-icons/hi2";
+import { HiOutlineBell, HiOutlineBellAlert } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { IoLogOutOutline } from "react-icons/io5";
 import {
@@ -10,103 +10,155 @@ import {
   useNavigate,
   useRouteLoaderData,
 } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getAllNotification } from "../../apis/notifications";
-import { useSelector } from "react-redux";
-
-const notiItems = [
-  {
-    key: "1",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.antgroup.com"
-      >
-        1st menu item
-      </a>
-    ),
-  },
-  {
-    key: "2",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.aliyun.com"
-      >
-        2nd menu item (disabled)
-      </a>
-    ),
-    disabled: true,
-  },
-  {
-    key: "3",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.luohanacademy.com"
-      >
-        3rd menu item (disabled)
-      </a>
-    ),
-    disabled: true,
-  },
-  {
-    key: "4",
-    danger: true,
-    label: "a danger item",
-  },
-];
-
-const NotiLabel = () => (
-  <div className="flex items-center gap-x-3 min-w-[300px]">
-    <Avatar
-      size={40}
-      src="https://hips.hearstapps.com/hmg-prod/images/dwayne-the-rock-johnson-gettyimages-1061959920.jpg?crop=0.5625xw:1xh;center,top&resize=1200:*"
-    />
-    <div className="flex-1">
-      <p className="text-base font-medium">Nguyen Vu</p>
-      <p className="text-xs max-w-[200px] overflow-hidden truncate">
-        Đã bình luận vào việc của bạn ad sa sa dsa dá á dá á da
-      </p>
-    </div>
-    <div>
-      <div className="w-[8px] h-[8px] bg-blue-500 rounded-full" />
-    </div>
-  </div>
-);
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getAllNotification, seenNotification } from "../../apis/notifications";
+import { useSelector, useDispatch } from "react-redux";
+import moment from "moment";
+import { addNotification } from "../../store/Slice/notificationsSlice";
+import { redirectionActions } from "../../store/redirection";
 
 const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("locaion: ", location);
   const manager = useRouteLoaderData("manager");
   const staff = useRouteLoaderData("staff");
-  const { socket } = useSelector((state) => state.socket);
-  console.log('socket:', socket);
-  // const [notiItems, setNotiItems] = useState();
 
-  useEffect(() => {
-    socket?.on('create-task', (data) => {
-      console.log("data:", data);
-    });
-  }, [socket])
+  const dispatch = useDispatch();
+  const { socket } = useSelector((state) => state.socket);
+  const { redirect } = useSelector((state) => state.redirection);
+  // console.log("redirection: ", redirect);
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const NotiLabel = ({ item }) => {
+    let time;
+    const currentDate = moment().subtract(7, "hours");
+    const targetDate = moment(item.createdAt);
+    const duration = moment.duration(currentDate.diff(targetDate));
+
+    console.log("item noti: ", item);
+
+    if (duration.asMinutes() < 1) {
+      // Less than 1 minute
+      time = `bây giờ`;
+    } else if (duration.asHours() < 1) {
+      time = `${Math.floor(duration.asMinutes())} phút trước`;
+    } else if (duration.asDays() < 1) {
+      // Less than 1 day
+      time = `${Math.floor(duration.asHours())} giờ trước`;
+    } else if (duration.asDays() < 7) {
+      // Less than 1 week
+      time = `${Math.floor(duration.asDays())} ngày trước`;
+    } else if (duration.asMonths() < 1) {
+      // Less than 1 month
+      time = `${Math.floor(duration.asDays() / 7)} tuần trước`;
+    } else {
+      // More than 1 month
+      time = `${Math.floor(duration.asMonths())} tháng trước`;
+    }
+
+    const handleNavigate = () => {
+      // console.log("navigate: ", item);
+      if (item.type === "REQUEST") {
+        console.log("request");
+        dispatch(redirectionActions.requestChange(item.commonId));
+        if (location.pathname !== "/manager/request") {
+          navigate(`/manager/request`);
+        }
+      } else if (item.type === "TASK") {
+        console.log("task");
+        dispatch(
+          redirectionActions.taskChange({
+            commonId: item.commonId,
+            parentTaskId: item.parentTaskId,
+          })
+        );
+        if (item.parentTaskId) {
+          if (
+            location.pathname !==
+            `/manager/event/${item.eventId}/${item.parentTaskId}`
+          ) {
+            navigate(`/manager/event/${item.eventId}/${item.parentTaskId}`);
+          }
+        } else {
+          if (
+            location.pathname !==
+            `/manager/event/${item.eventId}/${item.commonId}`
+          ) {
+            navigate(`/manager/event/${item.eventId}/${item.commonId}`);
+          }
+        }
+      } else if (item.type === "COMMENT") {
+        console.log("comment");
+        dispatch(redirectionActions.commentChange(item.commonId));
+        if (location.pathname !== "/manager/request") {
+          navigate(`/manager/event/${item.eventId}/${item.commenId}`);
+        }
+      }
+    };
+
+    return (
+      <div
+        onClick={handleNavigate}
+        className="flex items-center gap-x-3 min-w-[300px]"
+      >
+        <Avatar size={45} src={item.avatarSender} />
+        <div className="flex-1">
+          <p className="text-sm max-w-[280px] overflow-hidden">
+            <span className="font-bold">{item.content.split("đã")[0]}</span>
+            đã {item.content.split("đã")[1]}
+          </p>
+          <p className="text-blue-400">{time}</p>
+        </div>
+        <div>
+          {item.readFlag === 0 ? (
+            <div className="w-[8px] h-[8px] bg-blue-500 rounded-full" />
+          ) : (
+            <div className="w-[8px] h-[8px] bg-transparent" />
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const {
     data: notifications,
     isLoading,
     isError,
-  } = useQuery(["notifications"], getAllNotification, {
+  } = useQuery(["notifications", "10"], () => getAllNotification(10), {
     select: (data) => {
       return data.data;
     },
   });
-  console.log("notifications: ", notifications);
+  // console.log("notifications: ", notifications);
+
+  const queryClient = useQueryClient();
+  const { mutate: seenNotificationMutate } = useMutation(
+    (notificationId) => seenNotification(notificationId),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.setQueryData(["notifications", "10"], (oldValue) => {
+          const updatedOldData = oldValue.map((item) => {
+            if (item.id === variables.notificationId) {
+              return { ...item, readFlag: 1 };
+            }
+            return item;
+          });
+          return updatedOldData;
+        });
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
 
   const logout = () => {
     localStorage.removeItem("token");
-    socket?.disconnect()
+    socket?.disconnect();
     navigate("/");
   };
 
@@ -133,15 +185,30 @@ const Header = ({ collapsed, setCollapsed }) => {
   ];
 
   const onClickNotification = (key) => {
-    console.log("click noti : ", key);
-    if (key.key === "navigate" && location.pathname !== "/manager/notification")
-      navigate("/manager/notification");
+    if (
+      key.key === "navigate" &&
+      location.pathname !== "/manager/notification"
+    ) {
+      if (manager) {
+        navigate("/manager/notification");
+      } else {
+        navigate("/staff/notification");
+      }
+    }
+    const findNoti = notifications.find((noti) => noti.id === key.key);
+    dispatch(addNotification(findNoti));
+    if (findNoti?.type === "REQUEST" && staff) {
+      navigate("/staff/request");
+    } else if (findNoti?.type === "TASK" && staff) {
+      navigate("/staff");
+    }
   };
 
   return (
     <HeaderLayout
-      className={`${collapsed ? "w-[calc(100%-80px)]" : "w-[calc(100%-230px)]"
-        } p-0 bg-white border-b-2 h-16 fixed z-50`}
+      className={`${
+        collapsed ? "w-[calc(100%-80px)]" : "w-[calc(100%-230px)]"
+      } p-0 bg-white border-b-2 h-16 fixed z-50`}
     >
       <div className="flex justify-between items-center pr-8">
         <Button
@@ -168,7 +235,13 @@ const Header = ({ collapsed, setCollapsed }) => {
                 items: [
                   ...(notifications?.map((noti) => ({
                     key: noti.id,
-                    label: <NotiLabel />,
+                    label: (
+                      <NotiLabel
+                        item={noti}
+                        navigate={navigate}
+                        location={location}
+                      />
+                    ),
                   })) ?? []),
                   {
                     key: "navigate",
@@ -182,15 +255,24 @@ const Header = ({ collapsed, setCollapsed }) => {
               trigger={["click"]}
               placement="bottomRight"
               arrow
+              disabled={notifications?.length === 0}
             >
               <Badge
-                size={"small"}
-                count={notifications?.length ?? 0}
+                size={"default"}
+                count={
+                  notifications?.length && notifications?.length >= 10
+                    ? "9+"
+                    : notifications?.length ?? 0
+                }
                 offset={[-2, 2]}
                 title={`${notifications?.length ?? 0} thông báo`}
                 onClick={(e) => e.preventDefault()}
               >
-                <HiOutlineBellAlert size={20} />
+                {notifications?.length === 0 ? (
+                  <HiOutlineBell size={25} />
+                ) : (
+                  <HiOutlineBellAlert size={25} />
+                )}
               </Badge>
             </Dropdown>
           </div>
@@ -217,8 +299,8 @@ const Header = ({ collapsed, setCollapsed }) => {
                     {manager
                       ? manager?.role === "MANAGER" && "Quản lý"
                       : staff
-                        ? staff.role === "STAFF" && "Trưởng bộ phận"
-                        : "Vai? trò"}
+                      ? staff.role === "STAFF" && "Trưởng bộ phận"
+                      : "Vai? trò"}
                   </p>
                 </div>
                 <div className="w-2" />
@@ -226,10 +308,7 @@ const Header = ({ collapsed, setCollapsed }) => {
                   size={40}
                   icon={<p>icon</p>}
                   alt="user_image"
-                  src={
-                    manager?.avatar ??
-                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZCldKgmO2Hs0UGk6nRClAjATKoF9x2liYYA&usqp=CAU"
-                  }
+                  src={manager?.avatar ?? staff?.avatar}
                 />
               </div>
             </Dropdown>

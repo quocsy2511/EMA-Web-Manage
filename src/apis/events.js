@@ -58,3 +58,9 @@ export const getEventTemplate = () =>
 
 export const getTemplateEvent = () =>
   authRequest({ url: "/event/template-event" });
+
+export const getStatistic = ({ type }) =>
+  authRequest({ url: `/event/statistic?mode=${type}` });
+
+export const getEventParticipant = (eventId) =>
+  authRequest({ url: `/event?eventId=${eventId}` });

@@ -21,9 +21,12 @@ import { uploadFile } from "../../apis/files";
 
 const { RangePicker } = DatePicker;
 
-const Title = ({ title }) => <p className="text-base font-medium">{title}</p>;
+const Title = ({ title }) => (
+  <p className="text-base font-medium truncate">{title}</p>
+);
 
 const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
+  console.log("UPDATE MODAL: ", event);
   const { data: staffs, isLoading: staffsIsLoading } = useQuery(
     ["staffs"],
     () => getAllUser({ role: "STAFF", pageSize: 100, currentPage: 1 }),
@@ -129,7 +132,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
 
   return (
     <Modal
-      title={<p className="text-center text-2xl">Cập nhật sự kiện</p>}
+      title={<p className="text-center text-4xl pb-4">Cập nhật sự kiện</p>}
       open={isModalOpen}
       onOk={handleOk}
       onCancel={handleCancel}
@@ -160,6 +163,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           estBudget: event.estBudget,
           description: { ops: JSON.parse(event.description) },
           divisions: event.listDivision.map((item) => item.divisionId),
+          processingDate: event.processingDate,
         }}
       >
         <div className="flex justify-between gap-x-5">
@@ -230,37 +234,32 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           </Form.Item>
           <Form.Item
             className="w-[40%]"
-            label={<Title title="Ước lượng ngân sách" />}
-            name="estBudget"
+            label={<Title title="Thời gian bắt đầu" />}
+            name="processingDate"
             rules={[
               {
                 required: true,
-                message: "Chưa nhập ngân sách!",
+                message: "Chưa chọn ngày bắt đầu!",
               },
             ]}
           >
-            <div className="flex items-center gap-x-2">
-              <InputNumber
+            <ConfigProvider locale={viVN}>
+              <DatePicker
                 className="w-full"
-                defaultValue={event.estBudget}
-                min={500000}
-                step={100000}
-                formatter={(value) =>
-                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
-                parser={(value) => {
+                onChange={(value) => {
                   form.setFieldsValue({
-                    estBudget: value.replace(/,/g, ""),
+                    processingDate: moment(value?.$d).format("YYYY-MM-DD"),
                   });
-                  return `${value}`.replace(/,/g, "");
                 }}
-                onStep={(value) => {
-                  form.setFieldsValue({ estBudget: value });
+                disabledDate={(current) => {
+                  return (
+                    current && current > moment(event.startDate).endOf("day")
+                  );
                 }}
-                /*stringMode*/
+                defaultValue={dayjs(event.processingDate, "YYYY-MM-DD")}
+                format={"DD/MM/YYYY"}
               />
-              <p>VNĐ</p>
-            </div>
+            </ConfigProvider>
           </Form.Item>
         </div>
 
@@ -301,7 +300,40 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
             loading={staffsIsLoading}
           />
         </Form.Item>
-        <div className="flex justify-center">
+        <div className="flex items-center gap-x-10">
+          <Form.Item
+            className="w-[40%]"
+            label={<Title title="Ước lượng ngân sách" />}
+            name="estBudget"
+            rules={[
+              {
+                required: true,
+                message: "Chưa nhập ngân sách!",
+              },
+            ]}
+          >
+            <div className="flex items-center gap-x-2">
+              <InputNumber
+                className="w-full"
+                defaultValue={event.estBudget}
+                min={500000}
+                step={100000}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+                parser={(value) => {
+                  form.setFieldsValue({
+                    estBudget: value.replace(/,/g, ""),
+                  });
+                  return `${value}`.replace(/,/g, "");
+                }}
+                onStep={(value) => {
+                  form.setFieldsValue({ estBudget: value });
+                }}
+              />
+              <p>VNĐ</p>
+            </div>
+          </Form.Item>
           <Form.Item
             className="flex items-center justify-center"
             name="coverUrl"
@@ -343,7 +375,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
                 });
               }}
             >
-              <p className="p-3">Ảnh về sự kiện</p>
+              <p className="py-1.5 px-2">Ảnh về sự kiện</p>
             </Upload.Dragger>
           </Form.Item>
         </div>

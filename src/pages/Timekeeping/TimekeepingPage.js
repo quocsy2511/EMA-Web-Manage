@@ -1,77 +1,130 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Button, ConfigProvider, DatePicker, Input, Select, Table } from "antd";
+import { Avatar, ConfigProvider, Input, Select, Table, Tag } from "antd";
 import moment from "moment";
 import { FcCalendar } from "react-icons/fc";
 import { FiSearch } from "react-icons/fi";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { TbCalendarCog, TbCalendarEvent, TbCalendarX } from "react-icons/tb";
 import { AnimatePresence, motion } from "framer-motion";
 import EmptyTimeKeeping from "../../components/Error/EmptyTimeKeeping";
+import { useQuery } from "@tanstack/react-query";
+import { getEventParticipant, getFilterEvent } from "../../apis/events";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 
 import "moment/locale/vi";
+import { getTimekeeping } from "../../apis/timekeepings";
 
-const listAllDatesInMonthWithWeek = (date) => {
-  if (!date) return [];
-  const firstDayOfMonth = moment(
-    `${date?.split("-")[0]}-${date?.split("-")[1]}-01`,
-    "YYYY-MM-DD"
-  );
-  const lastDayOfMonth = firstDayOfMonth.clone().endOf("month");
+const listDatesInRange = (startDate, endDate) => {
+  if (!startDate || !endDate) return [];
+
+  const firstDayOfRange = moment(startDate, "YYYY-MM-DD");
+  const lastDayOfRange = moment(endDate, "YYYY-MM-DD");
 
   const dates = [];
 
-  let currentDay = firstDayOfMonth.clone();
-  while (currentDay.isSameOrBefore(lastDayOfMonth)) {
+  let currentDay = firstDayOfRange.clone();
+
+  if (firstDayOfRange.isSame(lastDayOfRange, "day")) {
     dates.push({
       date: currentDay.format("YYYY-MM-DD"),
       weekdayVi: currentDay.format("dddd", "vi"), // Get Vietnamese weekday
     });
-    currentDay.add(1, "day");
+  } else {
+    while (currentDay.isSameOrBefore(lastDayOfRange)) {
+      dates.push({
+        date: currentDay.format("YYYY-MM-DD"),
+        weekdayVi: currentDay.format("dddd", "vi"), // Get Vietnamese weekday
+      });
+      currentDay.add(1, "day");
+    }
   }
 
   return dates;
 };
 
 const TimekeepingPage = () => {
-  const [datePicker, setDatePicker] = useState();
+  const [selectedEvent, setSelectedEvent] = useState();
+  console.log("selectedEvent: ", selectedEvent);
   const [columns, setColumns] = useState([]);
   const [searchText, setSearchText] = useState();
-  const [pageSize, setPageSize] = useState(10);
-
-  const onChange = (date, dateString) => {
-    console.log(dateString.split("-")[0]);
-    console.log(dateString.split("-")[1]);
-    setDatePicker(dateString);
-  };
 
   useEffect(() => {
-    const datesInMonthWithWeek = listAllDatesInMonthWithWeek(datePicker);
-    const newColumns = [
-      {
-        title: "Nhân viên",
-        dataIndex: "user",
-        key: "user",
-        fixed: "left",
-        width: 250,
-      },
-      ...datesInMonthWithWeek.map((item) => ({
-        title: (
-          <div
-            className={`text-center ${
-              (item.weekdayVi === "thứ bảy" || item.weekdayVi === "chủ nhật") &&
-              "text-red-500"
-            }`}
-          >
-            <p className="text-xs font-normal">{item.weekdayVi}</p>
-            <p className="text-base font-medium">{item.date.split("-")[2]}</p>
-          </div>
-        ),
-        dataIndex: item.date.split("-")[2],
-        key: item.date.split("-")[2],
-        width: 150,
-      })),
-    ];
-    setColumns(newColumns);
-  }, [datePicker]);
+    if (selectedEvent) {
+      const datesInTimeGap = listDatesInRange(
+        selectedEvent.processingDate,
+        selectedEvent.endDate
+      );
+      const newColumns = [
+        {
+          title: "Nhân viên",
+          dataIndex: "user",
+          key: "user",
+          fixed: "left",
+          width: 250,
+          render: (_, record) => {
+            return (
+              <div className="flex items-center gap-x-2">
+                <Avatar src={record.avatar} />
+                <p>{record.fullName}</p>
+                {record.role === "STAFF" && (
+                  <div className="bg-yellow-600 w-[10px] h-[10px] rounded-full" />
+                )}
+              </div>
+            );
+          },
+        },
+        ...datesInTimeGap.map((item) => {
+          const date = item.date.split("-");
+          const parseDate = `date${date[2]}${date[1]}${date[0]}`;
+
+          return {
+            title: (
+              <div
+                className={`text-center ${
+                  (item.weekdayVi === "thứ bảy" ||
+                    item.weekdayVi === "chủ nhật") &&
+                  "text-red-500"
+                }`}
+              >
+                <p className="text-xs font-normal">{item.weekdayVi}</p>
+                <p className="text-base font-medium">
+                  {item.date.split("-")[2]}
+                </p>
+              </div>
+            ),
+            dataIndex: parseDate,
+            key: parseDate,
+            render: (_, record) => {
+              if (!record[parseDate])
+                return (
+                  <p
+                    className={`${
+                      (item.weekdayVi === "thứ bảy" ||
+                        item.weekdayVi === "chủ nhật") &&
+                      "text-red-500"
+                    }`}
+                  >
+                    -- : --
+                  </p>
+                );
+              const time = record[parseDate].split(":");
+              return (
+                <p className="border-2 py-2 rounded-2xl font-medium">{`${time[0]}h : ${time[1]}m`}</p>
+              );
+            },
+            width: 150,
+            align: "center",
+          };
+        }),
+      ];
+      setColumns(newColumns);
+    }
+    if (!eventParticipant) {
+      eventParticipantRefetch();
+      if (!timekeepings) timekeepingsFetching();
+    }
+  }, [selectedEvent]);
 
   useEffect(() => {
     const identifier = setTimeout(() => {
@@ -83,21 +136,179 @@ const TimekeepingPage = () => {
     };
   }, [searchText]);
 
-  console.log("columns: ", columns);
+  const {
+    data: events,
+    isLoading: eventsIsLoading,
+    isError: eventsIsError,
+  } = useQuery(
+    ["events"],
+    () =>
+      getFilterEvent({ pageSize: 100, currentPage: 1, nameSort: "createdAt" }),
+    {
+      select: (data) => {
+        return data.data.map((event) => ({
+          id: event.id,
+          eventName: event.eventName,
+          processingDate: moment(event.processingDate).format("YYYY-MM-DD"),
+          startDate: event.startDate,
+          endDate: event.endDate,
+        }));
+      },
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const {
+    data: eventParticipant,
+    isError: eventParticipantIsError,
+    isFetching: eventParticipantIsFetching,
+    refetch: eventParticipantRefetch,
+  } = useQuery(
+    ["event-user", selectedEvent?.id],
+    () => getEventParticipant(selectedEvent?.id),
+    {
+      select: (data) => {
+        return data.map((user) => {
+          const { address, dob, gender, nationalId, phoneNumber, ...rest } =
+            user;
+          return rest;
+        });
+      },
+      enabled: !!selectedEvent?.id,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const {
+    data: timekeepings,
+    isError: timekeepingsIsError,
+    isFetching: timekeepingsIsFetching,
+    refetch: timekeepingsFetching,
+  } = useQuery(
+    ["timekeeping", selectedEvent?.id],
+    () =>
+      getTimekeeping({
+        eventId: selectedEvent?.id,
+        startDate: selectedEvent?.processingDate,
+        endDate: selectedEvent?.endDate,
+        me: false,
+      }),
+    {
+      select: (data) => {
+        return data;
+      },
+      enabled: !!selectedEvent?.id && !!eventParticipant,
+      refetchOnWindowFocus: false,
+    }
+  );
+  console.log("timekeepings: ", timekeepings);
+  console.log("timekeepingsIsFetching: ", timekeepingsIsFetching);
+
+  let renderItem = eventParticipant ?? [];
+  if (!!eventParticipant && !!timekeepings) {
+    renderItem = eventParticipant.map((user) => {
+      timekeepings?.map((timekeeping) => {
+        if (timekeeping?.user?.id === user.id) {
+          const splitDate = timekeeping?.date?.split("-");
+          const date = `date${splitDate[2]}${splitDate[1]}${splitDate[0]}`;
+          user = { ...user, [date]: timekeeping.checkinTime };
+        }
+      });
+
+      return user;
+    });
+  }
+  console.log("renderItem: ", renderItem);
+
+  const onChange = (value) => {
+    const selectedEvent = events.find((event) => {
+      if (event.id === value) return event;
+    });
+    setSelectedEvent(selectedEvent);
+  };
+
+  if (eventsIsLoading)
+    return (
+      <div className="h-[calc(100vh-64px)] w-full">
+        <LoadingComponentIndicator />
+      </div>
+    );
+
+  if (eventsIsError)
+    return (
+      <div className="h-[calc(100vh-64px)] w-full">
+        <AnErrorHasOccured />
+      </div>
+    );
 
   return (
     <Fragment>
       <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] px-10 pt-5 pb-10 flex flex-col">
-        <div className="flex gap-x-2">
-          <div className="w-[15%] flex items-center gap-x-3 bg-white px-3 py-3">
+        <div className="flex gap-x-10">
+          <div className="w-[20%] flex items-center gap-x-3 bg-white px-3 py-3 rounded-md">
             <FcCalendar size={30} />
-            <DatePicker className="w-full" onChange={onChange} picker="month" />
+            <Select
+              className="w-full"
+              options={events.map((event) => ({
+                value: event.id,
+                label: event.eventName,
+              }))}
+              placeholder="Chọn 1 sự kiện"
+              onChange={onChange}
+            />
           </div>
+          {selectedEvent && (
+            <>
+              {" "}
+              <motion.div
+                key={selectedEvent?.processingDate}
+                initial={{ y: -15, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
+              >
+                <TbCalendarCog size={30} />
+                <div>
+                  <p className="text-lg font-semibold">Ngày chuẩn bị</p>
+                  <p className="text-sm font-medium">
+                    {moment(selectedEvent?.processingDate).format("DD-MM-YYYY")}
+                  </p>
+                </div>
+              </motion.div>
+              <motion.div
+                key={selectedEvent?.startDate}
+                initial={{ y: -15, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
+              >
+                <TbCalendarEvent size={30} />
+                <div>
+                  <p className="text-lg font-semibold">Ngày diễn ra</p>
+                  <p className="text-sm font-medium">
+                    {moment(selectedEvent?.startDate).format("DD-MM-YYYY")}
+                  </p>
+                </div>
+              </motion.div>
+              <motion.div
+                key={selectedEvent?.endDate}
+                initial={{ y: -15, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
+              >
+                <TbCalendarX size={30} />
+                <div>
+                  <p className="text-lg font-semibold">Ngày kết thúc</p>
+                  <p className="text-sm font-medium">
+                    {moment(selectedEvent?.endDate).format("DD-MM-YYYY")}
+                  </p>
+                </div>
+              </motion.div>
+            </>
+          )}
         </div>
 
-        <div className="flex-1 bg-white mt-5 overflow-hidden">
+        <div className="flex-1 bg-white mt-5 overflow-hidden rounded-md pb-5">
           <AnimatePresence mode="wait">
-            {datePicker ? (
+            {selectedEvent ? (
               <motion.div
                 key="has-date"
                 initial={{ x: -100, opacity: 0 }}
@@ -122,7 +333,7 @@ const TimekeepingPage = () => {
                 </div>
 
                 <AnimatePresence mode="wait">
-                  {1 + 1 === 2 ? (
+                  {timekeepings?.length !== 0 ? (
                     <motion.div
                       key="timekeepings"
                       initial={{ x: -100, opacity: 0 }}
@@ -141,47 +352,20 @@ const TimekeepingPage = () => {
                       >
                         <Table
                           columns={columns}
-                          dataSource={[]}
+                          // loading={
+                          //   eventParticipantIsFetching || timekeepingsIsFetching
+                          // }
+                          dataSource={renderItem}
                           bordered
                           scroll={{
                             x: "150%",
                             y: "100%",
                             scrollToFirstRowOnChange: true,
                           }}
-                          // sticky={{
-                          //   offsetHeader: 64,
-                          // }}
                           sticky={true}
+                          pagination={false}
                         />
                       </ConfigProvider>
-                      <div className="mt-4 mr-4 flex items-center justify-end gap-x-3">
-                        <Select
-                          value={pageSize}
-                          options={[
-                            { label: "10 / trang", value: 10 },
-                            { label: "20 / trang", value: 20 },
-                            { label: "50 / trang", value: 50 },
-                          ]}
-                        />
-
-                        <div className="flex items-centerflex items-center text-xs gap-x-3">
-                          <p>
-                            Từ
-                            <span className="mx-1 font-semibold">1</span>
-                            đến
-                            <span className="mx-1 font-semibold">15</span>
-                            bản ghi
-                          </p>
-                          <IoIosArrowBack
-                            size={15}
-                            className={`text-slate-400 cursor-pointer`}
-                          />
-                          <IoIosArrowForward
-                            size={15}
-                            className={`text-slate-400 cursor-pointer`}
-                          />
-                        </div>
-                      </div>
                     </motion.div>
                   ) : (
                     <EmptyTimeKeeping key="no-timekeeping" />

@@ -18,6 +18,7 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { debounce } from "lodash";
 import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSelector } from "react-redux";
 
 const HeaderEvent = ({
   sort,
@@ -40,6 +41,7 @@ const HeaderEvent = ({
   const [visible, setVisible] = useState(false);
   const dropdownRef = useRef(null);
   const listRole = ["STAFF", "EMPLOYEE"];
+  const notification = useSelector((state) => state.notification);
   const {
     data: users,
     isError: isErrorUsers,
@@ -67,10 +69,23 @@ const HeaderEvent = ({
         });
         return listUsers;
       },
+
+      refetchOnWindowFocus: false,
     }
   );
 
-  // const staffUsers = users?.filter((user) => user.role === "STAFF");
+  useEffect(() => {
+    if (notification?.eventId && events && events.length > 0 && users) {
+      const findEvent = events.find(
+        (item) => item.id === notification?.eventId
+      );
+      const parseEvent = JSON.stringify(findEvent);
+
+      handleChangeEvent(parseEvent);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notification?.id, events, users]);
+
   const handleChangeEvent = (value) => {
     const event = JSON.parse(value);
     setSelectEvent(event);
@@ -228,8 +243,9 @@ const HeaderEvent = ({
       window.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
   return (
-    <div className="p-4 left-0 bg-bgBoard z-50 right-0 top-14">
+    <div className="p-4 left-0 bg-bgBoard z-40 right-0 top-14">
       <AnimatePresence mode="wait">
         {!isLoadingUsers ? (
           !isErrorUsers ? (
@@ -243,6 +259,9 @@ const HeaderEvent = ({
                 {/* left header */}
                 <div className="flex items-center gap-x-4 ">
                   <Select
+                    value={
+                      selectEvent ? JSON.stringify(selectEvent) : undefined
+                    }
                     defaultValue={{ label: events[0].eventName, value: events }}
                     // bordered={false}
                     className="min-w-[120px] shadow-md rounded-lg"
@@ -259,23 +278,9 @@ const HeaderEvent = ({
                         value: jsonString,
                       };
                     })}
-                    // onChange={handleChange}
                     size="middle"
                   />
                 </div>
-                {/* search */}
-                {/* <div>
-                  <Input
-                    allowClear
-                    placeholder="tìm kiếm công việc "
-                    style={{
-                      width: 400,
-                    }}
-                    className=""
-                    onChange={(e) => debouncedSearch(e.target.value)}
-                    suffix={<SearchOutlined />}
-                  />
-                </div> */}
                 {!isDashBoard && (
                   <div className="flex-1 flex justify-end items-center gap-x-3">
                     {/* budget */}

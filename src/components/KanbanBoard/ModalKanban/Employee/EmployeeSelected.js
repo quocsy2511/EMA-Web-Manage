@@ -39,6 +39,7 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
         });
         return listUsers;
       },
+      refetchOnWindowFocus: false,
     }
   );
 

@@ -53,7 +53,6 @@ const TaskUpdateModal = ({
   const [fileList, setFileList] = useState();
   const [selectedEmployeesId, setSelectedEmployeesId] = useState();
   const [updateFileList, setUpdateFileList] = useState(task?.taskFiles ?? []);
-  console.log("updateFileList : ", updateFileList);
 
   useEffect(() => {
     form.setFieldsValue({

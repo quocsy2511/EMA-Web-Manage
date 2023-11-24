@@ -16,7 +16,7 @@ const EmptyTimeKeeping = ({ isEmptyDate }) => {
         src={isEmptyDate ? emptyTimekeeping : emptyFolder}
       />
       <p className="m-auto text-lg text-slate-600 font-medium">
-        {isEmptyDate ? "Hãy chọn thời điểm để chấm công" : "Chưa có chấm công "}
+        {isEmptyDate ? "Hãy chọn sự kiến để xem chấm công" : "Chưa có chấm công "}
       </p>
     </motion.div>
   );

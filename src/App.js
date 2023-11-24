@@ -7,7 +7,6 @@ import { checkAuthLoader, loginLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
-import BudgetStaffLayout from "./pages/Budget/BudgetStaffLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { socketActions } from "./store/socket";
 
@@ -36,7 +35,6 @@ const NotificationPage = lazy(() =>
 // Staff pages
 const ManagerLayout = lazy(() => import("./pages/ManagerLayout"));
 const EventStaffPage = lazy(() => import("./pages/Event/EventStaffPage"));
-const RequestStaffPage = lazy(() => import("./pages/Request/RequestStaffPage"));
 const TimekeepingStaffPage = lazy(() =>
   import("./pages/Timekeeping/TimekeepingStaffPage")
 );
@@ -67,7 +65,8 @@ const router = createBrowserRouter([
         index: true,
         element: (
           <Suspense fallback={<LoadingPageIndicator title="trang chủ" />}>
-            <DashboardPage />
+            {/* <DashboardPage /> */}
+            <DashboardPageStaff />
           </Suspense>
         ),
       },
@@ -216,7 +215,6 @@ const router = createBrowserRouter([
         path: "request",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            {/* <RequestStaffPage /> */}
             <RequestPage />
           </Suspense>
         ),
@@ -246,18 +244,18 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "budget",
-        element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
-            <BudgetStaffLayout />
-          </Suspense>
-        ),
-      },
-      {
         path: "profile",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <ProfilePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "notification",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <NotificationPage />
           </Suspense>
         ),
       },

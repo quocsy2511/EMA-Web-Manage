@@ -330,7 +330,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
             <AnimatePresence>
               {comments.map((comment) => {
                 let time;
-                const currentDate = moment().utc();
+                const currentDate = moment().subtract(7, "hours");
                 const targetDate = moment(comment.createdAt);
                 const duration = moment.duration(currentDate.diff(targetDate));
 

@@ -8,17 +8,45 @@ import "react-quill/dist/quill.snow.css";
 import moment from "moment";
 import { useRouteLoaderData } from "react-router-dom";
 import { LuSend } from "react-icons/lu";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { approveRequest } from "../../apis/requests";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { approveRequest, getRequestDetail } from "../../apis/requests";
+import { getMember } from "../../apis/users";
 
 const { TextArea } = Input;
 
-const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
+const RequestDetail = ({
+  selectedRequest,
+  setSelectedRequest,
+  resetRequestRedirect,
+}) => {
   const manager = useRouteLoaderData("manager");
-  console.log(manager);
-
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+
+  const { data: requestFromNoti } = useQuery(
+    ["request", selectedRequest?.requestFromNotification],
+    () => getRequestDetail(selectedRequest?.requestFromNotification),
+    {
+      select: (data) => {
+        return data?.[0];
+      },
+      enabled: !!selectedRequest?.requestFromNotification,
+    }
+  );
+
+  const { data: approver } = useQuery(
+    ["approver"],
+    () =>
+      getMember({
+        userId: selectedRequest?.approver,
+      }),
+    {
+      select: (data) => {
+        return data;
+      },
+      enabled: !!selectedRequest?.approver,
+    }
+  );
 
   const queryClient = useQueryClient();
   const { mutate } = useMutation((request) => approveRequest(request), {
@@ -45,8 +73,8 @@ const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
     mutate(value);
   };
 
-  console.log("selectedRequest: ", selectedRequest);
   const handleBackSelectedRequest = () => {
+    resetRequestRedirect();
     setSelectedRequest();
   };
 
@@ -65,13 +93,16 @@ const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
           size={18}
           className="text-slate-500 cursor-pointer"
         />
-        <p className="text-sm text-slate-500">{selectedRequest?.title}</p>
+        <p className="text-sm text-slate-500">
+          {requestFromNoti ? requestFromNoti?.title : selectedRequest?.title}
+        </p>
         <div className="flex-1 flex justify-end items-center gap-x-2">
-          {selectedRequest.type === "L" && selectedRequest.isFull ? (
+          {(requestFromNoti?.type === "L" || selectedRequest?.type === "L") &&
+          (requestFromNoti?.isFull || selectedRequest?.isFull) ? (
             <Tag color="cyan" className="w-20 text-center">
               Cả ngày
             </Tag>
-          ) : selectedRequest.isPM ? (
+          ) : requestFromNoti?.isPM || selectedRequest?.isPM ? (
             <Tag color="geekblue" className="w-20 text-center">
               Buổi chiều
             </Tag>
@@ -82,26 +113,34 @@ const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
           )}
           <div
             className={`w-2 h-2 rounded-full ${
-              selectedRequest.type === "A"
+              requestFromNoti?.type === "A" || selectedRequest?.type === "A"
                 ? "bg-green-600"
-                : selectedRequest.type === "L"
+                : requestFromNoti?.type === "L" || selectedRequest?.type === "L"
                 ? "bg-red-500"
-                : selectedRequest.type === "M" && "bg-purple-400"
+                : (requestFromNoti?.type === "M" ||
+                    selectedRequest?.type === "M") &&
+                  "bg-purple-400"
             }`}
           />
           <p className="text-xs">
-            {selectedRequest.type === "A"
+            {requestFromNoti?.type === "A" || selectedRequest?.type === "A"
               ? "Nghỉ có lương"
-              : selectedRequest.type === "L"
+              : requestFromNoti?.type === "L" || selectedRequest?.type === "L"
               ? "Nghỉ không lương"
-              : selectedRequest.type === "M" && "Đi công tác"}
+              : (requestFromNoti?.type === "M" ||
+                  selectedRequest?.type === "M") &&
+                "Đi công tác"}
           </p>
         </div>
       </div>
       <div className="p-5 space-y-10">
         <div className="w-full bg-white rounded-lg p-5">
           <div className="flex items-center gap-x-5">
-            <Avatar size={38} src={selectedRequest?.user?.profile.avatar} />
+            {requestFromNoti ? (
+              <Avatar size={38} src={requestFromNoti?.user?.profile.avatar} />
+            ) : (
+              <Avatar size={38} src={selectedRequest?.user?.profile.avatar} />
+            )}
             <div>
               <p className="text-sm text-slate-700 font-medium">
                 {selectedRequest?.user?.profile.fullName}
@@ -113,36 +152,50 @@ const RequestDetail = ({ selectedRequest, setSelectedRequest }) => {
               </p>
             </div>
             <p className="flex-1 text-end text-xs text-slate-400">
-              {moment(selectedRequest?.createdAt).format(
-                "DD [tháng] MM, YYYY HH:mm"
-              )}
+              {moment(
+                requestFromNoti
+                  ? requestFromNoti?.createdAt
+                  : selectedRequest?.createdAt
+              ).format("DD [tháng] MM, YYYY HH:mm")}
             </p>
           </div>
-          <p className="pt-5">{selectedRequest?.content}</p>
+          <p className="pt-5">
+            {requestFromNoti
+              ? requestFromNoti?.content
+              : selectedRequest?.content}
+          </p>
         </div>
 
-        {selectedRequest?.approver && (
+        {(requestFromNoti?.approver || selectedRequest?.approver) && (
           <div className="flex items-center ml-5 gap-x-5">
             <BsArrow90DegLeft size={35} className="rotate-180 text-slate-300" />
             <div className="flex-1 bg-white rounded-lg p-5">
               <div className="flex items-center gap-x-5">
-                <Avatar size={38} src={manager.avatar} />
+                <Avatar
+                  size={38}
+                  src={manager ? manager.avatar : approver?.avatar}
+                />
                 <div>
                   <p className="text-sm text-slate-700 font-medium">
-                    {manager.fullName}
+                    {manager ? manager.fullName : approver?.fullName}
                   </p>
                   <p className="text-xs text-slate-400">Quản lý</p>
                 </div>
                 <p className="flex-1 text-end text-xs text-slate-400">
-                  {moment(selectedRequest?.updatedAt).format(
-                    "DD [tháng] MM, YYYY HH:mm"
-                  )}
+                  {moment(
+                    requestFromNoti
+                      ? requestFromNoti?.updatedAt
+                      : selectedRequest?.updatedAt
+                  ).format("DD [tháng] MM, YYYY HH:mm")}
                 </p>
               </div>
-              {selectedRequest?.replyMessage &&
-              selectedRequest?.replyMessage !== "" ? (
+              {(requestFromNoti?.replyMessage ||
+                selectedRequest?.replyMessage) &&
+              (requestFromNoti?.replyMessage !== "" ||
+                selectedRequest?.replyMessage !== "") ? (
                 selectedRequest?.replyMessage
-              ) : selectedRequest?.status === "ACCEPT" ? (
+              ) : requestFromNoti?.status === "ACCEPT" ||
+                selectedRequest?.status === "ACCEPT" ? (
                 <div className="flex items-center gap-x-2 pt-5">
                   <p className="">Đơn được chấp thuận</p>
                   <AiOutlineCheck size={20} className="text-green-600" />

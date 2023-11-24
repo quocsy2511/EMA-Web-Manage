@@ -42,6 +42,7 @@ const EstimateTime = ({
       select: (data) => {
         return data;
       },
+      refetchOnWindowFocus: false,
       enabled: !!taskID,
     }
   );
@@ -119,12 +120,20 @@ const EstimateTime = ({
             className="w-full mb-2 px-3"
             rules={[
               {
-                type: "number",
-                message: "Chỉ được nhập số ",
+                validator: async (_, value) => {
+                  if (!/^\d*$/.test(value)) {
+                    throw new Error("Chỉ được nhập số");
+                  }
+                },
               },
               {
                 required: true,
-                message: "Bắt buộc nhập",
+                message: "Bắt buộc nhập số ",
+              },
+              {
+                type: "number",
+                min: 0,
+                message: "Bắt buộc nhập số lớn hơn 0",
               },
             ]}
           >
@@ -134,14 +143,14 @@ const EstimateTime = ({
               ref={inputRef}
               className="bg-transparent rounded-md border-none  border-gray-600 focus:outline-secondary outline-none cursor-pointer "
               placeholder="Thời gian làm ước tính ...."
-              value={
-                subtaskDetails?.[0].estimationTime
-                  ? subtaskDetails?.[0].estimationTime
-                  : 0
-              }
+              // value={
+              //   subtaskDetails?.[0].estimationTime
+              //     ? subtaskDetails?.[0].estimationTime
+              //     : 0
+              // }
               onChange={onChange}
               id="board-name-input"
-              type="number"
+              // type="number"
               disabled={disableUpdate}
               // step="0.1"
               // stringMode

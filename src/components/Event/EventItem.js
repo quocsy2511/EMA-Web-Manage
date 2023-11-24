@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar } from "antd";
+import { Avatar, Tooltip } from "antd";
 import {
   BsHourglassBottom,
   BsFolder2Open,
@@ -103,12 +103,17 @@ const EventItem = ({ event }) => {
         <div className="flex items-center gap-x-4">
           <p className="font-medium">Chịu trách nhiệm</p>
           <Avatar.Group
-            maxCount={event.listDivision.length}
+            maxCount={3}
             maxPopoverTrigger="hover"
             maxStyle={{ color: "#D25B68", backgroundColor: "#F4D7DA" }}
           >
             {event.listDivision.map((item) => (
-              <Avatar src={item.avatar} key={item.avatar} />
+              <Tooltip
+                title={`${item.fullName} - ${item.divisionName}`}
+                placement="top"
+              >
+                <Avatar src={item.avatar} key={item.avatar} />
+              </Tooltip>
             ))}
           </Avatar.Group>
         </div>

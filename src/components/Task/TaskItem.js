@@ -13,7 +13,7 @@ import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import { getUserById } from "../../apis/users";
 import { RiAttachment2 } from "react-icons/ri";
-import { BiDetail } from "react-icons/bi";
+import { MdMode } from "react-icons/md";
 
 const TaskItem = ({
   task,
@@ -233,14 +233,14 @@ const TaskItem = ({
           />
         </Badge>
       ) : !isDropdown ? (
-        <BiDetail
+        <MdMode
           onClick={(e) => {
             setSelectedSubTask(task);
             setIsOpenUpdateSubTaskModal(true);
             e.stopPropagation();
           }}
-          className="text-slate-400"
-          size={30}
+          className="text-slate-400 border-2 p-2 rounded-xl"
+          size={40}
         />
       ) : null}
     </motion.div>

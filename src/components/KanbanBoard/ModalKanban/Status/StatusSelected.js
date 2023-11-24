@@ -9,6 +9,7 @@ const StatusSelected = ({
   updateStatus,
   setUpdateStatus,
   classNameStyle,
+  // disableDoneTaskParent,
 }) => {
   const statusTask = [
     {
@@ -42,6 +43,12 @@ const StatusSelected = ({
       color: "orange",
     },
   ];
+  // Sửa giá trị của CONFIRM trong statusTask
+  // const updatedStatusTask = statusTask.map((task) =>
+  //   task.value === "CONFIRM"
+  //     ? { ...task, disabled: true } // Thêm thuộc tính disabled và gán giá trị true
+  //     : task
+  // );
   const StatusParentTask = statusTask.filter(
     (task) => task.value !== "CONFIRM"
   );
@@ -55,6 +62,7 @@ const StatusSelected = ({
         setUpdateStatus(uploadStatus);
         queryClient.invalidateQueries(["tasks"]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
+        queryClient.invalidateQueries(["parentTaskDetail"], taskID);
         message.open({
           type: "success",
           content: "Cập nhật trạng thái thành công",
@@ -86,6 +94,7 @@ const StatusSelected = ({
         className={classNameStyle}
         onChange={(value) => handleChangeStatus(value)}
         popupMatchSelectWidth={false}
+        // disabled={taskParent ? true : false}
       >
         {taskParent
           ? StatusParentTask?.map((status) => (

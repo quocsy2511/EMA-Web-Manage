@@ -2,12 +2,13 @@ import {
   BulbOutlined,
   FieldTimeOutlined,
   FolderOutlined,
+  PercentageOutlined,
   TagOutlined,
   UserOutlined,
   UsergroupAddOutlined,
   VerticalAlignTopOutlined,
 } from "@ant-design/icons";
-import { Avatar, Popover, Tooltip } from "antd";
+import { Avatar, Popover, Progress, Tooltip } from "antd";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import utc from "dayjs/plugin/utc";
@@ -35,7 +36,10 @@ const FieldSubtask = ({
   staff,
   disableUpdate,
   setIsOpenTaskModal,
+  disableDoneTaskParent,
+  completionPercentage,
 }) => {
+  // console.log("🚀 ~ file: FieldSubtask.js:42 ~ completed:", completed);
   const [updateFileList, setUpdateFileList] = useState(taskSelected?.taskFiles);
   const [updatePriority, setUpdatePriority] = useState(taskSelected?.priority);
   const [assignTasks, setAssignTasks] = useState(taskSelected?.assignTasks);
@@ -48,15 +52,7 @@ const FieldSubtask = ({
   const [updateEstimateTime, setUpdateEstimateTime] = useState(
     taskSelected?.estimationTime
   );
-
-  // useEffect(() => {
-  //   setUpdateFileList(taskSelected?.taskFiles);
-  //   setUpdatePriority(taskSelected?.priority);
-  //   setAssignTasks(taskSelected?.assignTasks);
-  //   setUpdateStatus(taskSelected?.status);
-  //   setUpdateStartDate(taskSelected?.startDate);
-  //   setUpdateEndDate(taskSelected?.endDate);
-  // }, [taskSelected]);
+  const [updateProgress, setUpdateProgress] = useState(taskSelected?.progress);
 
   return (
     <div className="flex flex-col ">
@@ -203,20 +199,44 @@ const FieldSubtask = ({
                 updateStatus={updateStatus}
               />
             ) : (
-              <StatusSelected
-                updateStatus={updateStatus}
-                setUpdateStatus={setUpdateStatus}
-                taskSelected={taskSelected}
-                taskParent={taskParent}
-                classNameStyle="w-[190px] mt-2"
-              />
+              <>
+                {taskParent ? (
+                  <>
+                    {/* disableDoneTaskParent check xem cacs task con hoan thanh chua */}
+                    {!disableDoneTaskParent ? (
+                      <StatusSelected
+                        // disableDoneTaskParent={disableDoneTaskParent}
+                        updateStatus={updateStatus}
+                        setUpdateStatus={setUpdateStatus}
+                        taskSelected={taskSelected}
+                        taskParent={taskParent}
+                        classNameStyle="w-[190px] mt-2"
+                      />
+                    ) : (
+                      <StatusTag
+                        taskSelected={taskSelected}
+                        updateStatus={updateStatus}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <StatusSelected
+                    // disableDoneTaskParent={disableDoneTaskParent}
+                    updateStatus={updateStatus}
+                    setUpdateStatus={setUpdateStatus}
+                    taskSelected={taskSelected}
+                    taskParent={taskParent}
+                    classNameStyle="w-[190px] mt-2"
+                  />
+                )}
+              </>
             )}
           </div>
         </div>
       </div>
       {/* task EstimateTimeout */}
       <div className=" flex flex-row gap-x-6">
-        <div className="flex flex-col w-full pl-12 mt-4">
+        <div className="flex flex-col w-1/2 pl-12 mt-4">
           <h4 className="text-sm font-semibold flex flex-row gap-x-2 mb-2">
             <TagOutlined />
             Thời gian làm ước tính (giờ)
@@ -240,6 +260,27 @@ const FieldSubtask = ({
               />
             )}
           </>
+        </div>
+        <div className="flex flex-col w-1/2 mt-2">
+          <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden ">
+            <h4 className="text-sm font-semibold flex flex-row gap-x-2">
+              <PercentageOutlined />
+              Tiến độ công việc
+            </h4>
+            {taskParent && completionPercentage !== undefined ? (
+              <Progress
+                percent={completionPercentage}
+                size="small"
+                className="mt-2"
+              />
+            ) : (
+              <Progress
+                percent={updateProgress}
+                size="default"
+                className="mt-2"
+              />
+            )}
+          </div>
         </div>
       </div>
 

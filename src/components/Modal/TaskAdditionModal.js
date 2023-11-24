@@ -197,8 +197,8 @@ const TaskAdditionModal = ({
   return (
     <Modal
       title={
-        <p className="text-center text-2xl">
-          {parentTaskId ? "Thông tin công việc" : "Thông tin hạng mục"}
+        <p className="text-center text-4xl border-b pb-5">
+          {parentTaskId ? "Thông tin công việc" : "Tạo hạng mục"}
         </p>
       }
       open={isModalOpen}
@@ -252,7 +252,6 @@ const TaskAdditionModal = ({
               {
                 validator: async (rule, value) => {
                   if (value && value[0] && value[1]) {
-                    console.log("value: ", value);
                     const startDate = moment(value[0].$d);
                     const endDate = moment(value[1].$d);
 
@@ -266,7 +265,6 @@ const TaskAdditionModal = ({
                         "Khoảng thời gian phải ít nhất là 15 phút"
                       );
                     }
-                    // return Promise.resolve();
                   }
                   return Promise.reject("Chọn khoảng thời gian thực hiện");
                 },
@@ -299,8 +297,6 @@ const TaskAdditionModal = ({
                     return current && current < today /*|| current > endDate*/;
                   }
                 }}
-
-                
                 format={"DD/MM/YYYY HH:mm:ss"}
                 className="w-full"
               />
@@ -387,6 +383,38 @@ const TaskAdditionModal = ({
                   </Form.Item>
                 </>
               )}
+              <Form.Item
+                className="w-[30%]"
+                label={<Title title="Độ ưu tiên" />}
+                name="priority"
+                rules={[
+                  {
+                    required: true,
+                    message: "Chưa chọn độ ưu tiên !",
+                  },
+                ]}
+              >
+                <Select
+                  placeholder="Mức độ"
+                  onChange={(value) => {
+                    form.setFieldsValue({ priority: value });
+                  }}
+                  options={[
+                    {
+                      value: "LOW",
+                      label: "Thấp",
+                    },
+                    {
+                      value: "MEDIUM",
+                      label: "Bình thường",
+                    },
+                    {
+                      value: "HIGH",
+                      label: "Cao",
+                    },
+                  ]}
+                />
+              </Form.Item>
             </>
           ) : (
             <>
@@ -417,12 +445,44 @@ const TaskAdditionModal = ({
                   }))}
                 />
               </Form.Item>
+              <Form.Item
+                className="w-[30%]"
+                label={<Title title="Độ ưu tiên" />}
+                name="priority"
+                rules={[
+                  {
+                    required: true,
+                    message: "Chưa chọn độ ưu tiên !",
+                  },
+                ]}
+              >
+                <Select
+                  placeholder="Mức độ"
+                  onChange={(value) => {
+                    form.setFieldsValue({ priority: value });
+                  }}
+                  options={[
+                    {
+                      value: "LOW",
+                      label: "Thấp",
+                    },
+                    {
+                      value: "MEDIUM",
+                      label: "Bình thường",
+                    },
+                    {
+                      value: "HIGH",
+                      label: "Cao",
+                    },
+                  ]}
+                />
+              </Form.Item>
             </>
           )}
         </div>
 
         <div className="flex gap-x-10">
-          <Form.Item
+          {/* <Form.Item
             className="w-[30%]"
             label={<Title title="Độ ưu tiên" />}
             name="priority"
@@ -453,8 +513,8 @@ const TaskAdditionModal = ({
                 },
               ]}
             />
-          </Form.Item>
-          <div className="w-[30%] flex items-center gap-x-3">
+          </Form.Item> */}
+          {/* <div className="w-[30%] flex items-center gap-x-3">
             <Form.Item
               className=""
               label={<Title title="Thời gian ước tính" />}
@@ -469,7 +529,7 @@ const TaskAdditionModal = ({
               <InputNumber className="w-full" min={1} />
             </Form.Item>
             Giờ
-          </div>
+          </div> */}
         </div>
 
         <div className="flex gap-x-5">
