@@ -197,8 +197,8 @@ const TaskAdditionModal = ({
   return (
     <Modal
       title={
-        <p className="text-center text-2xl">
-          {parentTaskId ? "Thông tin công việc" : "Thông tin hạng mục"}
+        <p className="text-center text-4xl border-b pb-5">
+          {parentTaskId ? "Thông tin công việc" : "Tạo hạng mục"}
         </p>
       }
       open={isModalOpen}
@@ -454,7 +454,7 @@ const TaskAdditionModal = ({
               ]}
             />
           </Form.Item>
-          <div className="w-[30%] flex items-center gap-x-3">
+          {/* <div className="w-[30%] flex items-center gap-x-3">
             <Form.Item
               className=""
               label={<Title title="Thời gian ước tính" />}
@@ -469,7 +469,7 @@ const TaskAdditionModal = ({
               <InputNumber className="w-full" min={1} />
             </Form.Item>
             Giờ
-          </div>
+          </div> */}
         </div>
 
         <div className="flex gap-x-5">

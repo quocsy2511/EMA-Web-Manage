@@ -132,7 +132,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
 
   return (
     <Modal
-      title={<p className="text-center text-2xl">Cập nhật sự kiện</p>}
+      title={<p className="text-center text-4xl pb-4">Cập nhật sự kiện</p>}
       open={isModalOpen}
       onOk={handleOk}
       onCancel={handleCancel}

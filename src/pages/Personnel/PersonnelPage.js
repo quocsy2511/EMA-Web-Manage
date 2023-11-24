@@ -318,6 +318,21 @@ const PersonnelPage = () => {
 
   const columns = [
     {
+      dataIndex: "avatar123",
+      key: "avatar123",
+      width: 50,
+      align: "center",
+      fixed: "left",
+      render: (_, record) => {
+        console.log(record);
+        console.log(record.avatar123);
+
+        if (!record.avatar123) return;
+
+        return <Avatar src={record.avatar123} />;
+      },
+    },
+    {
       // title: "Họ và tên",
       dataIndex: "avatar",
       key: "avatar",

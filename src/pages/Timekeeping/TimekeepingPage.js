@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { ConfigProvider, Input, Select, Table } from "antd";
+import { Avatar, ConfigProvider, Input, Select, Table, Tag } from "antd";
 import moment from "moment";
 import { FcCalendar } from "react-icons/fc";
 import { FiSearch } from "react-icons/fi";
@@ -8,11 +8,12 @@ import { TbCalendarCog, TbCalendarEvent, TbCalendarX } from "react-icons/tb";
 import { AnimatePresence, motion } from "framer-motion";
 import EmptyTimeKeeping from "../../components/Error/EmptyTimeKeeping";
 import { useQuery } from "@tanstack/react-query";
-import { getFilterEvent } from "../../apis/events";
+import { getEventParticipant, getFilterEvent } from "../../apis/events";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 
 import "moment/locale/vi";
+import { getTimekeeping } from "../../apis/timekeepings";
 
 const listDatesInRange = (startDate, endDate) => {
   if (!startDate || !endDate) return [];
@@ -44,9 +45,9 @@ const listDatesInRange = (startDate, endDate) => {
 
 const TimekeepingPage = () => {
   const [selectedEvent, setSelectedEvent] = useState();
+  console.log("selectedEvent: ", selectedEvent);
   const [columns, setColumns] = useState([]);
   const [searchText, setSearchText] = useState();
-  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     if (selectedEvent) {
@@ -61,26 +62,67 @@ const TimekeepingPage = () => {
           key: "user",
           fixed: "left",
           width: 250,
+          render: (_, record) => {
+            return (
+              <div className="flex items-center gap-x-2">
+                <Avatar src={record.avatar} />
+                <p>{record.fullName}</p>
+                {record.role === "STAFF" && (
+                  <div className="bg-yellow-600 w-[10px] h-[10px] rounded-full" />
+                )}
+              </div>
+            );
+          },
         },
-        ...datesInTimeGap.map((item) => ({
-          title: (
-            <div
-              className={`text-center ${
-                (item.weekdayVi === "thứ bảy" ||
-                  item.weekdayVi === "chủ nhật") &&
-                "text-red-500"
-              }`}
-            >
-              <p className="text-xs font-normal">{item.weekdayVi}</p>
-              <p className="text-base font-medium">{item.date.split("-")[2]}</p>
-            </div>
-          ),
-          dataIndex: item.date.split("-")[2],
-          key: item.date.split("-")[2],
-          width: 150,
-        })),
+        ...datesInTimeGap.map((item) => {
+          const date = item.date.split("-");
+          const parseDate = `date${date[2]}${date[1]}${date[0]}`;
+
+          return {
+            title: (
+              <div
+                className={`text-center ${
+                  (item.weekdayVi === "thứ bảy" ||
+                    item.weekdayVi === "chủ nhật") &&
+                  "text-red-500"
+                }`}
+              >
+                <p className="text-xs font-normal">{item.weekdayVi}</p>
+                <p className="text-base font-medium">
+                  {item.date.split("-")[2]}
+                </p>
+              </div>
+            ),
+            dataIndex: parseDate,
+            key: parseDate,
+            render: (_, record) => {
+              if (!record[parseDate])
+                return (
+                  <p
+                    className={`${
+                      (item.weekdayVi === "thứ bảy" ||
+                        item.weekdayVi === "chủ nhật") &&
+                      "text-red-500"
+                    }`}
+                  >
+                    -- : --
+                  </p>
+                );
+              const time = record[parseDate].split(":");
+              return (
+                <p className="border-2 py-2 rounded-2xl font-medium">{`${time[0]}h : ${time[1]}m`}</p>
+              );
+            },
+            width: 150,
+            align: "center",
+          };
+        }),
       ];
       setColumns(newColumns);
+    }
+    if (!eventParticipant) {
+      eventParticipantRefetch();
+      if (!timekeepings) timekeepingsFetching();
     }
   }, [selectedEvent]);
 
@@ -112,17 +154,77 @@ const TimekeepingPage = () => {
           endDate: event.endDate,
         }));
       },
+      refetchOnWindowFocus: false,
     }
   );
+
+  const {
+    data: eventParticipant,
+    isError: eventParticipantIsError,
+    isFetching: eventParticipantIsFetching,
+    refetch: eventParticipantRefetch,
+  } = useQuery(
+    ["event-user", selectedEvent?.id],
+    () => getEventParticipant(selectedEvent?.id),
+    {
+      select: (data) => {
+        return data.map((user) => {
+          const { address, dob, gender, nationalId, phoneNumber, ...rest } =
+            user;
+          return rest;
+        });
+      },
+      enabled: !!selectedEvent?.id,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const {
+    data: timekeepings,
+    isError: timekeepingsIsError,
+    isFetching: timekeepingsIsFetching,
+    refetch: timekeepingsFetching,
+  } = useQuery(
+    ["timekeeping", selectedEvent?.id],
+    () =>
+      getTimekeeping({
+        eventId: selectedEvent?.id,
+        startDate: selectedEvent?.processingDate,
+        endDate: selectedEvent?.endDate,
+        me: false,
+      }),
+    {
+      select: (data) => {
+        return data;
+      },
+      enabled: !!selectedEvent?.id && !!eventParticipant,
+      refetchOnWindowFocus: false,
+    }
+  );
+  console.log("timekeepings: ", timekeepings);
+  console.log("timekeepingsIsFetching: ", timekeepingsIsFetching);
+
+  let renderItem = eventParticipant ?? [];
+  if (!!eventParticipant && !!timekeepings) {
+    renderItem = eventParticipant.map((user) => {
+      timekeepings?.map((timekeeping) => {
+        if (timekeeping?.user?.id === user.id) {
+          const splitDate = timekeeping?.date?.split("-");
+          const date = `date${splitDate[2]}${splitDate[1]}${splitDate[0]}`;
+          user = { ...user, [date]: timekeeping.checkinTime };
+        }
+      });
+
+      return user;
+    });
+  }
+  console.log("renderItem: ", renderItem);
 
   const onChange = (value) => {
     const selectedEvent = events.find((event) => {
       if (event.id === value) return event;
     });
-    console.log("selectedEvent: ", selectedEvent);
     setSelectedEvent(selectedEvent);
-
-    // setDatePicker([selectedEvent.processingDate, selectedEvent.endDate]);
   };
 
   if (eventsIsLoading)
@@ -155,51 +257,56 @@ const TimekeepingPage = () => {
               onChange={onChange}
             />
           </div>
-          <motion.div
-            key={selectedEvent?.id}
-            initial={{ y: -15, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
-          >
-            <TbCalendarCog size={30} />
-            <div>
-              <p className="text-lg font-semibold">Ngày chuẩn bị</p>
-              <p className="text-sm font-medium">
-                {moment(selectedEvent?.processingDate).format("DD-MM-YYYY")}
-              </p>
-            </div>
-          </motion.div>
-          <motion.div
-            key={selectedEvent?.id}
-            initial={{ y: -15, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
-          >
-            <TbCalendarEvent size={30} />
-            <div>
-              <p className="text-lg font-semibold">Ngày diễn ra</p>
-              <p className="text-sm font-medium">
-                {moment(selectedEvent?.startDate).format("DD-MM-YYYY")}
-              </p>
-            </div>
-          </motion.div>
-          <motion.div
-            key={selectedEvent?.id}
-            initial={{ y: -15, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
-          >
-            <TbCalendarX size={30} />
-            <div>
-              <p className="text-lg font-semibold">Ngày kết thúc</p>
-              <p className="text-sm font-medium">
-                {moment(selectedEvent?.endDate).format("DD-MM-YYYY")}
-              </p>
-            </div>
-          </motion.div>
+          {selectedEvent && (
+            <>
+              {" "}
+              <motion.div
+                key={selectedEvent?.processingDate}
+                initial={{ y: -15, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
+              >
+                <TbCalendarCog size={30} />
+                <div>
+                  <p className="text-lg font-semibold">Ngày chuẩn bị</p>
+                  <p className="text-sm font-medium">
+                    {moment(selectedEvent?.processingDate).format("DD-MM-YYYY")}
+                  </p>
+                </div>
+              </motion.div>
+              <motion.div
+                key={selectedEvent?.startDate}
+                initial={{ y: -15, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
+              >
+                <TbCalendarEvent size={30} />
+                <div>
+                  <p className="text-lg font-semibold">Ngày diễn ra</p>
+                  <p className="text-sm font-medium">
+                    {moment(selectedEvent?.startDate).format("DD-MM-YYYY")}
+                  </p>
+                </div>
+              </motion.div>
+              <motion.div
+                key={selectedEvent?.endDate}
+                initial={{ y: -15, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="w-[20%] flex items-center gap-x-3 bg-white px-8 py-3 rounded-md"
+              >
+                <TbCalendarX size={30} />
+                <div>
+                  <p className="text-lg font-semibold">Ngày kết thúc</p>
+                  <p className="text-sm font-medium">
+                    {moment(selectedEvent?.endDate).format("DD-MM-YYYY")}
+                  </p>
+                </div>
+              </motion.div>
+            </>
+          )}
         </div>
 
-        <div className="flex-1 bg-white mt-5 overflow-hidden rounded-md">
+        <div className="flex-1 bg-white mt-5 overflow-hidden rounded-md pb-5">
           <AnimatePresence mode="wait">
             {selectedEvent ? (
               <motion.div
@@ -226,7 +333,7 @@ const TimekeepingPage = () => {
                 </div>
 
                 <AnimatePresence mode="wait">
-                  {1 + 1 === 2 ? (
+                  {timekeepings?.length !== 0 ? (
                     <motion.div
                       key="timekeepings"
                       initial={{ x: -100, opacity: 0 }}
@@ -245,47 +352,20 @@ const TimekeepingPage = () => {
                       >
                         <Table
                           columns={columns}
-                          dataSource={[]}
+                          // loading={
+                          //   eventParticipantIsFetching || timekeepingsIsFetching
+                          // }
+                          dataSource={renderItem}
                           bordered
                           scroll={{
                             x: "150%",
                             y: "100%",
                             scrollToFirstRowOnChange: true,
                           }}
-                          // sticky={{
-                          //   offsetHeader: 64,
-                          // }}
                           sticky={true}
+                          pagination={false}
                         />
                       </ConfigProvider>
-                      <div className="mt-4 mr-4 flex items-center justify-end gap-x-3">
-                        <Select
-                          value={pageSize}
-                          options={[
-                            { label: "10 / trang", value: 10 },
-                            { label: "20 / trang", value: 20 },
-                            { label: "50 / trang", value: 50 },
-                          ]}
-                        />
-
-                        <div className="flex items-centerflex items-center text-xs gap-x-3">
-                          <p>
-                            Từ
-                            <span className="mx-1 font-semibold">1</span>
-                            đến
-                            <span className="mx-1 font-semibold">15</span>
-                            bản ghi
-                          </p>
-                          <IoIosArrowBack
-                            size={15}
-                            className={`text-slate-400 cursor-pointer`}
-                          />
-                          <IoIosArrowForward
-                            size={15}
-                            className={`text-slate-400 cursor-pointer`}
-                          />
-                        </div>
-                      </div>
                     </motion.div>
                   ) : (
                     <EmptyTimeKeeping key="no-timekeeping" />

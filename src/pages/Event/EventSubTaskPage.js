@@ -12,10 +12,10 @@ import {
   FcMediumPriority,
 } from "react-icons/fc";
 import { BsHourglassBottom, BsHourglassSplit, BsPlus } from "react-icons/bs";
-import { BiDetail, BiCheck, BiRightArrowAlt } from "react-icons/bi";
+import { BiCheck, BiRightArrowAlt } from "react-icons/bi";
 import { VscDebugStart } from "react-icons/vsc";
-import { MdOutlineDoneOutline } from "react-icons/md";
-import { Avatar, Button, Card, FloatButton, message } from "antd";
+import { MdMode } from "react-icons/md";
+import { Avatar, Button, Card, FloatButton, message, Progress } from "antd";
 import TaskItem from "../../components/Task/TaskItem";
 import CommentInTask from "../../components/Comment/CommentInTask";
 import SubTaskModal from "../../components/Modal/SubTaskModal";
@@ -39,7 +39,6 @@ const EventSubTaskPage = () => {
 
   const dispatch = useDispatch();
   const { redirect } = useSelector((state) => state.redirection);
-  console.log("redirection: ", redirect);
 
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenCreateTaskModal, setIsOpenCreateTaskModal] = useState(false);
@@ -368,14 +367,7 @@ const EventSubTaskPage = () => {
                   whileHover={{ y: -5 }}
                   className="flex items-center px-4 py-2 bg-blue-100 text-blue-500 rounded-xl"
                 >
-                  {/* <BsHourglassSplit size={15} /> */}
-                  {/* <div className="w-4" /> */}
                   <p className="text-base font-medium">
-                    {/* {tasks?.startDate
-                      ? moment(tasks?.startDate)
-                          .utc()
-                          .format("dddd, D [tháng] M")
-                      : "-- : --"} */}
                     {tasks?.startDate
                       ? new Date(tasks?.startDate).toLocaleDateString("vi-VN", {
                           weekday: "long",
@@ -406,16 +398,6 @@ const EventSubTaskPage = () => {
                       : "-- : --"}
                   </p>
                 </motion.div>
-                {/* <motion.div
-                  whileHover={{ y: -5 }}
-                  className="flex items-center px-4 py-2 bg-red-100 text-red-400 rounded-xl"
-                >
-                  <p className="text-base font-medium">
-                    {tasks.endDate
-                      ? moment(tasks.endDate).utc().format("HH:mm")
-                      : "-- : --"}
-                  </p>
-                </motion.div> */}
               </div>
             ) : (
               <div className="flex items-center gap-x-2">
@@ -447,7 +429,6 @@ const EventSubTaskPage = () => {
                   </motion.div>
                 </div>
 
-                {/* <div className="w-[4%]" /> */}
                 <BiRightArrowAlt size={25} className="" />
 
                 <div className="flex gap-x-2">
@@ -490,15 +471,15 @@ const EventSubTaskPage = () => {
 
           <motion.div
             whileHover={{ y: -5 }}
-            className="cursor-pointer"
+            className="cursor-pointer border-2 rounded-xl p-2"
             onClick={handleOpenUpdateModal}
           >
-            <BiDetail size={30} className="text-slate-400" />
+            <MdMode size={20} className="text-slate-400" />
           </motion.div>
         </div>
 
-        <div className="mt-5 flex gap-x-10">
-          <div className="space-y-5">
+        <div className="mt-12 mb-20 flex gap-x-10">
+          {/* <div className="space-y-5">
             <Card>
               <p className="text-base font-medium">
                 Thời gian ước lượng:{" "}
@@ -519,7 +500,15 @@ const EventSubTaskPage = () => {
                 )}
               </p>
             </Card>
-          </div>
+          </div> */}
+          <Progress
+            type="dashboard"
+            percent={
+              tasks?.subTask?.filter((subtask) => subtask.status === "CONFIRM")
+                .length / tasks?.subTask?.length
+            }
+            gapDegree={30}
+          />
           <Card title="Mô tả" className="flex-1">
             <div
               className="text-sm"
