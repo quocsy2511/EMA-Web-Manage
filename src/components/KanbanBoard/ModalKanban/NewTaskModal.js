@@ -426,32 +426,34 @@ const NewTaskModal = ({
                   {!isLoadingEmployeesByDate ? (
                     !isErrorEmployeesByDate ? (
                       <>
-                        {employeesByDate?.map((item, index) => {
-                          return (
-                            <Option
-                              value={item?.id}
-                              label={item?.profile.fullName}
-                              key={item?.id}
-                            >
-                              <Space>
-                                <span
-                                  role="img"
-                                  aria-label={item?.profile.fullName}
+                        {employeesByDate
+                          ? employeesByDate?.map((item, index) => {
+                              return (
+                                <Option
+                                  value={item?.id}
+                                  label={item?.profile.fullName}
+                                  key={item?.id}
                                 >
-                                  {item.avatar ? (
-                                    <Avatar src={item?.avatar} />
-                                  ) : (
-                                    <Avatar
-                                      icon={<UserOutlined />}
-                                      size="small"
-                                    />
-                                  )}
-                                </span>
-                                {item?.profile.fullName}
-                              </Space>
-                            </Option>
-                          );
-                        })}
+                                  <Space>
+                                    <span
+                                      role="img"
+                                      aria-label={item?.profile.fullName}
+                                    >
+                                      {item.avatar ? (
+                                        <Avatar src={item?.avatar} />
+                                      ) : (
+                                        <Avatar
+                                          icon={<UserOutlined />}
+                                          size="small"
+                                        />
+                                      )}
+                                    </span>
+                                    {item?.profile.fullName}
+                                  </Space>
+                                </Option>
+                              );
+                            })
+                          : []}
                       </>
                     ) : (
                       <AnErrorHasOccured />
