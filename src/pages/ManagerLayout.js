@@ -1,7 +1,8 @@
+import React, { Fragment, useEffect, useState } from "react";
 import { Avatar, Layout, notification } from "antd";
-import React, { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
-import SidebarStaff from "../components/Sidebar/SidebarStaff";
+import { Content } from "antd/es/layout/layout";
+import { Outlet, ScrollRestoration } from "react-router-dom";
+import Sidebar from "../components/Sidebar/Sidebar";
 import Header from "../components/Header/Header";
 import { useDispatch, useSelector } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,12 +10,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { io } from "socket.io-client";
 import { URL_SOCKET } from "../constants/api";
 import { socketActions } from "../store/socket";
-
-const { Content } = Layout;
+import RoomChat from "../components/RoomChat/RoomChat";
+import { connectWithSocket } from "../socket/socketConnection";
 
 const ManagerLayout = () => {
   const dispatch = useDispatch();
   const { socket } = useSelector((state) => state.socket);
+  const room = useSelector((state) => state.room);
+  console.log("room >> ", room);
 
   const [collapsed, setCollapsed] = useState(false);
 
@@ -22,8 +25,11 @@ const ManagerLayout = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // console.log("Socket changed !!");
-    // console.log("socket:", socket);
+    const token = localStorage.getItem("token");
+    if (token) connectWithSocket(token, dispatch);
+  }, []);
+
+  useEffect(() => {
     if (!socket) {
       const saveSocket = io(URL_SOCKET, {
         auth: {
@@ -56,22 +62,29 @@ const ManagerLayout = () => {
   }, [socket]);
 
   return (
-    <div className="overflow-hidden overflow-y-scroll">
+    <Fragment>
       {contextHolder}
       <Layout
         style={{
           minHeight: "100vh",
         }}
       >
-        <SidebarStaff collapsed={collapsed} />
-        <Content>
-          <Header collapsed={collapsed} setCollapsed={setCollapsed} />
-          <div className="overflow-hidden overflow-y-scroll mt-[64px] ">
-            <Outlet />
+        <Sidebar collapsed={collapsed} />
+
+        <Layout>
+          <div className={`${collapsed ? "pl-[80px]" : "pl-[230px]"}`}>
+            <Header collapsed={collapsed} setCollapsed={setCollapsed} />
+            <Content>
+              <div className="bg-white flex items-center mt-[64px]">
+                <Outlet />
+              </div>
+              <ScrollRestoration getKey={(location) => location.pathname} />
+            </Content>
           </div>
-        </Content>
+        </Layout>
       </Layout>
-    </div>
+      {room?.isUserInRoom && <RoomChat />}
+    </Fragment>
   );
 };
 

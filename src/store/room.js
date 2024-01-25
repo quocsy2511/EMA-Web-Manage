@@ -18,13 +18,17 @@ const roomSlice = createSlice({
   reducers: {
     handleOpenRoom(state, action) {
       state.isUserInRoom = action.payload.isUserInRoom;
-      state.isUserRoomCreator = action.isUserRoomCreator;
+      // state.isUserRoomCreator = action.isUserRoomCreator;
     },
     handleSetRoomDetail(state, action) {},
     handleSetActiveRooms(state, action) {},
-    handleSetLocalstream(state, action) {},
+    handleSetLocalstream(state, action) {
+      state.localStream = action.payload;
+    },
     handleSetRemoteStreams(state, action) {},
-    handleSetAudioOnly(state, action) {},
+    handleSetAudioOnly(state, action) {
+      state.audioOnly = action.payload;
+    },
     handleSetScreenShareStream(state, action) {},
     // handle(state, action) {},
   },

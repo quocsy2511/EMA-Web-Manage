@@ -13,7 +13,7 @@ import { socketActions } from "./store/socket";
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
 // Mana pages
-const RootPage = lazy(() => import("./pages/RootPage"));
+const ManagerLayout = lazy(() => import("./pages/ManagerLayout"));
 const DashboardPage = lazy(() => import("./pages/Dashboard/DashboardPage"));
 const EventLayout = lazy(() => import("./pages/Event/EventLayout"));
 const EventPage = lazy(() => import("./pages/Event/EventPage"));
@@ -31,9 +31,10 @@ const RequestPage = lazy(() => import("./pages/Request/RequestPage"));
 const NotificationPage = lazy(() =>
   import("./pages/Notification/NotificationPage")
 );
+const CustomerPage = lazy(() => import("./pages/Customer/CustomerPage.js"));
 
 // Staff pages
-const ManagerLayout = lazy(() => import("./pages/ManagerLayout"));
+const StaffLayout = lazy(() => import("./pages/StaffLayout"));
 const EventStaffPage = lazy(() => import("./pages/Event/EventStaffPage"));
 const TimekeepingStaffPage = lazy(() =>
   import("./pages/Timekeeping/TimekeepingStaffPage")
@@ -43,23 +44,26 @@ const DashboardPageStaff = lazy(() =>
 );
 const TaskPageStaff = lazy(() => import("./pages/Task/MyTaskPageStaff"));
 
+// Admin pages
+const AdminLayout = lazy(() => import("./pages/AdminLayout.js"));
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: <LoginPage />,
     errorElement: <ErrorPage />,
-    loader: loginLoader,
+    // loader: loginLoader,
   },
   {
     path: "/manager",
     id: "manager",
     element: (
       <Suspense fallback={<LoadingPageIndicator />}>
-        <RootPage />
+        <ManagerLayout />
       </Suspense>
     ),
     errorElement: <ErrorPage />,
-    loader: checkAuthLoader, // Is call whenever a new navigation trigger
+    // loader: checkAuthLoader, // Is call whenever a new navigation trigger
     children: [
       {
         index: true,
@@ -132,23 +136,6 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "personnel",
-        element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
-            <PersonnelPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "division",
-        element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
-            <DivisionPage />
-          </Suspense>
-        ),
-      },
-
-      {
         path: "chat",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
@@ -188,16 +175,22 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      {
+        path: "customer",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <CustomerPage />
+          </Suspense>
+        ),
+      },
     ],
   },
-
-  //Staff
   {
     path: "/staff",
     id: "staff",
     element: (
       <Suspense fallback={<LoadingPageIndicator />}>
-        <ManagerLayout />
+        <StaffLayout />
       </Suspense>
     ),
     errorElement: <ErrorPage />,
@@ -261,14 +254,38 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "/admin",
+    id: "admin",
+    element: (
+      <Suspense fallback={<LoadingPageIndicator />}>
+        <AdminLayout />
+      </Suspense>
+    ),
+    errorElement: <ErrorPage />,
+    // loader: checkAuthLoader,
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <PersonnelPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "division",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <DivisionPage />
+          </Suspense>
+        ),
+      },
+    ],
+  },
 ]);
 
 function App() {
-  const dispatch = useDispatch();
-  // const { socket } = useSelector((state) => state.socket);
-  // console.log("Socket: ", socket);
-  // dispatch(socketActions.initSocket(io()));
-
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />

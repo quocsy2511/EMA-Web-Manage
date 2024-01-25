@@ -6,7 +6,7 @@ import { BsSendFill, BsCheckCircle } from "react-icons/bs";
 import { AnimatePresence, motion } from "framer-motion";
 import EmptyComment from "../Error/EmptyComment";
 import moment from "moment";
-import { useRouteLoaderData } from "react-router-dom";
+import { useRouteLoaderData,useLoaderData } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadFile } from "../../apis/files";
 import {
