@@ -731,7 +731,9 @@ const PersonnelPage = () => {
           !divisionsIsLoading &&
           !divisionsWithoutStaffIsLoading ? (
             isError || divisionsIsError || divisionsWithoutStaffIsError ? (
-              <AnErrorHasOccured />
+              <div className="min-h-[calc(100vh-64px-12rem)]">
+                <AnErrorHasOccured />
+              </div>
             ) : (
               <>
                 <div className="flex gap-x-4 mb-8">
@@ -817,7 +819,9 @@ const PersonnelPage = () => {
               </>
             )
           ) : (
-            <LoadingComponentIndicator />
+            <div className="min-h-[calc(100vh-64px-12rem)]">
+              <LoadingComponentIndicator />
+            </div>
           )}
         </div>
       </div>

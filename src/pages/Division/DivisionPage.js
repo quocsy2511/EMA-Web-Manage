@@ -24,9 +24,9 @@ import CreateDivisionDrawer from "../../components/Drawer/CreateDivisionDrawer";
 
 const DivisionPage = () => {
   const [page, setPage] = useState(1);
-  
+
   const { data, isLoading, isError } = useQuery(
-    ["divisions",1],
+    ["divisions", 1],
     () => getAllDivision({ pageSize: 50, currentPage: page, mode: 1 }),
     {
       select: (data) => {
@@ -327,7 +327,9 @@ const DivisionPage = () => {
           </div>
           {!isLoading ? (
             isError ? (
-              <AnErrorHasOccured />
+              <div className="min-h-[calc(100vh-64px-14rem)]">
+                <AnErrorHasOccured />
+              </div>
             ) : (
               <Form form={form} onFinish={onFinish} component={false}>
                 <Table
@@ -344,7 +346,9 @@ const DivisionPage = () => {
               </Form>
             )
           ) : (
-            <LoadingComponentIndicator />
+            <div className="min-h-[calc(100vh-64px-14rem)]">
+              <LoadingComponentIndicator />
+            </div>
           )}
         </div>
       </div>

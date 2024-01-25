@@ -4,10 +4,8 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
 import { AnimatePresence, motion } from "framer-motion";
-import { HiOutlineHome, HiOutlineCalendarDays } from "react-icons/hi2";
-import { BsPersonVcard, BsJournalCheck, BsMailbox } from "react-icons/bs";
-import { IoMailOutline } from "react-icons/io5";
-import { IoChatboxOutline } from "react-icons/io5";
+import { HiOutlineUserGroup, HiOutlineUser } from "react-icons/hi2";
+import { BsPersonVcard } from "react-icons/bs";
 import logo from "../../assets/images/logo.png";
 
 //label cho than side bar
@@ -15,7 +13,7 @@ const LabelText = ({ text }) => (
   <p className="pr-24 font-medium text-base">{text}</p>
 );
 
-const Sidebar = ({ collapsed }) => {
+const SidebarAdmin = ({ collapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [colorTheme, setColorTheme] = useDarkMode();
@@ -41,51 +39,19 @@ const Sidebar = ({ collapsed }) => {
 
   const sidebarItems = [
     getItem(
-      <LabelText text="Trang chủ" />,
-      "Trang chủ",
-      "/manager",
+      <LabelText text="Nhân sự" />,
+      "Nhân sự",
+      "/admin",
       <p>
-        <HiOutlineHome className="text-[#2196f3]" size={24} />
+        <HiOutlineUser className="text-[#3f51b5]" size={24} />
       </p>
     ),
     getItem(
-      <LabelText text="Sự kiện" />,
-      "Sự kiện",
-      "/manager/event",
+      <LabelText text="Bộ phận" />,
+      "Bộ phận",
+      "/admin/division",
       <p>
-        <HiOutlineCalendarDays className="text-[#9c27b0]" size={24} />
-      </p>
-    ),
-    getItem(
-      <LabelText text="Chấm công" />,
-      "Chấm công",
-      "/manager/timekeeping",
-      <p>
-        <BsJournalCheck className="text-[#333333]" size={24} />
-      </p>
-    ),
-    getItem(
-      <LabelText text="Yêu cầu" />,
-      "Yêu cầu",
-      "/manager/request",
-      <p>
-        <BsMailbox className="text-[#FF5722]" size={24} />
-      </p>
-    ),
-    getItem(
-      <LabelText text="Chat" />,
-      "Chat",
-      "/manager/chat",
-      <p>
-        <IoChatboxOutline className="text-[#FF5722]" size={24} />
-      </p>
-    ),
-    getItem(
-      <LabelText text="Khách hàng" />,
-      "Khách hàng",
-      "/manager/customer",
-      <p>
-        <IoMailOutline className="text-[#795548]" size={24} />
+        <HiOutlineUserGroup className="text-[#4CAF50]" size={24} />
       </p>
     ),
   ];
@@ -209,4 +175,4 @@ const Sidebar = ({ collapsed }) => {
   );
 };
 
-export default Sidebar;
+export default SidebarAdmin;
