@@ -10,7 +10,6 @@ import { getAllRequests, getAnnualLeave } from "../../apis/requests";
 import { useRouteLoaderData } from "react-router-dom";
 import { MoonLoader } from "react-spinners";
 import EditRequestModal from "./Modal/EditRequestModal";
-import moment from "moment";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,7 +20,6 @@ const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
   const dispatch = useDispatch();
   const { redirect } = useSelector((state) => state.redirection);
-  console.log("redirection: ", redirect);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState();
@@ -73,6 +71,7 @@ const RequestPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notification?.id, requests]);
+  
   const {
     data: annualLeave,
     isLoading: isLoadingAnnualLeave,

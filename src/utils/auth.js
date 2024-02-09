@@ -2,6 +2,7 @@ import { redirect } from "react-router-dom";
 import jwt from "jwt-decode";
 import moment from "moment";
 import { HOST } from "../constants/api";
+import TEXT from "../constants/string";
 
 function calcExpirationTime(expTime) {
   const currentTime = moment().unix();
@@ -28,20 +29,20 @@ export function loginLoader() {
   console.log("loginLoader token: ", token);
 
   if (!token || token === "EXPIRED") return null;
-  if (token.role === "MANAGER") return redirect("/manager");
-  if (token.role === "STAFF") return redirect("/staff");
+  else if (token.role === TEXT.MANAGER) return redirect("/manager");
+  else if (token.role === TEXT.STAFF) return redirect("/staff");
 
   return null;
 }
 
 export function checkAuthLoader(params) {
   const token = getAuthToken();
-  // console.log("checkAuthLoader token: ", token);
-  const authRole = params.request.url.split(HOST)[1].split("/")[1];
+
+  const pathRole = params.request.url.split(HOST)[1].split("/")[1];
+  const role = token.role === TEXT.MANAGER ? "manager" : "staff";
 
   if (!token || token === "EXPIRED") return redirect("/");
-  if (token.role.toLowerCase() !== authRole)
-    return redirect(`/${token.role.toLowerCase()}`);
+  if (role !== pathRole) return redirect(`/${token.role.toLowerCase()}`);
 
   return token;
 }

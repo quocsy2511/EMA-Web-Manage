@@ -38,7 +38,6 @@ const EventPage = () => {
       sort,
     })
   );
-  console.log("data: ", data);
 
   useEffect(() => {
     refetch();
@@ -54,10 +53,6 @@ const EventPage = () => {
     };
   }, [searchText]);
 
-  const goToCreateEventPage = () => {
-    navigate("addition");
-  };
-
   const handleButtonClick = (newSort) => {
     setIsButtonDisabled(true);
 
@@ -72,10 +67,9 @@ const EventPage = () => {
     }, 1000);
   };
 
-
   return (
     <Fragment>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-start items-center">
         <motion.p
           initial={{ x: -100 }}
           animate={{ x: 0 }}
@@ -83,15 +77,6 @@ const EventPage = () => {
         >
           Sự kiện
         </motion.p>
-        <motion.button
-          initial={{ x: 100 }}
-          animate={{ x: 0 }}
-          whileHover={{ scale: 1.1 }}
-          className="bg-[#1677ff] text-white text-base font-medium px-4 py-2 rounded-lg"
-          onClick={goToCreateEventPage}
-        >
-          Tạo mới
-        </motion.button>
       </div>
 
       <motion.div
@@ -150,6 +135,10 @@ const EventPage = () => {
             },
             {
               value: "PENDING",
+              label: "Đang chuẩn bị",
+            },
+            {
+              value: "PREPARING",
               label: "Đang chuẩn bị",
             },
             {

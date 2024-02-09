@@ -1,14 +1,14 @@
 import { Fragment } from "react";
 import { Outlet } from "react-router-dom";
 
-const EventLayout = () => {
+const CustomerLayout = () => {
   return (
     <Fragment>
-      <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-8">
+      <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] py-12 px-20">
         <Outlet />
       </div>
     </Fragment>
   );
 };
 
-export default EventLayout;
+export default CustomerLayout;

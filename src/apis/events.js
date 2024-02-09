@@ -1,10 +1,30 @@
 import { authRequest } from "../utils/axios-utils";
 
-export const createEvent = (event) =>
+export const createEvent = ({
+  eventName,
+  description,
+  startDate,
+  processingDate,
+  endDate,
+  location,
+  coverUrl,
+  estBudget,
+  eventTypeId,
+}) =>
   authRequest({
     url: "/event",
     method: "post",
-    data: event,
+    data: {
+      eventName,
+      description,
+      startDate,
+      processingDate,
+      endDate,
+      location,
+      coverUrl,
+      estBudget,
+      eventTypeId,
+    },
   });
 
 // status: PENDING - PROCESSING - DONE - CANCEL
@@ -19,7 +39,7 @@ export const getFilterEvent = ({
   status,
 }) =>
   authRequest({
-    url: `/event/filterEventByCondition?sizePage=${pageSize}&currentPage=${currentPage}&nameSort=${nameSort}${
+    url: `/event/filter?sizePage=${pageSize}&currentPage=${currentPage}&nameSort=${nameSort}${
       eventName ? `&eventName=${eventName}` : ""
     }${monthYear ? `&monthYear=${monthYear}` : ""}${
       sort ? `&sort=${sort}` : ""
@@ -64,3 +84,5 @@ export const getStatistic = ({ type }) =>
 
 export const getEventParticipant = (eventId) =>
   authRequest({ url: `/event?eventId=${eventId}` });
+
+export const getEventType = () => authRequest({ url: "/event-types" });

@@ -9,11 +9,12 @@ import { io } from "socket.io-client";
 import { URL_SOCKET } from "../../constants/api";
 import { useDispatch } from "react-redux";
 import { socketActions } from "../../store/socket";
+import TEXT from "../../constants/string";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const { mutate, isLoading } = useMutation(login, {
     onSuccess: (data) => {
       console.log("🚀 ~ file: LoginPage.js:17 ~ LoginPage ~ data:", data);
@@ -26,10 +27,10 @@ const LoginPage = () => {
           access_token: localStorage.getItem("token"),
         },
       });
-      dispatch(socketActions.saveSocket(socket));
+      // dispatch(socketActions.saveSocket(socket));
       console.log("socket:", socket);
 
-      if (role === "MANAGER") navigate("/manager");
+      if (role === TEXT.MANAGER) navigate("/manager");
       else navigate("/staff");
     },
   });

@@ -5,6 +5,7 @@ import redirectionReducer from "./redirection";
 import roomReducer from "./room";
 import chatsReducer from "./chats";
 import chatDetailReducer from "./chat_detail";
+import onlineUserReducer from "./online_user";
 import notificationReducer from "./Slice/notificationsSlice";
 
 const store = configureStore({
@@ -15,6 +16,7 @@ const store = configureStore({
     room: roomReducer,
     chats: chatsReducer,
     chatDetail: chatDetailReducer,
+    onlineUser: onlineUserReducer,
   },
 });
 

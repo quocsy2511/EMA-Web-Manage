@@ -29,7 +29,11 @@ import {
 } from "react-icons/bs";
 import { RiEditFill, RiAdvertisementFill } from "react-icons/ri";
 import { AiOutlinePlus } from "react-icons/ai";
-import { PiMicrophoneStageFill, PiTelevisionSimpleFill } from "react-icons/pi";
+import {
+  PiMicrophoneStageFill,
+  PiTelevisionSimpleFill,
+  PiPiggyBank,
+} from "react-icons/pi";
 import { LiaClipboardListSolid } from "react-icons/lia";
 import {
   MdDesignServices,
@@ -44,6 +48,7 @@ import {
   FcLowPriority,
   FcMediumPriority,
 } from "react-icons/fc";
+import { SiGoogleclassroom } from "react-icons/si";
 import EventTaskSelection from "../../components/Selection/EventTaskSelection";
 import TaskItem from "../../components/Task/TaskItem";
 import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
@@ -115,43 +120,33 @@ const EventTaskPage = () => {
       select: (data) => {
         return data.filter((item) => !item.parent);
       },
+      refetchOnWindowFocus: false,
     }
   );
-  console.log("tasks: ", tasks);
+  console.log("tasks > ", tasks);
 
-  const {
-    data: filterTasks,
-    isLoading: filterTaskIsLoading,
-    isError: filterTaskIsError,
-    refetch,
-  } = useQuery(
-    ["filter-tasks", eventId],
-    () =>
-      filterTask({
-        assignee: assigneeSelection,
-        eventID: eventId,
-        priority: prioritySelection,
-        status: statusSelection,
-      }),
-    {
-      select: (data) => {
-        return data.filter((item) => !item.parent);
-      },
-    }
-  );
-
-  const { data: templateEvent } = useQuery(
-    ["template-event"],
-    getTemplateEvent
-  );
-
-  const {
-    data: templateTask,
-    isLoading: templateTaskIsLoading,
-    isError: templateTaskIsError,
-  } = useQuery(["template-tasks"], () => getTemplateTask(templateEvent?.id), {
-    enabled: !!templateEvent?.id,
-  });
+  // const {
+  //   data: filterTasks,
+  //   isLoading: filterTaskIsLoading,
+  //   isError: filterTaskIsError,
+  //   refetch,
+  // } = useQuery(
+  //   ["filter-tasks", eventId],
+  //   () =>
+  //     filterTask({
+  //       assignee: assigneeSelection,
+  //       eventID: eventId,
+  //       priority: prioritySelection,
+  //       status: statusSelection,
+  //     }),
+  //   {
+  //     select: (data) => {
+  //       return data.filter((item) => !item.parent);
+  //     },
+  //     refetchOnWindowFocus: false,
+  //   }
+  // );
+  // console.log("filterTasks > ", filterTasks);
 
   const { mutate, isLoading: mutateIsLoading } = useMutation(
     (eventId, status) => updateStatusEvent(eventId, status),
@@ -184,25 +179,18 @@ const EventTaskPage = () => {
     setStatusSelection();
   };
 
-  const handleOpenModal = (selectTaskIndex) => {
-    setIsOpenModal((prev) => !prev);
-    setSelectedTemplateTask(
-      selectTaskIndex !== -1 ? templateTask[selectTaskIndex] : undefined
-    );
-  };
-
   const handleEndEvent = () => {
     mutate(eventId, "DONE");
   };
 
-  if (isLoading || templateTaskIsLoading)
+  if (isLoading)
     return (
       <div className="h-[calc(100vh-128px)] w-full">
         <LoadingComponentIndicator />
       </div>
     );
 
-  if (isError || templateTaskIsError)
+  if (isError)
     return (
       <div className="h-[calc(100vh-128px)]">
         <AnErrorHasOccured />
@@ -238,90 +226,6 @@ const EventTaskPage = () => {
   return (
     <Fragment>
       {contextHolder}
-      <FloatButton.Group
-        trigger="hover"
-        type="primary"
-        icon={<AiOutlinePlus />}
-      >
-        {templateTask?.length > 0 &&
-          templateTask?.map((item, index) => {
-            let icon;
-            switch (index) {
-              case 0:
-                icon = <RiAdvertisementFill />;
-                break;
-              case 1:
-                icon = <MdIntegrationInstructions />;
-                break;
-              case 2:
-                icon = <PiTelevisionSimpleFill />;
-                break;
-              case 3:
-                icon = <PiMicrophoneStageFill />;
-                break;
-              case 4:
-                icon = <MdDesignServices />;
-                break;
-
-              default:
-                break;
-            }
-
-            return (
-              <FloatButton
-                onClick={() => handleOpenModal(index)}
-                icon={icon}
-                type="primary"
-                tooltip={<p>{item.title}</p>}
-              />
-            );
-          })}
-        {/* <FloatButton
-          onClick={() => handleOpenModal(4)}
-          icon={<MdDesignServices />}
-          type="primary"
-          tooltip={<p>Thiết kế sự kiện</p>}
-        />
-        <FloatButton
-          onClick={() => handleOpenModal(2)}
-          icon={<PiTelevisionSimpleFill />}
-          type="primary"
-          tooltip={<p>Quản lý chương trình</p>}
-        />
-        <FloatButton
-          onClick={() => handleOpenModal(1)}
-          icon={<MdIntegrationInstructions />}
-          type="primary"
-          tooltip={<p>Tiếp đón và hướng dẫn</p>}
-        />
-        <FloatButton
-          onClick={() => handleOpenModal(0)}
-          icon={<RiAdvertisementFill />}
-          type="primary"
-          tooltip={<p>Quảng bá & Tiếp thị</p>}
-        />
-        <FloatButton
-          onClick={() => handleOpenModal(3)}
-          icon={<PiMicrophoneStageFill />}
-          type="primary"
-          tooltip={<p>Dựng sân khấu</p>}
-        /> */}
-        <ConfigProvider
-          theme={{
-            token: {
-              // colorPrimaryHover: "rgba(0, 0, 0, 0.3)",
-              colorPrimary: "white",
-              colorTextLightSolid: "black",
-            },
-          }}
-        ></ConfigProvider>
-        <FloatButton
-          onClick={() => handleOpenModal(-1)}
-          icon={<BsPlus />}
-          type="default"
-          tooltip={<p>Tạo công việc mới</p>}
-        />
-      </FloatButton.Group>
 
       <TaskAdditionModal
         isModalOpen={isOpenModal}
@@ -395,7 +299,6 @@ const EventTaskPage = () => {
         animate={{ y: 0 }}
         className="bg-white rounded-2xl mt-8 overflow-hidden"
       >
-        {/* <div className="bg-[url('https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg')] bg-auto bg-center h-40" /> */}
         <div className="h-40 w-full overflow-hidden">
           <Image
             src="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
@@ -405,20 +308,30 @@ const EventTaskPage = () => {
         <div className="mx-10 my-8">
           <div className="flex items-center gap-x-5">
             <p className="flex-1 text-3xl font-bold">{data.eventName}</p>
+            <motion.div
+              className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 px-3 py-1 rounded-md cursor-pointer"
+              whileHover={{ y: -4 }}
+              // onClick={() => setIsModalOpen(true)}
+            >
+              <SiGoogleclassroom />
+              <p>Bộ phận</p>
+            </motion.div>
             <Link to="budget">
               <motion.div
                 whileHover={{ y: -4 }}
-                className="text-base text-slate-400 border border-slate-400 px-3 py-1 rounded-md cursor-pointer"
+                className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 px-3 py-1 rounded-md cursor-pointer"
               >
-                Ngân sách
+                <PiPiggyBank />
+                <p>Ngân sách</p>
               </motion.div>
             </Link>
-            <motion.div whileHover={{ y: -4 }}>
-              <RiEditFill
-                onClick={() => setIsModalOpen(true)}
-                className="cursor-pointer text-slate-400"
-                size={20}
-              />
+            <motion.div
+              className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 px-3 py-1 rounded-md cursor-pointer"
+              whileHover={{ y: -4 }}
+              onClick={() => setIsModalOpen(true)}
+            >
+              <RiEditFill />
+              <p>chỉnh sửa</p>
             </motion.div>
           </div>
 
@@ -435,36 +348,43 @@ const EventTaskPage = () => {
             <Tag
               icon={<MdLocationPin size={20} color={color.green} />}
               text={data.location}
-              width={"max-w-[20%] truncate"}
+              width={"w-fit truncate"}
             />
             <Tag
               icon={<FcMoneyTransfer size={20} />}
-              text={`${data.estBudget.toLocaleString("en-US")} VNĐ`}
+              text={`${data.estBudget?.toLocaleString("en-US")} VNĐ`}
             />
             <Tag
               icon={<BsTagsFill size={20} color={color.green} />}
-              text={`${tasks?.length ?? 0} hạng mục`}
+              text={`${data.taskCount} hạng mục`}
             />
           </div>
 
           <div className="mt-6">
-            <p className=" font-medium">Bộ phận chịu trách nhiệm</p>
+            <p className="font-medium">Bộ phận chịu trách nhiệm</p>
             <div className="flex items-center flex-wrap gap-x-4 gap-y-3 mt-3">
-              {data.listDivision.map((division) => (
-                <Tag
-                  // key={division.divisionId}
-                  icon={<FaUserFriends size={20} color={color.blue} />}
-                  text={`${division.fullName} - ${division.divisionName}`}
-                  width={"truncate"}
-                />
-              ))}
+              {data?.listDivision && data.listDivision.length > 0 ? (
+                data.listDivision.map((division) => (
+                  <Tag
+                    icon={<FaUserFriends size={20} color={color.blue} />}
+                    text={`${division.fullName} - ${division.divisionName}`}
+                    width={"truncate"}
+                  />
+                ))
+              ) : (
+                <p className="">Chưa có bộ phận chịu trách nhiệm</p>
+              )}
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-x-20 gap-y-5 mt-10">
             <div>
               <div className="flex items-center gap-x-2">
-                <BsCalendarWeekFill size={20} className="" color={color.green} />
+                <BsCalendarWeekFill
+                  size={20}
+                  className=""
+                  color={color.green}
+                />
                 <p className="text-lg font-semibold">Ngày bắt đầu</p>
               </div>
               <div className="flex items-center gap-x-2">
@@ -497,8 +417,6 @@ const EventTaskPage = () => {
                 </p>
               </div>
             </div>
-
-            {/* <BsArrowRight size={30} /> */}
 
             <div>
               <div className="flex items-center gap-x-2">
@@ -540,7 +458,8 @@ const EventTaskPage = () => {
                 <p className="text-slate-500">Chưa có hạng mục</p>
               )}
             </div>
-            {tasks?.length !== 0 &&
+
+            {/* {tasks?.length !== 0 &&
               tasks?.filter((item) => item.status === "CONFIRM").length ===
                 tasks?.length && (
                 <div className="flex-1 flex justify-end">
@@ -566,12 +485,12 @@ const EventTaskPage = () => {
                     </motion.button>
                   </Popconfirm>
                 </div>
-              )}
+              )} */}
           </div>
         </div>
       </motion.div>
 
-      <motion.div
+      {/* <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         className="bg-white rounded-2xl px-10 py-8 mt-10 mb-20"
@@ -693,13 +612,6 @@ const EventTaskPage = () => {
                         />
                       ) : (
                         <AnimatePresence>
-                          {/* {filterTasks.map((task) => (
-                            <TaskItem
-                              key={task.id}
-                              task={task}
-                              isSubtask={false}
-                            />
-                          ))} */}
                           <Collapse
                             ghost
                             expandIcon={() => null}
@@ -800,24 +712,13 @@ const EventTaskPage = () => {
                     công việc
                   </p>
                 </div>
-                {/* <div className="flex items-center gap-x-1">
-                  <HiOutlineClipboardDocumentList
-                    size={20}
-                    className="text-slate-400"
-                  />
-                  <p className="text-slate-500">15 công việc con</p>
-                </div>
-                <div className="flex items-center gap-x-1">
-                  <RiAttachment2 size={20} className="text-slate-400" />
-                  <p className="text-slate-500">15 tài liệu đính kèm</p>
-                </div> */}
               </div>
             </>
           )
         ) : (
           <LoadingComponentIndicator />
         )}
-      </motion.div>
+      </motion.div> */}
       <FloatButton.BackTop className="right-24" />
     </Fragment>
   );

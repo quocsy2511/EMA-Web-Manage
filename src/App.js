@@ -1,14 +1,13 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { queryClient } from "./utils/http";
 import { checkAuthLoader, loginLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
-import { useDispatch, useSelector } from "react-redux";
-import { socketActions } from "./store/socket";
+import CustomerLayout from "./pages/Customer/CustomerLayout.js";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -52,7 +51,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <LoginPage />,
     errorElement: <ErrorPage />,
-    // loader: loginLoader,
+    loader: loginLoader,
   },
   {
     path: "/manager",
@@ -63,7 +62,7 @@ const router = createBrowserRouter([
       </Suspense>
     ),
     errorElement: <ErrorPage />,
-    // loader: checkAuthLoader, // Is call whenever a new navigation trigger
+    loader: checkAuthLoader, // Is call whenever a new navigation trigger
     children: [
       {
         index: true,
@@ -74,7 +73,6 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
-
       {
         path: "event",
         element: (
@@ -121,18 +119,18 @@ const router = createBrowserRouter([
               </Suspense>
             ),
           },
-          {
-            path: "addition",
-            element: (
-              <Suspense
-                fallback={
-                  <LoadingPageIndicator title="trang tạo mới sự kiện" />
-                }
-              >
-                <EventCreationPage />
-              </Suspense>
-            ),
-          },
+          // {
+          //   path: "addition",
+          //   element: (
+          //     <Suspense
+          //       fallback={
+          //         <LoadingPageIndicator title="trang tạo mới sự kiện" />
+          //       }
+          //     >
+          //       <EventCreationPage />
+          //     </Suspense>
+          //   ),
+          // },
         ],
       },
       {
@@ -178,10 +176,40 @@ const router = createBrowserRouter([
       {
         path: "customer",
         element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
-            <CustomerPage />
+          <Suspense
+            fallback={
+              <LoadingPageIndicator title="Trang thông tin khách hàng" />
+            }
+          >
+            <CustomerLayout />
           </Suspense>
         ),
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense
+                fallback={
+                  <LoadingPageIndicator title="Trang yêu cầu khách hàng" />
+                }
+              >
+                <CustomerPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "addition",
+            element: (
+              <Suspense
+                fallback={
+                  <LoadingPageIndicator title="trang tạo mới sự kiện" />
+                }
+              >
+                <EventCreationPage />
+              </Suspense>
+            ),
+          },
+        ],
       },
     ],
   },

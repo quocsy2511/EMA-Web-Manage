@@ -12,12 +12,11 @@ import { URL_SOCKET } from "../constants/api";
 import { socketActions } from "../store/socket";
 import RoomChat from "../components/RoomChat/RoomChat";
 import { connectWithSocket } from "../socket/socketConnection";
+import { managerChatSocket } from "../utils/chat-socket";
 
 const ManagerLayout = () => {
   const dispatch = useDispatch();
   const { socket } = useSelector((state) => state.socket);
-  const room = useSelector((state) => state.room);
-  console.log("room >> ", room);
 
   const [collapsed, setCollapsed] = useState(false);
 
@@ -25,41 +24,45 @@ const ManagerLayout = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) connectWithSocket(token, dispatch);
+    managerChatSocket(dispatch);
   }, []);
 
-  useEffect(() => {
-    if (!socket) {
-      const saveSocket = io(URL_SOCKET, {
-        auth: {
-          access_token: localStorage.getItem("token"),
-        },
-      });
-      dispatch(socketActions.saveSocket(saveSocket));
-      return;
-    }
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   if (token) connectWithSocket(token, dispatch);
+  // }, []);
 
-    socket?.on("notification", (data) => {
-      console.log("data:", data);
-      queryClient.invalidateQueries(["notifications", "10"]);
-      api.open({
-        message: <p className="text-base">Đã nhận 1 thông báo</p>,
-        description: (
-          <div className="flex items-center gap-x-3">
-            <Avatar src={data?.avatar} />
-            <p className="text-sm">
-              <span className="font-semibold">
-                {data?.content?.split("đã")[0]}{" "}
-              </span>
-              đã {data?.content?.split("đã")[1]}
-            </p>
-          </div>
-        ),
-        duration: 5,
-      });
-    });
-  }, [socket]);
+  // useEffect(() => {
+  //   if (!socket) {
+  //     const saveSocket = io(URL_SOCKET, {
+  //       auth: {
+  //         access_token: localStorage.getItem("token"),
+  //       },
+  //     });
+  //     dispatch(socketActions.saveSocket(saveSocket));
+  //     return;
+  //   }
+
+  //   socket?.on("notification", (data) => {
+  //     console.log("data:", data);
+  //     queryClient.invalidateQueries(["notifications", "10"]);
+  //     api.open({
+  //       message: <p className="text-base">Đã nhận 1 thông báo</p>,
+  //       description: (
+  //         <div className="flex items-center gap-x-3">
+  //           <Avatar src={data?.avatar} />
+  //           <p className="text-sm">
+  //             <span className="font-semibold">
+  //               {data?.content?.split("đã")[0]}{" "}
+  //             </span>
+  //             đã {data?.content?.split("đã")[1]}
+  //           </p>
+  //         </div>
+  //       ),
+  //       duration: 5,
+  //     });
+  //   });
+  // }, [socket]);
 
   return (
     <Fragment>
@@ -83,7 +86,7 @@ const ManagerLayout = () => {
           </div>
         </Layout>
       </Layout>
-      {room?.isUserInRoom && <RoomChat />}
+      {/* {room?.isUserInRoom && <RoomChat />} */}
     </Fragment>
   );
 };
