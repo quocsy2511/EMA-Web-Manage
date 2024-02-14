@@ -1,13 +1,13 @@
-import { authRequest } from "../utils/axios-utils";
+import http from "../utils/axios-utils";
 
 export const getAllNotification = (pageSize) =>
-  authRequest({ url: `/notification?sizePage=${pageSize}&currentPage=1` });
+  http({ url: `/notification?sizePage=${pageSize}&currentPage=1` });
 
 export const seenNotification = (notificationId) =>
-  authRequest({
+  http({
     url: `/notification/seen?notificationId=${notificationId}`,
     method: "put",
   });
 
 export const seenAllNotification = () =>
-  authRequest({ url: "/notification/seen-all", method: "put" });
+  http({ url: "/notification/seen-all", method: "put" });

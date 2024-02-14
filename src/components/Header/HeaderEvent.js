@@ -12,13 +12,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { useRouteLoaderData } from "react-router-dom";
 import { getAllUser } from "../../apis/users";
 import moment from "moment";
-import defaultImage from "../../assets/images/pngwing.com.png";
 import AnErrorHasOccured from "../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { debounce } from "lodash";
 import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelector } from "react-redux";
+import { defaultAvatar } from "../../constants/global";
 
 const HeaderEvent = ({
   sort,
@@ -122,7 +122,7 @@ const HeaderEvent = ({
                       title={item.fullName}
                       placement="top"
                     >
-                      <Avatar src={item?.avatar ?? defaultImage} size={24} />
+                      <Avatar src={item?.avatar ?? defaultAvatar} size={24} />
                     </Tooltip>
                     <p className="text-ellipsis w-full flex-1 overflow-hidden ">
                       {item.fullName}
@@ -136,7 +136,7 @@ const HeaderEvent = ({
                       title={item.fullName}
                       placement="top"
                     >
-                      <Avatar src={item?.avatar ?? defaultImage} size={24} />
+                      <Avatar src={item?.avatar ?? defaultAvatar} size={24} />
                     </Tooltip>
                     <p className="text-ellipsis w-full flex-1 overflow-hidden ">
                       {item.fullName}
@@ -153,7 +153,7 @@ const HeaderEvent = ({
                       title={item.fullName}
                       placement="top"
                     >
-                      <Avatar src={item?.avatar ?? defaultImage} size={24} />
+                      <Avatar src={item?.avatar ?? defaultAvatar} size={24} />
                     </Tooltip>
                     <p className="text-ellipsis w-full flex-1 overflow-hidden ">
                       {item.fullName}
@@ -167,7 +167,7 @@ const HeaderEvent = ({
                       title={item.fullName}
                       placement="top"
                     >
-                      <Avatar src={item?.avatar ?? defaultImage} size={24} />
+                      <Avatar src={item?.avatar ?? defaultAvatar} size={24} />
                     </Tooltip>
                     <p className="text-ellipsis w-full flex-1 overflow-hidden ">
                       {item.fullName}
@@ -406,7 +406,7 @@ const HeaderEvent = ({
                               title={member?.fullName}
                               placement="top"
                             >
-                              <Avatar src={member?.avatar ?? defaultImage} />
+                              <Avatar src={member?.avatar ?? defaultAvatar} />
                             </Tooltip>
                           );
                         })}

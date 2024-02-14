@@ -1,7 +1,6 @@
 import { Avatar, Button, Image } from "antd";
 import React, { Fragment, useState } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
-import defaultImage from "../../assets/images/pngwing.com.png";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUser, getProfile } from "../../apis/users";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
@@ -10,6 +9,7 @@ import moment from "moment";
 import { getEventDivisions, getFilterEvent } from "../../apis/events";
 import { SettingOutlined } from "@ant-design/icons";
 import EditProfileModal from "./Modal/EditProfileModal";
+import { defaultAvatar } from "../../constants/global";
 
 const ProfilePage = () => {
   const { data, isLoading, isError } = useQuery(["profile"], getProfile);
@@ -127,7 +127,7 @@ const ProfilePage = () => {
           >
             <Avatar
               alt="user_image"
-              src={data.avatar ?? defaultImage}
+              src={data.avatar ?? defaultAvatar}
               className="w-32 h-32 m-0.5"
             />
           </div>

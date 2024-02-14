@@ -12,7 +12,8 @@ import { URL_SOCKET } from "../constants/api";
 import { socketActions } from "../store/socket";
 import RoomChat from "../components/RoomChat/RoomChat";
 import { connectWithSocket } from "../socket/socketConnection";
-import { managerChatSocket } from "../utils/chat-socket";
+import { managerSocket } from "../utils/socket";
+import { getChatsList } from "../store/chats";
 
 const ManagerLayout = () => {
   const dispatch = useDispatch();
@@ -20,11 +21,13 @@ const ManagerLayout = () => {
 
   const [collapsed, setCollapsed] = useState(false);
 
-  const [api, contextHolder] = notification.useNotification();
+  const [notificationAPI, contextHolder] = notification.useNotification();
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    managerChatSocket(dispatch);
+    // create socket connection
+    // managerSocket(dispatch);
+    dispatch(getChatsList());
   }, []);
 
   // useEffect(() => {

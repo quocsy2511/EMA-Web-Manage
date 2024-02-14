@@ -20,6 +20,7 @@ import { createTask } from "../../apis/tasks";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 import { uploadFile } from "../../apis/files";
 import { IoMdAttach } from "react-icons/io";
+import TEXT from "../../constants/string";
 
 const { RangePicker } = DatePicker;
 
@@ -55,12 +56,13 @@ const TaskAdditionModal = ({
     () =>
       getAllUser({
         divisionId,
-        role: "EMPLOYEE",
+        role: TEXT.EMPLOYEE,
         pageSize: 50,
         currentPage: 1,
       }),
     {
       select: (data) => {
+        console.log("emploee > ", data);
         return data.data.map((employee) => ({
           label: employee.fullName,
           value: employee.id,

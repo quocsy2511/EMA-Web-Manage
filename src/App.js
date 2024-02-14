@@ -31,6 +31,9 @@ const NotificationPage = lazy(() =>
   import("./pages/Notification/NotificationPage")
 );
 const CustomerPage = lazy(() => import("./pages/Customer/CustomerPage.js"));
+const EventAssignDivisionPage = lazy(() =>
+  import("./pages/Event/EventAssignDivisionPage.js")
+);
 
 // Staff pages
 const StaffLayout = lazy(() => import("./pages/StaffLayout"));
@@ -119,18 +122,16 @@ const router = createBrowserRouter([
               </Suspense>
             ),
           },
-          // {
-          //   path: "addition",
-          //   element: (
-          //     <Suspense
-          //       fallback={
-          //         <LoadingPageIndicator title="trang tạo mới sự kiện" />
-          //       }
-          //     >
-          //       <EventCreationPage />
-          //     </Suspense>
-          //   ),
-          // },
+          {
+            path: ":eventId/division",
+            element: (
+              <Suspense
+                fallback={<LoadingPageIndicator title="danh sách bộ phận" />}
+              >
+                <EventAssignDivisionPage />
+              </Suspense>
+            ),
+          },
         ],
       },
       {
@@ -283,15 +284,15 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/admin",
-    id: "admin",
+    path: "/administrator",
+    id: "administrator",
     element: (
       <Suspense fallback={<LoadingPageIndicator />}>
         <AdminLayout />
       </Suspense>
     ),
     errorElement: <ErrorPage />,
-    // loader: checkAuthLoader,
+    loader: checkAuthLoader,
     children: [
       {
         index: true,

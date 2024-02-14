@@ -16,12 +16,15 @@ import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
 import { addNotification } from "../../store/Slice/notificationsSlice";
 import { redirectionActions } from "../../store/redirection";
+import TEXT from "../../constants/string";
+import { defaultAvatar } from "../../constants/global";
 
 const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const manager = useRouteLoaderData("manager");
   const staff = useRouteLoaderData("staff");
+  const administrator = useRouteLoaderData("administrator");
 
   const dispatch = useDispatch();
   const { socket } = useSelector((state) => state.socket);
@@ -292,15 +295,21 @@ const Header = ({ collapsed, setCollapsed }) => {
                 <div className="flex flex-col items-end">
                   <p className="text-sm font-semibold">
                     {manager
-                      ? manager?.fullName ?? "User Name"
-                      : staff?.fullName ?? "User Name"}
+                      ? manager.fullName ?? "Tên người dùng"
+                      : staff
+                      ? staff.fullName ?? "Tên người dùng"
+                      : administrator
+                      ? administrator.fullName ?? "Tên người dùng"
+                      : "Tên người dùng"}
                   </p>
                   <p className="text-xs font-normal">
                     {manager
-                      ? manager?.role === "MANAGER" && "Quản lý"
+                      ? manager.role === TEXT.MANAGER && "Quản lý"
                       : staff
-                      ? staff.role === "STAFF" && "Trưởng bộ phận"
-                      : "Vai? trò"}
+                      ? staff.role === TEXT.STAFF && "Trưởng bộ phận"
+                      : administrator
+                      ? administrator.role === TEXT.ADMINISTRATOR && "Admin"
+                      : "Vai trò"}
                   </p>
                 </div>
                 <div className="w-2" />
@@ -308,7 +317,12 @@ const Header = ({ collapsed, setCollapsed }) => {
                   size={40}
                   icon={<p>icon</p>}
                   alt="user_image"
-                  src={manager?.avatar ?? staff?.avatar}
+                  src={
+                    manager?.avatar ??
+                    staff?.avatar ??
+                    administrator?.avatar ??
+                    defaultAvatar
+                  }
                 />
               </div>
             </Dropdown>

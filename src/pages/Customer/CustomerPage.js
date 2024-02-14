@@ -147,6 +147,12 @@ const CustomerPage = () => {
     });
   };
 
+  const handleLoadMore = () => {
+    if (currentPage < contacts.lastPage) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
   return (
     <Fragment>
       {contextHolder}
@@ -245,6 +251,15 @@ const CustomerPage = () => {
                   />
                 );
               })
+            )}
+
+            {contacts?.nextPage && (
+              <p
+                className="text-center text-lag cursor-pointer"
+                onClick={handleLoadMore}
+              >
+                Tải tiếp
+              </p>
             )}
           </div>
         </div>

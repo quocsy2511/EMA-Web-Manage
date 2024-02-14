@@ -41,7 +41,7 @@ const SidebarAdmin = ({ collapsed }) => {
     getItem(
       <LabelText text="Nhân sự" />,
       "Nhân sự",
-      "/admin",
+      "/administrator",
       <p>
         <HiOutlineUser className="text-[#3f51b5]" size={24} />
       </p>
@@ -49,7 +49,7 @@ const SidebarAdmin = ({ collapsed }) => {
     getItem(
       <LabelText text="Bộ phận" />,
       "Bộ phận",
-      "/admin/division",
+      "/administrator/division",
       <p>
         <HiOutlineUserGroup className="text-[#4CAF50]" size={24} />
       </p>

@@ -13,7 +13,7 @@ import {
   message,
 } from "antd";
 import React, { useState } from "react";
-import { createUser } from "../../apis/users";
+import { createUser, getRoles } from "../../apis/users";
 import { getAllDivision } from "../../apis/divisions";
 import viVN from "antd/locale/vi_VN";
 import moment from "moment";
@@ -90,8 +90,8 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 1 }),
     {
       select: (data) =>
-        data.data
-          .filter((division) => division.status === 1)
+        data
+          .filter((division) => division.status)
           .map((division) => ({
             value: division.id,
             label: division.divisionName,
@@ -109,14 +109,28 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 2 }),
     {
       select: (data) =>
-        data.data
-          .filter((division) => division.status === 1)
+        data
+          .filter((division) => division.status)
           .map((division) => ({
             value: division.id,
             label: division.divisionName,
           })),
     }
   );
+
+  const {
+    data: roles,
+    isLoading: rolesIsLoading,
+    isError: rolesIsError,
+  } = useQuery(["roles"], getRoles, {
+    select: (data) => {
+      return data.map((role) => ({
+        value: role.id,
+        label: role.roleName,
+      }));
+    },
+  });
+  console.log("roles > ", roles);
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
@@ -155,7 +169,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
           requiredMark={false}
           initialValues={{
             gender: "MALE",
-            role: "EMPLOYEE",
             typeEmployee: "FULL_TIME",
           }}
         >
@@ -331,7 +344,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             </Form.Item>
             <Form.Item
               className="w-[45%]"
-              name="role"
+              name="roleId"
               label={<Label label="Vai trò" />}
               rules={[
                 {
@@ -348,16 +361,8 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                   form.setFieldsValue({ role: value });
                   form.resetFields(["divisionId"]);
                 }}
-                options={[
-                  {
-                    value: "EMPLOYEE",
-                    label: "Nhân viên",
-                  },
-                  {
-                    value: "STAFF",
-                    label: "Trưởng phòng",
-                  },
-                ]}
+                loading={rolesIsLoading || rolesIsError}
+                options={roles ?? []}
               />
             </Form.Item>
             <Form.Item

@@ -18,6 +18,7 @@ import { updateDetailEvent } from "../../apis/events";
 import dayjs from "dayjs";
 import moment from "moment";
 import { uploadFile } from "../../apis/files";
+import TEXT from "../../constants/string";
 
 const { RangePicker } = DatePicker;
 
@@ -29,7 +30,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
   console.log("UPDATE MODAL: ", event);
   const { data: staffs, isLoading: staffsIsLoading } = useQuery(
     ["staffs"],
-    () => getAllUser({ role: "STAFF", pageSize: 100, currentPage: 1 }),
+    () => getAllUser({ role: TEXT.STAFF, pageSize: 100, currentPage: 1 }),
     {
       select: (data) => {
         return data.data.map((staff) => ({

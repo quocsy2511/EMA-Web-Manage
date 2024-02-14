@@ -58,10 +58,10 @@ const PersonnelPage = () => {
     ["divisions", 1],
     () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 1 }),
     {
-      select: (data) => data.data.filter((division) => division.status === 1),
+      select: (data) => data.filter((division) => division.status),
     }
   );
-  // console.log("divisionsData: ", divisionsData);
+  console.log("divisionsData: ", divisionsData);
 
   const {
     data: divisionsWithoutStaff,
@@ -71,10 +71,10 @@ const PersonnelPage = () => {
     ["divisions", 2],
     () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 2 }),
     {
-      select: (data) => data.data.filter((division) => division.status === 1),
+      select: (data) => data.filter((division) => division.status),
     }
   );
-  // console.log("divisionsWithoutStaff: ", divisionsWithoutStaff);
+  console.log("divisionsWithoutStaff: ", divisionsWithoutStaff);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading: updateUserIsLoading } = useMutation(
@@ -320,7 +320,7 @@ const PersonnelPage = () => {
     {
       dataIndex: "avatar123",
       key: "avatar123",
-      width: 50,
+      width: 0,
       align: "center",
       fixed: "left",
       render: (_, record) => {

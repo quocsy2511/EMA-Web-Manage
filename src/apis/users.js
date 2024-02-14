@@ -1,19 +1,19 @@
-import { authRequest } from "../utils/axios-utils";
+import http from "../utils/axios-utils";
 
 // Check data if 'no user found'
 export const getAllUser = ({ divisionId, role, pageSize, currentPage }) =>
-  authRequest({
+  http({
     url: `/user?sizePage=${pageSize}&currentPage=${currentPage}${
       divisionId ? `&divisionId=${divisionId}` : ""
     }${role ? `&role=${role}` : ""}`,
   });
 
-export const getUserById = (userId) => authRequest({ url: `/user/${userId}` });
+export const getUserById = (userId) => http({ url: `/user/${userId}` });
 
-export const getProfile = () => authRequest({ url: "/user/profile" });
+export const getProfile = () => http({ url: "/user/profile" });
 
 export const createUser = (user) =>
-  authRequest({
+  http({
     url: `/auth/sign-up`,
     method: "post",
     data: user,
@@ -21,19 +21,20 @@ export const createUser = (user) =>
 
 // status = ACTIVE or INACTIVE
 export const updateStatusUser = ({ userId, status }) =>
-  authRequest({
+  http({
     url: `/user/${userId}/${status}`,
     method: "put",
   });
 
 export const updateUser = ({ userId, ...user }) =>
-  authRequest({ url: `/user/${userId}`, method: "put", data: user });
+  http({ url: `/user/${userId}`, method: "put", data: user });
 
-export const getMember = ({ userId }) =>
-  authRequest({ url: `/user/${userId}` });
+export const getMember = ({ userId }) => http({ url: `/user/${userId}` });
 
 export const updateProfile = (user) =>
-  authRequest({ url: `/user/profile`, method: "put", data: user });
+  http({ url: `/user/profile`, method: "put", data: user });
 
 export const getEmployeeByDate = ({ startDate, endDate }) =>
-  authRequest({ url: `/user/getFreeEmployee/${startDate}/${endDate}` });
+  http({ url: `/user/getFreeEmployee/${startDate}/${endDate}` });
+
+export const getRoles = () => http({ url: "/roles" });

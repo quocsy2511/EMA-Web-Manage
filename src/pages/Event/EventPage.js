@@ -27,16 +27,21 @@ const EventPage = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   const [page, setPage] = useState(1);
-  const { data, isLoading, isError, refetch } = useQuery(["event", page], () =>
-    getFilterEvent({
-      pageSize: 6,
-      currentPage: page,
-      nameSort: "createdAt",
-      eventName: searchText,
-      monthYear: searchDate,
-      status: searchStatus,
-      sort,
-    })
+  const { data, isLoading, isError, refetch } = useQuery(
+    ["event", page],
+    () =>
+      getFilterEvent({
+        pageSize: 6,
+        currentPage: page,
+        nameSort: "createdAt",
+        eventName: searchText,
+        monthYear: searchDate,
+        status: searchStatus,
+        sort,
+      }),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   useEffect(() => {

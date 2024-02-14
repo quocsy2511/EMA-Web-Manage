@@ -1,7 +1,7 @@
-import { authRequest } from "../utils/axios-utils";
+import http from "../utils/axios-utils";
 
 export const createContract = ({ eventId, contract }) =>
-  authRequest({
+  http({
     url: `/contracts/${eventId}/new`,
     method: "post",
     data: contract,

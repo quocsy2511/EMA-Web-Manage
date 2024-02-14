@@ -1,14 +1,14 @@
-import { authRequest } from "../utils/axios-utils";
+import http from "../utils/axios-utils";
 
 // mode: 1 -> get all division ( contain staff & employee )
 // mode: 2 -> get division dont have staff
 export const getAllDivision = ({ pageSize, currentPage, mode }) =>
-  authRequest({
+  http({
     url: `/division?sizePage=${pageSize}&currentPage=${currentPage}&mode=${mode}`,
   });
 
 export const createDivision = ({ divisionName, description }) =>
-  authRequest({
+  http({
     url: `/division`,
     method: "post",
     data: {
@@ -18,7 +18,7 @@ export const createDivision = ({ divisionName, description }) =>
   });
 
 export const updateStatusDivision = (divisionId) =>
-  authRequest({ url: `/division/${divisionId}/status`, method: "put" });
+  http({ url: `/division/${divisionId}/status`, method: "put" });
 
 export const updateDivision = ({
   divisionId,
@@ -26,7 +26,7 @@ export const updateDivision = ({
   description,
   status,
 }) =>
-  authRequest({
+  http({
     url: `/division/${divisionId}`,
     method: "put",
     data: {

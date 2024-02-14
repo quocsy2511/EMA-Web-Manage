@@ -1,4 +1,4 @@
-import { authRequest } from "../utils/axios-utils";
+import http, { authRequest } from "../utils/axios-utils";
 
 export const createEvent = ({
   eventName,
@@ -38,7 +38,7 @@ export const getFilterEvent = ({
   sort,
   status,
 }) =>
-  authRequest({
+  http({
     url: `/event/filter?sizePage=${pageSize}&currentPage=${currentPage}&nameSort=${nameSort}${
       eventName ? `&eventName=${eventName}` : ""
     }${monthYear ? `&monthYear=${monthYear}` : ""}${
@@ -53,11 +53,11 @@ export const getDetailEvent = (eventId) =>
 export const updateDetailEvent = ({ eventId, ...event }) =>
   authRequest({ url: `/event/${eventId}`, method: "put", data: event });
 
-export const updateAssignDivisionToEvent = (data) =>
+export const updateAssignDivisionToEvent = ({ eventId, divisionId }) =>
   authRequest({
     url: "/event/edit-division",
     method: "put",
-    data,
+    data: { eventId, divisionId },
   });
 
 export const updateStatusEvent = (eventId, status) =>

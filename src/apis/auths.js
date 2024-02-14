@@ -1,8 +1,8 @@
 import axios from "axios";
-import { normalRequest } from "../utils/axios-utils";
+import http from "../utils/axios-utils";
 
 export const login = ({ email, password }) =>
-  normalRequest({
+  http({
     url: "/auth/login",
     method: "post",
     data: { email, password },

@@ -27,7 +27,7 @@ import {
   BsCalendarWeekFill,
   BsArrowRight,
 } from "react-icons/bs";
-import { RiEditFill, RiAdvertisementFill } from "react-icons/ri";
+import { RiEditFill, RiAdvertisementFill, RiAddFill } from "react-icons/ri";
 import { AiOutlinePlus } from "react-icons/ai";
 import {
   PiMicrophoneStageFill,
@@ -98,8 +98,10 @@ const EventTaskPage = () => {
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const { data, isLoading, isError } = useQuery(["event-detail", eventId], () =>
-    getDetailEvent(eventId)
+  const { data, isLoading, isError } = useQuery(
+    ["event-detail", eventId],
+    () => getDetailEvent(eventId),
+    { refetchOnWindowFocus: false }
   );
   console.log("DATA : ", data);
 
@@ -125,47 +127,47 @@ const EventTaskPage = () => {
   );
   console.log("tasks > ", tasks);
 
-  // const {
-  //   data: filterTasks,
-  //   isLoading: filterTaskIsLoading,
-  //   isError: filterTaskIsError,
-  //   refetch,
-  // } = useQuery(
-  //   ["filter-tasks", eventId],
-  //   () =>
-  //     filterTask({
-  //       assignee: assigneeSelection,
-  //       eventID: eventId,
-  //       priority: prioritySelection,
-  //       status: statusSelection,
-  //     }),
-  //   {
-  //     select: (data) => {
-  //       return data.filter((item) => !item.parent);
-  //     },
-  //     refetchOnWindowFocus: false,
-  //   }
-  // );
-  // console.log("filterTasks > ", filterTasks);
-
-  const { mutate, isLoading: mutateIsLoading } = useMutation(
-    (eventId, status) => updateStatusEvent(eventId, status),
+  const {
+    data: filterTasks,
+    isLoading: filterTaskIsLoading,
+    isError: filterTaskIsError,
+    refetch,
+  } = useQuery(
+    ["filter-tasks", eventId],
+    () =>
+      filterTask({
+        assignee: assigneeSelection,
+        eventID: eventId,
+        priority: prioritySelection,
+        status: statusSelection,
+      }),
     {
-      onSuccess: (data) => {
-        messageApi.open({
-          type: "success",
-          content: "Sự kiến đã kết thúc !!",
-        });
-        navigate("/manager/event");
+      select: (data) => {
+        return data.filter((item) => !item.parent);
       },
-      onError: (error) => {
-        messageApi.open({
-          type: "error",
-          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-        });
-      },
+      refetchOnWindowFocus: false,
     }
   );
+  console.log("filterTasks > ", filterTasks);
+
+  // const { mutate, isLoading: mutateIsLoading } = useMutation(
+  //   (eventId, status) => updateStatusEvent(eventId, status),
+  //   {
+  //     onSuccess: (data) => {
+  //       messageApi.open({
+  //         type: "success",
+  //         content: "Sự kiến đã kết thúc !!",
+  //       });
+  //       navigate("/manager/event");
+  //     },
+  //     onError: (error) => {
+  //       messageApi.open({
+  //         type: "error",
+  //         content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+  //       });
+  //     },
+  //   }
+  // );
 
   useEffect(() => {
     if (assigneeSelection || prioritySelection || statusSelection) {
@@ -179,9 +181,9 @@ const EventTaskPage = () => {
     setStatusSelection();
   };
 
-  const handleEndEvent = () => {
-    mutate(eventId, "DONE");
-  };
+  // const handleEndEvent = () => {
+  //   mutate(eventId, "DONE");
+  // };
 
   if (isLoading)
     return (
@@ -192,7 +194,7 @@ const EventTaskPage = () => {
 
   if (isError)
     return (
-      <div className="h-[calc(100vh-128px)]">
+      <div className="h-[calc(100vh-128px)] w-full">
         <AnErrorHasOccured />
       </div>
     );
@@ -227,6 +229,19 @@ const EventTaskPage = () => {
     <Fragment>
       {contextHolder}
 
+      <FloatButton
+        onClick={() => setIsOpenModal(true)}
+        type="primary"
+        icon={<RiAddFill />}
+        disabled={data.listDivision?.length === 0}
+        tooltip={
+          data.listDivision?.length !== 0
+            ? "Tạo đề mục"
+            : "Chưa có bộ phận đảm nhiệm"
+        }
+        className="cursor-pointer"
+      />
+
       <TaskAdditionModal
         isModalOpen={isOpenModal}
         setIsModalOpen={setIsOpenModal}
@@ -235,11 +250,13 @@ const EventTaskPage = () => {
         staffs={data.listDivision}
         selectedTemplateTask={selectedTemplateTask}
       />
+
       <EventUpdateModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         event={data}
       />
+
       <motion.div
         initial={{ y: -75 }}
         animate={{ y: 0 }}
@@ -252,7 +269,6 @@ const EventTaskPage = () => {
           / {data.eventName}
         </p>
       </motion.div>
-
       <motion.div
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -293,7 +309,6 @@ const EventTaskPage = () => {
           {status}
         </p>
       </motion.div>
-
       <motion.div
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -311,7 +326,17 @@ const EventTaskPage = () => {
             <motion.div
               className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 px-3 py-1 rounded-md cursor-pointer"
               whileHover={{ y: -4 }}
-              // onClick={() => setIsModalOpen(true)}
+              onClick={() =>
+                navigate("division", {
+                  state: {
+                    eventId: data.id,
+                    eventName: data.eventName,
+                    listDivisionId: data.listDivision?.map(
+                      (item) => item.divisionId
+                    ),
+                  },
+                })
+              }
             >
               <SiGoogleclassroom />
               <p>Bộ phận</p>
@@ -335,14 +360,14 @@ const EventTaskPage = () => {
             </motion.div>
           </div>
 
-          <div
+          <p
             className="w-[75%] text-sm text-slate-500 mt-3"
             dangerouslySetInnerHTML={{
               __html: new QuillDeltaToHtmlConverter(
                 JSON.parse(data.description)
               ).convert(),
             }}
-          />
+          ></p>
 
           <div className="flex items-center flex-wrap gap-x-4 gap-y-5 mt-6">
             <Tag
@@ -354,10 +379,12 @@ const EventTaskPage = () => {
               icon={<FcMoneyTransfer size={20} />}
               text={`${data.estBudget?.toLocaleString("en-US")} VNĐ`}
             />
-            <Tag
-              icon={<BsTagsFill size={20} color={color.green} />}
-              text={`${data.taskCount} hạng mục`}
-            />
+            {!!tasks?.length && (
+              <Tag
+                icon={<BsTagsFill size={20} color={color.green} />}
+                text={`${tasks.length} hạng mục`}
+              />
+            )}
           </div>
 
           <div className="mt-6">
@@ -402,13 +429,14 @@ const EventTaskPage = () => {
 
             <div>
               <div className="flex items-center gap-x-2">
-                <BsHourglassSplit size={20} color={color.green} />
-                <p className="text-lg font-semibold">Ngày diễn ra</p>
+                <BsHourglassBottom size={20} color={color.green} />
+                <p className="text-lg font-semibold">Ngày kết thúc</p>
               </div>
               <div className="flex items-center gap-x-2">
                 <div className="w-5" />
                 <p className="text-xs text-slate-400">
-                  {new Date(data.startDate).toLocaleDateString("vi-VN", {
+                  {/* {moment(data.endDate).format("dddd, D [tháng] M, YYYY")} */}
+                  {new Date(data.endDate).toLocaleDateString("vi-VN", {
                     weekday: "long",
                     year: "numeric",
                     month: "long",
@@ -420,14 +448,13 @@ const EventTaskPage = () => {
 
             <div>
               <div className="flex items-center gap-x-2">
-                <BsHourglassBottom size={20} color={color.green} />
-                <p className="text-lg font-semibold">Ngày kết thúc</p>
+                <BsHourglassSplit size={20} color={color.green} />
+                <p className="text-lg font-semibold">Ngày diễn ra</p>
               </div>
               <div className="flex items-center gap-x-2">
                 <div className="w-5" />
                 <p className="text-xs text-slate-400">
-                  {/* {moment(data.endDate).format("dddd, D [tháng] M, YYYY")} */}
-                  {new Date(data.endDate).toLocaleDateString("vi-VN", {
+                  {new Date(data.startDate).toLocaleDateString("vi-VN", {
                     weekday: "long",
                     year: "numeric",
                     month: "long",
@@ -490,7 +517,7 @@ const EventTaskPage = () => {
         </div>
       </motion.div>
 
-      {/* <motion.div
+      <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         className="bg-white rounded-2xl px-10 py-8 mt-10 mb-20"
@@ -622,6 +649,7 @@ const EventTaskPage = () => {
                                   key={task.id}
                                   task={task}
                                   isSubtask={false}
+                                  eventName={data.eventName}
                                 />
                               ),
                               children:
@@ -636,6 +664,7 @@ const EventTaskPage = () => {
                                           task={subtask}
                                           isSubtask={true}
                                           isDropdown={true}
+                                          eventName={data.eventName}
                                         />
                                       </div>
                                     );
@@ -670,6 +699,7 @@ const EventTaskPage = () => {
                                   key={task.id}
                                   task={task}
                                   isSubtask={false}
+                                  eventName={data.eventName}
                                 />
                               ),
                               children:
@@ -684,6 +714,7 @@ const EventTaskPage = () => {
                                           task={subtask}
                                           isSubtask={true}
                                           isDropdown={true}
+                                          eventName={data.eventName}
                                         />
                                       </div>
                                     );
@@ -718,7 +749,7 @@ const EventTaskPage = () => {
         ) : (
           <LoadingComponentIndicator />
         )}
-      </motion.div> */}
+      </motion.div>
       <FloatButton.BackTop className="right-24" />
     </Fragment>
   );

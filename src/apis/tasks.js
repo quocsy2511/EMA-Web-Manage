@@ -1,4 +1,4 @@
-import { authRequest } from "../utils/axios-utils";
+import http from "../utils/axios-utils";
 
 // assignee = [id1, id2, ...]
 // leader = id của người đc chọn trong assignee
@@ -6,7 +6,7 @@ import { authRequest } from "../utils/axios-utils";
 // ( optional = undefined )
 
 export const createTask = (task) =>
-  authRequest({
+  http({
     url: "/task/createTask",
     method: "post",
     data: {
@@ -27,12 +27,12 @@ export const createTask = (task) =>
   });
 
 export const getTasks = ({ fieldName, conValue, pageSize, currentPage }) =>
-  authRequest({
+  http({
     url: `/task?fieldName=${fieldName}&conValue=${conValue}&sizePage=${pageSize}&currentPage=${currentPage}`,
   });
 
 export const filterTask = ({ assignee, eventID, priority, sort, status }) =>
-  authRequest({
+  http({
     url: `/task/filterByAssignee?${eventID ? `eventID=${eventID}` : ""}${
       assignee ? `&assignee=${assignee}` : ""
     }${priority ? `&priority=${priority}` : ""}${sort ? `&sort=${sort}` : ""}${
@@ -51,7 +51,7 @@ export const filterTask = ({ assignee, eventID, priority, sort, status }) =>
 // "estimationTime": null,
 // "effort": null
 export const updateTask = ({ taskID, ...task }) =>
-  authRequest({
+  http({
     url: `/task/updateTask?taskID=${taskID}`,
     method: "put",
     data: {
@@ -68,13 +68,13 @@ export const updateTask = ({ taskID, ...task }) =>
   });
 
 export const updateTaskStatus = ({ taskID, status }) =>
-  authRequest({
+  http({
     url: `/task/updateTaskStatus?taskID=${taskID}&status=${status}`,
     method: "put",
   });
 
 export const assignMember = (data) =>
-  authRequest({
+  http({
     url: "/assign-task",
     method: "post",
     data: {
@@ -85,7 +85,7 @@ export const assignMember = (data) =>
   });
 
 export const createTaskFile = (taskFile) =>
-  authRequest({
+  http({
     url: "/taskFile",
     method: "post",
     data: {
@@ -96,12 +96,11 @@ export const createTaskFile = (taskFile) =>
   });
 
 export const updateTaskFile = ({ taskId, ...files }) =>
-  authRequest({
+  http({
     url: `/taskFile/${taskId}`,
     method: "put",
     data: files.files,
   });
-
 
 export const getTasksTemplate = ({
   fieldName,
@@ -109,12 +108,11 @@ export const getTasksTemplate = ({
   sizePage,
   currentPage,
 }) =>
-  authRequest({
+  http({
     url: `/task/template-task?fieldName=${fieldName}&conValue=${conValue}&sizePage=${sizePage}&currentPage=${currentPage}`,
   });
 
 export const getTemplateTask = (templateEventID) =>
-  authRequest({
+  http({
     url: `/task/template-task?fieldName=eventID&conValue=${templateEventID}&sizePage=5&currentPage=1`,
-
   });
