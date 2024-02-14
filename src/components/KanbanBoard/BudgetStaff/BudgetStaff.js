@@ -38,9 +38,7 @@ const BudgetStaff = ({
       children: <NewBudget selectEvent={selectEvent} />,
     },
   ];
-  const onChangeTable = (key) => {
-    
-  };
+  const onChangeTable = (key) => {};
 
   return (
     <>
