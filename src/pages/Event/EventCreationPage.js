@@ -100,7 +100,7 @@ const EventCreationPage = () => {
       onSuccess: (data, variables) => {
         console.log("createEventMutate success > ", data);
         if (variables.contract) {
-          createContractMutate(data.eventId, contract);
+          createContractMutate(data.eventId, variables.contract);
         } else {
           // TODO -> navigation
           // messageApi.open({

@@ -1,13 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getConversations } from "../apis/chats";
 
-export const getChatsList = createAsyncThunk(
-  "chats/getChatsList",
-  async () => {
-    const response = await getConversations();
-    return response;
-  }
-);
+export const getChatsList = createAsyncThunk("chats/getChatsList", async () => {
+  const response = await getConversations();
+  console.log("res >", response);
+  return response;
+});
 
 const initialState = {
   chats: [],
@@ -27,7 +25,7 @@ const chatsSlice = createSlice({
         state.error = null;
       })
       .addCase(getChatsList.fulfilled, (state, action) => {
-        state.chats = action.payload;
+        state.chats = action.payload.data;
         state.status = "succeeded";
       })
       .addCase(getChatsList.rejected, (state, action) => {
