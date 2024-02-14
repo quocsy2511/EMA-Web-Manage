@@ -10,7 +10,6 @@ import {
   InputNumber,
   Select,
   Steps,
-  Table,
   Upload,
   message,
 } from "antd";
@@ -20,11 +19,9 @@ import momenttz from "moment-timezone";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getAllUser } from "../../apis/users";
-import { createEvent, getEventType, getTemplateEvent } from "../../apis/events";
+import { createEvent, getEventType } from "../../apis/events";
 import { updateCustomerContacts } from "../../apis/contact";
 import { uploadFile } from "../../apis/files";
-import { createTask, getTemplateTask } from "../../apis/tasks";
 import { createContract } from "../../apis/contract";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 

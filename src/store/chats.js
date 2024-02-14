@@ -1,10 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { authRequest } from "../utils/axios-utils";
+import { getConversations } from "../apis/chats";
 
-const getChatsByUserId = createAsyncThunk(
-  "chats/getChatsByUserId",
-  async (params, thunkAPI) => {
-    const response = await authRequest(params.userId);
+export const getChatsList = createAsyncThunk(
+  "chats/getChatsList",
+  async () => {
+    const response = await getConversations();
     return response;
   }
 );
@@ -21,16 +21,16 @@ const chatsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getChatsByUserId.pending, (state, action) => {
+      .addCase(getChatsList.pending, (state, action) => {
         state.chats = [];
         state.status = "pending";
         state.error = null;
       })
-      .addCase(getChatsByUserId.fulfilled, (state, action) => {
+      .addCase(getChatsList.fulfilled, (state, action) => {
         state.chats = action.payload;
         state.status = "succeeded";
       })
-      .addCase(getChatsByUserId.rejected, (state, action) => {
+      .addCase(getChatsList.rejected, (state, action) => {
         state.error = action.error;
         state.status = "failed";
       });

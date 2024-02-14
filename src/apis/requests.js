@@ -1,4 +1,4 @@
-import { authRequest } from "../utils/axios-utils";
+import http from "../utils/axios-utils";
 
 export const getAllRequests = ({
   curentPage,
@@ -9,7 +9,7 @@ export const getAllRequests = ({
   status,
   type,
 }) =>
-  authRequest({
+  http({
     url: `/request/filterRequest/${curentPage}/${pageSize}?${
       requestor ? `requestor=${requestor}` : ""
     }${requestorName ? `&requestorName=${requestorName}` : ""}${
@@ -17,11 +17,10 @@ export const getAllRequests = ({
     }${status ? `&status=${status}` : ""}${type ? `&type=${type}` : ""}`,
   });
 
-export const getRequestDetail = (id) =>
-  authRequest({ url: `/request/detail/${id}` });
+export const getRequestDetail = (id) => http({ url: `/request/detail/${id}` });
 
 export const createRequest = (request) =>
-  authRequest({
+  http({
     url: "/request",
     method: "post",
     data: {
@@ -36,7 +35,7 @@ export const createRequest = (request) =>
   });
 
 export const approveRequest = (request) =>
-  authRequest({
+  http({
     url: "/request/approveRequest",
     method: "put",
     data: {
@@ -47,7 +46,7 @@ export const approveRequest = (request) =>
   });
 
 export const updateRequest = ({ id, ...request }) =>
-  authRequest({
+  http({
     url: `/request/changeRequest/${id}`,
     method: "put",
     data: {
@@ -62,11 +61,11 @@ export const updateRequest = ({ id, ...request }) =>
   });
 
 export const deleteRequest = (id) =>
-  authRequest({
+  http({
     url: `/request/changeRequest/${id}`,
     method: "delete",
   });
 export const getAnnualLeave = () =>
-  authRequest({
+  http({
     url: `/annual-leave`,
   });

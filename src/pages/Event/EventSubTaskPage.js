@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useState } from "react";
 import {
   Link,
+  useLocation,
   useNavigate,
   useParams,
   useRouteLoaderData,
@@ -34,6 +35,8 @@ import { redirectionActions } from "../../store/redirection";
 const EventSubTaskPage = () => {
   const eventId = useParams().eventId;
   const taskId = useParams().taskId;
+  const { eventName } = useLocation().state;
+  // console.log("stateee > ", stateee);
   const manager = useRouteLoaderData("manager");
   const navigate = useNavigate();
 
@@ -70,6 +73,7 @@ const EventSubTaskPage = () => {
       select: (data) => {
         return data[0];
       },
+      
     }
   );
   console.log("tasks: ", tasks);
@@ -255,7 +259,7 @@ const EventSubTaskPage = () => {
           </Link>{" "}
           /{" "}
           <Link to=".." relative="path">
-            {tasks.event.eventName}
+            {eventName ?? "Tên sự kiện"}
           </Link>{" "}
           / {tasks.title}
         </p>

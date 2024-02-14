@@ -1,17 +1,17 @@
-import { authRequest } from "../utils/axios-utils";
+import http from "../utils/axios-utils";
 
 export const getBudget = ({ eventID, pageSize, currentPage, mode, userID }) =>
-  authRequest({
+  http({
     url: `/budget/${eventID}?sizePage=${pageSize}&currentPage=${currentPage}&mode=${mode}${
       userID ? `&userID=${userID}` : ""
     }`,
   });
 
 export const createBudget = (budget) =>
-  authRequest({ url: "/budget", method: "post", data: budget });
+  http({ url: "/budget", method: "post", data: budget });
 
 export const updateBudget = ({ budgetsId, ...budget }) =>
-  authRequest({
+  http({
     url: `/budget/${budgetsId}`,
     method: "put",
     data: {
@@ -27,13 +27,13 @@ export const updateBudget = ({ budgetsId, ...budget }) =>
 
 // status: PROCESSING - ACCEPT - REJECT - CANCEL
 export const updateStatusBudget = ({ budgetsId, status }) =>
-  authRequest({
+  http({
     url: `/budget/${budgetsId}/${status}`,
     method: "put",
   });
 
 export const deleteBudget = ({ budgetID }) =>
-  authRequest({
+  http({
     url: `/budget/detail/${budgetID}`,
     method: "delete",
   });

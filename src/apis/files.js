@@ -1,4 +1,4 @@
-import { authRequest } from "../utils/axios-utils";
+import http from "../utils/axios-utils";
 
 /*
 
@@ -8,21 +8,21 @@ import { authRequest } from "../utils/axios-utils";
 
 */
 export const uploadFile = (formData) =>
-  authRequest({
+  http({
     url: `/file/upload`,
     method: "post",
     data: formData,
   });
 
 export const uploadFileTask = (data) =>
-  authRequest({
+  http({
     url: `/taskFile`,
     method: "post",
     data: data,
   });
 
 export const deleteFileTask = ({ taskId, data }) =>
-  authRequest({
+  http({
     url: `/taskFile/${taskId}`,
     method: "put",
     data: data,

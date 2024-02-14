@@ -18,20 +18,19 @@ const LoginPage = () => {
   const { mutate, isLoading } = useMutation(login, {
     onSuccess: (data) => {
       console.log("🚀 ~ file: LoginPage.js:17 ~ LoginPage ~ data:", data);
-      const accessToken = data.data.access_token;
+      const accessToken = data.access_token;
       localStorage.setItem("token", accessToken);
 
       const role = jwt(accessToken).role;
-      const socket = io(URL_SOCKET, {
-        auth: {
-          access_token: localStorage.getItem("token"),
-        },
-      });
-      // dispatch(socketActions.saveSocket(socket));
-      console.log("socket:", socket);
+      // const socket = io(URL_SOCKET, {
+      //   auth: {
+      //     access_token: localStorage.getItem("token"),
+      //   },
+      // });
 
       if (role === TEXT.MANAGER) navigate("/manager");
-      else navigate("/staff");
+      else if (role === TEXT.STAFF) navigate("/staff");
+      else if (role === TEXT.ADMINISTRATOR) navigate("/administrator");
     },
   });
 

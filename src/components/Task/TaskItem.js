@@ -22,6 +22,7 @@ const TaskItem = ({
   setIsOpenUpdateSubTaskModal,
   setIsOpenModal,
   isDropdown,
+  eventName,
 }) => {
   const navigate = useNavigate();
   const { data: user } = useQuery(
@@ -38,7 +39,7 @@ const TaskItem = ({
   );
 
   const goToSubTask = () => {
-    navigate(`${task.id}`);
+    if (eventName) navigate(`${task.id}`, { state: { eventName } });
   };
 
   const openSubTaskModal = () => {
@@ -164,7 +165,7 @@ const TaskItem = ({
 
         <div className="space-y-1">
           <p className="text-center">Thời gian bắt đầu</p>
-          <dib className="flex gap-x-2">
+          <div className="flex gap-x-2">
             <div className="flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-lg">
               <BsHourglassSplit size={15} />
               <div className="w-4" />
@@ -181,14 +182,14 @@ const TaskItem = ({
                   : "-- : --"}
               </p>
             </div>
-          </dib>
+          </div>
         </div>
 
         <div className="w-[4%]" />
 
         <div className="space-y-1">
           <p className="text-center">Thời gian kết thúc</p>
-          <dib className="flex gap-x-2">
+          <div className="flex gap-x-2">
             <div className="flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-lg">
               <BsHourglassBottom size={15} />
               <div className="w-4" />
@@ -205,7 +206,7 @@ const TaskItem = ({
                   : "-- : --"}
               </p>
             </div>
-          </dib>
+          </div>
         </div>
       </div>
       <div className="w-[4%]" />

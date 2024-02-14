@@ -30,7 +30,7 @@ const DivisionPage = () => {
     () => getAllDivision({ pageSize: 50, currentPage: page, mode: 1 }),
     {
       select: (data) => {
-        data.data = data.data.map(({ ...item }) => {
+        data = data.map(({ ...item }) => {
           return {
             key: item.id,
             ...item,
@@ -40,7 +40,7 @@ const DivisionPage = () => {
       },
     }
   );
-  console.log(data);
+  console.log("data > ", data);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading: updateDivisionIsLoading } = useMutation(
@@ -194,7 +194,7 @@ const DivisionPage = () => {
       render: (_, record) => {
         const editable = checkEditing(record);
         return (
-          data.data.length >= 1 && (
+          data.length >= 1 && (
             <div className="flex items-center justify-center">
               {editable ? (
                 <Space size="middle">
@@ -339,7 +339,7 @@ const DivisionPage = () => {
                     },
                   }}
                   columns={mergedColumns}
-                  dataSource={data?.data}
+                  dataSource={data ?? []}
                   bordered
                   pagination={false}
                 />

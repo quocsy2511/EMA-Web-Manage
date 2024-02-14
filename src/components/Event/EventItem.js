@@ -71,12 +71,12 @@ const EventItem = ({ event }) => {
 
       {/* 1 line = 1rem = +4  */}
       <p
+          className="text-sm text-slate-500 line-clamp-3 h-16"
         dangerouslySetInnerHTML={{
           __html: new QuillDeltaToHtmlConverter(
             JSON.parse(event.description)
           ).convert(),
         }}
-        className="text-sm text-slate-500 line-clamp-3 h-16"
       ></p>
 
       <div className="h-7" />
