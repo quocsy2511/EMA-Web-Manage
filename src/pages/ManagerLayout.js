@@ -26,7 +26,7 @@ const ManagerLayout = () => {
 
   useEffect(() => {
     // create socket connection
-    // managerSocket(dispatch);
+    managerSocket(dispatch);
     dispatch(getChatsList());
   }, []);
 

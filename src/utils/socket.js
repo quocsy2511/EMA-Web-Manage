@@ -5,7 +5,7 @@ export const managerSocket = (dispatch) => {
   const token = localStorage.getItem("token");
 
   const socket = io(URL_SOCKET, {
-    autoConnect: false,
+    // autoConnect: false,
     auth: {
       access_token: token,
     },
@@ -19,7 +19,9 @@ export const managerSocket = (dispatch) => {
   // Listen to
   socket.on("notification", (data) => {});
 
-  socket.on("chat", (data) => {});
+  socket.on("onMessage", (data) => {
+    console.log("onMessage data > ", data);
+  });
 
   // socket.emit("getOnlineGroupUsers", { data });
   // socket.emit("onConversationJoin", { data });

@@ -4,14 +4,15 @@ import http from "../utils/axios-utils";
 export const createConversation = ({ email, message }) =>
   http({ url: "/conversations", method: "post", data: { email, message } });
 
-export const getConversations = () => http({ url: "/conversations" });
+export const getConversations = () =>
+  http({ url: `/conversations?sizePage=10&currentPage=1` });
 
 // Create a message while chatting
 export const createMessage = (id, content) =>
   http({
     url: `/conversations/${id}/messages`,
     method: "post",
-    data: content,
+    data: { content: content },
   });
 
 // Get a conversation detail containing all messages

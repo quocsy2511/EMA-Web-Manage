@@ -19,7 +19,10 @@ export function getAuthToken() {
   const remainedTime = calcExpirationTime(expTime);
   console.log("remainedTime: ", remainedTime);
 
-  if (remainedTime < 0) return "EXPIRED";
+  if (remainedTime < 0) {
+    localStorage.removeItem("token");
+    return "EXPIRED";
+  }
 
   return decodedToken;
 }

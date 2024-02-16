@@ -15,50 +15,71 @@ import { defaultAvatar } from "../../constants/global";
 import { FaCircle } from "react-icons/fa";
 import { fetchChatDetail } from "../../store/chat_detail";
 import { useRouteLoaderData } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { createMessage } from "../../apis/chats";
 
 const now = momenttz().tz("Asia/Bangkok");
 
-const SingleMessage = memo(({ isMe }) => {
+const SingleMessage = memo(({ isMe, index, length, content }) => {
   return (
     <p
       className={clsx(
-        "bg-blue-500 text-sm font-medium px-5 py-3.5 rounded-3xl rounded-tl-md rounded-bl-3xl w-auto",
+        "text-sm font-medium px-5 py-3.5 rounded-3xl w-auto",
         { " text-black bg-white border-2": isMe },
-        { " text-white": !isMe }
-        // { "rounded-bl-md": index === 0 && !isMe },
-        // { "rounded-bl-md rounded-tl-md": index === 0 && !isMe },
-        // { "rounded-tl-md": index === .length && !isMe },
-        // { "rounded-br-md": index === 0 && isMe },
-        // { "rounded-br-md rounded-tr-md": index === 0 && isMe },
-        // { "rounded-tr-md": index === .length && isMe },
+        { " text-white bg-blue-500": !isMe },
+
+        { "rounded-bl-md": index === 0 && !isMe },
+        { "rounded-tr-md ": index === 0 && isMe },
+
+        { "rounded-tl-md": index === length && !isMe },
+        { "rounded-br-md": index === length && isMe },
+
+        {
+          "rounded-bl-md rounded-tl-md":
+            index !== length && index !== 0 && !isMe,
+        },
+        {
+          "rounded-br-md rounded-tr-md":
+            index !== length && index !== 0 && isMe,
+        }
       )}
     >
-      dasjdasvdjhas d asd asd as das dsad asd asd asd sad as das as as d asd asd
-      as das d asd asd as das d asd
+      {content}
     </p>
   );
 });
 
-const MessageItem = memo(({ isMe }) => {
+const MessageItem = memo(({ isMe, messageList }) => {
+  console.log("messageList > ", messageList);
+  console.log("isMe > ", isMe);
+
+  const avatar = messageList?.[0]?.author?.profile?.avatar ?? defaultAvatar;
+  const name = messageList?.[0]?.author?.profile?.fullName;
   return (
     <div
       className={clsx("px-8 flex space-x-5 items-end", { "justify-end": isMe })}
     >
       {!isMe && (
         <Avatar
-          src={
-            "https://m.media-amazon.com/images/M/MV5BOWU1ODBiNGUtMzVjNi00MzdhLTk0OTktOWRiOTIxMWNhOGI2XkEyXkFqcGdeQXVyMTU2OTM5NDQw._V1_FMjpg_UX1000_.jpg"
-          }
+          src={avatar}
           className="w-10 h-10 mb-2 shadow-sm shadow-black/10"
         />
       )}
       <div className="max-w-[70%] space-y-1">
         {!isMe && (
-          <p className="px-4 text-sm text-slate-400 font-normal">Phụng gà</p>
+          <p className="px-4 text-sm text-slate-400 font-normal">{name}</p>
         )}
-        <SingleMessage isMe={isMe} />
-        <SingleMessage isMe={isMe} />
-        <SingleMessage isMe={isMe} />
+        <div className="flex flex-col-reverse">
+          {messageList?.map((message, index) => (
+            <SingleMessage
+              key={index}
+              isMe={isMe}
+              index={index}
+              length={messageList?.length - 1}
+              content={message.content}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -127,84 +148,52 @@ const GroupChatItem = memo(({ chat, handleSelectConversationDetail }) => {
 
 const ChatPage = () => {
   const dispatch = useDispatch();
-  const room = useSelector((state) => state.room);
   const chats = useSelector((state) => state.chats);
   const chatDetail = useSelector((state) => state.chatDetail);
   console.log("chatDetail from redux > ", chatDetail);
+  console.log("chatDetail from redux > ", chatDetail.chatDetail);
 
   const { email: managerEmail } = useRouteLoaderData("manager");
 
   const [searchInput, setSearchInput] = useState("");
   const [chatInput, setChatInput] = useState("");
-  const [chatDetailList, setChatDetailList] = useState([]);
-  console.log("chatDetailList > ", chatDetailList);
+  console.log("chatInput > ", chatInput);
 
-  // useEffect(() => {
-  //   if (chatDetail.status === "succeeded") {
-  //     console.log("GO");
-  //     if (chatDetailList.length === 0) {
-  //       console.log("GO2");
-  //       // Contain group of message with same user
-  //       let groupMessage;
+  const { mutate } = useMutation(
+    ({ id, content }) => createMessage(id, content),
+    {
+      onSuccess: (data, variables) => {
+        console.log("insert new message > ", data);
+      },
+    }
+  );
 
-  //       chatDetail.chatDetail?.map((item, index) => {
-  //         console.log("item > ", item);
-  //         console.log("index > ", index);
-  //         if (index === 0) {
-  //           // If 1st item => add directly to the group list
-  //           groupMessage = [item];
-  //         } else if (index === chatDetail.chatDetail?.length - 1) {
-  //           // If last item
-  //           if (
-  //             item?.author?.id === chatDetail.chatDetail[index - 1]?.author?.id
-  //           ) {
-  //             // If last item equal previous user => Add to the group list and add to the state
-  //             groupMessage = [...groupMessage, item];
-  //             setChatDetailList((prev) => [...prev, groupMessage]);
-  //           } else {
-  //             // If not equal, separate the group list and current item => add both to the state
-  //             setChatDetailList((prev) => [...prev, groupMessage, [item]]);
-  //           }
-  //         } else {
-  //           if (
-  //             item?.author?.id === chatDetail.chatDetail[index - 1]?.author?.id
-  //           ) {
-  //             // If current user equal to the previous user => add to the group list
-  //             groupMessage = [...groupMessage, item];
-  //           } else {
-  //             // If not equal => Add the group list to the state and reset with only the current item
-  //             setChatDetailList((prev) => [...prev, groupMessage]);
-  //             groupMessage = [item];
-  //           }
-  //         }
-  //       });
-  //     }
-  //     // setChatDetailList(prev => prev)
-  //   }
-  // }, [chatDetail.status]);
-
-  const handleSelectConversationDetail = (id, senderAvatar, senderFullName) => {
-    dispatch(fetchChatDetail({ id, senderAvatar, senderFullName }));
+  const handleSelectConversationDetail = (id, avatar, name) => {
+    if (!avatar && !name)
+      dispatch(fetchChatDetail({ id })); // fetch new chat detail
+    else dispatch(fetchChatDetail({ id, chatTitle: { avatar, name } })); // loadmore chat detail
   };
 
-  const handleSubmitChatMessage = () => {
-    setChatInput("");
+  const handleSubmitChatMessage = (e) => {
+    if (e.target.value !== "") {
+      // create new mesage
+      mutate({ id: chatDetail.chatId, content: e.target.value });
+
+      setChatInput("");
+    }
+  };
+
+  const handleSubmitChatMessageButton = () => {
+    if (chatInput !== "") {
+      // create new mesage
+      mutate({ id: chatDetail.chatId, content: chatInput });
+
+      setChatInput("");
+    }
   };
 
   // Handle open new room chat / call video
-  const handleOpenNewRoom = (isAudioOnly) => {
-    if (isAudioOnly) dispatch(roomActions.handleSetAudioOnly(true));
-    else dispatch(roomActions.handleSetAudioOnly(false));
-
-    // if user allow to access mic - camera => success
-    const successCallbackFunc = () => {
-      dispatch(roomActions.handleOpenRoom({ isUserInRoom: true }));
-    };
-
-    // getLocalStreamPreview(false, successCallbackFunc);
-    // getLocalStreamPreview(isAudioOnly, successCallbackFunc);
-    getLocalStreamPreview(room.audioOnly, successCallbackFunc);
-  };
+  const handleOpenNewRoom = (isAudioOnly) => {};
 
   return (
     <Fragment>
@@ -240,8 +229,9 @@ const ChatPage = () => {
                 </p>
               ) : (
                 chats.chats?.length !== 0 &&
-                chats.chats?.map((chat) => (
+                chats.chats?.map((chat, index) => (
                   <GroupChatItem
+                    key={index}
                     chat={chat}
                     handleSelectConversationDetail={
                       handleSelectConversationDetail
@@ -275,15 +265,19 @@ const ChatPage = () => {
               <div className="bg-slate-100 px-10 py-5 border-b-2 border-slate-200">
                 <div className="flex items-center space-x-5">
                   <Avatar
-                    src={chatDetail.sender?.avatar ?? defaultAvatar}
+                    src={chatDetail.chatTitle?.avatar ?? defaultAvatar}
                     className="w-12 h-12 shadow-sm shadow-black/10 bg-white"
                   />
 
                   <div className="flex-1 justify-around">
                     <p className="text-xl font-bold line-clamp-1">
-                      {chatDetail.sender?.fullName}
+                      {chatDetail.chatTitle?.name}
                     </p>
-                    <p className="text-sm">Nhân viên</p>
+                    {/* <p className="text-sm">Nhân viên</p> */}
+                    <div className="flex space-x-2 items-center text-xs font-semibold text-green-600">
+                      <FaCircle className="text-[0.45rem]" />
+                      <p>Trực tuyến</p>
+                    </div>
                   </div>
 
                   {/* Header Option */}
@@ -322,10 +316,14 @@ const ChatPage = () => {
               </div>
 
               {/* Chat section */}
-              <div className="min-h-[calc(100vh-64px-15rem)] max-h-[calc(100vh-64px-15rem)] bg-white space-y-5 py-10 overflow-scroll scrollbar-hide">
-                <MessageItem isMe />
-                <MessageItem isMe={false} />
-                <MessageItem isMe />
+              <div className="min-h-[calc(100vh-64px-15rem)] max-h-[calc(100vh-64px-15rem)] bg-white space-y-5 py-10 overflow-scroll scrollbar-hide flex flex-col-reverse">
+                {chatDetail.chatDetail?.map((groupMessage, index) => (
+                  <MessageItem
+                    key={index}
+                    isMe={groupMessage?.email === managerEmail}
+                    messageList={groupMessage.messageList}
+                  />
+                ))}
               </div>
 
               {/* Chat input */}
@@ -333,13 +331,16 @@ const ChatPage = () => {
                 <Input
                   className="text-xl"
                   bordered={false}
-                  placeholder="Type a message here"
+                  placeholder="Nhập đoạn tin nhắn ..."
                   value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
+                  onChange={(e) => {
+                    console.log("e.target.value > ", e.target.value);
+                    setChatInput(e.target.value);
+                  }}
                   onPressEnter={handleSubmitChatMessage}
                 />
                 <div
-                  onClick={handleSubmitChatMessage}
+                  onClick={handleSubmitChatMessageButton}
                   className="w-9 h-9 flex justify-center items-center rounded-full bg-blue-500"
                 >
                   <BsSendFill className="text-white text-sm" />
