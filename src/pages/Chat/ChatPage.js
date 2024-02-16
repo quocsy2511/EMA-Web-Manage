@@ -17,6 +17,7 @@ import { fetchChatDetail } from "../../store/chat_detail";
 import { useRouteLoaderData } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { createMessage } from "../../apis/chats";
+import { getChatsList } from "../../store/chats";
 
 const now = momenttz().tz("Asia/Bangkok");
 
@@ -24,14 +25,14 @@ const SingleMessage = memo(({ isMe, index, length, content }) => {
   return (
     <p
       className={clsx(
-        "text-sm font-medium px-5 py-3.5 rounded-3xl w-auto",
-        { " text-black bg-white border-2": isMe },
-        { " text-white bg-blue-500": !isMe },
+        "text-sm font-medium px-5 py-3.5 rounded-3xl w-auto mt-1.5 border-2",
+        { " text-black bg-white": isMe },
+        { " text-white bg-blue-500 border-transparent": !isMe },
 
-        { "rounded-bl-md": index === 0 && !isMe },
+        { "rounded-tl-md": index === 0 && !isMe },
         { "rounded-tr-md ": index === 0 && isMe },
 
-        { "rounded-tl-md": index === length && !isMe },
+        { "rounded-bl-md": index === length && !isMe },
         { "rounded-br-md": index === length && isMe },
 
         {
@@ -57,27 +58,39 @@ const MessageItem = memo(({ isMe, messageList }) => {
   const name = messageList?.[0]?.author?.profile?.fullName;
   return (
     <div
-      className={clsx("px-8 flex space-x-5 items-end", { "justify-end": isMe })}
+      className={clsx("px-8 flex space-x-5 items-end", {
+        "justify-end": isMe,
+      })}
     >
       {!isMe && (
         <Avatar
           src={avatar}
-          className="w-10 h-10 mb-2 shadow-sm shadow-black/10"
+          className="w-10 h-10 mb-5 shadow-sm shadow-black/10"
         />
       )}
-      <div className="max-w-[70%] space-y-1">
-        {!isMe && (
-          <p className="px-4 text-sm text-slate-400 font-normal">{name}</p>
-        )}
-        <div className="flex flex-col-reverse">
+      <div
+        className={clsx("w-[70%] space-y-1", {
+          "mb-5": !isMe,
+        })}
+      >
+        {/* {!isMe && (
+          <p className="text-sm font-normal text">{name}</p>
+        )} */}
+        <div
+          className={clsx("flex flex-col-reverse w-auto", {
+            "items-end": isMe,
+          })}
+        >
           {messageList?.map((message, index) => (
-            <SingleMessage
-              key={index}
-              isMe={isMe}
-              index={index}
-              length={messageList?.length - 1}
-              content={message.content}
-            />
+            <div className="w-fit">
+              <SingleMessage
+                key={index}
+                isMe={isMe}
+                index={index}
+                length={messageList?.length - 1}
+                content={message.content}
+              />
+            </div>
           ))}
         </div>
       </div>
@@ -149,15 +162,14 @@ const GroupChatItem = memo(({ chat, handleSelectConversationDetail }) => {
 const ChatPage = () => {
   const dispatch = useDispatch();
   const chats = useSelector((state) => state.chats);
+  // console.log("chats from redux > ", chats);
   const chatDetail = useSelector((state) => state.chatDetail);
-  console.log("chatDetail from redux > ", chatDetail);
-  console.log("chatDetail from redux > ", chatDetail.chatDetail);
+  // console.log("chatDetail from redux > ", chatDetail);
 
   const { email: managerEmail } = useRouteLoaderData("manager");
 
   const [searchInput, setSearchInput] = useState("");
   const [chatInput, setChatInput] = useState("");
-  console.log("chatInput > ", chatInput);
 
   const { mutate } = useMutation(
     ({ id, content }) => createMessage(id, content),
@@ -168,10 +180,18 @@ const ChatPage = () => {
     }
   );
 
+  const loadmoreChats = () => {
+    dispatch(getChatsList({ currentPage: chats.nextPage }));
+  };
+
+  const loadmoreChatDetail = () => {
+    dispatch(fetchChatDetail({ id, currentPage: chatDetail.nextPage }));
+  };
+
   const handleSelectConversationDetail = (id, avatar, name) => {
-    if (!avatar && !name)
-      dispatch(fetchChatDetail({ id })); // fetch new chat detail
-    else dispatch(fetchChatDetail({ id, chatTitle: { avatar, name } })); // loadmore chat detail
+    dispatch(
+      fetchChatDetail({ id, chatTitle: { avatar, name }, currentPage: 1 })
+    );
   };
 
   const handleSubmitChatMessage = (e) => {
@@ -197,7 +217,7 @@ const ChatPage = () => {
 
   return (
     <Fragment>
-      <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-10 pb-0 pl-10 pr-14 flex space-x-14 ">
+      <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-10 pb-0 pl-10 pr-14 flex space-x- ">
         {/* section 1 */}
         <div className="flex flex-col w-[35%] min-h-min max-h-[calc(100vh-64px-2.5rem)]">
           <p className="text-4xl text=black font-semibold ml-10 mb-5">Chats</p>
@@ -217,12 +237,12 @@ const ChatPage = () => {
           </div>
 
           <div className="h-dvh max-h-dvh mt-5 pt-5 space-y-8 px-10 overflow-y-scroll overflow-x-visible scrollbar-hide pb-10">
-            {chats.status === "pending" || chats.status === "idle" ? (
+            {chats.status === "idle" ? (
               <div className="flex flex-col items-center mt-10 space-y-3 ">
                 <ClipLoader color="#1677ff" size={45} />
                 <p className="text-xl">Đang tải ...</p>
               </div>
-            ) : chats.status === "succeeded" ? (
+            ) : chats.status === "succeeded" || chats.chats?.length !== 0 ? (
               chats.chats?.length === 0 ? (
                 <p className="px-10 mt-10 text-center text-black text-2xl font-medium">
                   Chưa tham gia đoạn hội thoại nào !
@@ -240,27 +260,52 @@ const ChatPage = () => {
                 ))
               )
             ) : (
-              <p className="px-10 mt-10 text-center text-black text-2xl font-medium">
-                Không thể lấy dữ liệu !<br />
-                Hãy thử lại sau.
-              </p>
+              chats.status === "failed" && (
+                <p className="px-10 mt-10 text-center text-black text-2xl font-medium">
+                  Không thể lấy dữ liệu !<br />
+                  Hãy thử lại sau.
+                </p>
+              )
+            )}
+
+            {chats.status === "pending" && (
+              <div className="flex flex-col items-center mt-10 space-y-3 ">
+                <ClipLoader color="#1677ff" size={45} />
+                <p className="text-xl">Đang tải ...</p>
+              </div>
+            )}
+
+            {chats.nextPage && chats.status === "succeeded" && (
+              <motion.p
+                onClick={loadmoreChats}
+                whileHover={{ y: -3 }}
+                className="text-lg text-center cursor-pointer"
+              >
+                Tải thêm
+              </motion.p>
             )}
           </div>
         </div>
 
         {/* section 2 */}
-        <div className="flex-1 flex flex-col min-h-[calc(100vh-64px-5rem)] mb-10 rounded-xl overflow-hidden bg-white shadow-[0_0_30px_0_rgba(0,0,0,0.3)] shadow-black/10">
+        <div className="flex-1 mx-20">
           {chatDetail.status === "idle" ? (
-            <div className="flex flex-col justify-center items-center h-full">
-              <p className="text-xl font-medium">Chọn 1 đoạn hội thoại</p>
+            // <div className="flex flex-col justify-center items-center h-full">
+            //   <p className="text-xl font-medium">Chọn 1 đoạn hội thoại</p>
+            // </div>
+            <></>
+          ) : chatDetail.status === "pending" &&
+            chatDetail.chatDetail.length === 0 ? (
+            <div className="flex-1 flex flex-col h-[calc(100vh-64px-5rem)] mb-10 rounded-xl overflow-hidden bg-white shadow-[0_0_30px_0_rgba(0,0,0,0.3)] shadow-black/10">
+              <div className="flex flex-col justify-center items-center h-full space-y-3">
+                <ClipLoader color="#1677ff" size={45} />
+                <p className="text-xl">Đang tải ...</p>
+              </div>
             </div>
-          ) : chatDetail.status === "pending" ? (
-            <div className="flex flex-col justify-center items-center h-full space-y-3">
-              <ClipLoader color="#1677ff" size={45} />
-              <p className="text-xl">Đang tải ...</p>
-            </div>
-          ) : chatDetail.status === "succeeded" ? (
-            <div>
+          ) : chatDetail.status === "succeeded" ||
+            (chatDetail.status === "pending" &&
+              chatDetail.chatDetail.length !== 0) ? (
+            <div className="flex-1 flex flex-col h-[calc(100vh-64px-5rem)] mb-10 rounded-xl overflow-hidden bg-white shadow-[0_0_30px_0_rgba(0,0,0,0.3)] shadow-black/10">
               {/* Header */}
               <div className="bg-slate-100 px-10 py-5 border-b-2 border-slate-200">
                 <div className="flex items-center space-x-5">
@@ -324,7 +369,25 @@ const ChatPage = () => {
                     messageList={groupMessage.messageList}
                   />
                 ))}
+
+                {chatDetail.nextPage && chatDetail.status === "succeeded" && (
+                  <motion.p
+                    onClick={loadmoreChatDetail}
+                    whileHover={{ y: -3 }}
+                    className="text-lg text-center cursor-pointer"
+                  >
+                    Tải thêm
+                  </motion.p>
+                )}
+
+                {chatDetail.status === "pending" && (
+                  <div className="flex flex-col items-center mt-10 space-y-3 ">
+                    <ClipLoader color="#1677ff" size={45} />
+                  </div>
+                )}
               </div>
+
+              {/* {loadmoreChatDetail} */}
 
               {/* Chat input */}
               <div className="flex items-center space-x-5 bg-white m-5 mt-0 pt-3 border-t-2 border-slate-100">

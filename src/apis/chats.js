@@ -4,8 +4,8 @@ import http from "../utils/axios-utils";
 export const createConversation = ({ email, message }) =>
   http({ url: "/conversations", method: "post", data: { email, message } });
 
-export const getConversations = () =>
-  http({ url: `/conversations?sizePage=10&currentPage=1` });
+export const getConversations = (currentPage) =>
+  http({ url: `/conversations?sizePage=5&currentPage=${currentPage}` });
 
 // Create a message while chatting
 export const createMessage = (id, content) =>
@@ -16,8 +16,10 @@ export const createMessage = (id, content) =>
   });
 
 // Get a conversation detail containing all messages
-export const getConversation = (id) =>
-  http({ url: `/conversations/${id}/messages` });
+export const getConversation = (id, currentPage) =>
+  http({
+    url: `/conversations/${id}/messages?sizePage=10&currentPage=${currentPage}`,
+  });
 
 // Update a message
 export const modifyMessage = (id, messageId, content) =>
