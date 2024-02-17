@@ -2,7 +2,11 @@ import http from "../utils/axios-utils";
 
 // Create a new 1-1 conversation
 export const createConversation = ({ email, message }) =>
-  http({ url: "/conversations", method: "post", data: { email, message } });
+  http({
+    url: "/conversations",
+    method: "post",
+    data: { email, message: message ? message : undefined },
+  });
 
 export const getConversations = (currentPage) =>
   http({ url: `/conversations?sizePage=5&currentPage=${currentPage}` });

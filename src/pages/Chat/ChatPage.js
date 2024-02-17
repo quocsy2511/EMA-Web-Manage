@@ -4,20 +4,25 @@ import { FiSearch } from "react-icons/fi";
 import { IoVideocam, IoCall } from "react-icons/io5";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { BsSendFill } from "react-icons/bs";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 import { useDispatch, useSelector } from "react-redux";
-import { roomActions } from "../../store/room";
-import { getLocalStreamPreview } from "../../socket/webRTCHandler";
-import { ClipLoader } from "react-spinners";
+import { ClipLoader, SyncLoader } from "react-spinners";
 import momenttz from "moment-timezone";
 import { defaultAvatar } from "../../constants/global";
 import { FaCircle } from "react-icons/fa";
 import { fetchChatDetail } from "../../store/chat_detail";
 import { useRouteLoaderData } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { createMessage } from "../../apis/chats";
+import { createConversation, createMessage } from "../../apis/chats";
 import { getChatsList } from "../../store/chats";
+import {
+  onConversationJoinSocket,
+  onConversationLeaveSocket,
+  onTypingStartSocket,
+  onTypingStopSocket,
+  socket,
+} from "../../utils/socket";
 
 const now = momenttz().tz("Asia/Bangkok");
 
@@ -51,9 +56,6 @@ const SingleMessage = memo(({ isMe, index, length, content }) => {
 });
 
 const MessageItem = memo(({ isMe, messageList }) => {
-  console.log("messageList > ", messageList);
-  console.log("isMe > ", isMe);
-
   const avatar = messageList?.[0]?.author?.profile?.avatar ?? defaultAvatar;
   const name = messageList?.[0]?.author?.profile?.fullName;
   return (
@@ -98,80 +100,203 @@ const MessageItem = memo(({ isMe, messageList }) => {
   );
 });
 
-const GroupChatItem = memo(({ chat, handleSelectConversationDetail }) => {
-  const time = momenttz(chat.lastMessageSentAt).tz("Asia/Bangkok");
+const GroupChatItem = memo(
+  ({ chat, onlineUsers, handleSelectConversationDetail }) => {
+    const time = momenttz(chat.lastMessageSentAt).tz("Asia/Bangkok");
 
-  let diff;
-  if (now.diff(time, "minutes") < 60)
-    diff = `${now.diff(time, "minutes")} phút`;
-  else if (now.diff(time, "hours") < 24)
-    diff = `${now.diff(time, "hours")} giờ`;
-  else if (now.diff(time, "days") < 7) diff = `${now.diff(time, "days")} ngày`;
-  else if (now.diff(time, "weeks") < 4)
-    diff = `${now.diff(time, "weeks")} tuần`;
-  else if (now.diff(time, "months") < 12)
-    diff = `${now.diff(time, "months")} tháng`;
-  else if (now.diff(time, "months") >= 12)
-    diff = `${now.diff(time, "years")} năm`;
+    let diff;
+    if (now.diff(time, "minutes") < 60)
+      diff = `${now.diff(time, "minutes")} phút`;
+    else if (now.diff(time, "hours") < 24)
+      diff = `${now.diff(time, "hours")} giờ`;
+    else if (now.diff(time, "days") < 7)
+      diff = `${now.diff(time, "days")} ngày`;
+    else if (now.diff(time, "weeks") < 4)
+      diff = `${now.diff(time, "weeks")} tuần`;
+    else if (now.diff(time, "months") < 12)
+      diff = `${now.diff(time, "months")} tháng`;
+    else if (now.diff(time, "months") >= 12)
+      diff = `${now.diff(time, "years")} năm`;
 
-  return (
-    <motion.div
-      onClick={() =>
-        handleSelectConversationDetail(
-          chat.id,
-          chat?.recipient?.profile?.avatar,
-          chat?.recipient?.profile?.fullName
-        )
-      }
-      whileHover={{ scale: 1.1 }}
-      className="bg-white p-5 rounded-lg space-y-5 shadow-md hover:shadow-xl transition-shadow shadow-black/10 cursor-pointer"
-    >
-      <div className="flex items-center space-x-5">
-        <Avatar
-          src={chat?.recipient?.profile?.avatar ?? defaultAvatar}
-          className="w-10 h-10 shadow-sm shadow-black/10"
-        />
+    // const isOnline = onlineUsers.includes(chat?.recipient?.id);
+    const isOnline = !!onlineUsers.find(
+      (item) => item.id === chat?.recipient?.id
+    );
 
-        <div className="flex-1 justify-around">
-          <p className="text-lg font-bold line-clamp-1">
-            {chat?.recipient?.profile?.fullName ?? "Tên người dùng"}
+    return (
+      <motion.div
+        onClick={() =>
+          handleSelectConversationDetail(
+            chat.id,
+            chat?.recipient?.profile?.avatar,
+            chat?.recipient?.profile?.fullName
+          )
+        }
+        whileHover={{ scale: 1.1 }}
+        className="bg-white p-5 rounded-lg space-y-5 shadow-md hover:shadow-xl transition-shadow shadow-black/10 cursor-pointer"
+      >
+        <div className="flex items-center space-x-5">
+          <Avatar
+            src={chat?.recipient?.profile?.avatar ?? defaultAvatar}
+            className="w-10 h-10 shadow-sm shadow-black/10"
+          />
+
+          <div className="flex-1 justify-around">
+            <p className="text-lg font-bold line-clamp-1">
+              {chat?.recipient?.profile?.fullName ?? "Tên người dùng"}
+            </p>
+            <div
+              className={clsx(
+                "flex space-x-2 items-center text-xs font-semibold text-green-600",
+                { "text-slate-400": !isOnline }
+              )}
+            >
+              <FaCircle className="text-[0.45rem]" />
+              <p>{isOnline ? "Trực tuyến" : "Ngoại tuyến"}</p>
+            </div>
+          </div>
+
+          <p className="text-right text-sm font-normal text-slate-400">
+            {diff} trước
           </p>
-          <div className="flex space-x-2 items-center text-xs font-semibold text-green-600">
-            <FaCircle className="text-[0.45rem]" />
-            <p>Trực tuyến</p>
+        </div>
+
+        <div className="flex items-start space-x-5">
+          <p
+            className={clsx(
+              "flex-1 line-clamp-3 text-base font-medium truncate",
+              { "text-slate-500": !chat?.lastMessageSent?.content }
+            )}
+          >
+            {chat?.lastMessageSent?.content ?? "Gửi tin nhắn đầu tiên"}
+          </p>
+          <div className="w-5 h-5 flex justify-center items-center bg-red-500 rounded-full">
+            <p className="text-white text-xs font-medium">3</p>
           </div>
         </div>
-
-        <p className="text-right text-sm font-normal text-slate-400">
-          {diff} trước
-        </p>
-      </div>
-
-      <div className="flex items-start space-x-5">
-        <p className="flex-1 line-clamp-3 text-base font-normal">
-          {chat?.lastMessageSent?.content}
-        </p>
-        <div className="w-5 h-5 flex justify-center items-center bg-red-500 rounded-full">
-          <p className="text-white text-xs font-medium">11</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-});
+      </motion.div>
+    );
+  }
+);
 
 const ChatPage = () => {
   const dispatch = useDispatch();
   const chats = useSelector((state) => state.chats);
-  // console.log("chats from redux > ", chats);
+  console.log("chats from redux > ", chats);
   const chatDetail = useSelector((state) => state.chatDetail);
-  // console.log("chatDetail from redux > ", chatDetail);
+  console.log("chatDetail from redux > ", chatDetail);
+  const { onlineUsers, offlineUsers } = useSelector(
+    (state) => state.onlineUser
+  );
 
-  const { email: managerEmail } = useRouteLoaderData("manager");
+  const { email: managerEmail, id: managerId } = useRouteLoaderData("manager");
 
   const [searchInput, setSearchInput] = useState("");
   const [chatInput, setChatInput] = useState("");
+  const [searchUsers, setSearchUsers] = useState(null);
+  const [isRecipientTyping, setIsRecipientTyping] = useState(false);
+  console.log("isRecipientTyping >", isRecipientTyping);
 
-  const { mutate } = useMutation(
+  useEffect(() => {
+    if (chatDetail.chatId !== "") onConversationJoinSocket(chatDetail.chatId);
+
+    socket.on("userJoin", () => {
+      console.log("userJoin");
+    });
+
+    socket.on("userLeave", () => {
+      console.log("userLeave");
+    });
+
+    socket.on("onTypingStart", () => {
+      console.log("onTypingStart: User has started typing...");
+      setIsRecipientTyping(true);
+    });
+    socket.on("onTypingStop", () => {
+      console.log("onTypingStop: User has stopped typing...");
+      setIsRecipientTyping(false);
+    });
+
+    return () => {
+      // If chatDetail.chatId change => leave the previous room chat
+      if (chatDetail.chatId !== "")
+        onConversationLeaveSocket(chatDetail.chatId);
+      socket.off("userJoin");
+      socket.off("userLeave");
+      socket.off("onTypingStart");
+      socket.off("onTypingStop");
+    };
+  }, [chatDetail.chatId]);
+
+  useEffect(() => {
+    const identifier = setTimeout(() => {
+      if (searchInput !== "") {
+        const searchOnlineUser = onlineUsers.filter(
+          (user) =>
+            user.email.includes(searchInput.toLowerCase()) ||
+            (user.fullName.toLowerCase().includes(searchInput.toLowerCase()) &&
+              user.id !== managerId)
+        );
+
+        const searchOfflineUsers = offlineUsers.filter(
+          (user) =>
+            user.email.includes(searchInput.toLowerCase()) ||
+            (user.fullName.toLowerCase().includes(searchInput.toLowerCase()) &&
+              user.id !== managerId)
+        );
+
+        const filterUser = searchOnlineUser
+          .map((item) => ({ ...item, online: true }))
+          .concat(searchOfflineUsers);
+
+        setSearchUsers(filterUser);
+      } else {
+        setSearchUsers(null);
+      }
+    }, 1500);
+
+    return () => {
+      clearTimeout(identifier);
+    };
+  }, [searchInput]);
+
+  const { mutate: conversationMutate } = useMutation(
+    ({ email, avatar, name }) => createConversation({ email }),
+    {
+      onSuccess: (data, variables) => {
+        console.log("data > ", data, variables);
+        dispatch(getChatsList({ currentPage: 1 }));
+        dispatch(
+          fetchChatDetail({
+            id: data?.id,
+            chatTitle: { avatar: variables.avatar, name: variables.name },
+            currentPage: 1,
+          })
+        );
+
+        setSearchInput("");
+      },
+      onError: (error, variables) => {
+        console.log("error > ", error);
+        console.log("variables > ", variables);
+
+        if (error.response.status === 409) {
+          console.log("409");
+          dispatch(
+            fetchChatDetail({
+              id: error.response.data?.message,
+              chatTitle: { avatar: variables.avatar, name: variables.name },
+              currentPage: 1,
+            })
+          );
+
+          setSearchInput("");
+        }
+      },
+    }
+  );
+
+  const { mutate: messageMutate } = useMutation(
     ({ id, content }) => createMessage(id, content),
     {
       onSuccess: (data, variables) => {
@@ -197,7 +322,7 @@ const ChatPage = () => {
   const handleSubmitChatMessage = (e) => {
     if (e.target.value !== "") {
       // create new mesage
-      mutate({ id: chatDetail.chatId, content: e.target.value });
+      messageMutate({ id: chatDetail.chatId, content: e.target.value });
 
       setChatInput("");
     }
@@ -206,10 +331,14 @@ const ChatPage = () => {
   const handleSubmitChatMessageButton = () => {
     if (chatInput !== "") {
       // create new mesage
-      mutate({ id: chatDetail.chatId, content: chatInput });
+      messageMutate({ id: chatDetail.chatId, content: chatInput });
 
       setChatInput("");
     }
+  };
+
+  const handleSelectConservation = (email, avatar, name) => {
+    conversationMutate({ email, avatar, name });
   };
 
   // Handle open new room chat / call video
@@ -227,64 +356,139 @@ const ChatPage = () => {
             <Input
               className="text-lg"
               bordered={false}
-              placeholder="Search"
+              placeholder="Tìm kiếm theo tên hoặc email"
               allowClear
+              value={searchInput}
               onChange={(e) => {
-                console.log("e.target.value >> ", e.target.value);
                 setSearchInput(e.target.value);
               }}
+              onFocus={() => {}}
+              onBlur={() => {}}
             />
           </div>
 
-          <div className="h-dvh max-h-dvh mt-5 pt-5 space-y-8 px-10 overflow-y-scroll overflow-x-visible scrollbar-hide pb-10">
-            {chats.status === "idle" ? (
-              <div className="flex flex-col items-center mt-10 space-y-3 ">
-                <ClipLoader color="#1677ff" size={45} />
-                <p className="text-xl">Đang tải ...</p>
-              </div>
-            ) : chats.status === "succeeded" || chats.chats?.length !== 0 ? (
-              chats.chats?.length === 0 ? (
-                <p className="px-10 mt-10 text-center text-black text-2xl font-medium">
-                  Chưa tham gia đoạn hội thoại nào !
-                </p>
-              ) : (
-                chats.chats?.length !== 0 &&
-                chats.chats?.map((chat, index) => (
-                  <GroupChatItem
-                    key={index}
-                    chat={chat}
-                    handleSelectConversationDetail={
-                      handleSelectConversationDetail
-                    }
-                  />
-                ))
-              )
-            ) : (
-              chats.status === "failed" && (
-                <p className="px-10 mt-10 text-center text-black text-2xl font-medium">
-                  Không thể lấy dữ liệu !<br />
-                  Hãy thử lại sau.
-                </p>
-              )
-            )}
-
-            {chats.status === "pending" && (
-              <div className="flex flex-col items-center mt-10 space-y-3 ">
-                <ClipLoader color="#1677ff" size={45} />
-                <p className="text-xl">Đang tải ...</p>
-              </div>
-            )}
-
-            {chats.nextPage && chats.status === "succeeded" && (
-              <motion.p
-                onClick={loadmoreChats}
-                whileHover={{ y: -3 }}
-                className="text-lg text-center cursor-pointer"
+          <AnimatePresence mode="wait">
+            {!searchInput ? (
+              <motion.div
+                key="chat"
+                initial={{ x: -10, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 10, opacity: 0 }}
+                className="h-dvh max-h-dvh mt-5 pt-5 space-y-8 px-10 overflow-y-scroll overflow-x-visible scrollbar-hide pb-10"
               >
-                Tải thêm
-              </motion.p>
+                {chats.status === "idle" ? (
+                  <div className="flex flex-col items-center mt-10 space-y-3 ">
+                    <ClipLoader color="#1677ff" size={45} />
+                    <p className="text-xl">Đang tải ...</p>
+                  </div>
+                ) : chats.status === "succeeded" ||
+                  chats.chats?.length !== 0 ? (
+                  chats.chats?.length === 0 ? (
+                    <p className="px-10 mt-10 text-center text-black text-2xl font-medium">
+                      Chưa tham gia đoạn hội thoại nào !
+                    </p>
+                  ) : (
+                    chats.chats?.length !== 0 &&
+                    chats.chats?.map((chat, index) => (
+                      <GroupChatItem
+                        key={index}
+                        chat={chat}
+                        onlineUsers={onlineUsers}
+                        handleSelectConversationDetail={
+                          handleSelectConversationDetail
+                        }
+                      />
+                    ))
+                  )
+                ) : (
+                  chats.status === "failed" && (
+                    <p className="px-10 mt-10 text-center text-black text-2xl font-medium">
+                      Không thể lấy dữ liệu !<br />
+                      Hãy thử lại sau.
+                    </p>
+                  )
+                )}
+
+                {chats.status === "pending" && (
+                  <div className="flex flex-col items-center mt-10 space-y-3 ">
+                    <ClipLoader color="#1677ff" size={45} />
+                    <p className="text-xl">Đang tải ...</p>
+                  </div>
+                )}
+
+                {chats.nextPage && chats.status === "succeeded" && (
+                  <motion.p
+                    onClick={loadmoreChats}
+                    whileHover={{ y: -3 }}
+                    className="text-lg text-center cursor-pointer"
+                  >
+                    Tải thêm
+                  </motion.p>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="search"
+                initial={{ x: -10, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 10, opacity: 0 }}
+                className="h-dvh max-h-dvh mt-5 pt-5 space-y-8 px-10 overflow-y-scroll overflow-x-visible scrollbar-hide pb-10"
+              >
+                <AnimatePresence mode="wait">
+                  {searchUsers &&
+                    (searchUsers.length === 0 ? (
+                      <motion.div
+                        key="search-not-found"
+                        initial={{ x: -1, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -1, opacity: 0 }}
+                        className="mt-10 text-center"
+                      >
+                        <p className="text-xl">
+                          Không tìm thấy người dùng nào !
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="search-found"
+                        initial={{ x: -1, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -1, opacity: 0 }}
+                        className="space-y-5"
+                      >
+                        {searchUsers.map((user) => (
+                          <motion.div
+                            key={user.email}
+                            onClick={() =>
+                              handleSelectConservation(
+                                user.email,
+                                user.avatar,
+                                user.fullName
+                              )
+                            }
+                            whileHover={{
+                              y: -3,
+                            }}
+                            className="flex items-center space-x-5 px-5 py-2 bg-white rounded-lg shadow-md cursor-pointer"
+                          >
+                            <div className="relative">
+                              <Avatar
+                                src={user.avatar ?? defaultAvatar}
+                                size="large"
+                              />
+                              {user.online && (
+                                <div className="bg-green-400 rounded-full border-2 right-0 border-white absolute bottom-0 h-[40%] w-[40%]" />
+                              )}
+                            </div>
+                            <p className="text-lg">{user.fullName}</p>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    ))}
+                </AnimatePresence>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
 
         {/* section 2 */}
@@ -362,13 +566,34 @@ const ChatPage = () => {
 
               {/* Chat section */}
               <div className="min-h-[calc(100vh-64px-15rem)] max-h-[calc(100vh-64px-15rem)] bg-white space-y-5 py-10 overflow-scroll scrollbar-hide flex flex-col-reverse">
-                {chatDetail.chatDetail?.map((groupMessage, index) => (
-                  <MessageItem
-                    key={index}
-                    isMe={groupMessage?.email === managerEmail}
-                    messageList={groupMessage.messageList}
-                  />
-                ))}
+                {isRecipientTyping && (
+                  <div className="flex items-center space-x-5 ml-8">
+                    <Avatar
+                      src={chatDetail.chatTitle?.avatar ?? defaultAvatar}
+                      className="w-10 h-10 shadow-sm shadow-black/10"
+                    />
+
+                    <div className="rounded-3xl px-6 py-3 bg-blue-500">
+                      <SyncLoader size={5} color="#ffffff" />
+                    </div>
+                  </div>
+                )}
+
+                {chatDetail.chatDetail.length === 0 ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <p className="text-xl text-slate-400">
+                      Hãy là người gửi đoạn tin nhắn đầu tiên
+                    </p>
+                  </div>
+                ) : (
+                  chatDetail.chatDetail?.map((groupMessage, index) => (
+                    <MessageItem
+                      key={index}
+                      isMe={groupMessage?.email === managerEmail}
+                      messageList={groupMessage.messageList}
+                    />
+                  ))
+                )}
 
                 {chatDetail.nextPage && chatDetail.status === "succeeded" && (
                   <motion.p
@@ -401,6 +626,12 @@ const ChatPage = () => {
                     setChatInput(e.target.value);
                   }}
                   onPressEnter={handleSubmitChatMessage}
+                  onFocus={() => {
+                    onTypingStartSocket(chatDetail.chatId);
+                  }}
+                  onBlur={() => {
+                    onTypingStopSocket(chatDetail.chatId);
+                  }}
                 />
                 <div
                   onClick={handleSubmitChatMessageButton}

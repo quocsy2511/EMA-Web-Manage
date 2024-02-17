@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { authRequest } from "../utils/axios-utils";
 import { getConversation } from "../apis/chats";
 
 export const fetchChatDetail = createAsyncThunk(

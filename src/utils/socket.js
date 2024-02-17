@@ -1,8 +1,9 @@
 import { io } from "socket.io-client";
 import { URL_SOCKET } from "../constants/api";
 import { chatDetailActions } from "../store/chat_detail";
+import { handleUpdateUsers } from "../store/online_user";
 
-const socket = io(URL_SOCKET, {
+export const socket = io(URL_SOCKET, {
   withCredentials: true,
   auth: {
     access_token: localStorage.getItem("token"),
@@ -62,14 +63,45 @@ export const managerSocket = (dispatch, notificationAPI) => {
     );
   });
 
+  // Get online / offline user
   socket.on("onlineGroupUsersReceived", (data) => {
     console.log("online user > ", data);
-  });
 
-  // socket.emit("onConversationJoin", { data });
-  // socket.emit("onConversationLeave", { data });
+    dispatch(
+      handleUpdateUsers({
+        onlineUsers: data.onlineUsers,
+        offlineUsers: data.offlineUsers,
+      })
+    );
+  });
 };
 
+// =============================== EMIT SOCKET ===============================
 export const getOnlineGroupUsersSocket = () => {
   socket.emit("getOnlineGroupUsers", {});
+};
+
+export const onConversationJoinSocket = (conversationId) => {
+  socket.emit("onConversationJoin", { conversationId });
+};
+
+export const onConversationLeaveSocket = (conversationId) => {
+  socket.emit("onConversationLeave", { conversationId });
+};
+
+export const onTypingStartSocket = (conversationId) => {
+  socket.emit("onTypingStart", { conversationId });
+};
+
+export const onTypingStopSocket = (conversationId) => {
+  socket.emit("onTypingStop", { conversationId });
+};
+
+// =============================== CLEAN UP SOCKET ===============================
+export const cleanUpOnMessage = () => {
+  socket.off("onMessage");
+};
+
+export const cleanUpOnlineGroupUsersReceived = () => {
+  socket.off("onlineGroupUsersReceived");
 };
