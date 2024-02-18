@@ -101,7 +101,7 @@ const MessageItem = memo(({ isMe, messageList }) => {
 });
 
 const GroupChatItem = memo(
-  ({ chat, onlineUsers, handleSelectConversationDetail, managerEmail }) => {
+  ({ chat, onlineUsers, handleSelectConversationDetail, userEmail }) => {
     const time = momenttz(chat.lastMessageSentAt);
     console.log("chat > ", chat);
     console.log("chat time > ", time);
@@ -120,10 +120,11 @@ const GroupChatItem = memo(
     else if (now.diff(time, "months") >= 12)
       diff = `${now.diff(time, "years")} năm`;
 
+    const user =
+      chat?.creator?.email !== userEmail ? chat?.creator : chat?.recipient;
+
     // const isOnline = onlineUsers.includes(chat?.recipient?.id);
-    const isOnline = !!onlineUsers.find(
-      (item) => item.id === chat?.recipient?.id
-    );
+    const isOnline = !!onlineUsers.find((item) => item.id === user?.id);
 
     return (
       <motion.div
@@ -131,8 +132,8 @@ const GroupChatItem = memo(
         onClick={() =>
           handleSelectConversationDetail(
             chat.id,
-            chat?.recipient?.profile?.avatar,
-            chat?.recipient?.profile?.fullName
+            user?.profile?.avatar,
+            user?.profile?.fullName
           )
         }
         whileHover={{ scale: 1.1 }}
@@ -140,13 +141,13 @@ const GroupChatItem = memo(
       >
         <div className="flex items-center space-x-5">
           <Avatar
-            src={chat?.recipient?.profile?.avatar ?? defaultAvatar}
+            src={user?.profile?.avatar ?? defaultAvatar}
             className="w-10 h-10 shadow-sm shadow-black/10"
           />
 
           <div className="flex-1 justify-around">
             <p className="text-lg font-bold line-clamp-1">
-              {chat?.recipient?.profile?.fullName ?? "Tên người dùng"}
+              {user?.profile?.fullName ?? "Tên người dùng"}
             </p>
             <div
               className={clsx(
@@ -173,7 +174,7 @@ const GroupChatItem = memo(
           >
             {!chat?.lastMessageSent
               ? "Gửi tin nhắn đầu tiên"
-              : chat?.lastMessageSent?.author?.email === managerEmail
+              : chat?.lastMessageSent?.author?.email === userEmail
               ? "Bạn đã gửi 1 tin nhắn"
               : `${chat?.lastMessageSent?.author?.profile?.fullName}: ${chat?.lastMessageSent?.content}`}
           </p>
@@ -196,7 +197,13 @@ const ChatPage = () => {
   );
   // console.log("onlineUsers > ", onlineUsers);
 
-  const { email: managerEmail, id: managerId } = useRouteLoaderData("manager");
+  const { email: managerEmail, id: managerId } =
+    useRouteLoaderData("manager") || {};
+  const { email: staffEmail, id: staffId } = useRouteLoaderData("staff") || {};
+
+  const userEmail = managerEmail ? managerEmail : staffEmail;
+  const userId = managerId ? managerId : staffId;
+  console.log("userEmail > ", userEmail);
 
   const [searchInput, setSearchInput] = useState("");
   const [chatInput, setChatInput] = useState("");
@@ -239,14 +246,14 @@ const ChatPage = () => {
       if (searchInput !== "") {
         const searchOnlineUser = onlineUsers.filter(
           (user) =>
-            user.id !== managerId &&
+            user.id !== userId &&
             (user.email.includes(searchInput.toLowerCase()) ||
               user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
 
         const searchOfflineUsers = offlineUsers.filter(
           (user) =>
-            user.id !== managerId &&
+            user.id !== userId &&
             (user.email.includes(searchInput.toLowerCase()) ||
               user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
@@ -368,12 +375,12 @@ const ChatPage = () => {
               }}
               onFocus={() => {
                 const users = onlineUsers
-                  .filter((user) => user.id !== managerId)
+                  .filter((user) => user.id !== userId)
                   .map((item) => ({
                     ...item,
                     online: true,
                   }))
-                  .concat(offlineUsers.filter((user) => user.id !== managerId));
+                  .concat(offlineUsers.filter((user) => user.id !== userId));
 
                 setSearchUsers(users);
               }}
@@ -411,7 +418,7 @@ const ChatPage = () => {
                         handleSelectConversationDetail={
                           handleSelectConversationDetail
                         }
-                        managerEmail={managerEmail}
+                        userEmail={userEmail}
                       />
                     ))
                   )
@@ -620,7 +627,7 @@ const ChatPage = () => {
                   chatDetail.chatDetail?.map((groupMessage, index) => (
                     <MessageItem
                       key={index + groupMessage?.email}
-                      isMe={groupMessage?.email === managerEmail}
+                      isMe={groupMessage?.email === userEmail}
                       messageList={groupMessage.messageList}
                     />
                   ))

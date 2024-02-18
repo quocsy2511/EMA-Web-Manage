@@ -18,6 +18,8 @@ import { addNotification } from "../../store/Slice/notificationsSlice";
 import { redirectionActions } from "../../store/redirection";
 import TEXT from "../../constants/string";
 import { defaultAvatar } from "../../constants/global";
+import { chatsActions } from "../../store/chats";
+import { closeConnectSocket } from "../../utils/socket";
 
 const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
@@ -27,9 +29,7 @@ const Header = ({ collapsed, setCollapsed }) => {
   const administrator = useRouteLoaderData("administrator");
 
   const dispatch = useDispatch();
-  const { socket } = useSelector((state) => state.socket);
   const { redirect } = useSelector((state) => state.redirection);
-  // console.log("redirection: ", redirect);
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -161,7 +161,10 @@ const Header = ({ collapsed, setCollapsed }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
-    socket?.disconnect();
+
+    closeConnectSocket();
+    dispatch(chatsActions.resetChats());
+
     navigate("/");
   };
 

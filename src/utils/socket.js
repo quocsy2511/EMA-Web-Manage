@@ -2,6 +2,7 @@ import { io } from "socket.io-client";
 import { URL_SOCKET } from "../constants/api";
 import { chatDetailActions } from "../store/chat_detail";
 import { handleUpdateUsers } from "../store/online_user";
+import { chatsActions } from "../store/chats";
 
 export const socket = io(URL_SOCKET, {
   withCredentials: true,
@@ -12,7 +13,7 @@ export const socket = io(URL_SOCKET, {
 
 export const socketListener = (dispatch, notificationAPI) => {
   // create connection
-  socket.on("connect", () => {
+  socket.on("connect-success", () => {
     console.log("Successfully connect with socket.io server : ", socket.id);
   });
 
@@ -74,6 +75,12 @@ export const socketListener = (dispatch, notificationAPI) => {
       })
     );
   });
+
+  socket.on("onConversation", (data) => {
+    console.log("onConversation > ", data);
+
+    // dispatch(chatsActions.updateChat(data));
+  });
 };
 
 // =============================== EMIT SOCKET ===============================
@@ -95,6 +102,10 @@ export const onTypingStartSocket = (conversationId) => {
 
 export const onTypingStopSocket = (conversationId) => {
   socket.emit("onTypingStop", { conversationId });
+};
+
+export const closeConnectSocket = () => {
+  socket.emit("closeConnect", {});
 };
 
 // =============================== CLEAN UP SOCKET ===============================

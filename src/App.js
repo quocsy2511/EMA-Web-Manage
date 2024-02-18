@@ -287,7 +287,7 @@ const router = createBrowserRouter([
         path: "chat",
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <StaffChatPage />
+            <ChatPage />
           </Suspense>
         ),
       },
