@@ -76,10 +76,18 @@ export const socketListener = (dispatch, notificationAPI) => {
     );
   });
 
-  socket.on("onConversation", (data) => {
-    console.log("onConversation > ", data);
+  // after create a conversation => add to the redux
+  // socket.on("onConversation", (data) => {
+  //   console.log("onConversation > ", data);
 
-    // dispatch(chatsActions.updateChat(data));
+  //   dispatch(chatsActions.updateChat(data));
+  // });
+
+  //
+  socket.on("onConversationUpdate", (data) => {
+    console.log("onConversationUpdate > ", data);
+
+    dispatch(chatsActions.updateChat(data));
   });
 };
 

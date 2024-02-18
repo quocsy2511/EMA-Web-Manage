@@ -20,6 +20,7 @@ import { getChatsList } from "../../store/chats";
 import {
   onConversationJoinSocket,
   onConversationLeaveSocket,
+  onConversationUpdateSocket,
   onTypingStartSocket,
   onTypingStopSocket,
   socket,
@@ -103,8 +104,6 @@ const MessageItem = memo(({ isMe, messageList }) => {
 const GroupChatItem = memo(
   ({ chat, onlineUsers, handleSelectConversationDetail, userEmail }) => {
     const time = momenttz(chat.lastMessageSentAt);
-    console.log("chat > ", chat);
-    console.log("chat time > ", time);
 
     let diff;
     if (now.diff(time, "minutes") < 60)
@@ -195,7 +194,7 @@ const ChatPage = () => {
   const { onlineUsers, offlineUsers } = useSelector(
     (state) => state.onlineUser
   );
-  // console.log("onlineUsers > ", onlineUsers);
+  console.log("onlineUsers > ", onlineUsers);
 
   const { email: managerEmail, id: managerId } =
     useRouteLoaderData("manager") || {};
@@ -671,13 +670,13 @@ const ChatPage = () => {
                   placeholder="Nhập đoạn tin nhắn ..."
                   value={chatInput}
                   onChange={(e) => {
-                    console.log("e.target.value > ", e.target.value);
+                    if (e.target.value === "")
+                      onTypingStopSocket(chatDetail.chatId);
+                    else onTypingStartSocket(chatDetail.chatId);
                     setChatInput(e.target.value);
                   }}
                   onPressEnter={handleSubmitChatMessage}
-                  onFocus={() => {
-                    onTypingStartSocket(chatDetail.chatId);
-                  }}
+                  onFocus={() => {}}
                   onBlur={() => {
                     onTypingStopSocket(chatDetail.chatId);
                   }}
