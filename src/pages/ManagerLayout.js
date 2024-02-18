@@ -7,7 +7,11 @@ import Header from "../components/Header/Header";
 import { useDispatch, useSelector } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { getOnlineGroupUsersSocket, managerSocket } from "../utils/socket";
+import {
+  cleanUpOnMessage,
+  getOnlineGroupUsersSocket,
+  managerSocket,
+} from "../utils/socket";
 import { getChatsList } from "../store/chats";
 
 const ManagerLayout = () => {
@@ -27,6 +31,10 @@ const ManagerLayout = () => {
     getOnlineGroupUsersSocket();
 
     dispatch(getChatsList({ currentPage: 1 }));
+
+    return () => {
+      cleanUpOnMessage();
+    };
   }, []);
 
   return (

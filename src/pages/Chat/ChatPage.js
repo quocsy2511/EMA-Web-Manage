@@ -1,9 +1,10 @@
-import { Avatar, Input } from "antd";
+import { Avatar, Input, Popover } from "antd";
 import React, { Fragment, useState, memo, useEffect } from "react";
 import { FiSearch } from "react-icons/fi";
 import { IoVideocam, IoCall } from "react-icons/io5";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { BsSendFill } from "react-icons/bs";
+import { FaArrowUp } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,6 +26,7 @@ import {
 } from "../../utils/socket";
 
 const now = momenttz().tz("Asia/Bangkok");
+console.log("Now > ", now);
 
 const SingleMessage = memo(({ isMe, index, length, content }) => {
   return (
@@ -84,9 +86,8 @@ const MessageItem = memo(({ isMe, messageList }) => {
           })}
         >
           {messageList?.map((message, index) => (
-            <div className="w-fit">
+            <div className="w-fit" key={message?.id ?? index}>
               <SingleMessage
-                key={index}
                 isMe={isMe}
                 index={index}
                 length={messageList?.length - 1}
@@ -101,8 +102,9 @@ const MessageItem = memo(({ isMe, messageList }) => {
 });
 
 const GroupChatItem = memo(
-  ({ chat, onlineUsers, handleSelectConversationDetail }) => {
+  ({ chat, onlineUsers, handleSelectConversationDetail, managerEmail }) => {
     const time = momenttz(chat.lastMessageSentAt).tz("Asia/Bangkok");
+    console.log("chat > ", chat);
 
     let diff;
     if (now.diff(time, "minutes") < 60)
@@ -125,6 +127,7 @@ const GroupChatItem = memo(
 
     return (
       <motion.div
+        key={chat.id}
         onClick={() =>
           handleSelectConversationDetail(
             chat.id,
@@ -168,7 +171,11 @@ const GroupChatItem = memo(
               { "text-slate-500": !chat?.lastMessageSent?.content }
             )}
           >
-            {chat?.lastMessageSent?.content ?? "Gửi tin nhắn đầu tiên"}
+            {/* {!chat?.lastMessageSent?.content
+              ? "Gửi tin nhắn đầu tiên"
+              : chat?.lastMessageSent?.email === managerEmail
+              ? "Bạn đã gửi 1 tin nhắn"
+              : ""} */}
           </p>
           <div className="w-5 h-5 flex justify-center items-center bg-red-500 rounded-full">
             <p className="text-white text-xs font-medium">3</p>
@@ -188,6 +195,7 @@ const ChatPage = () => {
   const { onlineUsers, offlineUsers } = useSelector(
     (state) => state.onlineUser
   );
+  // console.log("onlineUsers > ", onlineUsers);
 
   const { email: managerEmail, id: managerId } = useRouteLoaderData("manager");
 
@@ -195,7 +203,6 @@ const ChatPage = () => {
   const [chatInput, setChatInput] = useState("");
   const [searchUsers, setSearchUsers] = useState(null);
   const [isRecipientTyping, setIsRecipientTyping] = useState(false);
-  console.log("isRecipientTyping >", isRecipientTyping);
 
   useEffect(() => {
     if (chatDetail.chatId !== "") onConversationJoinSocket(chatDetail.chatId);
@@ -233,16 +240,16 @@ const ChatPage = () => {
       if (searchInput !== "") {
         const searchOnlineUser = onlineUsers.filter(
           (user) =>
-            user.email.includes(searchInput.toLowerCase()) ||
-            (user.fullName.toLowerCase().includes(searchInput.toLowerCase()) &&
-              user.id !== managerId)
+            user.id !== managerId &&
+            (user.email.includes(searchInput.toLowerCase()) ||
+              user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
 
         const searchOfflineUsers = offlineUsers.filter(
           (user) =>
-            user.email.includes(searchInput.toLowerCase()) ||
-            (user.fullName.toLowerCase().includes(searchInput.toLowerCase()) &&
-              user.id !== managerId)
+            user.id !== managerId &&
+            (user.email.includes(searchInput.toLowerCase()) ||
+              user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
 
         const filterUser = searchOnlineUser
@@ -266,12 +273,11 @@ const ChatPage = () => {
       onSuccess: (data, variables) => {
         console.log("data > ", data, variables);
         dispatch(getChatsList({ currentPage: 1 }));
-        dispatch(
-          fetchChatDetail({
-            id: data?.id,
-            chatTitle: { avatar: variables.avatar, name: variables.name },
-            currentPage: 1,
-          })
+
+        handleSelectConversationDetail(
+          data?.id,
+          variables.avatar,
+          variables.name
         );
 
         setSearchInput("");
@@ -282,12 +288,11 @@ const ChatPage = () => {
 
         if (error.response.status === 409) {
           console.log("409");
-          dispatch(
-            fetchChatDetail({
-              id: error.response.data?.message,
-              chatTitle: { avatar: variables.avatar, name: variables.name },
-              currentPage: 1,
-            })
+
+          handleSelectConversationDetail(
+            error.response.data?.message,
+            variables.avatar,
+            variables.name
           );
 
           setSearchInput("");
@@ -310,13 +315,13 @@ const ChatPage = () => {
   };
 
   const loadmoreChatDetail = () => {
-    dispatch(fetchChatDetail({ id, currentPage: chatDetail.nextPage }));
+    dispatch(
+      fetchChatDetail({ id: chatDetail.chatId, startKey: chatDetail.startKey })
+    );
   };
 
   const handleSelectConversationDetail = (id, avatar, name) => {
-    dispatch(
-      fetchChatDetail({ id, chatTitle: { avatar, name }, currentPage: 1 })
-    );
+    dispatch(fetchChatDetail({ id, chatTitle: { avatar, name } }));
   };
 
   const handleSubmitChatMessage = (e) => {
@@ -362,13 +367,23 @@ const ChatPage = () => {
               onChange={(e) => {
                 setSearchInput(e.target.value);
               }}
-              onFocus={() => {}}
+              onFocus={() => {
+                const users = onlineUsers
+                  .filter((user) => user.id !== managerId)
+                  .map((item) => ({
+                    ...item,
+                    online: true,
+                  }))
+                  .concat(offlineUsers.filter((user) => user.id !== managerId));
+
+                setSearchUsers(users);
+              }}
               onBlur={() => {}}
             />
           </div>
 
           <AnimatePresence mode="wait">
-            {!searchInput ? (
+            {!searchInput && !searchUsers ? (
               <motion.div
                 key="chat"
                 initial={{ x: -10, opacity: 0 }}
@@ -397,6 +412,7 @@ const ChatPage = () => {
                         handleSelectConversationDetail={
                           handleSelectConversationDetail
                         }
+                        managerEmail={managerEmail}
                       />
                     ))
                   )
@@ -523,9 +539,25 @@ const ChatPage = () => {
                       {chatDetail.chatTitle?.name}
                     </p>
                     {/* <p className="text-sm">Nhân viên</p> */}
-                    <div className="flex space-x-2 items-center text-xs font-semibold text-green-600">
+                    <div
+                      className={clsx(
+                        "flex space-x-2 items-center text-xs font-semibold text-green-600",
+                        {
+                          "text-slate-400": !onlineUsers.find(
+                            (user) =>
+                              user.fullName === chatDetail.chatTitle?.name
+                          ),
+                        }
+                      )}
+                    >
                       <FaCircle className="text-[0.45rem]" />
-                      <p>Trực tuyến</p>
+                      <p>
+                        {onlineUsers.find(
+                          (user) => user.fullName === chatDetail.chatTitle?.name
+                        )
+                          ? "Trực tuyến"
+                          : "Ngoại tuyến"}
+                      </p>
                     </div>
                   </div>
 
@@ -534,7 +566,7 @@ const ChatPage = () => {
                     <motion.div
                       onClick={() => {
                         console.log("Video call");
-                        handleOpenNewRoom(true);
+                        // handleOpenNewRoom(true);
                       }}
                       whileHover={{ scale: 1.1 }}
                       className="flex justify-center items-center bg-white w-10 h-10 rounded-full shadow-md hover:shadow-lg transition-shadow shadow-black/20 hover:shadow-black/25 cursor-pointer"
@@ -588,21 +620,32 @@ const ChatPage = () => {
                 ) : (
                   chatDetail.chatDetail?.map((groupMessage, index) => (
                     <MessageItem
-                      key={index}
+                      key={index + groupMessage?.email}
                       isMe={groupMessage?.email === managerEmail}
                       messageList={groupMessage.messageList}
                     />
                   ))
                 )}
 
-                {chatDetail.nextPage && chatDetail.status === "succeeded" && (
-                  <motion.p
+                {chatDetail.startKey && chatDetail.status === "succeeded" && (
+                  <div
                     onClick={loadmoreChatDetail}
-                    whileHover={{ y: -3 }}
-                    className="text-lg text-center cursor-pointer"
+                    className="flex justify-center"
                   >
-                    Tải thêm
-                  </motion.p>
+                    <Popover
+                      placement="top"
+                      // title={<p className="text-center">Tải thêm</p>}
+                      content={<p className="text-center">Tải thêm</p>}
+                      trigger="hover"
+                    >
+                      <motion.div
+                        whileHover={{ y: -3 }}
+                        className="border-4 rounded-full border-black p-1 cursor-pointer"
+                      >
+                        <FaArrowUp className="text-xl" />
+                      </motion.div>
+                    </Popover>
+                  </div>
                 )}
 
                 {chatDetail.status === "pending" && (

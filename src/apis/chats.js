@@ -20,9 +20,11 @@ export const createMessage = (id, content) =>
   });
 
 // Get a conversation detail containing all messages
-export const getConversation = (id, currentPage) =>
+export const getConversation = (id, startKey) =>
   http({
-    url: `/conversations/${id}/messages?sizePage=10&currentPage=${currentPage}`,
+    url: `/conversations/${id}/messages?sizePage=10${
+      startKey ? `&startKey=${startKey}` : ""
+    }`,
   });
 
 // Update a message
