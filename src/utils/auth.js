@@ -43,6 +43,7 @@ export function checkAuthLoader(params) {
   const token = getAuthToken();
 
   const pathRole = params.request.url.split(HOST)[1].split("/")[1];
+  console.log("🚀 ~ checkAuthLoader ~ pathRole:", pathRole);
   const role =
     token.role === TEXT.MANAGER
       ? "manager"
