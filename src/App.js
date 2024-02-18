@@ -5,9 +5,9 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { queryClient } from "./utils/http";
 import { checkAuthLoader, loginLoader } from "./utils/auth";
 import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
+
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
-import CustomerLayout from "./pages/Customer/CustomerLayout.js";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -30,6 +30,7 @@ const RequestPage = lazy(() => import("./pages/Request/RequestPage"));
 const NotificationPage = lazy(() =>
   import("./pages/Notification/NotificationPage")
 );
+const CustomerLayout = lazy(() => import("./pages/Customer/CustomerLayout.js"));
 const CustomerPage = lazy(() => import("./pages/Customer/CustomerPage.js"));
 const EventAssignDivisionPage = lazy(() =>
   import("./pages/Event/EventAssignDivisionPage.js")
@@ -45,6 +46,7 @@ const DashboardPageStaff = lazy(() =>
   import("./pages/Dashboard/DashboardPageStaff")
 );
 const TaskPageStaff = lazy(() => import("./pages/Task/MyTaskPageStaff"));
+const StaffChatPage = lazy(() => import("./pages/Chat/StaffChatPage.js"));
 
 // Admin pages
 const AdminLayout = lazy(() => import("./pages/AdminLayout.js"));
@@ -278,6 +280,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <NotificationPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "chat",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <StaffChatPage />
           </Suspense>
         ),
       },

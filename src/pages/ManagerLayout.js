@@ -9,23 +9,22 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import {
   cleanUpOnMessage,
+  cleanUpOnlineGroupUsersReceived,
   getOnlineGroupUsersSocket,
-  managerSocket,
+  socketListener,
 } from "../utils/socket";
 import { getChatsList } from "../store/chats";
 
 const ManagerLayout = () => {
   const dispatch = useDispatch();
-  const { socket } = useSelector((state) => state.socket);
 
   const [collapsed, setCollapsed] = useState(false);
 
   const [notificationAPI, contextHolder] = notification.useNotification();
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     // create socket connection
-    managerSocket(dispatch, notificationAPI);
+    socketListener(dispatch, notificationAPI);
 
     // get online user
     getOnlineGroupUsersSocket();
@@ -34,6 +33,7 @@ const ManagerLayout = () => {
 
     return () => {
       cleanUpOnMessage();
+      cleanUpOnlineGroupUsersReceived();
     };
   }, []);
 

@@ -101,9 +101,9 @@ const MessageItem = memo(({ isMe, messageList }) => {
 });
 
 const GroupChatItem = memo(
-  ({ chat, onlineUsers, handleSelectConversationDetail, managerEmail }) => {
-    const time = momenttz(chat.lastMessageSentAt);
-    console.log("chat > ", chat);
+  ({ chat, onlineUsers, handleSelectConversationDetail, staffEmail }) => {
+    const time = momenttz(chat.lastMessageSentAt).tz("Asia/Bangkok");
+    console.log("chat > ", chat.lastMessageSentAt);
     console.log("chat time > ", time);
 
     let diff;
@@ -168,14 +168,14 @@ const GroupChatItem = memo(
           <p
             className={clsx(
               "flex-1 line-clamp-3 text-base font-medium truncate",
-              { "text-slate-500": !chat?.lastMessageSent }
+              { "text-slate-500": !chat?.lastMessageSent?.content }
             )}
           >
-            {!chat?.lastMessageSent
+            {/* {!chat?.lastMessageSent?.content
               ? "Gửi tin nhắn đầu tiên"
-              : chat?.lastMessageSent?.author?.email === managerEmail
+              : chat?.lastMessageSent?.email === staffEmail
               ? "Bạn đã gửi 1 tin nhắn"
-              : `${chat?.lastMessageSent?.author?.profile?.fullName}: ${chat?.lastMessageSent?.content}`}
+              : ""} */}
           </p>
           <div className="w-5 h-5 flex justify-center items-center bg-red-500 rounded-full">
             <p className="text-white text-xs font-medium">3</p>
@@ -186,17 +186,16 @@ const GroupChatItem = memo(
   }
 );
 
-const ChatPage = () => {
+const StaffChatPage = () => {
   const dispatch = useDispatch();
   const chats = useSelector((state) => state.chats);
-  console.log("chats > ", chats);
   const chatDetail = useSelector((state) => state.chatDetail);
   const { onlineUsers, offlineUsers } = useSelector(
     (state) => state.onlineUser
   );
   // console.log("onlineUsers > ", onlineUsers);
 
-  const { email: managerEmail, id: managerId } = useRouteLoaderData("manager");
+  const { email: staffEmail, id: staffId } = useRouteLoaderData("staff");
 
   const [searchInput, setSearchInput] = useState("");
   const [chatInput, setChatInput] = useState("");
@@ -239,14 +238,14 @@ const ChatPage = () => {
       if (searchInput !== "") {
         const searchOnlineUser = onlineUsers.filter(
           (user) =>
-            user.id !== managerId &&
+            user.id !== staffId &&
             (user.email.includes(searchInput.toLowerCase()) ||
               user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
 
         const searchOfflineUsers = offlineUsers.filter(
           (user) =>
-            user.id !== managerId &&
+            user.id !== staffId &&
             (user.email.includes(searchInput.toLowerCase()) ||
               user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
@@ -368,12 +367,12 @@ const ChatPage = () => {
               }}
               onFocus={() => {
                 const users = onlineUsers
-                  .filter((user) => user.id !== managerId)
+                  .filter((user) => user.id !== staffId)
                   .map((item) => ({
                     ...item,
                     online: true,
                   }))
-                  .concat(offlineUsers.filter((user) => user.id !== managerId));
+                  .concat(offlineUsers.filter((user) => user.id !== staffId));
 
                 setSearchUsers(users);
               }}
@@ -411,7 +410,7 @@ const ChatPage = () => {
                         handleSelectConversationDetail={
                           handleSelectConversationDetail
                         }
-                        managerEmail={managerEmail}
+                        staffEmail={staffEmail}
                       />
                     ))
                   )
@@ -620,7 +619,7 @@ const ChatPage = () => {
                   chatDetail.chatDetail?.map((groupMessage, index) => (
                     <MessageItem
                       key={index + groupMessage?.email}
-                      isMe={groupMessage?.email === managerEmail}
+                      isMe={groupMessage?.email === staffEmail}
                       messageList={groupMessage.messageList}
                     />
                   ))
@@ -692,4 +691,4 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage;
+export default StaffChatPage;

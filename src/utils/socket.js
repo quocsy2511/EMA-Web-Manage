@@ -10,7 +10,7 @@ export const socket = io(URL_SOCKET, {
   },
 });
 
-export const managerSocket = (dispatch, notificationAPI) => {
+export const socketListener = (dispatch, notificationAPI) => {
   // create connection
   socket.on("connect", () => {
     console.log("Successfully connect with socket.io server : ", socket.id);

@@ -143,7 +143,7 @@ const EventCreationPage = () => {
       processingDate: values.processingDate,
       endDate: values.date[1],
       location: values.location,
-      estBudget: values.estBudget,
+      estBudget: +values.estBudget,
       eventTypeId: values.eventTypeId,
     };
   };
