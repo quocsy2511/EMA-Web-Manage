@@ -18,13 +18,14 @@ import { useMutation } from "@tanstack/react-query";
 import { createConversation, createMessage } from "../../apis/chats";
 import { getChatsList } from "../../store/chats";
 import {
+  getOnlineGroupUsersSocket,
   onConversationJoinSocket,
   onConversationLeaveSocket,
-  onConversationUpdateSocket,
   onTypingStartSocket,
   onTypingStopSocket,
   socket,
 } from "../../utils/socket";
+import { handleUpdateUsers } from "../../store/online_user";
 
 const now = momenttz().tz("Asia/Bangkok");
 
@@ -106,23 +107,23 @@ const GroupChatItem = memo(
     const time = momenttz(chat.lastMessageSentAt);
 
     let diff;
-    if (now.diff(time, "minutes") < 60)
-      diff = `${now.diff(time, "minutes")} phút`;
+    if (now.diff(time, "minutes") < 5) diff = "Bây giờ";
+    else if (now.diff(time, "minutes") < 60)
+      diff = `${now.diff(time, "minutes")} phút trước`;
     else if (now.diff(time, "hours") < 24)
-      diff = `${now.diff(time, "hours")} giờ`;
+      diff = `${now.diff(time, "hours")} giờ trước`;
     else if (now.diff(time, "days") < 7)
-      diff = `${now.diff(time, "days")} ngày`;
+      diff = `${now.diff(time, "days")} ngày trước`;
     else if (now.diff(time, "weeks") < 4)
-      diff = `${now.diff(time, "weeks")} tuần`;
+      diff = `${now.diff(time, "weeks")} tuần trước`;
     else if (now.diff(time, "months") < 12)
-      diff = `${now.diff(time, "months")} tháng`;
+      diff = `${now.diff(time, "months")} tháng trước`;
     else if (now.diff(time, "months") >= 12)
-      diff = `${now.diff(time, "years")} năm`;
+      diff = `${now.diff(time, "years")} năm trước`;
 
     const user =
       chat?.creator?.email !== userEmail ? chat?.creator : chat?.recipient;
 
-    // const isOnline = onlineUsers.includes(chat?.recipient?.id);
     const isOnline = !!onlineUsers.find((item) => item.id === user?.id);
 
     return (
@@ -160,7 +161,7 @@ const GroupChatItem = memo(
           </div>
 
           <p className="text-right text-sm font-normal text-slate-400">
-            {diff} trước
+            {diff}
           </p>
         </div>
 
@@ -210,6 +211,20 @@ const ChatPage = () => {
   const [isRecipientTyping, setIsRecipientTyping] = useState(false);
 
   useEffect(() => {
+    // ================ REFETCH ONLINE USER ================
+    getOnlineGroupUsersSocket();
+    const interval = setInterval(() => {
+      getOnlineGroupUsersSocket();
+    }, 10000);
+    // ================ REFETCH ONLINE USER ================
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    // ================================ CHAT HANDLER ================================
     if (chatDetail.chatId !== "") onConversationJoinSocket(chatDetail.chatId);
 
     socket.on("userJoin", () => {
@@ -228,6 +243,7 @@ const ChatPage = () => {
       console.log("onTypingStop: User has stopped typing...");
       setIsRecipientTyping(false);
     });
+    // ================================ CHAT HANDLER ================================
 
     return () => {
       // If chatDetail.chatId change => leave the previous room chat

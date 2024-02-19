@@ -2,9 +2,7 @@ import http from "../utils/axios-utils";
 
 export const getCustomerContacts = ({ currentPage, sort, status }) =>
   http({
-    url: `/customer-contacts/info?sizePage=10&currentPage=${currentPage}&sortProperty=createdAt&sort=${sort}${
-      status === "ALL" ? "" : `&status=${status}`
-    }`,
+    url: `/customer-contacts/info?sizePage=10&currentPage=${currentPage}&sortProperty=createdAt&sort=${sort}&status=${status}`,
     method: "get",
   });
 

@@ -23,7 +23,7 @@ const chatsSlice = createSlice({
   initialState,
   reducers: {
     updateChat(state, action) {
-      state.chats.map((chat) => {
+      state.chats = state.chats.map((chat) => {
         if (chat.id === action.payload.id) {
           return action.payload;
         } else return chat;

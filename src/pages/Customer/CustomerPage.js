@@ -145,7 +145,7 @@ const CustomerPage = () => {
         startDate: selectedContact.startDate,
         endDate: selectedContact.endDate,
         estBudget: selectedContact.budget,
-        eventType: selectedContact.eventType.typeName,
+        eventType: selectedContact.eventType.id,
         contactId: selectedContact.id,
       },
     });

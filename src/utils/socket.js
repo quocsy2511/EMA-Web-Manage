@@ -47,21 +47,25 @@ export const socketListener = (dispatch, notificationAPI) => {
   socket.on("onMessage", (data) => {
     console.log("onMessage data > ", data);
 
+    const { message, newConservations } = data ?? {};
+
     const customNewMessage = {
       attachments: [],
-      author: data?.author,
-      content: data?.content,
-      createdAt: data?.createdAt,
-      id: data?.id,
-      updatedAt: data?.updatedAt,
+      author: message?.author,
+      content: message?.content,
+      createdAt: message?.createdAt,
+      id: message?.id,
+      updatedAt: message?.updatedAt,
     };
 
     dispatch(
       chatDetailActions.updateChatDetail({
-        email: data?.author?.email,
+        email: message?.author?.email,
         newMessage: customNewMessage,
       })
     );
+
+    dispatch(chatsActions.updateChat(newConservations));
   });
 
   // Get online / offline user
@@ -75,25 +79,15 @@ export const socketListener = (dispatch, notificationAPI) => {
       })
     );
   });
-
-  // after create a conversation => add to the redux
-  // socket.on("onConversation", (data) => {
-  //   console.log("onConversation > ", data);
-
-  //   dispatch(chatsActions.updateChat(data));
-  // });
-
-  //
-  socket.on("onConversationUpdate", (data) => {
-    console.log("onConversationUpdate > ", data);
-
-    dispatch(chatsActions.updateChat(data));
-  });
 };
 
 // =============================== EMIT SOCKET ===============================
 export const getOnlineGroupUsersSocket = () => {
   socket.emit("getOnlineGroupUsers", {});
+};
+
+export const getOnlineUserSocket = () => {
+  socket.emit("getOnlineUser", {});
 };
 
 export const onConversationJoinSocket = (conversationId) => {
@@ -116,7 +110,12 @@ export const closeConnectSocket = () => {
   socket.emit("closeConnect", {});
 };
 
+
 // =============================== CLEAN UP SOCKET ===============================
+export const cleanUpNotification = () => {
+  socket.off("notification");
+};
+
 export const cleanUpOnMessage = () => {
   socket.off("onMessage");
 };
