@@ -230,7 +230,15 @@ const EventTaskPage = () => {
       {contextHolder}
 
       <FloatButton
-        onClick={() => setIsOpenModal(true)}
+        // onClick={() => setIsOpenModal(true)}
+        onClick={() =>
+          navigate("task", {
+            state: {
+              eventId: data.id,
+              eventName: data.eventName,
+            },
+          })
+        }
         type="primary"
         icon={<RiAddFill />}
         disabled={data.listDivision?.length === 0}
@@ -269,6 +277,7 @@ const EventTaskPage = () => {
           / {data.eventName}
         </p>
       </motion.div>
+      
       <motion.div
         initial={{ y: -100 }}
         animate={{ y: 0 }}

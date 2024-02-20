@@ -35,6 +35,9 @@ const CustomerPage = lazy(() => import("./pages/Customer/CustomerPage.js"));
 const EventAssignDivisionPage = lazy(() =>
   import("./pages/Event/EventAssignDivisionPage.js")
 );
+const EventAssignTaskPage = lazy(() =>
+  import("./pages/Event/EventAssignTaskPage/EventAssignTaskPage.js")
+);
 
 // Staff pages
 const StaffLayout = lazy(() => import("./pages/StaffLayout"));
@@ -131,6 +134,14 @@ const router = createBrowserRouter([
                 fallback={<LoadingPageIndicator title="danh sách bộ phận" />}
               >
                 <EventAssignDivisionPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: ":eventId/task",
+            element: (
+              <Suspense fallback={<LoadingPageIndicator title="dữ liệu" />}>
+                <EventAssignTaskPage />
               </Suspense>
             ),
           },

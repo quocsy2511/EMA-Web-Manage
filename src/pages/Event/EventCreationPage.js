@@ -681,6 +681,7 @@ const EventCreationPage = () => {
               {/* <Input placeholder="Nhập giá trị hợp đồng" size="large" /> */}
               <div className="flex items-center gap-x-3">
                 <InputNumber
+                  value={form.getFieldsValue().contract?.contractValue}
                   className="w-full"
                   placeholder="Nhập giá trị hợp đồng"
                   min={0}

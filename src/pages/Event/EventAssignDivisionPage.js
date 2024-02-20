@@ -7,6 +7,9 @@ import { getAllDivision } from "../../apis/divisions";
 import { defaultAvatar } from "../../constants/global";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 import { updateAssignDivisionToEvent } from "../../apis/events";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import clsx from "clsx";
 
 const EventAssignDivisionPage = () => {
   const location = useLocation();
@@ -67,7 +70,6 @@ const EventAssignDivisionPage = () => {
 
   const handleUpdateDivision = () => {
     mutate({ eventId, divisionId: selectedDivisions });
-    // navigate(-1);
   };
 
   if (divisionsIsLoading) {
@@ -90,7 +92,7 @@ const EventAssignDivisionPage = () => {
         animate={{ y: 0 }}
         className="flex justify-between items-center"
       >
-        <p className="text-base font-medium text-slate-400">
+        <p className="text-base font-medium text-slate-400 truncate">
           <Link to="/manager/event" relative="path">
             Sự kiện{" "}
           </Link>
@@ -105,68 +107,79 @@ const EventAssignDivisionPage = () => {
       <motion.div
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="bg-white rounded-2xl mt-8 mx-20 overflow-hidden"
+        className={clsx(
+          "bg-white rounded-2xl mt-8 mx-20 overflow-hidden min-h-[calc(100vh-64px-8rem)]",
+          {
+            "flex items-center justify-center":
+              divisionsIsLoading || divisionsIsError,
+          }
+        )}
       >
-        <div className="mx-10 my-8 space-y-5">
-          <div className="flex justify-between">
-            <p className="text-xl font-medium">Chọn bộ phận phù hợp</p>
-            <Button type="primary" onClick={handleUpdateDivision}>
-              Áp dụng
-            </Button>
-          </div>
-          <Collapse
-            collapsible="icon"
-            expandIconPosition="end"
-            items={divisions?.map((division, index) => ({
-              key: division.id,
-              label: (
-                <div className="flex justify-between items-center mx-5">
-                  <Checkbox
-                    checked={selectedDivisions.includes(division.id)}
-                    onChange={(e) => {
-                      toggleSelectedDivision(division.id);
-                    }}
-                  >
-                    <p className="text-base ml-3">{division.divisionName}</p>
-                  </Checkbox>
-                  <p className="text-base">
-                    Đang tham gia{" "}
-                    <span className="font-semibold">
-                      {division.assignEvents}
-                    </span>{" "}
-                    sự kiện
-                  </p>
-                </div>
-              ),
-              children: (
-                <div className="mx-5 space-y-5">
-                  {division.users?.map((user) => (
-                    <div className="flex space-x-5">
-                      <Avatar
-                        src={user.profile?.avatar || defaultAvatar}
-                        size={45}
-                      />
+        {divisionsIsLoading ? (
+          <LoadingComponentIndicator title="dữ liệu" />
+        ) : divisionsIsError ? (
+          <AnErrorHasOccured />
+        ) : (
+          <div className="mx-10 my-8 space-y-5">
+            <div className="flex justify-between">
+              <p className="text-xl font-medium">Chọn bộ phận phù hợp</p>
+              <Button type="primary" onClick={handleUpdateDivision}>
+                Áp dụng
+              </Button>
+            </div>
+            <Collapse
+              collapsible="icon"
+              expandIconPosition="end"
+              items={divisions?.map((division, index) => ({
+                key: division.id,
+                label: (
+                  <div className="flex justify-between items-center mx-5">
+                    <Checkbox
+                      checked={selectedDivisions.includes(division.id)}
+                      onChange={(e) => {
+                        toggleSelectedDivision(division.id);
+                      }}
+                    >
+                      <p className="text-base ml-3">{division.divisionName}</p>
+                    </Checkbox>
+                    <p className="text-base">
+                      Đang tham gia{" "}
+                      <span className="font-semibold">
+                        {division.assignEvents}
+                      </span>{" "}
+                      sự kiện
+                    </p>
+                  </div>
+                ),
+                children: (
+                  <div className="mx-5 space-y-5">
+                    {division.users?.map((user) => (
+                      <div className="flex space-x-5">
+                        <Avatar
+                          src={user.profile?.avatar || defaultAvatar}
+                          size={45}
+                        />
 
-                      <div className="flex flex-col justify-between">
-                        <p className="text-xl font-medium">
-                          {user.profile?.fullName}
-                        </p>
-                        <p className="text-sm text-slate-400">
-                          {user.role?.roleName}
-                        </p>
+                        <div className="flex flex-col justify-between">
+                          <p className="text-xl font-medium">
+                            {user.profile?.fullName}
+                          </p>
+                          <p className="text-sm text-slate-400">
+                            {user.role?.roleName}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ),
-            }))}
-            // defaultActiveKey={["1"]}
-            onChange={(key) => {
-              console.log(key);
-            }}
-            // expandIcon={() => null}
-          />
-        </div>
+                    ))}
+                  </div>
+                ),
+              }))}
+              // defaultActiveKey={["1"]}
+              onChange={(key) => {
+                console.log(key);
+              }}
+            />
+          </div>
+        )}
       </motion.div>
     </Fragment>
   );
