@@ -25,7 +25,7 @@ const { RangePicker } = DatePicker;
 const Title = ({ title }) => (
   <p className="text-base font-medium truncate">{title}</p>
 );
-
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
 const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
   console.log("UPDATE MODAL: ", event);
   const { data: staffs, isLoading: staffsIsLoading } = useQuery(
@@ -163,7 +163,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           date: [event.startDate, event.endDate],
           location: event.location,
           estBudget: event.estBudget,
-          description: { ops: JSON.parse(event.description) },
+          description: { ops: JSON.parse(event?.description?.startsWith(`[{"insert":"`) ? event.description : parseJson(event.description)) },
           divisions: event.listDivision.map((item) => item.divisionId),
           processingDate: event.processingDate,
         }}
@@ -213,9 +213,9 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
                   dayjs(event.endDate, "YYYY-MM-DD"),
                 ]}
                 format={"DD/MM/YYYY"}
-                // disabledDate={(current) => {
-                //   return current && current < moment().startOf("day");
-                // }}
+              // disabledDate={(current) => {
+              //   return current && current < moment().startOf("day");
+              // }}
               />
             </ConfigProvider>
           </Form.Item>

@@ -25,7 +25,7 @@ import TEXT from "../../constants/string";
 const { RangePicker } = DatePicker;
 
 const Title = ({ title }) => <p className="text-base font-medium">{title}</p>;
-
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
 const TaskAdditionModal = ({
   isModalOpen,
   setIsModalOpen,
@@ -125,7 +125,7 @@ const TaskAdditionModal = ({
     if (selectedTemplateTask) {
       form.setFieldsValue({
         title: selectedTemplateTask.title,
-        desc: { ops: JSON.parse(selectedTemplateTask.description) },
+        desc: { ops: JSON.parse(selectedTemplateTask.description?.startsWith(`[{"insert":"`) ? selectedTemplateTask.description : parseJson(selectedTemplateTask.description)) },
       });
     } else {
       form.resetFields();
@@ -186,7 +186,7 @@ const TaskAdditionModal = ({
     }
   };
 
-  const onFinishFailed = (errorInfo) => {};
+  const onFinishFailed = (errorInfo) => { };
 
   const handleValuesChange = (changedValues) => {
     const formFieldName = Object.keys(changedValues)[0];
@@ -374,8 +374,8 @@ const TaskAdditionModal = ({
                       options={
                         selectedEmployeesId
                           ? employees?.filter((employee) =>
-                              selectedEmployeesId.includes(employee.value)
-                            )
+                            selectedEmployeesId.includes(employee.value)
+                          )
                           : []
                       }
                       onChange={(value) => {

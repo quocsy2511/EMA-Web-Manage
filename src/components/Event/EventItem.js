@@ -13,6 +13,9 @@ import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 
+
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
+
 const EventItem = ({ event }) => {
   const navigate = useNavigate();
 
@@ -70,15 +73,16 @@ const EventItem = ({ event }) => {
       <div className="w-full bg-slate-200 mt-3 mb-5" style={{ height: 1 }} />
 
       {/* 1 line = 1rem = +4  */}
+
       <p
-          className="text-sm text-slate-500 line-clamp-3 h-16"
+        className="text-sm text-slate-500 line-clamp-3 h-16"
         dangerouslySetInnerHTML={{
           __html: new QuillDeltaToHtmlConverter(
-            JSON.parse(event.description)
+            JSON.parse(event?.description?.startsWith(`[{"insert":"`) ? event.description : parseJson(event.description))
           ).convert(),
         }}
       ></p>
-
+      
       <div className="h-7" />
 
       <div className="flex items-center gap-x-3">
@@ -107,7 +111,7 @@ const EventItem = ({ event }) => {
             maxPopoverTrigger="hover"
             maxStyle={{ color: "#D25B68", backgroundColor: "#F4D7DA" }}
           >
-            {event.listDivision.map((item) => (
+            {event.listDivision?.map((item) => (
               <Tooltip
                 title={`${item.fullName} - ${item.divisionName}`}
                 placement="top"

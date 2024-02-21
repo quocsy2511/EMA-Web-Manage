@@ -35,7 +35,7 @@ const { RangePicker } = DatePicker;
 const Title = ({ title }) => (
   <p className="text-base font-medium truncate">{title}</p>
 );
-
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
 const TaskUpdateModal = ({
   isModalOpen,
   setIsModalOpen,
@@ -60,7 +60,7 @@ const TaskUpdateModal = ({
       date:
         task.startDate && task.endDate ? [task.startDate, task.endDate] : null,
       description: task.description
-        ? { ops: JSON.parse(task.description) }
+        ? { ops: JSON.parse(task?.description?.startsWith(`[{"insert":"`) ? task?.description : parseJson(task?.description)) }
         : null,
       priority: task.priority ?? null,
       estimationTime: task.estimationTime ?? null,
@@ -68,12 +68,12 @@ const TaskUpdateModal = ({
       assignee: !isSubTask
         ? task.assignTasks?.[0]?.user.id
         : divisionIdOfStaff === leader?.divisionId
-        ? task.assignTasks?.map((item) => item.user.id)
-        : undefined,
+          ? task.assignTasks?.map((item) => item.user.id)
+          : undefined,
       leader:
         divisionIdOfStaff === leader?.divisionId
           ? task.assignTasks?.filter((item) => item.isLeader === true)[0]?.user
-              .id
+            .id
           : null,
     });
 
@@ -196,7 +196,7 @@ const TaskUpdateModal = ({
   const { mutate: updateTaskFileMutate } = useMutation(
     (updateFileList) => updateTaskFile(updateFileList),
     {
-      onSuccess: (data, variables) => {},
+      onSuccess: (data, variables) => { },
       onError: (error) => {
         messageApi.open({
           type: "error",
@@ -396,7 +396,7 @@ const TaskUpdateModal = ({
               ? [task.startDate, task.endDate]
               : null,
           description: task.description
-            ? { ops: JSON.parse(task.description) }
+            ? { ops: JSON.parse(task.description?.startsWith(`[{"insert":"`) ? task.description : parseJson(task.description)) }
             : null,
           priority: task.priority ?? null,
           estimationTime: task.estimationTime ?? null,
@@ -404,12 +404,12 @@ const TaskUpdateModal = ({
           assignee: !isSubTask
             ? task.assignTasks?.[0]?.user.id
             : divisionIdOfStaff === leader?.divisionId
-            ? task.assignTasks?.map((item) => item.user.id)
-            : undefined,
+              ? task.assignTasks?.map((item) => item.user.id)
+              : undefined,
           leader:
             divisionIdOfStaff === leader?.divisionId
               ? task.assignTasks?.filter((item) => item.isLeader === true)[0]
-                  ?.user.id
+                ?.user.id
               : null,
         }}
       >
@@ -639,8 +639,8 @@ const TaskUpdateModal = ({
                 options={
                   selectedEmployeesId
                     ? employees?.filter((employee) =>
-                        selectedEmployeesId.includes(employee.value)
-                      )
+                      selectedEmployeesId.includes(employee.value)
+                    )
                     : []
                 }
               />
@@ -651,10 +651,9 @@ const TaskUpdateModal = ({
           {task?.taskFiles.length > 0 &&
             task?.taskFiles.map((file) => (
               <div
-                className={`flex items-center gap-x-3 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg ${
-                  !updateFileList.some((item) => item.id === file.id) &&
+                className={`flex items-center gap-x-3 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg ${!updateFileList.some((item) => item.id === file.id) &&
                   "opacity-50"
-                }`}
+                  }`}
                 onClick={() => modifyFileList(file)}
               >
                 <a

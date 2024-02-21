@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { getTasks, updateTask } from "../../../../apis/tasks";
-
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
 const DescriptionSubtask = ({
   description,
   setDescription,
@@ -21,7 +21,7 @@ const DescriptionSubtask = ({
   const [form] = Form.useForm();
   const taskID = taskSelected?.id;
   const [descriptionQuill, setDescriptionQuill] = useState({
-    ops: JSON.parse(description),
+    ops: JSON.parse(description?.startsWith(`[{"insert":"`) ? description : parseJson(description)),
   });
   const [isOpenQuill, seItsOpenQuill] = useState(false);
   const queryClient = useQueryClient();
@@ -116,7 +116,7 @@ const DescriptionSubtask = ({
                   className="text-base italic text-black "
                   dangerouslySetInnerHTML={{
                     __html: new QuillDeltaToHtmlConverter(
-                      JSON.parse(description)
+                      JSON.parse(description?.startsWith(`[{"insert":"`) ? description : parseJson(description))
                     ).convert(),
                   }}
                 ></p>
@@ -170,12 +170,12 @@ const DescriptionSubtask = ({
                 onClick={() => seItsOpenQuill(true)}
               >
                 {subtaskDetails?.[0].description !== undefined &&
-                subtaskDetails?.[0].description !== null ? (
+                  subtaskDetails?.[0].description !== null ? (
                   <p
                     className="text-base italic text-black "
                     dangerouslySetInnerHTML={{
                       __html: new QuillDeltaToHtmlConverter(
-                        JSON.parse(subtaskDetails?.[0].description)
+                        JSON.parse(subtaskDetails?.[0].description?.startsWith(`[{"insert":"`) ? subtaskDetails?.[0].description : parseJson(subtaskDetails?.[0].description))
                       ).convert(),
                     }}
                   ></p>

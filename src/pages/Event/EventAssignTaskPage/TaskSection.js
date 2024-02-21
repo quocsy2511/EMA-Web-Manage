@@ -25,22 +25,22 @@ const Item = memo(({ division, selectedId, handleSelectDivision }) => {
       transition={{ duration: 0.3, type: "tween" }}
       className={clsx(
         "flex space-x-5 items-center rounded-xl p-3 border-2 cursor-pointer",
-        { "border-blue-400": selectedId.id === division.id }
+        { "border-blue-400": selectedId?.id === division?.id }
       )}
     >
       <div
         className={clsx(
           "flex items-center justify-center w-10 h-10 border rounded-full",
-          { "border-blue-500": selectedId.id === division.id }
+          { "border-blue-500": selectedId?.id === division?.id }
         )}
       >
-        {selectedId.id === division.id && (
+        {selectedId?.id === division?.id && (
           <FaCheck className="text-blue-500 text-base" />
         )}
       </div>
       <div className="flex-1">
         <p className="text-base font-medium truncate">
-          {division.divisionName}
+          {division?.divisionName}
         </p>
         <p className="text-sm truncate">
           Do{" "}
@@ -80,7 +80,7 @@ const TaskSection = ({ form }) => {
         data
           ?.filter((division) => division.status)
           .map((division) => ({
-            id: division.id,
+            id: division?.id,
             divisionName: division.divisionName,
             userName: division?.users?.[0]?.profile?.fullName,
           })),
@@ -89,7 +89,7 @@ const TaskSection = ({ form }) => {
 
   const handleSelectDivision = (division) => {
     setSelectedId(division);
-    form.setFieldsValue({ assignee: division.id });
+    form.setFieldsValue({ assignee: division?.id });
     console.log(form.getFieldsValue());
   };
 
@@ -119,7 +119,7 @@ const TaskSection = ({ form }) => {
               ) : (
                 divisions.map((division) => (
                   <Item
-                    key={division.id}
+                    key={division?.id}
                     division={division}
                     selectedId={selectedId}
                     handleSelectDivision={handleSelectDivision}

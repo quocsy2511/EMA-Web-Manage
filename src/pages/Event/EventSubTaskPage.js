@@ -55,7 +55,7 @@ const EventSubTaskPage = () => {
   const resetTaskRedirect = () => {
     if (redirect.task) dispatch(redirectionActions.taskChange(undefined));
   };
-
+  const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
   const {
     data: tasks,
     isLoading: taskIsLoading,
@@ -73,7 +73,7 @@ const EventSubTaskPage = () => {
       select: (data) => {
         return data[0];
       },
-      
+
     }
   );
   console.log("tasks: ", tasks);
@@ -374,11 +374,11 @@ const EventSubTaskPage = () => {
                   <p className="text-base font-medium">
                     {tasks?.startDate
                       ? new Date(tasks?.startDate).toLocaleDateString("vi-VN", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
                       : "-- : --"}
                   </p>
                 </motion.div>
@@ -416,8 +416,8 @@ const EventSubTaskPage = () => {
                     <p className="text-base font-medium">
                       {tasks?.startDate
                         ? moment(tasks?.startDate)
-                            .utc()
-                            .format("dddd, D [tháng] M")
+                          .utc()
+                          .format("dddd, D [tháng] M")
                         : "-- : --"}
                     </p>
                   </motion.div>
@@ -445,8 +445,8 @@ const EventSubTaskPage = () => {
                     <p className="text-base font-medium">
                       {tasks?.endDate
                         ? moment(tasks?.endDate)
-                            .utc()
-                            .format("dddd, D [tháng] M")
+                          .utc()
+                          .format("dddd, D [tháng] M")
                         : "-- : --"}
                     </p>
                   </motion.div>
@@ -518,7 +518,7 @@ const EventSubTaskPage = () => {
               className="text-sm"
               dangerouslySetInnerHTML={{
                 __html: new QuillDeltaToHtmlConverter(
-                  JSON.parse(tasks.description)
+                  JSON.parse(tasks?.description?.startsWith(`[{"insert":"`) ? tasks?.description : parseJson(tasks?.description))
                 ).convert(),
               }}
             />
@@ -544,9 +544,8 @@ const EventSubTaskPage = () => {
         </div>
 
         <div
-          className={`flex flex-col gap-y-6 ${
-            tasks.subTask.length !== 0 && "mt-10 mx-10"
-          }`}
+          className={`flex flex-col gap-y-6 ${tasks.subTask.length !== 0 && "mt-10 mx-10"
+            }`}
         >
           <AnimatePresence>
             {tasks.subTask.length !== 0 &&
