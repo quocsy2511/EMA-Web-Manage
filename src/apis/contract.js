@@ -6,3 +6,5 @@ export const createContract = ({ eventId, contract }) =>
     method: "post",
     data: contract,
   });
+
+export const getContract = (eventId) => http({ url: `/contracts/${eventId}` });
