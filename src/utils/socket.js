@@ -2,6 +2,7 @@ import { io } from "socket.io-client";
 import { URL_SOCKET } from "../constants/api";
 import { chatDetailActions } from "../store/chat_detail";
 import { handleUpdateUsers } from "../store/online_user";
+import { Avatar } from "antd";
 
 export const socket = io(URL_SOCKET, {
   withCredentials: true,
