@@ -21,7 +21,7 @@ const DescriptionEvent = ({ selectEvent }) => {
     //colorMapping[status] ở đây để truy suất value bằng key
     return colorMapping[value];
   };
-
+  const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
   return (
     <motion.div
       animate={{ opacity: [1, 0.2, 1] }}
@@ -105,7 +105,7 @@ const DescriptionEvent = ({ selectEvent }) => {
                   className="text-base w-2/3  px-2 italic text-black break-words"
                   dangerouslySetInnerHTML={{
                     __html: new QuillDeltaToHtmlConverter(
-                      JSON.parse(selectEvent?.description)
+                      JSON.parse(selectEvent?.description?.startsWith(`[{"insert":"`) ? selectEvent?.description : parseJson(selectEvent?.description))
                     ).convert(),
                   }}
                 ></p>

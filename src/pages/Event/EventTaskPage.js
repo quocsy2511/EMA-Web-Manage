@@ -72,7 +72,7 @@ import DocReviewerModal from "../../components/Modal/DocReviewerModal";
 import ContractCreatePage from "../../components/Modal/ContractCreatePage";
 
 moment.locale("vi"); // Set the locale to Vietnam
-
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
 const Tag = ({ icon, text, width }) => (
   <motion.div
     whileHover={{ y: -5 }}
@@ -420,7 +420,7 @@ const EventTaskPage = () => {
             className="w-[75%] text-sm text-slate-500 mt-3"
             dangerouslySetInnerHTML={{
               __html: new QuillDeltaToHtmlConverter(
-                JSON.parse(data.description)
+                JSON.parse(data.description?.startsWith(`[{"insert":"`) ? data?.description : parseJson(data?.description))
               ).convert(),
             }}
           ></p>
@@ -524,9 +524,8 @@ const EventTaskPage = () => {
               <p className="text-base font-semibold">Tiến độ các hạng mục</p>
               {tasks && tasks?.length !== 0 ? (
                 <Tooltip
-                  title={`${
-                    tasks.filter((item) => item.status === "CONFIRM").length
-                  }/${tasks.length} hạng mục đã xong`}
+                  title={`${tasks.filter((item) => item.status === "CONFIRM").length
+                    }/${tasks.length} hạng mục đã xong`}
                 >
                   <Progress
                     percent={(
