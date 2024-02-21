@@ -1,13 +1,18 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getConversations } from "../apis/chats";
 
-export const getChatsList = createAsyncThunk("chats/getChatsList", async () => {
-  const response = await getConversations();
-  console.log("res >", response);
-  return response;
-});
+export const getChatsList = createAsyncThunk(
+  "chats/getChatsList",
+  async (params, thunkAPI) => {
+    const response = await getConversations(params.currentPage);
+    console.log("res >", response);
+    return response;
+  }
+);
 
 const initialState = {
+  currentPage: 1,
+  nextPage: null,
   chats: [],
   status: "idle", //'idle' | 'pending' | 'succeeded' | 'failed'
   error: null,
@@ -20,12 +25,20 @@ const chatsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getChatsList.pending, (state, action) => {
-        state.chats = [];
+        // state.chats = [];
         state.status = "pending";
         state.error = null;
       })
       .addCase(getChatsList.fulfilled, (state, action) => {
-        state.chats = action.payload.data;
+        state.currentPage = action.payload.currentPage;
+        state.nextPage = action.payload.nextPage
+          ? action.payload.nextPage
+          : null;
+
+        state.chats =
+          state.chats.length === 0
+            ? action.payload.data
+            : [...state.chats, ...action.payload.data];
         state.status = "succeeded";
       })
       .addCase(getChatsList.rejected, (state, action) => {
