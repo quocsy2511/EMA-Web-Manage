@@ -96,6 +96,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
       startDate: values.date[0],
       endDate: values.date[1],
       estBudget: +values.estBudget,
+      eventTypeId: event.eventType.typeId,
     };
 
     console.log("TRANSFORM: ", values);

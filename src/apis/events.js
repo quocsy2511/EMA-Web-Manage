@@ -1,4 +1,4 @@
-import http, { authRequest } from "../utils/axios-utils";
+import http from "../utils/axios-utils";
 
 export const createEvent = ({
   eventName,
@@ -11,7 +11,7 @@ export const createEvent = ({
   estBudget,
   eventTypeId,
 }) =>
-  authRequest({
+  http({
     url: "/event",
     method: "post",
     data: {
@@ -47,42 +47,42 @@ export const getFilterEvent = ({
   });
 
 export const getDetailEvent = (eventId) =>
-  authRequest({ url: `/event/${eventId}` });
+  http({ url: `/event/${eventId}` });
 
 // mode = 1: assign , 2: delete
 export const updateDetailEvent = ({ eventId, ...event }) =>
-  authRequest({ url: `/event/${eventId}`, method: "put", data: event });
+  http({ url: `/event/${eventId}`, method: "put", data: event });
 
 export const updateAssignDivisionToEvent = ({ eventId, divisionId }) =>
-  authRequest({
+  http({
     url: "/event/edit-division",
     method: "put",
     data: { eventId, divisionId },
   });
 
 export const updateStatusEvent = (eventId, status) =>
-  authRequest({ url: `/event/${eventId}/${status}`, method: "put" });
+  http({ url: `/event/${eventId}/${status}`, method: "put" });
 
 export const getEventDivisions = () =>
-  authRequest({
+  http({
     url: `/event/division`,
   });
 
 export const getEventDetail = ({ eventId }) =>
-  authRequest({
+  http({
     url: `/event/${eventId}`,
   });
 
 export const getEventTemplate = () =>
-  authRequest({ url: "/event/template-event" });
+  http({ url: "/event/template-event" });
 
 export const getTemplateEvent = () =>
-  authRequest({ url: "/event/template-event" });
+  http({ url: "/event/template-event" });
 
 export const getStatistic = ({ type }) =>
-  authRequest({ url: `/event/statistic?mode=${type}` });
+  http({ url: `/event/statistic?mode=${type}` });
 
 export const getEventParticipant = (eventId) =>
-  authRequest({ url: `/event?eventId=${eventId}` });
+  http({ url: `/event?eventId=${eventId}` });
 
-export const getEventType = () => authRequest({ url: "/event-types" });
+export const getEventType = () => http({ url: "/event-types" });

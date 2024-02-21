@@ -7,65 +7,35 @@ import Header from "../components/Header/Header";
 import { useDispatch, useSelector } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { io } from "socket.io-client";
-import { URL_SOCKET } from "../constants/api";
-import { socketActions } from "../store/socket";
-import RoomChat from "../components/RoomChat/RoomChat";
-import { connectWithSocket } from "../socket/socketConnection";
-import { managerSocket } from "../utils/socket";
+import {
+  cleanUpOnMessage,
+  cleanUpOnlineGroupUsersReceived,
+  getOnlineGroupUsersSocket,
+  socketListener,
+} from "../utils/socket";
 import { getChatsList } from "../store/chats";
 
 const ManagerLayout = () => {
   const dispatch = useDispatch();
-  const { socket } = useSelector((state) => state.socket);
 
   const [collapsed, setCollapsed] = useState(false);
 
   const [notificationAPI, contextHolder] = notification.useNotification();
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     // create socket connection
-    // managerSocket(dispatch);
-    dispatch(getChatsList());
+    socketListener(dispatch, notificationAPI);
+
+    // get online user
+    getOnlineGroupUsersSocket();
+
+    dispatch(getChatsList({ currentPage: 1 }));
+
+    return () => {
+      cleanUpOnMessage();
+      cleanUpOnlineGroupUsersReceived();
+    };
   }, []);
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (token) connectWithSocket(token, dispatch);
-  // }, []);
-
-  // useEffect(() => {
-  //   if (!socket) {
-  //     const saveSocket = io(URL_SOCKET, {
-  //       auth: {
-  //         access_token: localStorage.getItem("token"),
-  //       },
-  //     });
-  //     dispatch(socketActions.saveSocket(saveSocket));
-  //     return;
-  //   }
-
-  //   socket?.on("notification", (data) => {
-  //     console.log("data:", data);
-  //     queryClient.invalidateQueries(["notifications", "10"]);
-  //     api.open({
-  //       message: <p className="text-base">Đã nhận 1 thông báo</p>,
-  //       description: (
-  //         <div className="flex items-center gap-x-3">
-  //           <Avatar src={data?.avatar} />
-  //           <p className="text-sm">
-  //             <span className="font-semibold">
-  //               {data?.content?.split("đã")[0]}{" "}
-  //             </span>
-  //             đã {data?.content?.split("đã")[1]}
-  //           </p>
-  //         </div>
-  //       ),
-  //       duration: 5,
-  //     });
-  //   });
-  // }, [socket]);
 
   return (
     <Fragment>

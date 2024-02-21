@@ -63,7 +63,7 @@ const CustomerPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [sort, setSort] = useState("DESC");
-  const [contactStatus, setContactStatus] = useState("PENDING");
+  const [contactStatus, setContactStatus] = useState("ALL");
   const [selectedContact, setSelectedContact] = useState();
   const [loadContact, setloadContact] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -75,8 +75,12 @@ const CustomerPage = () => {
     isLoading,
     isError,
     refetch,
-  } = useQuery(["contact", currentPage, sort, contactStatus], () =>
-    getCustomerContacts({ currentPage, sort, status: contactStatus })
+  } = useQuery(
+    ["contact", currentPage, sort, contactStatus],
+    () => getCustomerContacts({ currentPage, sort, status: contactStatus }),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
   console.log("contacts > ", contacts);
 
@@ -141,7 +145,7 @@ const CustomerPage = () => {
         startDate: selectedContact.startDate,
         endDate: selectedContact.endDate,
         estBudget: selectedContact.budget,
-        eventType: selectedContact.eventType.typeName,
+        eventType: selectedContact.eventType.id,
         contactId: selectedContact.id,
       },
     });
@@ -182,6 +186,10 @@ const CustomerPage = () => {
                 setContactStatus(value);
               }}
               options={[
+                {
+                  value: "ALL",
+                  label: <p className="font-semibold">Tất Cả</p>,
+                },
                 {
                   value: "PENDING",
                   label: <p className="font-semibold">Chờ Duyệt</p>,
@@ -308,7 +316,8 @@ const CustomerPage = () => {
                   <p>Ngân sách ước tính</p>
                 </div>
                 <p className="w-fit border-b border-black/30">
-                  {selectedContact?.budget ?? 100000} VNĐ
+                  {selectedContact?.budget?.toLocaleString("en-US") ?? 100000}{" "}
+                  VNĐ
                 </p>
               </div>
 

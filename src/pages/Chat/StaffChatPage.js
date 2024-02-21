@@ -18,14 +18,12 @@ import { useMutation } from "@tanstack/react-query";
 import { createConversation, createMessage } from "../../apis/chats";
 import { getChatsList } from "../../store/chats";
 import {
-  getOnlineGroupUsersSocket,
   onConversationJoinSocket,
   onConversationLeaveSocket,
   onTypingStartSocket,
   onTypingStopSocket,
   socket,
 } from "../../utils/socket";
-import { handleUpdateUsers } from "../../store/online_user";
 
 const now = momenttz().tz("Asia/Bangkok");
 
@@ -103,28 +101,29 @@ const MessageItem = memo(({ isMe, messageList }) => {
 });
 
 const GroupChatItem = memo(
-  ({ chat, onlineUsers, handleSelectConversationDetail, userEmail }) => {
-    const time = momenttz(chat.lastMessageSentAt);
+  ({ chat, onlineUsers, handleSelectConversationDetail, staffEmail }) => {
+    const time = momenttz(chat.lastMessageSentAt).tz("Asia/Bangkok");
+    console.log("chat > ", chat.lastMessageSentAt);
+    console.log("chat time > ", time);
 
     let diff;
-    if (now.diff(time, "minutes") < 5) diff = "Bây giờ";
-    else if (now.diff(time, "minutes") < 60)
-      diff = `${now.diff(time, "minutes")} phút trước`;
+    if (now.diff(time, "minutes") < 60)
+      diff = `${now.diff(time, "minutes")} phút`;
     else if (now.diff(time, "hours") < 24)
-      diff = `${now.diff(time, "hours")} giờ trước`;
+      diff = `${now.diff(time, "hours")} giờ`;
     else if (now.diff(time, "days") < 7)
-      diff = `${now.diff(time, "days")} ngày trước`;
+      diff = `${now.diff(time, "days")} ngày`;
     else if (now.diff(time, "weeks") < 4)
-      diff = `${now.diff(time, "weeks")} tuần trước`;
+      diff = `${now.diff(time, "weeks")} tuần`;
     else if (now.diff(time, "months") < 12)
-      diff = `${now.diff(time, "months")} tháng trước`;
+      diff = `${now.diff(time, "months")} tháng`;
     else if (now.diff(time, "months") >= 12)
-      diff = `${now.diff(time, "years")} năm trước`;
+      diff = `${now.diff(time, "years")} năm`;
 
-    const user =
-      chat?.creator?.email !== userEmail ? chat?.creator : chat?.recipient;
-
-    const isOnline = !!onlineUsers.find((item) => item.id === user?.id);
+    // const isOnline = onlineUsers.includes(chat?.recipient?.id);
+    const isOnline = !!onlineUsers.find(
+      (item) => item.id === chat?.recipient?.id
+    );
 
     return (
       <motion.div
@@ -132,8 +131,8 @@ const GroupChatItem = memo(
         onClick={() =>
           handleSelectConversationDetail(
             chat.id,
-            user?.profile?.avatar,
-            user?.profile?.fullName
+            chat?.recipient?.profile?.avatar,
+            chat?.recipient?.profile?.fullName
           )
         }
         whileHover={{ scale: 1.1 }}
@@ -141,13 +140,13 @@ const GroupChatItem = memo(
       >
         <div className="flex items-center space-x-5">
           <Avatar
-            src={user?.profile?.avatar ?? defaultAvatar}
+            src={chat?.recipient?.profile?.avatar ?? defaultAvatar}
             className="w-10 h-10 shadow-sm shadow-black/10"
           />
 
           <div className="flex-1 justify-around">
             <p className="text-lg font-bold line-clamp-1">
-              {user?.profile?.fullName ?? "Tên người dùng"}
+              {chat?.recipient?.profile?.fullName ?? "Tên người dùng"}
             </p>
             <div
               className={clsx(
@@ -161,7 +160,7 @@ const GroupChatItem = memo(
           </div>
 
           <p className="text-right text-sm font-normal text-slate-400">
-            {diff}
+            {diff} trước
           </p>
         </div>
 
@@ -169,14 +168,14 @@ const GroupChatItem = memo(
           <p
             className={clsx(
               "flex-1 line-clamp-3 text-base font-medium truncate",
-              { "text-slate-500": !chat?.lastMessageSent }
+              { "text-slate-500": !chat?.lastMessageSent?.content }
             )}
           >
-            {!chat?.lastMessageSent
+            {/* {!chat?.lastMessageSent?.content
               ? "Gửi tin nhắn đầu tiên"
-              : chat?.lastMessageSent?.author?.email === userEmail
+              : chat?.lastMessageSent?.email === staffEmail
               ? "Bạn đã gửi 1 tin nhắn"
-              : `${chat?.lastMessageSent?.author?.profile?.fullName}: ${chat?.lastMessageSent?.content}`}
+              : ""} */}
           </p>
           <div className="w-5 h-5 flex justify-center items-center bg-red-500 rounded-full">
             <p className="text-white text-xs font-medium">3</p>
@@ -187,23 +186,16 @@ const GroupChatItem = memo(
   }
 );
 
-const ChatPage = () => {
+const StaffChatPage = () => {
   const dispatch = useDispatch();
   const chats = useSelector((state) => state.chats);
-  console.log("chats > ", chats);
   const chatDetail = useSelector((state) => state.chatDetail);
   const { onlineUsers, offlineUsers } = useSelector(
     (state) => state.onlineUser
   );
-  console.log("onlineUsers > ", onlineUsers);
+  // console.log("onlineUsers > ", onlineUsers);
 
-  const { email: managerEmail, id: managerId } =
-    useRouteLoaderData("manager") || {};
-  const { email: staffEmail, id: staffId } = useRouteLoaderData("staff") || {};
-
-  const userEmail = managerEmail ? managerEmail : staffEmail;
-  const userId = managerId ? managerId : staffId;
-  console.log("userEmail > ", userEmail);
+  const { email: staffEmail, id: staffId } = useRouteLoaderData("staff");
 
   const [searchInput, setSearchInput] = useState("");
   const [chatInput, setChatInput] = useState("");
@@ -211,20 +203,6 @@ const ChatPage = () => {
   const [isRecipientTyping, setIsRecipientTyping] = useState(false);
 
   useEffect(() => {
-    // ================ REFETCH ONLINE USER ================
-    getOnlineGroupUsersSocket();
-    const interval = setInterval(() => {
-      getOnlineGroupUsersSocket();
-    }, 10000);
-    // ================ REFETCH ONLINE USER ================
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
-  useEffect(() => {
-    // ================================ CHAT HANDLER ================================
     if (chatDetail.chatId !== "") onConversationJoinSocket(chatDetail.chatId);
 
     socket.on("userJoin", () => {
@@ -243,7 +221,6 @@ const ChatPage = () => {
       console.log("onTypingStop: User has stopped typing...");
       setIsRecipientTyping(false);
     });
-    // ================================ CHAT HANDLER ================================
 
     return () => {
       // If chatDetail.chatId change => leave the previous room chat
@@ -261,14 +238,14 @@ const ChatPage = () => {
       if (searchInput !== "") {
         const searchOnlineUser = onlineUsers.filter(
           (user) =>
-            user.id !== userId &&
+            user.id !== staffId &&
             (user.email.includes(searchInput.toLowerCase()) ||
               user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
 
         const searchOfflineUsers = offlineUsers.filter(
           (user) =>
-            user.id !== userId &&
+            user.id !== staffId &&
             (user.email.includes(searchInput.toLowerCase()) ||
               user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
@@ -390,12 +367,12 @@ const ChatPage = () => {
               }}
               onFocus={() => {
                 const users = onlineUsers
-                  .filter((user) => user.id !== userId)
+                  .filter((user) => user.id !== staffId)
                   .map((item) => ({
                     ...item,
                     online: true,
                   }))
-                  .concat(offlineUsers.filter((user) => user.id !== userId));
+                  .concat(offlineUsers.filter((user) => user.id !== staffId));
 
                 setSearchUsers(users);
               }}
@@ -433,7 +410,7 @@ const ChatPage = () => {
                         handleSelectConversationDetail={
                           handleSelectConversationDetail
                         }
-                        userEmail={userEmail}
+                        staffEmail={staffEmail}
                       />
                     ))
                   )
@@ -642,7 +619,7 @@ const ChatPage = () => {
                   chatDetail.chatDetail?.map((groupMessage, index) => (
                     <MessageItem
                       key={index + groupMessage?.email}
-                      isMe={groupMessage?.email === userEmail}
+                      isMe={groupMessage?.email === staffEmail}
                       messageList={groupMessage.messageList}
                     />
                   ))
@@ -686,13 +663,13 @@ const ChatPage = () => {
                   placeholder="Nhập đoạn tin nhắn ..."
                   value={chatInput}
                   onChange={(e) => {
-                    if (e.target.value === "")
-                      onTypingStopSocket(chatDetail.chatId);
-                    else onTypingStartSocket(chatDetail.chatId);
+                    console.log("e.target.value > ", e.target.value);
                     setChatInput(e.target.value);
                   }}
                   onPressEnter={handleSubmitChatMessage}
-                  onFocus={() => {}}
+                  onFocus={() => {
+                    onTypingStartSocket(chatDetail.chatId);
+                  }}
                   onBlur={() => {
                     onTypingStopSocket(chatDetail.chatId);
                   }}
@@ -714,4 +691,4 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage;
+export default StaffChatPage;

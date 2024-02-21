@@ -7,6 +7,7 @@ import useDarkMode from "../../hooks/useDarkMode";
 import { Avatar, ConfigProvider, Menu } from "antd";
 import logo from "../../assets/images/logo.png";
 import { AnimatePresence, motion } from "framer-motion";
+import { IoChatboxOutline } from "react-icons/io5";
 
 const SidebarStaff = ({ collapsed }) => {
   const [colorTheme, setColorTheme] = useDarkMode();
@@ -77,6 +78,13 @@ const SidebarStaff = ({ collapsed }) => {
     //     <LiaMoneyBillWaveAltSolid className="text-[#4CAF50]" size={24} />
     //   </p>
     // ),
+    getItem(
+      <LabelText text="Chat" />,
+      "/staff/chat",
+      <p>
+        <IoChatboxOutline className="text-[#FF5722]" size={24} />
+      </p>
+    ),
   ];
 
   return (

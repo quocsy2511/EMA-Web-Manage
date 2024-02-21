@@ -1,4 +1,3 @@
-import axios from "axios";
 import http from "../utils/axios-utils";
 
 export const login = ({ email, password }) =>
