@@ -681,6 +681,7 @@ const EventCreationPage = () => {
               {/* <Input placeholder="Nhập giá trị hợp đồng" size="large" /> */}
               <div className="flex items-center gap-x-3">
                 <InputNumber
+                  size="large"
                   value={form.getFieldsValue().contract?.contractValue}
                   className="w-full"
                   placeholder="Nhập giá trị hợp đồng"
@@ -733,7 +734,6 @@ const EventCreationPage = () => {
                     label: "Chuyển Khoản",
                   },
                 ]}
-                loading={eventTypeIsLoading}
                 placeholder="Chọn hình thức thanh toán"
                 size="large"
               />

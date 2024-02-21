@@ -58,10 +58,7 @@ import EventTaskSelection from "../../components/Selection/EventTaskSelection";
 import TaskItem from "../../components/Task/TaskItem";
 import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  getDetailEvent,
-  updateStatusEvent,
-} from "../../apis/events";
+import { getDetailEvent, updateStatusEvent } from "../../apis/events";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
@@ -72,6 +69,7 @@ import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import EventUpdateModal from "../../components/Modal/EventUpdateModal";
 import { getContract } from "../../apis/contract";
 import DocReviewerModal from "../../components/Modal/DocReviewerModal";
+import ContractCreatePage from "../../components/Modal/ContractCreatePage";
 
 moment.locale("vi"); // Set the locale to Vietnam
 
@@ -100,6 +98,7 @@ const EventTaskPage = () => {
   const [statusSelection, setStatusSelection] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false); // update event
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -238,15 +237,15 @@ const EventTaskPage = () => {
       {contextHolder}
 
       <FloatButton
-        // onClick={() => setIsOpenModal(true)}
-        onClick={() =>
-          navigate("task", {
-            state: {
-              eventId: data.id,
-              eventName: data.eventName,
-            },
-          })
-        }
+        onClick={() => setIsOpenModal(true)}
+        // onClick={() =>
+        //   navigate("task", {
+        //     state: {
+        //       eventId: data.id,
+        //       eventName: data.eventName,
+        //     },
+        //   })
+        // }
         type="primary"
         icon={<RiAddFill />}
         disabled={data.listDivision?.length === 0}
@@ -260,19 +259,24 @@ const EventTaskPage = () => {
 
       {/* <DocReviewerModal isModalOpen={isDocModalOpen} /> */}
 
-      {/* <TaskAdditionModal
+      <TaskAdditionModal
         isModalOpen={isOpenModal}
         setIsModalOpen={setIsOpenModal}
         eventId={eventId}
         date={[data.startDate, data.endDate]}
         staffs={data.listDivision}
-        selectedTemplateTask={selectedTemplateTask}
-      /> */}
+      />
 
       <EventUpdateModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         event={data}
+      />
+
+      <ContractCreatePage
+        isModalOpen={isContractModalOpen}
+        setIsModalOpen={setIsContractModalOpen}
+        messageApi={messageApi}
       />
 
       <motion.div
@@ -345,14 +349,19 @@ const EventTaskPage = () => {
             <Popover
               content={
                 <p className="text-base">
-                  {!contract ? "Tạo hợp đồng" : "Hợp đồng"}
+                  {Object.keys(contract).length === 0
+                    ? "Tạo hợp đồng"
+                    : "Hợp đồng"}
                 </p>
               }
             >
               <motion.div
                 className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 p-2 rounded-md cursor-pointer"
                 whileHover={{ y: -4 }}
-                onClick={() => !contract && setIsModalOpen(true)}
+                onClick={() =>
+                  Object.keys(contract).length === 0 &&
+                  setIsContractModalOpen(true)
+                }
               >
                 {!contract ? (
                   <FaFileContract className="text-xl" />
