@@ -284,7 +284,7 @@ const HeaderEvent = ({
                 {!isDashBoard && (
                   <div className="flex-1 flex justify-end items-center gap-x-3">
                     {/* budget */}
-                    <div className="flex-1 flex flex-row gap-x-2 text-sm">
+                    {/* <div className="flex-1 flex flex-row gap-x-2 text-sm">
                       <AnimatePresence mode="wait">
                         {!isBoardTask ? (
                           <motion.span
@@ -390,7 +390,8 @@ const HeaderEvent = ({
                           </motion.div>
                         )}
                       </AnimatePresence>
-                    </div>
+                    </div> */}
+
                     <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer">
                       <Avatar.Group
                         maxCount={3}

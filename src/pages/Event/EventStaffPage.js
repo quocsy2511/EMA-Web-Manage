@@ -101,51 +101,51 @@ const EventStaffPage = () => {
 
   const [filterMember, setFilterMember] = useState(staff?.id);
 
-  const {
-    data: listBudgetConfirming,
-    isError: isErrorListBudgetConfirming,
-    isLoading: isLoadingListBudgetConfirming,
-    refetch: refetchListBudgetConfirming,
-  } = useQuery(
-    ["listBudgetConfirming"],
-    () =>
-      getBudget({
-        eventID: selectEvent?.id,
-        pageSize: 50,
-        currentPage: 1,
-        mode: 1,
-        userID: idStaff,
-      }),
-    {
-      select: (data) => {
-        return data.data;
-      },
+  // const {
+  //   data: listBudgetConfirming,
+  //   isError: isErrorListBudgetConfirming,
+  //   isLoading: isLoadingListBudgetConfirming,
+  //   refetch: refetchListBudgetConfirming,
+  // } = useQuery(
+  //   ["listBudgetConfirming"],
+  //   () =>
+  //     getBudget({
+  //       eventID: selectEvent?.id,
+  //       pageSize: 50,
+  //       currentPage: 1,
+  //       mode: 1,
+  //       userID: idStaff,
+  //     }),
+  //   {
+  //     select: (data) => {
+  //       return data.data;
+  //     },
 
-      refetchOnWindowFocus: false,
-      enabled: !!selectEvent?.id,
-    }
-  );
+  //     refetchOnWindowFocus: false,
+  //     enabled: !!selectEvent?.id,
+  //   }
+  // );
 
-  const { data: listBudgetConfirmed, refetch: refetchListBudgetConfirmed } =
-    useQuery(
-      ["listBudgetConfirmed"],
-      () =>
-        getBudget({
-          eventID: selectEvent?.id,
-          pageSize: 50,
-          currentPage: 1,
-          mode: 2,
-          userID: idStaff,
-        }),
-      {
-        select: (data) => {
-          return data.data;
-        },
+  // const { data: listBudgetConfirmed, refetch: refetchListBudgetConfirmed } =
+  //   useQuery(
+  //     ["listBudgetConfirmed"],
+  //     () =>
+  //       getBudget({
+  //         eventID: selectEvent?.id,
+  //         pageSize: 50,
+  //         currentPage: 1,
+  //         mode: 2,
+  //         userID: idStaff,
+  //       }),
+  //     {
+  //       select: (data) => {
+  //         return data.data;
+  //       },
 
-        refetchOnWindowFocus: false,
-        enabled: !!selectEvent?.id,
-      }
-    );
+  //       refetchOnWindowFocus: false,
+  //       enabled: !!selectEvent?.id,
+  //     }
+  //   );
 
   const {
     data: listTaskParents,
@@ -324,8 +324,8 @@ const EventStaffPage = () => {
 
   useEffect(() => {
     if (selectEvent.id) {
-      refetchListBudgetConfirming();
-      refetchListBudgetConfirmed();
+      // refetchListBudgetConfirming();
+      // refetchListBudgetConfirmed();
       refetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -366,18 +366,24 @@ const EventStaffPage = () => {
                 ) : (
                   <LoadingComponentIndicator />
                 )
-              ) : !isLoadingListBudgetConfirming ? (
+              ) : (
+                <div>
+                  {/* !isLoadingListBudgetConfirming ? (
                 !isErrorListBudgetConfirming ? (
-                  <BudgetStaff
+                  
+                    <BudgetStaff
                     listBudgetConfirmed={listBudgetConfirmed}
                     listBudgetConfirming={listBudgetConfirming}
                     selectEvent={selectEvent}
                   />
+                  
                 ) : (
                   <AnErrorHasOccured />
                 )
               ) : (
                 <LoadingComponentIndicator />
+              ) */}
+                </div>
               )}
             </>
           ) : (

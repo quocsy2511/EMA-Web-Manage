@@ -52,13 +52,13 @@ const SidebarStaff = ({ collapsed }) => {
     //     <HiOutlineCalendarDays className="text-[#9c27b0]" size={24} />
     //   </p>
     // ),
-    getItem(
-      <LabelText text="Yêu cầu" />,
-      "/staff/request",
-      <p>
-        <BsMailbox className="text-[#FF5722]" size={24} />
-      </p>
-    ),
+    // getItem(
+    //   <LabelText text="Yêu cầu" />,
+    //   "/staff/request",
+    //   <p>
+    //     <BsMailbox className="text-[#FF5722]" size={24} />
+    //   </p>
+    // ),
     getItem(
       <LabelText text="Thống kê" />,
       "/staff/dashboard",
