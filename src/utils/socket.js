@@ -3,6 +3,7 @@ import { URL_SOCKET } from "../constants/api";
 import { chatDetailActions } from "../store/chat_detail";
 import { handleUpdateUsers } from "../store/online_user";
 import { Avatar } from "antd";
+import { chatsActions } from "../store/chats";
 
 export const socket = io(URL_SOCKET, {
   withCredentials: true,
@@ -11,9 +12,9 @@ export const socket = io(URL_SOCKET, {
   },
 });
 
-export const managerSocket = (dispatch, notificationAPI) => {
+export const socketListener = (dispatch, notificationAPI) => {
   // create connection
-  socket.on("connect", () => {
+  socket.on("connect-success", () => {
     console.log("Successfully connect with socket.io server : ", socket.id);
   });
 
@@ -47,21 +48,25 @@ export const managerSocket = (dispatch, notificationAPI) => {
   socket.on("onMessage", (data) => {
     console.log("onMessage data > ", data);
 
+    const { message, newConservations } = data ?? {};
+
     const customNewMessage = {
       attachments: [],
-      author: data?.author,
-      content: data?.content,
-      createdAt: data?.createdAt,
-      id: data?.id,
-      updatedAt: data?.updatedAt,
+      author: message?.author,
+      content: message?.content,
+      createdAt: message?.createdAt,
+      id: message?.id,
+      updatedAt: message?.updatedAt,
     };
 
     dispatch(
       chatDetailActions.updateChatDetail({
-        email: data?.author?.email,
+        email: message?.author?.email,
         newMessage: customNewMessage,
       })
     );
+
+    dispatch(chatsActions.updateChat(newConservations));
   });
 
   // Get online / offline user
@@ -82,6 +87,10 @@ export const getOnlineGroupUsersSocket = () => {
   socket.emit("getOnlineGroupUsers", {});
 };
 
+export const getOnlineUserSocket = () => {
+  socket.emit("getOnlineUser", {});
+};
+
 export const onConversationJoinSocket = (conversationId) => {
   socket.emit("onConversationJoin", { conversationId });
 };
@@ -98,7 +107,15 @@ export const onTypingStopSocket = (conversationId) => {
   socket.emit("onTypingStop", { conversationId });
 };
 
+export const closeConnectSocket = () => {
+  socket.emit("closeConnect", {});
+};
+
 // =============================== CLEAN UP SOCKET ===============================
+export const cleanUpNotification = () => {
+  socket.off("notification");
+};
+
 export const cleanUpOnMessage = () => {
   socket.off("onMessage");
 };

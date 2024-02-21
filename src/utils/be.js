@@ -1,37 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { JwtService } from '@nestjs/jwt';
-import {
-  HttpException,
-  HttpStatus,
-  Inject,
-  Logger,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ConnectedSocket,
-  MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { SocketEnum } from 'src/common/enum/socket.enum';
-import { jwtConstants } from 'src/config/jwt.config';
-import { UserService } from 'src/modules/user/user.service';
-import { WsGuard } from 'src/guards/ws.guard';
-import { Services } from '../utils/constants';
-import { IGatewaySessionManager } from './gateway.session';
-import { AuthenticatedSocket } from 'src/utils/interfaces';
-import { CreateMessageResponse } from 'src/utils/types';
-import { ConversationsEntity } from 'src/modules/conversations/conversations.entity';
-import { MessageEntity } from 'src/modules/messages/messages.entity';
-import { IConversationsService } from 'src/modules/conversations/interface/conversations';
-import { OnEvent } from '@nestjs/event-emitter';
-import { IGroupService } from 'src/modules/groups/interfaces/group';
 @UseGuards(WsGuard)
 @WebSocketGateway(3006, {
   cors: {
@@ -100,11 +66,22 @@ export class AppGateway
     }
   }
 
+  @SubscribeMessage('closeConnect')
+  async handleDisconnectClose(socket: AuthenticatedSocket): Promise<void> {
+    this.logger.log(`${socket.id} disconnect`);
+    try {
+      const token: any = await this.getDataUserFromToken(socket);
+      this.sessions.removeUserSocket(token.id);
+    } catch (error) {
+      return error.message;
+    }
+  }
+
   @SubscribeMessage('getOnlineGroupUsers')
   async handleGetOnlineGroupUsers(
     @ConnectedSocket() socket: AuthenticatedSocket,
   ): Promise<void> {
-    const listUser = await this.userService.getAllUser();
+    const listUser: any = await this.userService.getAllUser();
     if (!listUser) return;
     const onlineUsers = [];
     const offlineUsers = [];
@@ -167,19 +144,18 @@ export class AppGateway
 
   @OnEvent('message.create')
   handleMessageCreateEvent(payload: CreateMessageResponse): Promise<void> {
-    console.log('Inside message.create');
     const {
-      author,
+      message: { author },
       conversation: { creator, recipient },
-    } = payload.message;
+    } = payload;
 
     const authorSocket = this.sessions.getUserSocket(author.id);
     const recipientSocket =
-      author.id === creator.id
-        ? this.sessions.getUserSocket(recipient.id)
-        : this.sessions.getUserSocket(creator.id);
-    if (authorSocket) authorSocket.emit('onMessage', payload);
-    if (recipientSocket) recipientSocket.emit('onMessage', payload);
+      author?.id === creator?.id
+        ? this.sessions.getUserSocket(recipient?.id)
+        : this.sessions.getUserSocket(creator?.id);
+    if (authorSocket) authorSocket.emit('onMessage', payload.message);
+    if (recipientSocket) recipientSocket.emit('onMessage', payload.message);
     return;
   }
 
@@ -188,6 +164,22 @@ export class AppGateway
     console.log('Inside conversation.create');
     const recipientSocket = this.sessions.getUserSocket(payload.recipient.id);
     if (recipientSocket) recipientSocket.emit('onConversation', payload);
+    return;
+  }
+
+  @SubscribeMessage('onConversationUpdate')
+  async handleConversationUpdate(@MessageBody() userId: string): Promise<void> {
+    console.log('onConversationUpdate');
+    const paging: ConservationsPagination = {
+      sizePage: 10,
+      currentPage: 1,
+    };
+    const listConservations = await this.conversationService.getConversations(
+      userId,
+      paging,
+    );
+    const userSocket = this.sessions.getUserSocket(userId);
+    if (userSocket) userSocket.emit('onConversationUpdate', listConservations);
     return;
   }
 

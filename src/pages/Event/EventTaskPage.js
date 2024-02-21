@@ -14,11 +14,16 @@ import {
   FloatButton,
   Image,
   Popconfirm,
+  Popover,
   Progress,
   Tooltip,
   message,
 } from "antd";
-import { FaLongArrowAltRight, FaUserFriends } from "react-icons/fa";
+import {
+  FaLongArrowAltRight,
+  FaUserFriends,
+  FaFileContract,
+} from "react-icons/fa";
 import {
   BsHourglassSplit,
   BsHourglassBottom,
@@ -55,7 +60,6 @@ import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   getDetailEvent,
-  getTemplateEvent,
   updateStatusEvent,
 } from "../../apis/events";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
@@ -66,6 +70,8 @@ import { filterTask, getTasks, getTemplateTask } from "../../apis/tasks";
 import EmptyList from "../../components/Error/EmptyList";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import EventUpdateModal from "../../components/Modal/EventUpdateModal";
+import { getContract } from "../../apis/contract";
+import DocReviewerModal from "../../components/Modal/DocReviewerModal";
 
 moment.locale("vi"); // Set the locale to Vietnam
 
@@ -92,9 +98,8 @@ const EventTaskPage = () => {
   const [assigneeSelection, setAssigneeSelection] = useState();
   const [prioritySelection, setPrioritySelection] = useState();
   const [statusSelection, setStatusSelection] = useState();
-  const [isOpenModal, setIsOpenModal] = useState(false); // create Task
   const [isModalOpen, setIsModalOpen] = useState(false); // update event
-  const [selectedTemplateTask, setSelectedTemplateTask] = useState();
+  const [isContractModalOpen, setIsContractModalOpen] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -103,7 +108,14 @@ const EventTaskPage = () => {
     () => getDetailEvent(eventId),
     { refetchOnWindowFocus: false }
   );
-  console.log("DATA : ", data);
+  console.log("Event : ", data);
+
+  const {
+    data: contract,
+    isLoading: contractIsLoading,
+    isError: contractIsError,
+  } = useQuery(["contract", eventId], () => getContract(eventId));
+  console.log("contract > ", contract);
 
   const {
     data: tasks,
@@ -181,10 +193,6 @@ const EventTaskPage = () => {
     setStatusSelection();
   };
 
-  // const handleEndEvent = () => {
-  //   mutate(eventId, "DONE");
-  // };
-
   if (isLoading)
     return (
       <div className="h-[calc(100vh-128px)] w-full">
@@ -230,7 +238,15 @@ const EventTaskPage = () => {
       {contextHolder}
 
       <FloatButton
-        onClick={() => setIsOpenModal(true)}
+        // onClick={() => setIsOpenModal(true)}
+        onClick={() =>
+          navigate("task", {
+            state: {
+              eventId: data.id,
+              eventName: data.eventName,
+            },
+          })
+        }
         type="primary"
         icon={<RiAddFill />}
         disabled={data.listDivision?.length === 0}
@@ -242,14 +258,16 @@ const EventTaskPage = () => {
         className="cursor-pointer"
       />
 
-      <TaskAdditionModal
+      {/* <DocReviewerModal isModalOpen={isDocModalOpen} /> */}
+
+      {/* <TaskAdditionModal
         isModalOpen={isOpenModal}
         setIsModalOpen={setIsOpenModal}
         eventId={eventId}
         date={[data.startDate, data.endDate]}
         staffs={data.listDivision}
         selectedTemplateTask={selectedTemplateTask}
-      />
+      /> */}
 
       <EventUpdateModal
         isModalOpen={isModalOpen}
@@ -269,6 +287,7 @@ const EventTaskPage = () => {
           / {data.eventName}
         </p>
       </motion.div>
+
       <motion.div
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -323,41 +342,69 @@ const EventTaskPage = () => {
         <div className="mx-10 my-8">
           <div className="flex items-center gap-x-5">
             <p className="flex-1 text-3xl font-bold">{data.eventName}</p>
-            <motion.div
-              className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 px-3 py-1 rounded-md cursor-pointer"
-              whileHover={{ y: -4 }}
-              onClick={() =>
-                navigate("division", {
-                  state: {
-                    eventId: data.id,
-                    eventName: data.eventName,
-                    listDivisionId: data.listDivision?.map(
-                      (item) => item.divisionId
-                    ),
-                  },
-                })
+            <Popover
+              content={
+                <p className="text-base">
+                  {!contract ? "Tạo hợp đồng" : "Hợp đồng"}
+                </p>
               }
             >
-              <SiGoogleclassroom />
-              <p>Bộ phận</p>
-            </motion.div>
-            <Link to="budget">
               <motion.div
+                className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 p-2 rounded-md cursor-pointer"
                 whileHover={{ y: -4 }}
-                className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 px-3 py-1 rounded-md cursor-pointer"
+                onClick={() => !contract && setIsModalOpen(true)}
               >
-                <PiPiggyBank />
-                <p>Ngân sách</p>
+                {!contract ? (
+                  <FaFileContract className="text-xl" />
+                ) : (
+                  <a
+                    className="hover:text-inherit"
+                    href={contract?.contractFileUrl}
+                    download={contract?.contractFileName}
+                  >
+                    <FaFileContract className="text-xl" />
+                  </a>
+                )}
               </motion.div>
+            </Popover>
+            <Popover content={<p className="text-base">Điều chỉnh bộ phận</p>}>
+              <motion.div
+                className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 p-2 rounded-md cursor-pointer"
+                whileHover={{ y: -4 }}
+                onClick={() =>
+                  navigate("division", {
+                    state: {
+                      eventId: data.id,
+                      eventName: data.eventName,
+                      listDivisionId: data.listDivision?.map(
+                        (item) => item.divisionId
+                      ),
+                    },
+                  })
+                }
+              >
+                <SiGoogleclassroom className="text-xl" />
+              </motion.div>
+            </Popover>
+            <Link to="budget">
+              <Popover content={<p className="text-base">Ngân sách</p>}>
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 p-2 rounded-md cursor-pointer"
+                >
+                  <PiPiggyBank className="text-xl" />
+                </motion.div>
+              </Popover>
             </Link>
-            <motion.div
-              className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 px-3 py-1 rounded-md cursor-pointer"
-              whileHover={{ y: -4 }}
-              onClick={() => setIsModalOpen(true)}
-            >
-              <RiEditFill />
-              <p>chỉnh sửa</p>
-            </motion.div>
+            <Popover content={<p className="text-base">Chỉnh sửa sự kiện</p>}>
+              <motion.div
+                className="flex items-center gap-x-2 text-base text-slate-400 border border-slate-400 p-2 rounded-md cursor-pointer"
+                whileHover={{ y: -4 }}
+                onClick={() => setIsModalOpen(true)}
+              >
+                <RiEditFill className="text-xl" />
+              </motion.div>
+            </Popover>
           </div>
 
           <p

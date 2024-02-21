@@ -34,6 +34,8 @@ const Title = ({ title }) => (
 const EventCreationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  console.log("location > ", location.state);
+  console.log("location.state?.eventType > ", location.state?.eventType);
 
   const [fileList, setFileList] = useState();
   const [current, setCurrent] = useState(0);
@@ -46,9 +48,10 @@ const EventCreationPage = () => {
       form.setFieldsValue({
         location: location.state?.location,
         estBudget: location.state?.estBudget ?? 500000,
-        eventType: location.state?.eventType,
+        eventTypeId: location.state?.eventType,
       });
     }
+    console.log("after > ", form.getFieldsValue());
   }, []);
 
   const { data: eventType, isLoading: eventTypeIsLoading } = useQuery(
@@ -143,7 +146,7 @@ const EventCreationPage = () => {
       processingDate: values.processingDate,
       endDate: values.date[1],
       location: values.location,
-      estBudget: values.estBudget,
+      estBudget: +values.estBudget,
       eventTypeId: values.eventTypeId,
     };
   };
@@ -251,7 +254,9 @@ const EventCreationPage = () => {
               onClick={() => {
                 form
                   .validateFields()
-                  .then((values) => {})
+                  .then((values) => {
+                    setCurrent((prev) => prev + 1);
+                  })
                   .catch((errorInfo) => {
                     console.log("Validation Fields:", errorInfo);
                     const values = errorInfo.values;
@@ -494,6 +499,7 @@ const EventCreationPage = () => {
                   .validateFields()
                   .then((values) => {
                     console.log("success > ", values);
+                    setCurrent((prev) => prev + 1);
                   })
                   .catch((errorInfo) => {
                     console.log("Validation Fields:", errorInfo);
@@ -605,7 +611,7 @@ const EventCreationPage = () => {
                 },
                 {
                   pattern: /^[0-9]{12}$/,
-                  message: "CCCD / CMND cần phải có 12 số!",
+                  message: "CCCD / CMND cần bao gồm 12 số!",
                 },
               ]}
               onChange={(value) => {
@@ -616,7 +622,6 @@ const EventCreationPage = () => {
               }}
             >
               <Input
-                type="number"
                 pattern="[0-9]*"
                 maxLength={12}
                 placeholder="Nhập CCCD / CMND"
@@ -647,7 +652,6 @@ const EventCreationPage = () => {
               }}
             >
               <Input
-                type="number"
                 pattern="[0-9]*"
                 maxLength={10}
                 max={10}
@@ -677,6 +681,7 @@ const EventCreationPage = () => {
               {/* <Input placeholder="Nhập giá trị hợp đồng" size="large" /> */}
               <div className="flex items-center gap-x-3">
                 <InputNumber
+                  value={form.getFieldsValue().contract?.contractValue}
                   className="w-full"
                   placeholder="Nhập giá trị hợp đồng"
                   min={0}
@@ -803,7 +808,7 @@ const EventCreationPage = () => {
               e.preventDefault();
             }
           }}
-          initialValues={{ estBudget: 500000 }}
+          // initialValues={{}}
         >
           <Steps
             className=""
