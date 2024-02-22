@@ -49,6 +49,11 @@ const EventCreationPage = () => {
         location: location.state?.location,
         estBudget: location.state?.estBudget ?? 500000,
         eventTypeId: location.state?.eventType,
+        contract: {
+          customerName: location.state?.customer?.fullName,
+          customerEmail: location.state?.customer?.email,
+          customerPhoneNumber: location.state?.customer?.phoneNumber,
+        },
       });
     }
     console.log("after > ", form.getFieldsValue());

@@ -293,8 +293,10 @@ const ChatPage = () => {
     {
       onSuccess: (data, variables) => {
         console.log("data > ", data, variables);
+        // refetch lại chat list
         dispatch(getChatsList({ currentPage: 1 }));
 
+        // access chat detail
         handleSelectConversationDetail(
           data?.id,
           variables.avatar,
@@ -439,7 +441,7 @@ const ChatPage = () => {
                   )
                 ) : (
                   chats.status === "failed" && (
-                    <p className="px-10 mt-10 text-center text-black text-2xl font-medium">
+                    <p className="px-10 mt-10 text-center text-black text-xl font-medium">
                       Không thể lấy dữ liệu !<br />
                       Hãy thử lại sau.
                     </p>
