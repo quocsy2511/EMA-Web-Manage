@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -20,16 +20,15 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createEvent, getEventType } from "../../apis/events";
-import { updateCustomerContacts } from "../../apis/contact";
 import { uploadFile } from "../../apis/files";
 import { createContract } from "../../apis/contract";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 
 const { RangePicker } = DatePicker;
 
-const Title = ({ title }) => (
+const Title = memo(({ title }) => (
   <p className="text-base font-medium truncate">{title}</p>
-);
+));
 
 const EventCreationPage = () => {
   const navigate = useNavigate();
@@ -56,24 +55,19 @@ const EventCreationPage = () => {
         },
       });
     }
-    console.log("after > ", form.getFieldsValue());
   }, []);
 
   const { data: eventType, isLoading: eventTypeIsLoading } = useQuery(
     ["event-type"],
-    () => getEventType()
+    () => getEventType(),
+    { refetchOnWindowFocus: false }
   );
 
-  const { mutate: updateContactMutate, isLoading: updateContactIsLoading } =
+  const { mutate: createContractMutate, isLoading: createContractIsLoading } =
     useMutation(
-      () =>
-        updateCustomerContacts({
-          contactId: location.state.contactId,
-          status: "ACCEPTED",
-        }),
+      ({ eventId, contract }) => createContract({ eventId, contract }),
       {
         onSuccess: (data, variables) => {
-          // TODO -> navigation
           messageApi.open({
             type: "success",
             content: "Tạo sự kiện thành công.",
@@ -90,33 +84,22 @@ const EventCreationPage = () => {
       }
     );
 
-  const { mutate: createContractMutate, isLoading: createContractIsLoading } =
-    useMutation((eventId, contract) => createContract({ eventId, contract }), {
-      onSuccess: (data, variables) => {
-        updateContactMutate();
-      },
-      onError: (error) => {
-        messageApi.open({
-          type: "error",
-          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-        });
-      },
-    });
-
   const { mutate: createEventMutate, isLoading: createEventIsLoading } =
-    useMutation((event, contract) => createEvent(event), {
+    useMutation(({ event, contract }) => createEvent(event), {
       onSuccess: (data, variables) => {
-        console.log("createEventMutate success > ", data);
         if (variables.contract) {
-          createContractMutate(data.eventId, variables.contract);
+          createContractMutate({
+            eventId: data?.split(" ")?.[0],
+            contract: variables.contract,
+          });
         } else {
           // TODO -> navigation
-          // messageApi.open({
-          //   type: "success",
-          //   content: "Tạo sự kiện thành công.",
-          // });
-          // form.resetFields();
-          updateContactMutate();
+          messageApi.open({
+            type: "success",
+            content: "Tạo sự kiện thành công.",
+          });
+          form.resetFields();
+          navigate(-1);
         }
       },
       onError: (error) => {
@@ -131,8 +114,12 @@ const EventCreationPage = () => {
     ({ formData, event, contract }) => uploadFile(formData),
     {
       onSuccess: (data, variables) => {
+        console.log("variables upload > ", variables);
         variables.event = { coverUrl: data.downloadUrl, ...variables.event };
-        createEventMutate(variables.event, variables.contract);
+        createEventMutate({
+          event: variables.event,
+          contract: variables.contract,
+        });
       },
       onError: () => {
         messageApi.open({
@@ -164,12 +151,17 @@ const EventCreationPage = () => {
     formData.append("folderName", "event");
 
     const eventValues = setupEventValues(values);
-    console.log("TRANSORM: ", eventValues);
+
+    const contractValues = {
+      ...values.contract,
+      contractValue: `${values.contract.contractValue}`,
+      paymentDate: momenttz().format("YYYY-MM-DD"),
+    };
 
     uploadFileMutate({
       formData,
       event: eventValues,
-      contract: values.contract,
+      contract: contractValues,
     });
   };
 
@@ -178,13 +170,11 @@ const EventCreationPage = () => {
   };
 
   const handleSubmitFormWithoutContract = () => {
-    console.log("getFieldsValue > ", form.getFieldsValue());
     const formData = new FormData();
     formData.append("file", fileList);
     formData.append("folderName", "event");
 
     const eventValues = setupEventValues(form.getFieldsValue());
-    console.log("TRANSORM: ", eventValues);
 
     uploadFileMutate({ formData, event: eventValues });
   };
@@ -553,7 +543,7 @@ const EventCreationPage = () => {
                 });
               }}
             >
-              <Input placeholder="Nhập tên khách hàng" size="large" />
+              <Input disabled placeholder="Nhập tên khách hàng" size="large" />
             </Form.Item>
 
             <Form.Item
@@ -578,7 +568,11 @@ const EventCreationPage = () => {
                 });
               }}
             >
-              <Input placeholder="Nhập email khách hàng" size="large" />
+              <Input
+                disabled
+                placeholder="Nhập email khách hàng"
+                size="large"
+              />
             </Form.Item>
           </div>
 
@@ -657,6 +651,7 @@ const EventCreationPage = () => {
               }}
             >
               <Input
+                disabled
                 pattern="[0-9]*"
                 maxLength={10}
                 max={10}
@@ -677,9 +672,8 @@ const EventCreationPage = () => {
                   message: "Chưa nhập giá trị hợp đồng!",
                 },
                 {
-                  type: "number",
-                  min: 1,
-                  message: "Giá trị hợp đồng không có hiệu lực!",
+                  pattern: /^[0-9,]*$/,
+                  message: "Giá trị hợp đồng không có hiệu lực!!",
                 },
               ]}
             >
@@ -776,10 +770,7 @@ const EventCreationPage = () => {
       {contextHolder}
       <LockLoadingModal
         isModalOpen={
-          uploadIsLoading ||
-          createEventIsLoading ||
-          createContractIsLoading ||
-          updateContactIsLoading
+          uploadIsLoading || createEventIsLoading || createContractIsLoading
         }
         label="Đang khởi tạo sự kiện ..."
       />
@@ -998,4 +989,4 @@ const EventCreationPage = () => {
   );
 };
 
-export default EventCreationPage;
+export default memo(EventCreationPage);
