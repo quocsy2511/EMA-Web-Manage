@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Form, Input, Modal, Select, InputNumber } from "antd";
 import React, { memo } from "react";
 import { createContract } from "../../apis/contract";
@@ -8,16 +8,24 @@ const Title = memo(({ title }) => (
   <p className="text-base font-medium truncate">{title}</p>
 ));
 
-const ContractCreatePage = ({ isModalOpen, setIsModalOpen, messageApi }) => {
+const ContractCreatePage = ({
+  isModalOpen,
+  setIsModalOpen,
+  messageApi,
+  eventId,
+}) => {
   const [form] = Form.useForm();
 
+  const queryClient = useQueryClient();
   const { mutate: createContractMutate, isLoading: createContractIsLoading } =
     useMutation(() => createContract(), {
       onSuccess: (data) => {
+        queryClient.invalidateQueries(["tasks", eventId]);
         messageApi.open({
           type: "success",
           content: "Đã tạo hợp đồng thành công.",
         });
+        setIsModalOpen(false);
       },
       onError: (error) => {
         messageApi.open({
@@ -43,6 +51,8 @@ const ContractCreatePage = ({ isModalOpen, setIsModalOpen, messageApi }) => {
       ...values,
       paymentDate: momenttz().format("YYYY-MM-DD"),
     };
+
+    createContractMutate()
   };
 
   // on form submit fail

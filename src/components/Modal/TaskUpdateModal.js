@@ -35,7 +35,9 @@ const { RangePicker } = DatePicker;
 const Title = ({ title }) => (
   <p className="text-base font-medium truncate">{title}</p>
 );
+
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
+
 const TaskUpdateModal = ({
   isModalOpen,
   setIsModalOpen,

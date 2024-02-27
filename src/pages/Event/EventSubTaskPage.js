@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, memo, useEffect, useState } from "react";
 import {
   Link,
   useLocation,
@@ -32,13 +32,15 @@ import TaskUpdateModal from "../../components/Modal/TaskUpdateModal";
 import { useDispatch, useSelector } from "react-redux";
 import { redirectionActions } from "../../store/redirection";
 
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
+
 const EventSubTaskPage = () => {
   const eventId = useParams().eventId;
   const taskId = useParams().taskId;
-  const { eventName } = useLocation().state;
-  // console.log("stateee > ", stateee);
   const manager = useRouteLoaderData("manager");
+
   const navigate = useNavigate();
+  const location = useLocation();
 
   const dispatch = useDispatch();
   const { redirect } = useSelector((state) => state.redirection);
@@ -55,7 +57,7 @@ const EventSubTaskPage = () => {
   const resetTaskRedirect = () => {
     if (redirect.task) dispatch(redirectionActions.taskChange(undefined));
   };
-  const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
+
   const {
     data: tasks,
     isLoading: taskIsLoading,
@@ -73,7 +75,7 @@ const EventSubTaskPage = () => {
       select: (data) => {
         return data[0];
       },
-
+      refetchOnWindowFocus: false,
     }
   );
   console.log("tasks: ", tasks);
@@ -82,9 +84,12 @@ const EventSubTaskPage = () => {
     data: comments,
     isLoading: commentsIsLoading,
     isError: commentsIsError,
-  } = useQuery(["comment", taskId], () => getComment(taskId));
+  } = useQuery(["comment", taskId], () => getComment(taskId), {
+    refetchOnWindowFocus: false,
+  });
 
   const queryClient = useQueryClient();
+
   const {
     mutate: updateEventStatusMutate,
     isLoading: updateEventStatusIsLoading,
@@ -110,23 +115,19 @@ const EventSubTaskPage = () => {
     }
   );
 
-  useEffect(() => {
-    console.log("inside useEffect: ", tasks?.subTask);
-    if (redirect.task && redirect.task.parentTaskId) {
-      const openSubtask = tasks?.subTask.find(
-        (subtask) => subtask.id === redirect.task.commonId
-      );
-      console.log("find to open subtask: ", openSubtask);
-      if (openSubtask) {
-        setSelectedSubTask(openSubtask);
-        setIsOpenModal(true);
-      }
-    }
-  }, [redirect.task, tasks]);
-
-  const handleOpenModal = () => {
-    setIsOpenCreateTaskModal((prev) => !prev);
-  };
+  // useEffect(() => {
+  //   console.log("inside useEffect: ", tasks?.subTask);
+  //   if (redirect.task && redirect.task.parentTaskId) {
+  //     const openSubtask = tasks?.subTask.find(
+  //       (subtask) => subtask.id === redirect.task.commonId
+  //     );
+  //     console.log("find to open subtask: ", openSubtask);
+  //     if (openSubtask) {
+  //       setSelectedSubTask(openSubtask);
+  //       setIsOpenModal(true);
+  //     }
+  //   }
+  // }, [redirect.task, tasks]);
 
   const handleOpenUpdateModal = () => {
     setIsOpenUpdateTaskModal((prev) => !prev);
@@ -136,6 +137,20 @@ const EventSubTaskPage = () => {
     updateEventStatusMutate({
       taskID: taskId,
       status,
+    });
+  };
+
+  const goToCreateTask = () => {
+    navigate(`/manager/event/${eventId}/task`, {
+      state: {
+        eventId,
+        eventName: location.state?.eventName,
+        dateRange: [tasks?.startDate, tasks?.endDate],
+        taskId: tasks?.id,
+        taskName: tasks?.title,
+        taskResponsorId: tasks?.assignTasks?.[0]?.user?.id,
+        isSubTask: true,
+      },
     });
   };
 
@@ -156,7 +171,7 @@ const EventSubTaskPage = () => {
   }
 
   let priorityIcon;
-  switch (tasks.priority) {
+  switch (tasks?.priority) {
     case "LOW":
       priorityIcon = <FcLowPriority size={30} />;
       break;
@@ -172,7 +187,7 @@ const EventSubTaskPage = () => {
   }
 
   let status, statusColor, statusBorder;
-  switch (tasks.status) {
+  switch (tasks?.status) {
     case "PENDING":
       status = "Đang chuẩn bị";
       statusColor = "text-gray-400";
@@ -217,28 +232,11 @@ const EventSubTaskPage = () => {
     <Fragment>
       {contextHolder}
       <FloatButton
-        onClick={handleOpenModal}
+        onClick={goToCreateTask}
         icon={<BsPlus />}
         type="primary"
-        tooltip={
-          <p>
-            {tasks.assignTasks.length !== 0
-              ? "Tạo công việc"
-              : "Chưa phân công cho bộ phận nào!"}
-          </p>
-        }
+        tooltip={<p>Tạo công việc</p>}
       />
-
-      {tasks.assignTasks.length !== 0 && (
-        <TaskAdditionModal
-          isModalOpen={isOpenCreateTaskModal}
-          setIsModalOpen={setIsOpenCreateTaskModal}
-          eventId={eventId}
-          date={[tasks.startDate, tasks.endDate]}
-          parentTaskId={taskId}
-          staffId={tasks.assignTasks[0].user.id}
-        />
-      )}
 
       <TaskUpdateModal
         isModalOpen={isOpenUpdateTaskModal}
@@ -259,12 +257,13 @@ const EventSubTaskPage = () => {
           </Link>{" "}
           /{" "}
           <Link to=".." relative="path">
-            {eventName ?? "Tên sự kiện"}
+            {location.state?.eventName ?? "Tên sự kiện"}
           </Link>{" "}
-          / {tasks.title}
+          / {tasks?.title}
         </p>
+
         <div className="flex items-end">
-          <AnimatePresence>
+          {/* <AnimatePresence>
             {tasks.subTask?.length !== 0 &&
               tasks.subTask?.filter((task) => task.status === "CONFIRM")
                 .length === tasks.subTask?.length &&
@@ -286,9 +285,9 @@ const EventSubTaskPage = () => {
                   </Button>
                 </motion.div>
               )}
-          </AnimatePresence>
+          </AnimatePresence> */}
 
-          <AnimatePresence>
+          {/* <AnimatePresence>
             {tasks.status === "PENDING" && (
               <motion.div
                 initial={{ x: 50, opacity: 0 }}
@@ -306,9 +305,9 @@ const EventSubTaskPage = () => {
                 </Button>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence> */}
 
-          <AnimatePresence>
+          {/* <AnimatePresence>
             {tasks.subTask?.length !== 0 &&
               tasks.subTask?.filter((task) => task.status === "CONFIRM")
                 .length === tasks.subTask?.length && (
@@ -328,7 +327,7 @@ const EventSubTaskPage = () => {
                   </Button>
                 </motion.div>
               )}
-          </AnimatePresence>
+          </AnimatePresence> */}
         </div>
       </motion.div>
 
@@ -337,151 +336,88 @@ const EventSubTaskPage = () => {
         animate={{ y: 0, opacity: 1 }}
         className="min-h-[calc(100vh-200px)] bg-white mt-8 px-10 py-8 rounded-2xl"
       >
-        <div className="flex items-center">
+        {/* Title */}
+        <div className="flex items-center space-x-8">
           {priorityIcon}
 
-          <div className="w-[2%]" />
-
           <div className="space-y-1">
-            <p className="text-2xl font-semibold">{tasks.title}</p>
-            {tasks.assignTasks.length === 0 ? (
-              <p className="text-sm">Chưa giao công việc !!</p>
-            ) : (
-              <p className="text-sm">
-                Chịu trách nhiệm bởi{" "}
-                <span className="font-semibold">
-                  {tasks.assignTasks[0]?.user.profile.fullName}
-                </span>
-              </p>
-            )}
+            <p className="text-2xl font-semibold">{tasks?.title}</p>
+            <p className="text-sm">
+              Chịu trách nhiệm bởi{" "}
+              <span className="font-semibold">
+                {tasks?.assignTasks?.[0]?.user?.profile?.fullName}
+              </span>
+            </p>
           </div>
 
-          <div className="flex-1 flex justify-end">
-            <div
-              className={`flex items-center px-3 ${statusColor} border ${statusBorder} rounded-full`}
+          <div className="flex-1 flex justify-end space-x-8">
+            <motion.div
+              whileHover={{ y: -5 }}
+              className={`flex items-center px-3 ${statusColor} border ${statusBorder} rounded-full truncate cursor-pointer`}
             >
-              {status}
-            </div>
-
-            <div className="w-[4%]" />
+              <p className="text-base font-medium">{status}</p>
+            </motion.div>
 
             {moment(tasks?.startDate).isSame(moment(tasks?.endDate), "day") ? (
-              <div className="flex gap-x-2">
-                <motion.div
-                  whileHover={{ y: -5 }}
-                  className="flex items-center px-4 py-2 bg-blue-100 text-blue-500 rounded-xl"
-                >
-                  <p className="text-base font-medium">
-                    {tasks?.startDate
-                      ? new Date(tasks?.startDate).toLocaleDateString("vi-VN", {
+              <motion.div
+                whileHover={{ y: -5 }}
+                className="flex items-center px-4 py-2 bg-blue-100 text-blue-500 rounded-xl"
+              >
+                <p className="text-base font-medium">
+                  {tasks?.startDate
+                    ? new Date(tasks?.startDate).toLocaleDateString("vi-VN", {
                         weekday: "long",
                         year: "numeric",
                         month: "long",
                         day: "numeric",
                       })
-                      : "-- : --"}
-                  </p>
-                </motion.div>
+                    : "-- : --"}
+                </p>
+              </motion.div>
+            ) : (
+              <div className="flex items-center gap-x-2">
+                {/* <p className="">Thời gian bắt đầu</p> */}
+
                 <motion.div
                   whileHover={{ y: -5 }}
-                  className="flex items-center gap-x-3 px-4 py-2 bg-blue-100 text-blue-500 rounded-xl"
+                  className="flex items-center px-4 py-2 bg-green-100 text-green-400 rounded-xl space-x-2"
                 >
                   <BsHourglassSplit size={15} />
                   <p className="text-base font-medium">
                     {tasks?.startDate
-                      ? moment(tasks?.startDate).utc().format("HH:mm")
+                      ? moment(tasks?.startDate)
+                          .utc()
+                          .format("dddd, D [tháng] M")
                       : "-- : --"}
                   </p>
+                </motion.div>
 
-                  <BiRightArrowAlt size={25} />
+                <BiRightArrowAlt size={25} className="" />
 
-                  <BsHourglassBottom />
+                <motion.div
+                  whileHover={{ y: -5 }}
+                  className="flex items-center px-4 py-2 bg-red-100 text-red-400 rounded-xl space-x-2"
+                >
+                  <BsHourglassBottom size={15} />
                   <p className="text-base font-medium">
                     {tasks?.endDate
-                      ? moment(tasks?.endDate).utc().format("HH:mm")
+                      ? moment(tasks?.endDate).utc().format("dddd, D [tháng] M")
                       : "-- : --"}
                   </p>
                 </motion.div>
               </div>
-            ) : (
-              <div className="flex items-center gap-x-2">
-                {/* <p className="">Thời gian bắt đầu</p> */}
-                <div className="flex gap-x-2">
-                  <motion.div
-                    whileHover={{ y: -5 }}
-                    className="flex items-center px-4 py-2 bg-green-100 text-green-400 rounded-xl"
-                  >
-                    <BsHourglassSplit size={15} />
-                    <div className="w-4" />
-                    <p className="text-base font-medium">
-                      {tasks?.startDate
-                        ? moment(tasks?.startDate)
-                          .utc()
-                          .format("dddd, D [tháng] M")
-                        : "-- : --"}
-                    </p>
-                  </motion.div>
-                  <motion.div
-                    whileHover={{ y: -5 }}
-                    className="flex items-center px-4 py-2 bg-green-100 text-green-400 rounded-xl"
-                  >
-                    <p className="text-base font-medium">
-                      {tasks?.startDate
-                        ? moment(tasks?.startDate).utc().format("HH:mm")
-                        : "-- : --"}
-                    </p>
-                  </motion.div>
-                </div>
-
-                <BiRightArrowAlt size={25} className="" />
-
-                <div className="flex gap-x-2">
-                  <motion.div
-                    whileHover={{ y: -5 }}
-                    className="flex items-center px-4 py-2 bg-red-100 text-red-400 rounded-xl"
-                  >
-                    <BsHourglassBottom size={15} />
-                    <div className="w-4" />
-                    <p className="text-base font-medium">
-                      {tasks?.endDate
-                        ? moment(tasks?.endDate)
-                          .utc()
-                          .format("dddd, D [tháng] M")
-                        : "-- : --"}
-                    </p>
-                  </motion.div>
-                  <motion.div
-                    whileHover={{ y: -5 }}
-                    className="flex items-center px-4 py-2 bg-red-100 text-red-400 rounded-xl"
-                  >
-                    <p className="text-base font-medium">
-                      {tasks?.endDate
-                        ? moment(tasks?.endDate).utc().format("HH:mm")
-                        : "-- : --"}
-                    </p>
-                  </motion.div>
-                </div>
-              </div>
             )}
           </div>
 
-          <div className="w-[4%]" />
-
           <motion.div whileHover={{ y: -5 }}>
-            <Avatar size={40} src={tasks.assignTasks[0]?.user.profile.avatar} />
-          </motion.div>
-
-          <div className="w-[4%]" />
-
-          <motion.div
-            whileHover={{ y: -5 }}
-            className="cursor-pointer border-2 rounded-xl p-2"
-            onClick={handleOpenUpdateModal}
-          >
-            <MdMode size={20} className="text-slate-400" />
+            <Avatar
+              size={40}
+              src={tasks?.assignTasks?.[0]?.user?.profile?.avatar}
+            />
           </motion.div>
         </div>
 
+        {/* Desc */}
         <div className="mt-12 mb-20 flex gap-x-10">
           {/* <div className="space-y-5">
             <Card>
@@ -518,45 +454,52 @@ const EventSubTaskPage = () => {
               className="text-sm"
               dangerouslySetInnerHTML={{
                 __html: new QuillDeltaToHtmlConverter(
-                  JSON.parse(tasks?.description?.startsWith(`[{"insert":"`) ? tasks?.description : parseJson(tasks?.description))
+                  JSON.parse(
+                    tasks?.description?.startsWith(`[{"insert":"`)
+                      ? tasks?.description
+                      : parseJson(tasks?.description)
+                  )
                 ).convert(),
               }}
             />
           </Card>
           <Card title="Tệp đính kèm" className="w-[20%]">
-            {tasks.taskFiles.length > 0 ? (
+            {tasks?.taskFiles?.length > 0 ? (
               <div className="flex gap-x-3 items-center max-h-fit overflow-y-scroll">
-                {tasks.taskFiles.map((file) => (
+                {tasks?.taskFiles?.map((file, index) => (
                   <a
+                    key={index}
                     href={file.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500"
                   >
-                    {file.fileName}
+                    {file?.fileName}
                   </a>
                 ))}
               </div>
             ) : (
-              <p>Không có</p>
+              <p className="text-base">Không có</p>
             )}
           </Card>
         </div>
 
+        {/* Subtask */}
         <div
-          className={`flex flex-col gap-y-6 ${tasks.subTask.length !== 0 && "mt-10 mx-10"
-            }`}
+          className={`flex flex-col gap-y-6 ${
+            tasks?.subTask?.length !== 0 && "mt-10 mx-10"
+          }`}
         >
           <AnimatePresence>
-            {tasks.subTask.length !== 0 &&
-              tasks.subTask.map((subtask) => {
+            {tasks?.subTask?.length !== 0 ? (
+              tasks?.subTask?.map((subtask) => {
                 if (
-                  subtask.assignTasks.length !== 0 ||
-                  subtask.createdBy === manager.id
+                  subtask?.assignTasks?.length !== 0 ||
+                  subtask?.createdBy === manager?.id
                 )
                   return (
                     <TaskItem
-                      key={subtask.id}
+                      key={subtask?.id}
                       task={subtask}
                       isSubtask={true}
                       setSelectedSubTask={setSelectedSubTask}
@@ -564,7 +507,13 @@ const EventSubTaskPage = () => {
                       setIsOpenModal={setIsOpenModal}
                     />
                   );
-              })}
+              })
+            ) : (
+              <p className="text-lg text-center font-medium">
+                Chưa có công việc
+              </p>
+            )}
+
             {selectedSubTask && (
               <>
                 <SubTaskModal
@@ -579,7 +528,7 @@ const EventSubTaskPage = () => {
                   eventID={eventId}
                   task={selectedSubTask}
                   isSubTask={true}
-                  staffId={tasks.assignTasks?.[0]?.user.id}
+                  staffId={tasks?.assignTasks?.[0]?.user.id}
                   parentTaskId={tasks.id}
                 />
               </>
@@ -608,4 +557,4 @@ const EventSubTaskPage = () => {
   );
 };
 
-export default EventSubTaskPage;
+export default memo(EventSubTaskPage);

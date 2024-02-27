@@ -35,3 +35,13 @@ export const updateDivision = ({
       status,
     },
   });
+
+export const getDivisionByStaff = (fieldName, conValue) =>
+  http({
+    url: `/division/list/user?fieldName=${fieldName}&conValue=${conValue}`,
+  });
+
+export const getDivisionFreeUser = (fieldName, conValue, startDate, endDate) =>
+  http({
+    url: `/division/list/assignee/employee?fieldName=${fieldName}&conValue=${conValue}&startDate=${startDate}&endDate=${endDate}`,
+  });

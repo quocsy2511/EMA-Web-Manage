@@ -61,13 +61,32 @@ const chatDetailSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchChatDetail.fulfilled, (state, action) => {
+        console.log("action.payload > ", action.payload);
         if (action.payload.reset) state.chatDetail = [];
 
         let groupMessage = [];
         let tmp;
 
         if (action.payload.chatDetail.length === 1) {
-          groupMessage = action.payload.chatDetail;
+          // TODO
+          // In case the response data have 1 item
+
+          // If the current chat detail list is empty
+          // if (state.chatDetail.length === 0) {
+          //   const newGroupMessage = {
+          //     email: action.payload?.author?.email,
+          //     messageList: action.payload.chatDetail,
+          //   };
+          //   groupMessage = newGroupMessage;
+          // } else {
+          // }
+          // groupMessage = action.payload.chatDetail;
+
+          const newGroupMessage = {
+            email: action.payload.chatDetail?.[0]?.author?.email,
+            messageList: action.payload.chatDetail,
+          };
+          groupMessage = [newGroupMessage];
         } else if (action.payload.chatDetail.length !== 0) {
           action.payload.chatDetail.map((message, index) => {
             if (index === 0) {
