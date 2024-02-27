@@ -72,7 +72,8 @@ const EventCreationPage = () => {
 
   const { mutate: updateContactMutate, isLoading: updateContactIsLoading } =
     useMutation(
-      ({ contactId, status }) => updateCustomerContacts({ contactId, status }),
+      ({ contactId, eventId, status }) =>
+        updateCustomerContacts({ contactId, status }),
       {
         onSuccess: (data, variables) => {
           notification.success({
@@ -82,6 +83,11 @@ const EventCreationPage = () => {
             duration: 3,
           });
           navigate(-1);
+
+          // navigate(
+          //   `/manager/event/${variables?.eventId}`,
+          //   { replace: true }
+          // );
         },
         onError: (error) => {
           messageApi.open({
@@ -100,6 +106,7 @@ const EventCreationPage = () => {
         onSuccess: (data, variables) => {
           updateContactMutate({
             contactId: location.state?.contactId,
+            eventId: variables?.eventId,
             status: "SUCCESS",
           });
         },
@@ -382,9 +389,11 @@ const EventCreationPage = () => {
                     }
 
                     return (
-                      current <
-                        moment(startDate, "YYYY-MM-DD").startOf("day") ||
-                      current > moment(endDate, "YYYY-MM-DD").endOf("day")
+                      current >
+                      moment(startDate, "YYYY-MM-DD")
+                        .add(1, "day")
+                        .startOf("day")
+                      //  || current > moment(endDate, "YYYY-MM-DD").endOf("day")
                     );
                   }}
                   format={"DD/MM/YYYY"}
@@ -872,6 +881,7 @@ const EventCreationPage = () => {
                     customerAddress: contactInfo?.customerInfo?.address,
                     customerNationalId: contactInfo?.customerInfo?.nationalId,
                     customerPhoneNumber: contactInfo?.customerInfo?.phoneNumber,
+                    contractValue: contactInfo?.budget ?? 0,
                   },
                 }}
               >

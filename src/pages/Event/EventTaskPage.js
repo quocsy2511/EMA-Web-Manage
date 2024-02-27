@@ -221,6 +221,9 @@ const EventTaskPage = () => {
           eventName: eventDetail?.eventName,
           dateRange: [eventDetail?.startDate, eventDetail?.endDate],
           isSubTask: false,
+          listDivision: eventDetail?.listDivision?.map(
+            (division) => division?.divisionId
+          ),
         },
       });
     }

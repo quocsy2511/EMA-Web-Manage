@@ -2,6 +2,7 @@ import React, { Fragment, memo, useEffect, useState } from "react";
 import LockLoadingModal from "../../../components/Modal/LockLoadingModal";
 import { motion } from "framer-motion";
 import {
+  App,
   Button,
   ConfigProvider,
   DatePicker,
@@ -38,6 +39,9 @@ const EventAssignTaskPage = () => {
     eventName,
     dateRange,
 
+    // Task only
+    listDivision,
+
     // Subtask only
     taskId,
     taskName,
@@ -49,6 +53,7 @@ const EventAssignTaskPage = () => {
 
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
+  const { notification } = App.useApp();
 
   const { mutate: taskMutate, isLoading: taskIsLoading } = useMutation(
     (task) => createTask(task),
@@ -59,6 +64,14 @@ const EventAssignTaskPage = () => {
         //   // description: (),
         //   duration: 2,
         // });
+
+        notification.success({
+          message: <p className="font-medium">Tạo 1 hạng mục thành công</p>,
+          // description: "Hello, Ant Design!!",
+          placement: "topRight",
+          duration: 3,
+        });
+
         navigate(-1);
       },
       onError: (error) => {
@@ -309,7 +322,11 @@ const EventAssignTaskPage = () => {
               taskResponsorId={taskResponsorId}
             />
           ) : (
-            <TaskSection form={form} isSelectDate={isSelectDate} />
+            <TaskSection
+              form={form}
+              isSelectDate={isSelectDate}
+              listDivision={listDivision}
+            />
           )}
 
           <div className="flex justify-center items-center mt-10">
@@ -319,6 +336,7 @@ const EventAssignTaskPage = () => {
               onClick={() => {
                 form.submit();
               }}
+              loading={taskIsLoading}
             >
               Hoàn Thành
             </Button>

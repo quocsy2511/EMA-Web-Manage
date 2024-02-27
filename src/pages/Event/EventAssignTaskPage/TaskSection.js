@@ -189,12 +189,10 @@ const Item = memo(
   }
 );
 
-const TaskSection = ({ form, isSelectDate }) => {
+const TaskSection = ({ form, isSelectDate, listDivision }) => {
   const [selectedId, setSelectedId] = useState();
   const [calendarChecking, setCalendarChecking] = useState();
   const [calendarDateChecking, setCalendarDateChecking] = useState();
-  // console.log("calendarChecking > ", calendarChecking);
-  console.log("selectedId > ", selectedId);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -213,7 +211,10 @@ const TaskSection = ({ form, isSelectDate }) => {
     {
       select: (data) =>
         data
-          ?.filter((division) => division?.status)
+          ?.filter(
+            (division) =>
+              division?.status && listDivision?.includes(division?.id)
+          )
           .map((division) => ({
             id: division?.users?.[0]?.id,
             divisionName: division?.divisionName,

@@ -11,7 +11,7 @@ http.interceptors.request.use(
       request.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
 
     // Set request timeout
-    request.timeout = 8000;
+    request.timeout = 29000;
 
     return request;
   },
