@@ -2,13 +2,16 @@ import React, { Fragment, memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
+  App,
   Button,
   ConfigProvider,
   DatePicker,
   Form,
+  Image,
   Input,
   InputNumber,
   Select,
+  Spin,
   Steps,
   Upload,
   message,
@@ -23,8 +26,16 @@ import { createEvent, getEventType } from "../../apis/events";
 import { uploadFile } from "../../apis/files";
 import { createContract } from "../../apis/contract";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
+import {
+  getCustomerContactDetail,
+  updateCustomerContacts,
+} from "../../apis/contact";
+import dayjs from "dayjs";
+import clsx from "clsx";
 
 const { RangePicker } = DatePicker;
+
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
 const Title = memo(({ title }) => (
   <p className="text-base font-medium truncate">{title}</p>
@@ -33,29 +44,25 @@ const Title = memo(({ title }) => (
 const EventCreationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("location > ", location.state);
-  console.log("location.state?.eventType > ", location.state?.eventType);
 
   const [fileList, setFileList] = useState();
   const [current, setCurrent] = useState(0);
 
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi] = message.useMessage();
+  const { notification } = App.useApp();
 
-  useEffect(() => {
-    if (location.state) {
-      form.setFieldsValue({
-        location: location.state?.location,
-        estBudget: location.state?.estBudget ?? 500000,
-        eventTypeId: location.state?.eventType,
-        contract: {
-          customerName: location.state?.customer?.fullName,
-          customerEmail: location.state?.customer?.email,
-          customerPhoneNumber: location.state?.customer?.phoneNumber,
-        },
-      });
+  const { data: contactInfo, isLoading: contactInfoIsLoading } = useQuery(
+    ["contact", location.state?.contactId],
+    () => getCustomerContactDetail(location.state?.contactId),
+    {
+      select: (data) => {
+        return data;
+      },
+      refetchOnWindowFocus: false,
     }
-  }, []);
+  );
+  console.log("contactInfo > ", contactInfo);
 
   const { data: eventType, isLoading: eventTypeIsLoading } = useQuery(
     ["event-type"],
@@ -63,16 +70,17 @@ const EventCreationPage = () => {
     { refetchOnWindowFocus: false }
   );
 
-  const { mutate: createContractMutate, isLoading: createContractIsLoading } =
+  const { mutate: updateContactMutate, isLoading: updateContactIsLoading } =
     useMutation(
-      ({ eventId, contract }) => createContract({ eventId, contract }),
+      ({ contactId, status }) => updateCustomerContacts({ contactId, status }),
       {
         onSuccess: (data, variables) => {
-          messageApi.open({
-            type: "success",
-            content: "Tạo sự kiện thành công.",
+          notification.success({
+            message: <p className="font-medium">Tạo sự kiện thành công</p>,
+            // description: "Hello, Ant Design!!",
+            placement: "topRight",
+            duration: 3,
           });
-          form.resetFields();
           navigate(-1);
         },
         onError: (error) => {
@@ -84,23 +92,34 @@ const EventCreationPage = () => {
       }
     );
 
+  // Create contract after create event
+  const { mutate: createContractMutate, isLoading: createContractIsLoading } =
+    useMutation(
+      ({ eventId, contract }) => createContract({ eventId, contract }),
+      {
+        onSuccess: (data, variables) => {
+          updateContactMutate({
+            contactId: location.state?.contactId,
+            status: "SUCCESS",
+          });
+        },
+        onError: (error) => {
+          messageApi.open({
+            type: "error",
+            content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+          });
+        },
+      }
+    );
+
+  // Create event after upload banner image
   const { mutate: createEventMutate, isLoading: createEventIsLoading } =
     useMutation(({ event, contract }) => createEvent(event), {
       onSuccess: (data, variables) => {
-        if (variables.contract) {
-          createContractMutate({
-            eventId: data?.split(" ")?.[0],
-            contract: variables.contract,
-          });
-        } else {
-          // TODO -> navigation
-          messageApi.open({
-            type: "success",
-            content: "Tạo sự kiện thành công.",
-          });
-          form.resetFields();
-          navigate(-1);
-        }
+        createContractMutate({
+          eventId: data?.split(" ")?.[0],
+          contract: variables?.contract,
+        });
       },
       onError: (error) => {
         messageApi.open({
@@ -110,6 +129,7 @@ const EventCreationPage = () => {
       },
     });
 
+  // Upload banner image
   const { mutate: uploadFileMutate, isLoading: uploadIsLoading } = useMutation(
     ({ formData, event, contract }) => uploadFile(formData),
     {
@@ -124,7 +144,7 @@ const EventCreationPage = () => {
       onError: () => {
         messageApi.open({
           type: "error",
-          content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
+          content: "Ko thể tải ảnh lên! Hãy thử lại sau",
         });
       },
     }
@@ -132,14 +152,14 @@ const EventCreationPage = () => {
 
   const setupEventValues = (values) => {
     return {
-      eventName: values.eventName,
-      description: JSON.stringify(values.description.ops),
-      startDate: values.date[0],
-      processingDate: values.processingDate,
-      endDate: values.date[1],
-      location: values.location,
-      estBudget: +values.estBudget,
-      eventTypeId: values.eventTypeId,
+      eventName: values?.eventName,
+      description: JSON.stringify(values?.description.ops),
+      startDate: values?.date?.[0],
+      processingDate: values?.processingDate,
+      endDate: values?.date?.[1],
+      location: values?.location,
+      estBudget: +values?.estBudget,
+      eventTypeId: values?.eventTypeId,
     };
   };
 
@@ -169,16 +189,6 @@ const EventCreationPage = () => {
     console.log("Failed:", errorInfo);
   };
 
-  const handleSubmitFormWithoutContract = () => {
-    const formData = new FormData();
-    formData.append("file", fileList);
-    formData.append("folderName", "event");
-
-    const eventValues = setupEventValues(form.getFieldsValue());
-
-    uploadFileMutate({ formData, event: eventValues });
-  };
-
   const steps = [
     {
       key: 1,
@@ -201,7 +211,7 @@ const EventCreationPage = () => {
                 form.setFieldsValue({ eventName: value.target.value });
               }}
             >
-              <Input placeholder="Nhập tên sự kiện" />
+              <Input placeholder="Nhập tên sự kiện" size="large" />
             </Form.Item>
             <Form.Item
               className="w-[70%]"
@@ -218,7 +228,7 @@ const EventCreationPage = () => {
                 form.setFieldsValue({ location: value.target.value });
               }}
             >
-              <Input placeholder="Nhập địa điểm" />
+              <Input placeholder="Nhập địa điểm" size="large" />
             </Form.Item>
           </div>
 
@@ -281,12 +291,12 @@ const EventCreationPage = () => {
           <div className="flex space-x-10">
             <Form.Item
               className="w-[40%]"
-              label={<Title title="Ngày bắt đầu - kết thúc dự án" />}
+              label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
               name="date"
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (value && value[0] && value[1]) {
+                    if (value && value?.[0] && value?.[1]) {
                       return Promise.resolve();
                     }
                     return Promise.reject("Chưa chọn thời gian tổ chức");
@@ -296,18 +306,23 @@ const EventCreationPage = () => {
             >
               <ConfigProvider locale={viVN}>
                 <RangePicker
+                  size="large"
                   className="w-full"
+                  defaultValue={[
+                    dayjs(contactInfo?.startDate, "YYYY-MM-DD"),
+                    dayjs(contactInfo?.endDate, "YYYY-MM-DD"),
+                  ]}
                   onChange={(value) => {
                     // Update to specific field
                     form.setFieldsValue({
                       date: value?.map((item) =>
-                        moment(item.$d).format("YYYY-MM-DD")
+                        moment(item?.$d).format("YYYY-MM-DD")
                       ),
                     });
 
                     // Get date in range
-                    const startDate = moment(value?.[0].$d);
-                    const endDate = moment(value?.[1].$d);
+                    const startDate = moment(value?.[0]?.$d);
+                    const endDate = moment(value?.[1]?.$d);
 
                     // Get processing date in range
                     const selectedDate = moment(
@@ -316,7 +331,8 @@ const EventCreationPage = () => {
 
                     // Check if processing date is not in range  => reset processing date
                     if (
-                      !selectedDate.isBetween(startDate, endDate, null, "[]")
+                      !selectedDate.isBetween(startDate, endDate, null, "[]") ||
+                      !value
                     ) {
                       form.resetFields(["processingDate"]);
                     }
@@ -331,7 +347,7 @@ const EventCreationPage = () => {
 
             <Form.Item
               className="w-[30%]"
-              label={<Title title="Ngày diễn ra sự kiện" />}
+              label={<Title title="Ngày bắt đầu dự án" />}
               name="processingDate"
               rules={[
                 {
@@ -342,6 +358,15 @@ const EventCreationPage = () => {
             >
               <ConfigProvider locale={viVN}>
                 <DatePicker
+                  size="large"
+                  defaultValue={
+                    form.getFieldValue("processingDate")
+                      ? dayjs(
+                          form.getFieldValue("processingDate"),
+                          "YYYY-MM-DD"
+                        )
+                      : null
+                  }
                   className="w-full"
                   onChange={(value) => {
                     form.setFieldsValue({
@@ -381,10 +406,11 @@ const EventCreationPage = () => {
               ]}
             >
               <Select
+                size="large"
                 options={
                   eventType?.map((item) => ({
-                    value: item.id,
-                    label: item.typeName,
+                    value: item?.id,
+                    label: item?.typeName,
                   })) ?? []
                 }
                 loading={eventTypeIsLoading}
@@ -405,6 +431,7 @@ const EventCreationPage = () => {
             >
               <div className="flex items-center gap-x-3">
                 <InputNumber
+                  size="large"
                   className="w-full"
                   defaultValue={form.getFieldValue("estBudget")}
                   min={10000}
@@ -422,7 +449,7 @@ const EventCreationPage = () => {
                     form.setFieldsValue({ estBudget: value });
                   }}
                 />
-                <p className="text-base">VNĐ</p>
+                <p className="text-base font-medium">VNĐ</p>
               </div>
             </Form.Item>
           </div>
@@ -453,7 +480,7 @@ const EventCreationPage = () => {
           >
             <Upload.Dragger
               maxCount={1}
-              listType="picture-card"
+              listType="picture"
               customRequest={({ file, onSuccess }) => {
                 setTimeout(() => {
                   onSuccess("ok");
@@ -479,7 +506,13 @@ const EventCreationPage = () => {
             </Upload.Dragger>
           </Form.Item>
 
-          <div className="flex justify-between mt-5">
+          <div
+            className={clsx(
+              "flex justify-between",
+              { "mt-5": fileList },
+              { "mt-10": !fileList }
+            )}
+          >
             <Button
               onClick={() => setCurrent((prev) => prev - 1)}
               size="large"
@@ -594,12 +627,16 @@ const EventCreationPage = () => {
               });
             }}
           >
-            <Input placeholder="Nhập địa chỉ khách hàng" size="large" />
+            <Input
+              disabled
+              placeholder="Nhập địa chỉ khách hàng"
+              size="large"
+            />
           </Form.Item>
 
           <div className="flex space-x-10">
             <Form.Item
-              className="w-1/2"
+              className="flex-1"
               label={<Title title="Căn cước công dân / Chứng minh nhân dân" />}
               // name="customerNationalId"
               name={["contract", "customerNationalId"]}
@@ -621,6 +658,7 @@ const EventCreationPage = () => {
               }}
             >
               <Input
+                disabled
                 pattern="[0-9]*"
                 maxLength={12}
                 placeholder="Nhập CCCD / CMND"
@@ -628,8 +666,18 @@ const EventCreationPage = () => {
               />
             </Form.Item>
 
+            <div className="w-[10%] rounded-lg overflow-hidden">
+              <Image
+                className="rounded-lg overflow-hidden"
+                src={
+                  contactInfo?.customerInfo?.nationalImages ??
+                  "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+                }
+              />
+            </div>
+
             <Form.Item
-              className="w-1/2"
+              className="flex-1"
               label={<Title title="Số điện thoại" />}
               // name="customerPhoneNumber"
               name={["contract", "customerPhoneNumber"]}
@@ -747,18 +795,10 @@ const EventCreationPage = () => {
             >
               Quay lại
             </Button>
-            <div className="flex space-x-5">
-              <Button
-                size="large"
-                type="primary"
-                onClick={() => handleSubmitFormWithoutContract()}
-              >
-                Tạo sự kiện
-              </Button>
-              <Button size="large" type="primary" onClick={() => form.submit()}>
-                Tạo sự kiện cùng hợp đồng
-              </Button>
-            </div>
+
+            <Button size="large" type="primary" onClick={() => form.submit()}>
+              Tạo sự kiện
+            </Button>
           </div>
         </>
       ),
@@ -767,13 +807,16 @@ const EventCreationPage = () => {
 
   return (
     <Fragment>
-      {contextHolder}
       <LockLoadingModal
         isModalOpen={
-          uploadIsLoading || createEventIsLoading || createContractIsLoading
+          uploadIsLoading ||
+          createEventIsLoading ||
+          createContractIsLoading ||
+          createContractIsLoading
         }
         label="Đang khởi tạo sự kiện ..."
       />
+
       <motion.div
         initial={{ y: -75 }}
         animate={{ y: 0 }}
@@ -792,198 +835,225 @@ const EventCreationPage = () => {
         animate={{ y: 0 }}
         className="bg-white p-8 rounded-2xl mt-6"
       >
-        <Form
-          form={form}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          autoComplete="off"
-          layout="vertical"
-          requiredMark={false}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-            }
-          }}
-          // initialValues={{}}
-        >
-          <Steps
-            className=""
-            direction="horizontal"
-            current={current}
-            items={steps}
-          />
-
-          <div className="mt-10">{steps[current].content}</div>
-
-          <div className="h-0 overflow-hidden">
-            <Form.Item
-              name="eventName"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập tên sự kiện!",
-                },
-              ]}
-            />
-            <Form.Item
-              name="location"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập địa điểm!",
-                },
-              ]}
-            />
-            <Form.Item
-              name="description"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập mô tả!",
-                },
-              ]}
-            />
-            <Form.Item
-              name="date"
-              rules={[
-                {
-                  validator: (rule, value) => {
-                    if (value && value[0] && value[1]) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject("Chưa chọn thời gian tổ chức");
-                  },
-                },
-              ]}
-            />
-            <Form.Item
-              name="processingDate"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa chọn ngày bắt đầu!",
-                },
-              ]}
-            />
-            <Form.Item
-              name="eventTypeId"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập ngân sách!",
-                },
-              ]}
-            />
-            <Form.Item
-              name="estBudget"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập ngân sách!",
-                },
-              ]}
-            />
-            <Form.Item
-              name="coverUrl"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa chọn ảnh đại diện",
-                },
-                {
-                  validator(_, fileList) {
-                    return new Promise((resolve, reject) => {
-                      if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
-                        reject("File quá lớn ( <10MB )");
-                      } else {
-                        resolve();
+        <Spin spinning={contactInfoIsLoading}>
+          {contactInfoIsLoading ? (
+            <div className="h-[calc(100vh/2)]" />
+          ) : (
+            <div className="min-h-[calc(100vh/2)]">
+              <Form
+                form={form}
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                autoComplete="off"
+                layout="vertical"
+                requiredMark={false}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                  }
+                }}
+                initialValues={{
+                  location: contactInfo?.address,
+                  description: contactInfo?.note
+                    ? {
+                        ops: JSON.parse(
+                          contactInfo?.note?.startsWith(`[{"insert":"`)
+                            ? contactInfo?.note
+                            : parseJson(contactInfo?.note)
+                        ),
                       }
-                    });
+                    : null,
+                  date: [contactInfo?.startDate, contactInfo?.endDate],
+                  eventTypeId: location.state?.eventType,
+                  estBudget: contactInfo?.budget ?? 0,
+                  contract: {
+                    customerName: contactInfo?.customerInfo?.fullName,
+                    customerEmail: contactInfo?.customerInfo?.email,
+                    customerAddress: contactInfo?.customerInfo?.address,
+                    customerNationalId: contactInfo?.customerInfo?.nationalId,
+                    customerPhoneNumber: contactInfo?.customerInfo?.phoneNumber,
                   },
-                },
-              ]}
-            />
+                }}
+              >
+                <Steps direction="horizontal" current={current} items={steps} />
 
-            <Form.Item
-              // name="customerName"
-              name={["contract", "customerName"]}
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập tên khách hàng!",
-                },
-              ]}
-            />
-            <Form.Item
-              // name="customerNationalId"
-              name={["contract", "customerNationalId"]}
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập CCCD / CMND!",
-                },
-                {
-                  pattern: /^[0-9]{12}$/,
-                  message: "CCCD / CMND cần phải có 12 số!",
-                },
-              ]}
-            />
-            <Form.Item
-              // name="customerAddress"
-              name={["contract", "customerAddress"]}
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập địa chỉ khách hàng!",
-                },
-              ]}
-            />
-            <Form.Item
-              // name="customerEmail"
-              name={["contract", "customerEmail"]}
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập email khách hàng!",
-                },
-              ]}
-            />
-            <Form.Item
-              // name="customerPhoneNumber"
-              name={["contract", "customerPhoneNumber"]}
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập số điện thoại khách hàng!",
-                },
-                {
-                  pattern: /^[0-9]{10}$/,
-                  message: "Số điện thoại cần phải có 10 số!",
-                },
-              ]}
-            />
-            <Form.Item
-              // name="contractValue"
-              name={["contract", "contractValue"]}
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập giá trị hợp đồng khách hàng!",
-                },
-              ]}
-            />
-            <Form.Item
-              // name="paymentMethod"
-              name={["contract", "paymentMethod"]}
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập hình thức thanh toán!",
-                },
-              ]}
-            />
-          </div>
-        </Form>
+                <div className="mt-10">{steps[current].content}</div>
+
+                <div className="h-0 overflow-hidden">
+                  <Form.Item
+                    name="eventName"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập tên sự kiện!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    name="location"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập địa điểm!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    name="description"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập mô tả!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    name="date"
+                    rules={[
+                      {
+                        validator: (rule, value) => {
+                          if (value && value[0] && value[1]) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject("Chưa chọn thời gian tổ chức");
+                        },
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    name="processingDate"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa chọn ngày bắt đầu!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    name="eventTypeId"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập ngân sách!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    name="estBudget"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập ngân sách!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    name="coverUrl"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa chọn ảnh đại diện",
+                      },
+                      {
+                        validator(_, fileList) {
+                          return new Promise((resolve, reject) => {
+                            if (
+                              fileList &&
+                              fileList[0]?.size > 10 * 1024 * 1024
+                            ) {
+                              reject("File quá lớn ( <10MB )");
+                            } else {
+                              resolve();
+                            }
+                          });
+                        },
+                      },
+                    ]}
+                  />
+
+                  <Form.Item
+                    // name="customerName"
+                    name={["contract", "customerName"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập tên khách hàng!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    // name="customerNationalId"
+                    name={["contract", "customerNationalId"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập CCCD / CMND!",
+                      },
+                      {
+                        pattern: /^[0-9]{12}$/,
+                        message: "CCCD / CMND cần phải có 12 số!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    // name="customerAddress"
+                    name={["contract", "customerAddress"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập địa chỉ khách hàng!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    // name="customerEmail"
+                    name={["contract", "customerEmail"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập email khách hàng!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    // name="customerPhoneNumber"
+                    name={["contract", "customerPhoneNumber"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập số điện thoại khách hàng!",
+                      },
+                      {
+                        pattern: /^[0-9]{10}$/,
+                        message: "Số điện thoại cần phải có 10 số!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    // name="contractValue"
+                    name={["contract", "contractValue"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập giá trị hợp đồng khách hàng!",
+                      },
+                    ]}
+                  />
+                  <Form.Item
+                    // name="paymentMethod"
+                    name={["contract", "paymentMethod"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Chưa nhập hình thức thanh toán!",
+                      },
+                    ]}
+                  />
+                </div>
+              </Form>
+            </div>
+          )}
+        </Spin>
       </motion.div>
     </Fragment>
   );

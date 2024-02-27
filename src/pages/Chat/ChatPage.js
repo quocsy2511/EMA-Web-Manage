@@ -260,6 +260,7 @@ const ChatPage = () => {
   }, [chatDetail.chatId]);
 
   useEffect(() => {
+    console.log("searchInput > ", searchInput);
     const identifier = setTimeout(() => {
       if (searchInput !== "") {
         const searchOnlineUser = onlineUsers.filter(
@@ -268,6 +269,7 @@ const ChatPage = () => {
             (user.email.includes(searchInput.toLowerCase()) ||
               user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
+        console.log("searchOnlineUser > ", searchOnlineUser);
 
         const searchOfflineUsers = offlineUsers.filter(
           (user) =>

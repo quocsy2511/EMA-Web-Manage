@@ -1,25 +1,23 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
 import { Calendar, ConfigProvider, Drawer, Form, Spin, Tooltip } from "antd";
-import viVN from "antd/locale/vi_VN";
-import { FaCheck } from "react-icons/fa6";
-import { MdArrowForwardIos, MdEmojiEvents } from "react-icons/md";
 import momenttz from "moment-timezone";
-import { motion } from "framer-motion";
-
-import moment from "moment";
-import "moment/locale/vi";
 import { useQuery } from "@tanstack/react-query";
-import { getAllDivision, getDivisionFreeUser } from "../../../apis/divisions";
-import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
-import clsx from "clsx";
 import {
-  IoArrowForwardCircleOutline,
-  IoEllipsisHorizontalCircle,
-} from "react-icons/io5";
+  getDivisionByStaff,
+  getDivisionFreeUser,
+} from "../../../apis/divisions";
+import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
+import { MdArrowForwardIos, MdEmojiEvents } from "react-icons/md";
+import { FaCheck } from "react-icons/fa6";
+import { PiMedal } from "react-icons/pi";
 import { BsExclamationCircle } from "react-icons/bs";
+import {
+  IoEllipsisHorizontalCircle,
+  IoArrowForwardCircleOutline,
+} from "react-icons/io5";
 import { GoDotFill } from "react-icons/go";
-
-moment.locale("vi");
+import clsx from "clsx";
+import { motion } from "framer-motion";
 
 const DrawerContainer = memo(
   ({
@@ -117,45 +115,81 @@ const DrawerContainer = memo(
 
 const Item = memo(
   ({
-    division,
-    selectedId,
-    handleSelectDivision,
-    setCalendarChecking,
+    user,
+    selectedEmployees,
+    handleSelectUser,
+    handleSelectCalendarChecking,
+    leader,
+    handleSelectLeader,
     isSelectDate,
   }) => {
     return (
       <div className="relative">
         <motion.div
-          onClick={() => handleSelectDivision(division)}
+          onClick={() => handleSelectUser(user)}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.95 }}
           transition={{ duration: 0.3, type: "tween" }}
           className={clsx(
-            "flex space-x-5 items-center rounded-xl p-3 border-2 cursor-pointer",
-            { "border-blue-400": selectedId?.id === division?.id }
+            "flex space-x-5 items-center rounded-xl p-3 border-2 cursor-pointer ",
+            { "border-blue-400": selectedEmployees?.includes(user?.id) },
+            { "border-orange-400": leader === user?.id }
           )}
         >
-          <div
-            className={clsx(
-              "flex items-center justify-center w-10 h-10 border rounded-full",
-              { "border-blue-500": selectedId?.id === division?.id }
-            )}
-          >
-            {selectedId?.id === division?.id && (
-              <FaCheck className="text-blue-500 text-base" />
-            )}
+          <div className="min-w-[10%] ">
+            <div
+              className={clsx(
+                "flex items-center justify-center w-10 h-10 border rounded-full",
+                { "border-blue-500": selectedEmployees?.includes(user?.id) },
+                { "border-orange-400": leader === user?.id }
+              )}
+            >
+              {selectedEmployees?.includes(user?.id) && (
+                <FaCheck
+                  className={clsx("text-blue-500 text-base", {
+                    "text-orange-400": leader === user?.id,
+                  })}
+                />
+              )}
+            </div>
           </div>
           <div className="flex-1">
-            <p className="text-base font-medium truncate">
-              {division?.divisionName}
+            <p className="max-w-[45%] text-base font-medium truncate">
+              {user?.fullName}
             </p>
-            <p className="text-sm truncate">
-              Do{" "}
-              <span className="font-medium text-blue-600">
-                {division?.userName}
-              </span>{" "}
-              quản lý
-            </p>
+
+            <div className="flex items-center space-x-2">
+              <p className="text-sm truncate">
+                Chức vụ{" "}
+                <span
+                  className={clsx("font-medium text-blue-600", {
+                    "text-orange-400": leader === user?.id,
+                  })}
+                >
+                  {user?.role}
+                </span>{" "}
+              </p>
+              {selectedEmployees?.includes(user?.id) && (
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectLeader(user);
+                  }}
+                >
+                  <PiMedal
+                    className={clsx(
+                      "text-xl",
+                      {
+                        "text-slate-300": leader !== user?.id,
+                      },
+                      {
+                        "text-orange-400": leader === user?.id,
+                      }
+                    )}
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <div className="absolute right-0 top-0 bottom-0">
             <Tooltip
@@ -174,7 +208,7 @@ const Item = memo(
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isSelectDate) {
-                    setCalendarChecking(division);
+                    handleSelectCalendarChecking(user);
                   }
                 }}
                 className="group flex justify-center items-center"
@@ -189,14 +223,30 @@ const Item = memo(
   }
 );
 
-const TaskSection = ({ form, isSelectDate }) => {
-  const [selectedId, setSelectedId] = useState();
+const SubTaskSection = ({ form, isSelectDate, taskResponsorId }) => {
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [calendarChecking, setCalendarChecking] = useState();
   const [calendarDateChecking, setCalendarDateChecking] = useState();
-  // console.log("calendarChecking > ", calendarChecking);
-  console.log("selectedId > ", selectedId);
+  const [leader, setLeader] = useState();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Update assignee in form
+  useEffect(() => {
+    if (selectedEmployees.length === 0) {
+      form.setFieldsValue({ assignee: undefined });
+    } else {
+      form.setFieldsValue({ assignee: selectedEmployees });
+    }
+
+    console.log("update form > ", form.getFieldsValue());
+  }, [selectedEmployees]);
+
+  // Update leader in form
+  useEffect(() => {
+    if (leader) form.setFieldsValue({ leader });
+    else form.setFieldsValue({ leader: undefined });
+  }, [leader]);
 
   // Reset calendarChecking
   useEffect(() => {
@@ -204,25 +254,23 @@ const TaskSection = ({ form, isSelectDate }) => {
   }, [isSelectDate]);
 
   const {
-    data: divisions,
-    isLoading: divisionsLoading,
-    isError: divisionsIsError,
+    data: employees,
+    isLoading: employeesIsLoading,
+    isError: employeesIsError,
   } = useQuery(
-    ["divisions"],
-    () => getAllDivision({ pageSize: 100, currentPage: 1, mode: 1 }),
+    ["divisions", taskResponsorId],
+    () => getDivisionByStaff("id", taskResponsorId),
     {
-      select: (data) =>
-        data
-          ?.filter((division) => division?.status)
-          .map((division) => ({
-            id: division?.users?.[0]?.id,
-            divisionName: division?.divisionName,
-            userId: division?.users?.[0]?.id,
-            userName: division?.users?.[0]?.profile?.fullName,
-          })),
+      select: (data) => {
+        return data?.users?.map((user) => ({
+          id: user?.id,
+          fullName: user?.profile?.fullName,
+          role: user?.role?.roleName,
+        }));
+      },
+      refetchOnWindowFocus: false,
     }
   );
-  console.log("divisions > ", divisions);
 
   const {
     data: calendarData,
@@ -232,21 +280,21 @@ const TaskSection = ({ form, isSelectDate }) => {
     [
       "free-user",
       "id",
-      calendarChecking?.userId,
+      calendarChecking?.id,
       isSelectDate?.[0]?.format("DD-MM-YYYY"),
       isSelectDate?.[1]?.format("DD-MM-YYYY"),
     ],
     () =>
       getDivisionFreeUser(
         "id",
-        calendarChecking?.userId,
+        calendarChecking?.id,
         isSelectDate?.[0]?.format("DD-MM-YYYY"),
         isSelectDate?.[1]?.format("DD-MM-YYYY")
       ),
     {
       select: (data) => {
         const userTasks = data?.users?.find(
-          (item) => item?.id === calendarChecking?.userId
+          (item) => item?.id === calendarChecking?.id
         );
 
         return {
@@ -263,16 +311,32 @@ const TaskSection = ({ form, isSelectDate }) => {
             ?.flat(),
         };
       },
-      enabled: !!isSelectDate && !!calendarChecking?.userId,
+      enabled: !!isSelectDate && !!calendarChecking?.id,
       refetchOnWindowFocus: false,
     }
   );
   console.log("calendarData > ", calendarData);
 
-  const handleSelectDivision = (division) => {
-    setSelectedId(division);
-    form.setFieldsValue({ assignee: [division?.id] });
-    console.log(form.getFieldsValue());
+  const handleSelectUser = (employee) => {
+    if (selectedEmployees?.length === 0) {
+      setLeader(employee?.id);
+    }
+
+    if (selectedEmployees?.includes(employee?.id)) {
+      setSelectedEmployees(
+        (prev) => prev?.filter((item) => item !== employee?.id) ?? []
+      );
+    } else {
+      setSelectedEmployees((prev) => [...prev, employee?.id]);
+    }
+  };
+
+  const handleSelectLeader = (employee) => {
+    setLeader(employee?.id);
+  };
+
+  const handleSelectCalendarChecking = (employee) => {
+    setCalendarChecking(employee);
   };
 
   const getColor = (status) => {
@@ -365,39 +429,46 @@ const TaskSection = ({ form, isSelectDate }) => {
         getPriority={getPriority}
       />
 
+      <Form.Item name="leader" />
+
       <div className="flex space-x-10">
-        <p className="w-1/3 text-lg font-medium">Bộ phận chịu trách nhiệm</p>
+        <p className="w-1/3 text-lg font-medium">Nhân viên thực hiện</p>
         <p className="flex-1 text-black text-lg font-medium">
-          {calendarIsError
-            ? "Không thể lấy dữ liệu! Hãy thử lại sau"
-            : !calendarChecking
-            ? "Chọn 1 bộ phận để xem lịch trình"
-            : "Lịch trình của"}{" "}
-          <span className="text-black">{calendarChecking?.divisionName}</span>
+          {calendarIsError ? (
+            "Không thể lấy dữ liệu! Hãy thử lại sau"
+          ) : !calendarChecking ? (
+            "Chọn 1 nhân viên để xem lịch trình"
+          ) : (
+            <span className="text-black">
+              Lịch trình của {calendarChecking?.fullName}
+            </span>
+          )}
         </p>
       </div>
 
       <div className="flex space-x-10 h-screen">
-        {/* Division list */}
+        {/* Employee list */}
         <div className="w-1/3 h-full overflow-scroll scrollbar-hide">
           <Form.Item name="assignee">
             <div className="space-y-5 mt-5 px-3">
-              {divisionsLoading ? (
+              {employeesIsLoading ? (
                 <div className="mt-5">
                   <LoadingComponentIndicator />
                 </div>
-              ) : divisionsIsError ? (
+              ) : employeesIsError ? (
                 <p className="mt-5 text-lg font-medium">
                   Không thể lấy dữ liệu hãy thử lại sau !
                 </p>
               ) : (
-                divisions?.map((division, index) => (
+                employees?.map((user) => (
                   <Item
-                    key={division?.id ?? index}
-                    division={division}
-                    selectedId={selectedId}
-                    handleSelectDivision={handleSelectDivision}
-                    setCalendarChecking={setCalendarChecking}
+                    key={user?.id}
+                    user={user}
+                    selectedEmployees={selectedEmployees}
+                    handleSelectUser={handleSelectUser}
+                    handleSelectCalendarChecking={handleSelectCalendarChecking}
+                    leader={leader}
+                    handleSelectLeader={handleSelectLeader}
                     isSelectDate={isSelectDate}
                   />
                 ))
@@ -513,4 +584,4 @@ const TaskSection = ({ form, isSelectDate }) => {
   );
 };
 
-export default memo(TaskSection);
+export default memo(SubTaskSection);

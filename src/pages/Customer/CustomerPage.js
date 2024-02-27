@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, memo, useEffect, useState } from "react";
 import { FloatButton, Popover, Select, message } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -29,7 +29,7 @@ import ContactUpdateModal from "../../components/Modal/ContactUpdateModal";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 
-const ContactItem = ({ customer, setSelectedContact }) => {
+const ContactItem = memo(({ customer, setSelectedContact }) => {
   const handleSelectedContact = () => {
     setSelectedContact(customer);
   };
@@ -71,7 +71,7 @@ const ContactItem = ({ customer, setSelectedContact }) => {
       </div>
     </motion.div>
   );
-};
+});
 
 const CustomerPage = () => {
   const navigate = useNavigate();
@@ -160,17 +160,8 @@ const CustomerPage = () => {
   const goToCreateEventPage = () => {
     navigate("addition", {
       state: {
-        location: selectedContact.address,
-        startDate: selectedContact.startDate,
-        endDate: selectedContact.endDate,
-        estBudget: selectedContact.budget,
-        eventType: selectedContact.eventType.id,
         contactId: selectedContact.id,
-        customer: {
-          fullName: selectedContact.fullName,
-          email: selectedContact.email,
-          phoneNumber: selectedContact.phoneNumber,
-        },
+        eventType: selectedContact.eventType.id,
       },
     });
   };
@@ -192,6 +183,7 @@ const CustomerPage = () => {
           icon={<MdOutlineNewLabel className="scale-110" />}
         />
       </Popover>
+
       <ContactUpdateModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
@@ -199,6 +191,7 @@ const CustomerPage = () => {
         selectedContactId={selectedContact?.id}
         updateIsLoading={updateIsLoading}
       />
+
       <div className="flex w-full h-[calc(100vh-64px-6rem)] bg-white rounded-lg shadow-xl">
         <div className="w-[30%] flex flex-col border-r-2 border-black/20">
           <p className="text-2xl font-semibold p-5">Thông tin khách hàng</p>
@@ -274,12 +267,12 @@ const CustomerPage = () => {
                 Không có thông tin
               </p>
             ) : (
-              contacts?.data.map((contact) => {
+              contacts?.data?.map((contact) => {
                 return (
                   <ContactItem
                     customer={contact}
                     setSelectedContact={setSelectedContact}
-                    key={contact.id}
+                    key={contact?.id}
                   />
                 );
               })
@@ -295,6 +288,7 @@ const CustomerPage = () => {
             )}
           </div>
         </div>
+
         <div className="flex-1 bg-[#ffffff]">
           {loadContact ? (
             <LoadingItemIndicator />
@@ -358,40 +352,74 @@ const CustomerPage = () => {
               <div className="flex-1 flex flex-col justify-end items-end">
                 {selectedContact?.status === "ACCEPTED" && (
                   <div className="bg-white h-full flex items-end">
-                    <motion.button
-                      onClick={goToCreateEventPage}
-                      whileHover={{ y: -5 }}
-                      className="flex h-fit items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
-                    >
-                      <div className="py-3 pl-5 pr-3 bg-blue-500">
-                        <IoCloseCircleSharp className="text-white text-2xl" />
-                      </div>
-                      <p className="py-3 pr-6 text-base font-medium">
-                        Tạo sự kiện
-                      </p>
-                    </motion.button>
+                    <div className="flex space-x-5 mt-10">
+                      <motion.button
+                        whileHover={{ y: -5 }}
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
+                      >
+                        <div className="py-3 pl-5 pr-3 bg-red-500">
+                          <IoCloseCircleSharp className="text-white text-2xl" />
+                        </div>
+                        <p className="py-3 pr-6 text-base font-medium">
+                          Từ chối
+                        </p>
+                      </motion.button>
+                      <motion.button
+                        onClick={goToCreateEventPage}
+                        whileHover={{ y: -5 }}
+                        className="flex h-fit items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
+                      >
+                        <div className="py-3 pl-5 pr-3 bg-blue-500">
+                          <IoCloseCircleSharp className="text-white text-2xl" />
+                        </div>
+                        <p className="py-3 pr-6 text-base font-medium">
+                          Tạo sự kiện
+                        </p>
+                      </motion.button>
+                    </div>
                   </div>
                 )}
 
                 <div className="flex h-full space-x-5 justify-end items-center">
-                  {selectedContact?.status === "ACCEPTED" && (
-                    <motion.button
-                      whileHover={{ y: -5 }}
-                      onClick={() => setIsModalOpen(true)}
-                      className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
-                    >
-                      <div className="py-3 pl-5 pr-3 bg-red-500">
-                        <IoCloseCircleSharp className="text-white text-2xl" />
-                      </div>
-                      <p className="py-3 pr-6 text-base font-medium">Từ chối</p>
-                    </motion.button>
+                  {selectedContact?.status === "PENDING" && (
+                    <div className="flex space-x-5">
+                      <motion.button
+                        whileHover={{ y: -5 }}
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
+                      >
+                        <div className="py-3 pl-5 pr-3 bg-red-500">
+                          <IoCloseCircleSharp className="text-white text-2xl" />
+                        </div>
+                        <p className="py-3 pr-6 text-base font-medium">
+                          Từ chối
+                        </p>
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ y: -5 }}
+                        onClick={() =>
+                          handleUpdateContact(selectedContact?.id, "ACCEPTED")
+                        }
+                        className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
+                      >
+                        <p className="py-3 pl-6 pr- text-base font-medium">
+                          Chấp thuận
+                        </p>
+                        <div className="py-3 pr-5 pl-3 bg-success">
+                          <IoCheckmarkCircle className="text-white text-2xl" />
+                        </div>
+                      </motion.button>
+                    </div>
                   )}
 
+                  {/* 
                   {selectedContact?.status !== "ACCEPTED" && (
                     <motion.button
                       whileHover={{ y: -5 }}
                       onClick={() =>
-                        handleUpdateContact(selectedContact.id, "ACCEPTED")
+                        handleUpdateContact(selectedContact?.id, "ACCEPTED")
                       }
                       className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
                     >
@@ -402,7 +430,7 @@ const CustomerPage = () => {
                         <IoCheckmarkCircle className="text-white text-2xl" />
                       </div>
                     </motion.button>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
@@ -417,4 +445,4 @@ const CustomerPage = () => {
   );
 };
 
-export default CustomerPage;
+export default memo(CustomerPage);

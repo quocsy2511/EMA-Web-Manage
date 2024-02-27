@@ -124,40 +124,41 @@ const Header = ({ collapsed, setCollapsed }) => {
     );
   };
 
-  const {
-    data: notifications,
-    isLoading,
-    isError,
-  } = useQuery(["notifications", "10"], () => getAllNotification(10), {
-    select: (data) => {
-      return data.data;
-    },
-  });
+  // const {
+  //   data: notifications,
+  //   isLoading,
+  //   isError,
+  // } = useQuery(["notifications", "10"], () => getAllNotification(10), {
+  //   select: (data) => {
+  //     return data.data;
+  //   },
+  // });
   // console.log("notifications: ", notifications);
+  const notifications = [];
 
   const queryClient = useQueryClient();
-  const { mutate: seenNotificationMutate } = useMutation(
-    (notificationId) => seenNotification(notificationId),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.setQueryData(["notifications", "10"], (oldValue) => {
-          const updatedOldData = oldValue.map((item) => {
-            if (item.id === variables.notificationId) {
-              return { ...item, readFlag: 1 };
-            }
-            return item;
-          });
-          return updatedOldData;
-        });
-      },
-      onError: (error) => {
-        messageApi.open({
-          type: "error",
-          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-        });
-      },
-    }
-  );
+  // const { mutate: seenNotificationMutate } = useMutation(
+  //   (notificationId) => seenNotification(notificationId),
+  //   {
+  //     onSuccess: (data, variables) => {
+  //       queryClient.setQueryData(["notifications", "10"], (oldValue) => {
+  //         const updatedOldData = oldValue.map((item) => {
+  //           if (item.id === variables.notificationId) {
+  //             return { ...item, readFlag: 1 };
+  //           }
+  //           return item;
+  //         });
+  //         return updatedOldData;
+  //       });
+  //     },
+  //     onError: (error) => {
+  //       messageApi.open({
+  //         type: "error",
+  //         content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+  //       });
+  //     },
+  //   }
+  // );
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -191,23 +192,23 @@ const Header = ({ collapsed, setCollapsed }) => {
   ];
 
   const onClickNotification = (key) => {
-    if (
-      key.key === "navigate" &&
-      location.pathname !== "/manager/notification"
-    ) {
-      if (manager) {
-        navigate("/manager/notification");
-      } else {
-        navigate("/staff/notification");
-      }
-    }
-    const findNoti = notifications.find((noti) => noti.id === key.key);
-    dispatch(addNotification(findNoti));
-    if (findNoti?.type === "REQUEST" && staff) {
-      navigate("/staff/request");
-    } else if (findNoti?.type === "TASK" && staff) {
-      navigate("/staff");
-    }
+    // if (
+    //   key.key === "navigate" &&
+    //   location.pathname !== "/manager/notification"
+    // ) {
+    //   if (manager) {
+    //     navigate("/manager/notification");
+    //   } else {
+    //     navigate("/staff/notification");
+    //   }
+    // }
+    // const findNoti = notifications.find((noti) => noti.id === key.key);
+    // dispatch(addNotification(findNoti));
+    // if (findNoti?.type === "REQUEST" && staff) {
+    //   navigate("/staff/request");
+    // } else if (findNoti?.type === "TASK" && staff) {
+    //   navigate("/staff");
+    // }
   };
 
   return (

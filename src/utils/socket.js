@@ -3,6 +3,7 @@ import { URL_SOCKET } from "../constants/api";
 import { chatDetailActions } from "../store/chat_detail";
 import { handleUpdateUsers } from "../store/online_user";
 import { chatsActions } from "../store/chats";
+import { Avatar } from "antd";
 
 export const socket = io(URL_SOCKET, {
   withCredentials: true,
@@ -109,7 +110,6 @@ export const onTypingStopSocket = (conversationId) => {
 export const closeConnectSocket = () => {
   socket.emit("closeConnect", {});
 };
-
 
 // =============================== CLEAN UP SOCKET ===============================
 export const cleanUpNotification = () => {
