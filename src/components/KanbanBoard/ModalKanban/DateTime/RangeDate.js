@@ -3,7 +3,7 @@ import React from "react";
 
 const RangeDate = ({ taskSelected, updateEndDate, updateStartDate }) => {
   const formattedDate = (value) => {
-    const date = moment(value).format("DD/MM HH:mm");
+    const date = moment(value).format("DD/MM");
     return date;
   };
   return (

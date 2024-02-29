@@ -20,15 +20,6 @@ const RangeDateSelected = ({
   const [isRangePickerFocused, setIsRangePickerFocused] = useState(false);
   const [isRangePickerCancel, setIsRangePickerCancel] = useState(false);
   const today = moment();
-  const todayFormat = moment().format("YYYY-MM-DD HH:mm:ss");
-  const checkStartDateFormat = moment(disableStartDate).format("YYYY-MM-DD");
-  const checkEndDateFormat = moment(disableEndDate).format("YYYY-MM-DD");
-  const hourStartDate = moment(disableStartDate).format("HH");
-  const minutesStartDate = moment(disableStartDate).format("mm");
-  const hourCurrentDate = moment(todayFormat).format("HH");
-  const minutesCurrentDate = moment(todayFormat).format("mm");
-  const hourEndDate = moment(disableEndDate).format("HH");
-  const minutesEndDate = moment(disableEndDate).format("mm");
 
   const { RangePicker } = DatePicker;
   const eventID = taskSelected?.event?.id;
@@ -51,9 +42,10 @@ const RangeDateSelected = ({
     setStartDateUpdate(isoStartDate);
     setEndDateUpdate(isoEndDate);
   };
+
   ///////////////validate Date
   const formattedDate = (value) => {
-    const date = moment(value).format("DD/MM HH:mm");
+    const date = moment(value).format("DD/MM");
     return date;
   };
 
@@ -65,114 +57,6 @@ const RangeDateSelected = ({
       );
     } else {
       return current.isBefore(today) || current.isAfter(disableEndDate, "day");
-    }
-  };
-
-  //validate pick timess
-  const range = (start, end) => {
-    const result = [];
-    for (let i = start; i < end; i++) {
-      result.push(i);
-    }
-    return result;
-  };
-  const disabledRangeTime = (current, type) => {
-    //check xem có phải chọn ngày bắt đầu với kết thúc ko ? ko thì sẽ ko bắt time
-    if (
-      !current?.isAfter(disableStartDate, "day") ||
-      !current?.isBefore(disableEndDate, "day")
-    ) {
-      if (!today.isBefore(disableStartDate, "day")) {
-        //Trường hợp  ngày hôm nay nó trùng ngày bắt đầu không ?
-        if (type === "start") {
-          if (!current?.isBefore(disableEndDate, "day")) {
-            //check xem có phải chọn ngày bắt đầu là ngày kết thúc của task ko ?
-            return {
-              disabledHours: () => range(hourEndDate, 24),
-              disabledMinutes: () => range(minutesEndDate, 60),
-            };
-          } else if (!current?.isAfter(disableStartDate, "day")) {
-            //check xem có phải chọn ngày bắt đầu là ngày bắt đầu của task ko ?
-            return {
-              disabledHours: () => range(0, hourCurrentDate),
-              disabledMinutes: () => range(0, minutesCurrentDate),
-            };
-          }
-        } else {
-          // đây là chọn ngày kết thúc
-          if (!current?.isAfter(disableStartDate, "day")) {
-            return {
-              disabledHours: () => range(0, hourCurrentDate),
-              disabledMinutes: () => range(0, minutesCurrentDate),
-            };
-          } else if (!current?.isBefore(disableEndDate, "day")) {
-            return {
-              disabledHours: () => range(hourEndDate, 24),
-              disabledMinutes: () => range(minutesEndDate, 60),
-            };
-          }
-          return {
-            disabledHours: () => range(hourEndDate, 24),
-            disabledMinutes: () => range(minutesEndDate, 60),
-          };
-        }
-      } else if (
-        checkStartDateFormat.toString() === checkEndDateFormat.toString()
-      ) {
-        //Trường hợp trong 1 ngày
-        if (type === "start") {
-          // return {
-          //   disabledHours: () => range(0, hourStartDate),
-          //   disabledMinutes: () => range(0, minutesStartDate),
-          // };
-          return {
-            disabledHours: () =>
-              range(0, hourStartDate).concat(range(hourEndDate, 24)), // Sửa đoạn này
-            disabledMinutes: () =>
-              range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
-          };
-        }
-        return {
-          disabledHours: () =>
-            range(0, hourStartDate).concat(range(hourEndDate, 24)), // Sửa đoạn này
-          disabledMinutes: () =>
-            range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
-        };
-      } else {
-        // trường hợp ngày hôm nay trước ngày bắt đầu
-        if (type === "start") {
-          if (!current?.isBefore(disableEndDate, "day")) {
-            // nếu chọn ngày enđate
-            return {
-              disabledHours: () => range(hourEndDate, 24),
-              disabledMinutes: () => range(minutesEndDate, 60),
-            };
-          } else if (!current?.isAfter(disableStartDate, "day")) {
-            //ngày bắt đầu startdate
-            return {
-              disabledHours: () => range(0, hourStartDate),
-              disabledMinutes: () => range(0, minutesStartDate),
-            };
-          }
-          if (!current?.isAfter(disableStartDate, "day")) {
-            //chọn ngày kết thúc là ngày cuối
-            return {
-              disabledHours: () => range(0, hourStartDate),
-              disabledMinutes: () => range(0, minutesStartDate),
-            };
-          }
-          return {
-            disabledHours: () => range(hourEndDate, 24),
-            disabledMinutes: () => range(minutesEndDate, 60),
-          };
-        }
-      }
-    } else {
-      //các ngày ở giữa ngày bắt đầu và kết thúc thì sẽ ko bắt gì cả
-      return {
-        disabledHours: () => range(0, 0),
-        disabledMinutes: () => range(0, 0),
-      };
     }
   };
 
@@ -250,16 +134,10 @@ const RangeDateSelected = ({
               >
                 <RangePicker
                   placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
-                  disabledTime={disabledRangeTime}
                   disabledDate={disabledDate}
-                  showTime={{
-                    format: "HH:mm:ss",
-                    hideDisabledOptions: true,
-                  }}
                   onChange={onChangeDate}
-                  format="YYYY/MM/DD HH:mm:ss"
+                  format="YYYY/MM/DD"
                   onFocus={onFocusRangePicker}
-                  // onBlur={onBlurRangePicker}
                   allowClear={false}
                 />
               </Form.Item>

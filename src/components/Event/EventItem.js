@@ -13,21 +13,27 @@ import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
+
 const EventItem = ({ event }) => {
   const navigate = useNavigate();
 
   let status, statusColor, statusBgColor;
-
-  switch (event.status) {
+  switch (event?.status) {
     case "PENDING":
-      status = "Đang chuẩn bị";
+      status = "Chưa bắt đầu";
       statusColor = "text-slate-500";
       statusBgColor = "bg-slate-100";
       break;
-    case "PROCESSING":
-      status = "Đang diễn ra";
+    case "PREPARING":
+      status = "Đang chuẩn bị";
       statusColor = "text-orange-500";
       statusBgColor = "bg-orange-100";
+      break;
+    case "PROCESSING":
+      status = "Đang diễn ra";
+      statusColor = "text-blue-500";
+      statusBgColor = "bg-blue-100";
       break;
     case "DONE":
       status = "Đã kết thúc";
@@ -40,6 +46,9 @@ const EventItem = ({ event }) => {
       statusBgColor = "bg-red-100";
       break;
     default:
+      status = "Chưa bắt đầu";
+      statusColor = "text-slate-500";
+      statusBgColor = "bg-slate-100";
       break;
   }
 
@@ -49,10 +58,10 @@ const EventItem = ({ event }) => {
       whileHover={{ scale: 1.03 }}
       transition={{ type: "spring", duration: 0.5 }}
       className={`group md:w-[32%] w-[45%] rounded-md cursor-pointer bg-white p-5 shadow-lg`}
-      onClick={() => navigate(`${event.id}`)}
+      onClick={() => navigate(`${event?.id}`)}
     >
       <div className="flex justify-between items-center">
-        <p className="text-xl font-semibold truncate">{event.eventName}</p>
+        <p className="text-xl font-semibold truncate">{event?.eventName}</p>
         <div className="flex justify-between items-center gap-x-1">
           <p
             className={`text-sm font-medium px-3 py-2 ${statusBgColor} ${statusColor} rounded-lg truncate`}
@@ -70,11 +79,16 @@ const EventItem = ({ event }) => {
       <div className="w-full bg-slate-200 mt-3 mb-5" style={{ height: 1 }} />
 
       {/* 1 line = 1rem = +4  */}
+
       <p
-          className="text-sm text-slate-500 line-clamp-3 h-16"
+        className="text-sm text-slate-500 line-clamp-3 h-16"
         dangerouslySetInnerHTML={{
           __html: new QuillDeltaToHtmlConverter(
-            JSON.parse(event.description)
+            JSON.parse(
+              event?.description?.startsWith(`[{"insert":"`)
+                ? event?.description
+                : parseJson(event?.description)
+            )
           ).convert(),
         }}
       ></p>
@@ -85,14 +99,14 @@ const EventItem = ({ event }) => {
         <div className="flex items-center gap-x-2 text-green-600 bg-green-400 bg-opacity-20 px-2 py-1 rounded-lg">
           <BsHourglassSplit size={18} />
           <p className="font-semibold">
-            {moment(event.startDate).format("DD-MM-YYYY")}
+            {moment(event?.startDate).format("DD-MM-YYYY")}
           </p>
         </div>
         <BsArrowRightShort size={20} />
         <div className="flex items-center gap-x-2 text-red-500 bg-red-300 bg-opacity-20 px-2 py-1 rounded-lg">
           <BsHourglassBottom size={18} />
           <p className="font-semibold">
-            {moment(event.endDate).format("DD-MM-YYYY")}
+            {moment(event?.endDate).format("DD-MM-YYYY")}
           </p>
         </div>
       </div>
@@ -107,18 +121,19 @@ const EventItem = ({ event }) => {
             maxPopoverTrigger="hover"
             maxStyle={{ color: "#D25B68", backgroundColor: "#F4D7DA" }}
           >
-            {event.listDivision.map((item) => (
+            {event?.listDivision?.map((item, index) => (
               <Tooltip
-                title={`${item.fullName} - ${item.divisionName}`}
+                key={item?.divisionId ?? index}
+                title={`${item?.fullName} - ${item?.divisionName}`}
                 placement="top"
               >
-                <Avatar src={item.avatar} key={item.avatar} />
+                <Avatar src={item?.avatar} key={item?.avatar} />
               </Tooltip>
             ))}
           </Avatar.Group>
         </div>
         <div className="flex justify-between items-center text-black">
-          {event.taskCount > 0 ? (
+          {event?.taskCount > 0 ? (
             <BsFolder2Open size={20} />
           ) : (
             <BsFolderX size={20} />
@@ -126,8 +141,8 @@ const EventItem = ({ event }) => {
 
           <div className="w-2" />
 
-          {event.taskCount > 0 && (
-            <p className="text-sm font-medium">{event.taskCount} hạng mục</p>
+          {event?.taskCount > 0 && (
+            <p className="text-sm font-medium">{event?.taskCount} hạng mục</p>
           )}
         </div>
       </div>

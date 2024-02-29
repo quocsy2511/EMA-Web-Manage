@@ -59,6 +59,7 @@ const SingleMessage = memo(({ isMe, index, length, content }) => {
 });
 
 const MessageItem = memo(({ isMe, messageList }) => {
+  console.log("MessageItem > ", isMe, messageList);
   const avatar = messageList?.[0]?.author?.profile?.avatar ?? defaultAvatar;
   const name = messageList?.[0]?.author?.profile?.fullName;
   return (
@@ -192,6 +193,8 @@ const ChatPage = () => {
   const chats = useSelector((state) => state.chats);
   console.log("chats > ", chats);
   const chatDetail = useSelector((state) => state.chatDetail);
+  console.log("chatDetail > ", chatDetail);
+  console.log("chatDetail.chatDetail > ", chatDetail.chatDetail);
   const { onlineUsers, offlineUsers } = useSelector(
     (state) => state.onlineUser
   );
@@ -257,6 +260,7 @@ const ChatPage = () => {
   }, [chatDetail.chatId]);
 
   useEffect(() => {
+    console.log("searchInput > ", searchInput);
     const identifier = setTimeout(() => {
       if (searchInput !== "") {
         const searchOnlineUser = onlineUsers.filter(
@@ -265,6 +269,7 @@ const ChatPage = () => {
             (user.email.includes(searchInput.toLowerCase()) ||
               user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
+        console.log("searchOnlineUser > ", searchOnlineUser);
 
         const searchOfflineUsers = offlineUsers.filter(
           (user) =>
@@ -293,8 +298,10 @@ const ChatPage = () => {
     {
       onSuccess: (data, variables) => {
         console.log("data > ", data, variables);
+        // refetch lại chat list
         dispatch(getChatsList({ currentPage: 1 }));
 
+        // access chat detail
         handleSelectConversationDetail(
           data?.id,
           variables.avatar,
@@ -439,7 +446,7 @@ const ChatPage = () => {
                   )
                 ) : (
                   chats.status === "failed" && (
-                    <p className="px-10 mt-10 text-center text-black text-2xl font-medium">
+                    <p className="px-10 mt-10 text-center text-black text-xl font-medium">
                       Không thể lấy dữ liệu !<br />
                       Hãy thử lại sau.
                     </p>
@@ -536,7 +543,7 @@ const ChatPage = () => {
             // </div>
             <></>
           ) : chatDetail.status === "pending" &&
-            chatDetail.chatDetail.length === 0 ? (
+            chatDetail.chatDetail?.length === 0 ? (
             <div className="flex-1 flex flex-col h-[calc(100vh-64px-5rem)] mb-10 rounded-xl overflow-hidden bg-white shadow-[0_0_30px_0_rgba(0,0,0,0.3)] shadow-black/10">
               <div className="flex flex-col justify-center items-center h-full space-y-3">
                 <ClipLoader color="#1677ff" size={45} />
@@ -545,7 +552,7 @@ const ChatPage = () => {
             </div>
           ) : chatDetail.status === "succeeded" ||
             (chatDetail.status === "pending" &&
-              chatDetail.chatDetail.length !== 0) ? (
+              chatDetail.chatDetail?.length !== 0) ? (
             <div className="flex-1 flex flex-col h-[calc(100vh-64px-5rem)] mb-10 rounded-xl overflow-hidden bg-white shadow-[0_0_30px_0_rgba(0,0,0,0.3)] shadow-black/10">
               {/* Header */}
               <div className="bg-slate-100 px-10 py-5 border-b-2 border-slate-200">
@@ -632,14 +639,14 @@ const ChatPage = () => {
                   </div>
                 )}
 
-                {chatDetail.chatDetail.length === 0 ? (
+                {chatDetail.chatDetail?.length === 0 ? (
                   <div className="w-full h-full flex items-center justify-center">
                     <p className="text-xl text-slate-400">
                       Hãy là người gửi đoạn tin nhắn đầu tiên
                     </p>
                   </div>
                 ) : (
-                  chatDetail.chatDetail?.map((groupMessage, index) => (
+                  chatDetail?.chatDetail?.map((groupMessage, index) => (
                     <MessageItem
                       key={index + groupMessage?.email}
                       isMe={groupMessage?.email === userEmail}

@@ -5,7 +5,7 @@ export const getChatsList = createAsyncThunk(
   "chats/getChatsList",
   async (params, thunkAPI) => {
     const response = await getConversations(params.currentPage);
-    console.log("res >", response);
+    // console.log("res >", response);
     return response;
   }
 );

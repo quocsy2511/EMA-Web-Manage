@@ -232,7 +232,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
           requiredMark={false}
         >
           <div className={`flex items-center gap-x-3 ${!isSubtask && "mr-12"}`}>
-            <Avatar size={40} src={manager.avatar} />
+            <Avatar size={40} src={manager?.avatar} />
 
             <Form.Item
               className="w-[95%] mb-0"
@@ -309,7 +309,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
       </div>
 
       <AnimatePresence mode="wait">
-        {comments.length === 0 ? (
+        {comments?.length === 0 ? (
           <motion.div
             key="empty-comment"
             exit={{ y: -50, opacity: 0 }}
@@ -328,10 +328,10 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
             className="ml-12 mt-8 pb-10"
           >
             <AnimatePresence>
-              {comments.map((comment) => {
+              {comments?.map((comment) => {
                 let time;
                 const currentDate = moment().subtract(7, "hours");
-                const targetDate = moment(comment.createdAt);
+                const targetDate = moment(comment?.createdAt);
                 const duration = moment.duration(currentDate.diff(targetDate));
 
                 if (duration.asMinutes() < 1) {
@@ -356,17 +356,17 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                 return (
                   <motion.div
                     layout
-                    key={comment.id}
+                    key={comment?.id}
                     exit={{ x: -30, opacity: 0 }}
                     initial={{ x: 30, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     className="space-y-3 mb-7"
                   >
                     <div className="flex gap-x-3">
-                      <Avatar size={25} src={comment.user.profile.avatar} />
+                      <Avatar size={25} src={comment?.user?.profile?.avatar} />
                       <p className="text-base">
                         <span className="font-bold">
-                          {comment.user.profile.fullName}
+                          {comment?.user.profile.fullName}
                         </span>{" "}
                         đã bình luận vào{" "}
                         <span className="font-bold">{time}</span>
@@ -374,7 +374,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                     </div>
 
                     <AnimatePresence mode="wait">
-                      {comment.id === selectedCommentId ? (
+                      {comment?.id === selectedCommentId ? (
                         <motion.div
                           key="update-comment"
                           initial={{ y: -10, opacity: 0 }}
@@ -392,9 +392,9 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                               }
                             }}
                             initialValues={{
-                              content: comment.text,
-                              oldFileList: comment.commentFiles,
-                              commentId: comment.id,
+                              content: comment?.text,
+                              oldFileList: comment?.commentFiles,
+                              commentId: comment?.id,
                             }}
                           >
                             <div className="flex items-center gap-x-5">
@@ -441,28 +441,28 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                             ></Form.Item>
 
                             <div className="ml-8 mt-3 flex flex-wrap gap-x-3">
-                              {comment.commentFiles.length > 0 &&
-                                comment.commentFiles.map((file) => (
+                              {comment?.commentFiles.length > 0 &&
+                                comment?.commentFiles.map((file) => (
                                   <div
-                                    key={file.id}
+                                    key={file?.id}
                                     className={`flex items-center gap-x-3 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg ${
                                       !listSelectedCommentFiles.some(
-                                        (item) => item.id === file.id
+                                        (item) => item.id === file?.id
                                       ) && "opacity-50"
                                     }`}
                                     onClick={() => modifyFileList(file)}
                                   >
                                     <a
-                                      href={file.fileUrl}
+                                      href={file?.fileUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="text-blue-500"
                                       onClick={(e) => e.stopPropagation()}
                                     >
-                                      {file.fileName}
+                                      {file?.fileName}
                                     </a>
                                     {listSelectedCommentFiles.some(
-                                      (item) => item.id === file.id
+                                      (item) => item.id === file?.id
                                     ) ? (
                                       <GiCancel className="text-blue-400" />
                                     ) : (
@@ -548,22 +548,22 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                           animate={{ y: 0, opacity: 1 }}
                           exit={{ y: 10, opacity: 0 }}
                         >
-                          <p className="text-sm ml-10 mb-2">{comment.text}</p>
+                          <p className="text-sm ml-10 mb-2">{comment?.text}</p>
 
                           <div className="ml-10 flex flex-wrap gap-x-3">
-                            {comment.commentFiles.length > 0 &&
-                              comment.commentFiles.map((file) => (
+                            {comment?.commentFiles?.length > 0 &&
+                              comment?.commentFiles?.map((file) => (
                                 <div
-                                  key={file.id}
+                                  key={file?.id}
                                   className="px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg inline-block"
                                 >
                                   <a
-                                    href={file.fileUrl}
+                                    href={file?.fileUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-blue-500"
                                   >
-                                    {file.fileName}
+                                    {file?.fileName}
                                   </a>
                                 </div>
                               ))}
@@ -573,18 +573,18 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                     </AnimatePresence>
 
                     <div>
-                      {comment.user.id === manager.id && (
+                      {comment?.user?.id === manager?.id && (
                         <div className="flex font-medium gap-x-3 text-base">
                           <motion.p
                             className="cursor-pointer"
                             whileHover={{ scale: 1.1 }}
-                            onClick={() => handleDelete(comment.id)}
+                            onClick={() => handleDelete(comment?.id)}
                           >
                             Xóa
                           </motion.p>
 
                           <AnimatePresence mode="wait">
-                            {comment.id === selectedCommentId ? (
+                            {comment?.id === selectedCommentId ? (
                               <motion.p
                                 key="cancel-update-comment"
                                 whileHover={{ scale: 1.1 }}
@@ -609,9 +609,9 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                                 exit={{ opacity: 0 }}
                                 className="cursor-pointer"
                                 onClick={() => {
-                                  setSelectedCommentId(comment.id);
+                                  setSelectedCommentId(comment?.id);
                                   setListSelectedCommentFiles(
-                                    comment.commentFiles
+                                    comment?.commentFiles
                                   );
                                 }}
                               >

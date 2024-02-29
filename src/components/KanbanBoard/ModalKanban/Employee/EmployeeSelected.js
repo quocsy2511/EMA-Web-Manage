@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
-import { getAllUser } from "../../../../apis/users";
+import { getAllUser, getEmployee } from "../../../../apis/users";
 import { useRouteLoaderData } from "react-router-dom";
 import moment from "moment";
-import { Avatar, Select, Space, Tooltip, message } from "antd";
+import { Avatar, Select, Space, Tag, Tooltip, message } from "antd";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
 import { assignMember } from "../../../../apis/tasks";
@@ -22,26 +22,44 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
   } = useQuery(
     ["employees"],
     () =>
-      getAllUser({
+      getEmployee({
         divisionId,
-        pageSize: 10,
-        currentPage: 1,
-        role: "EMPLOYEE",
       }),
     {
       select: (data) => {
-        const listUsers = data.data.map(({ ...item }) => {
-          item.dob = moment(item.dob).format("YYYY-MM-DD");
+        const listEmployee = data?.users?.map(({ ...item }) => {
+          item.dob = moment(item?.dob).format("YYYY-MM-DD");
           return {
-            key: item.id,
+            key: item?.id,
             ...item,
           };
         });
-        return listUsers;
+        return listEmployee;
       },
       refetchOnWindowFocus: false,
     }
   );
+  const tagRender = (props) => {
+    const { label, value, closable, onClose } = props;
+
+    const onPreventMouseDown = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    return (
+      <Tag
+        color="gold"
+        onMouseDown={onPreventMouseDown}
+        closable={closable}
+        onClose={onClose}
+        style={{
+          marginRight: 3,
+        }}
+      >
+        {label}
+      </Tag>
+    );
+  };
 
   const { mutate: UpdateMember } = useMutation((data) => assignMember(data), {
     onSuccess: () => {
@@ -87,31 +105,31 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
               onChange={(value) => handleChangeMember(value)}
               optionLabelProp="label"
               className="h-fit"
+              tagRender={tagRender}
             >
               {employees?.map((item, index) => {
                 return (
                   <Option
                     value={item?.id}
                     label={
-                      <span role="img" aria-label={item?.fullName}>
+                      <span role="img" aria-label={item?.profile?.fullName}>
                         <Tooltip
                           key="avatar"
-                          title={item?.fullName}
+                          title={item?.profile?.fullName}
                           placement="top"
                         >
-                          <Avatar src={item?.avatar} />
+                          <Avatar src={item?.profile?.avatar} />
                         </Tooltip>
-                        {item?.fullName}
+                        {item?.profile?.fullName}
                       </span>
                     }
-                    // key={!item.id ? index : item.id}
-                    key={index}
+                    key={item?.id}
                   >
                     <Space>
-                      <span role="img" aria-label={item?.fullName}>
-                        <Avatar src={item?.avatar} />
+                      <span role="img" aria-label={item?.profile?.fullName}>
+                        <Avatar src={item?.profile?.avatar} />
                       </span>
-                      {item?.fullName}
+                      {item?.profile?.fullName}
                     </Space>
                   </Option>
                 );

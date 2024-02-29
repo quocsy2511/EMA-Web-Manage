@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import {
   ConfigProvider,
   DatePicker,
@@ -22,9 +22,11 @@ import TEXT from "../../constants/string";
 
 const { RangePicker } = DatePicker;
 
-const Title = ({ title }) => (
+const Title = memo(({ title }) => (
   <p className="text-base font-medium truncate">{title}</p>
-);
+));
+
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
 const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
   console.log("UPDATE MODAL: ", event);
@@ -45,7 +47,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
   const { mutate: updateEventMutate, isLoading: updateEventIsLoading } =
     useMutation((event) => updateDetailEvent(event), {
       onSuccess: () => {
-        queryClient.invalidateQueries(["event-detail", event.id]);
+        queryClient.invalidateQueries(["event-detail", event?.id]);
         handleCancel();
         messageApi.open({
           type: "success",
@@ -90,13 +92,13 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
 
     values = {
       ...values,
-      eventId: event.id,
+      eventId: event?.id,
       description: JSON.stringify(values.description.ops),
       divisionId: values.divisions,
       startDate: values.date[0],
       endDate: values.date[1],
       estBudget: +values.estBudget,
-      eventTypeId: event.eventType.typeId,
+      // eventTypeId: event.eventType.typeId,
     };
 
     console.log("TRANSFORM: ", values);
@@ -159,13 +161,19 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           }
         }}
         initialValues={{
-          eventName: event.eventName,
-          date: [event.startDate, event.endDate],
-          location: event.location,
-          estBudget: event.estBudget,
-          description: { ops: JSON.parse(event.description) },
-          divisions: event.listDivision.map((item) => item.divisionId),
-          processingDate: event.processingDate,
+          eventName: event?.eventName,
+          date: [event?.startDate, event?.endDate],
+          location: event?.location,
+          estBudget: event?.estBudget,
+          description: {
+            ops: JSON.parse(
+              event?.description?.startsWith(`[{"insert":"`)
+                ? event?.description
+                : parseJson(event?.description)
+            ),
+          },
+          divisions: event?.listDivision.map((item) => item.divisionId),
+          processingDate: event?.processingDate,
         }}
       >
         <div className="flex justify-between gap-x-5">
@@ -209,8 +217,8 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
                     });
                 }}
                 defaultValue={[
-                  dayjs(event.startDate, "YYYY-MM-DD"),
-                  dayjs(event.endDate, "YYYY-MM-DD"),
+                  dayjs(event?.startDate, "YYYY-MM-DD"),
+                  dayjs(event?.endDate, "YYYY-MM-DD"),
                 ]}
                 format={"DD/MM/YYYY"}
                 // disabledDate={(current) => {
@@ -255,10 +263,10 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
                 }}
                 disabledDate={(current) => {
                   return (
-                    current && current > moment(event.startDate).endOf("day")
+                    current && current > moment(event?.startDate).endOf("day")
                   );
                 }}
-                defaultValue={dayjs(event.processingDate, "YYYY-MM-DD")}
+                defaultValue={dayjs(event?.processingDate, "YYYY-MM-DD")}
                 format={"DD/MM/YYYY"}
               />
             </ConfigProvider>
@@ -317,7 +325,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
             <div className="flex items-center gap-x-2">
               <InputNumber
                 className="w-full"
-                defaultValue={event.estBudget}
+                defaultValue={event?.estBudget}
                 min={500000}
                 step={100000}
                 formatter={(value) =>
@@ -357,7 +365,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
                 {
                   name: "Ảnh sự kiện",
                   status: "done",
-                  url: event.coverUrl,
+                  url: event?.coverUrl,
                 },
               ]}
               showUploadList={{
@@ -386,4 +394,4 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
   );
 };
 
-export default EventUpdateModal;
+export default memo(EventUpdateModal);

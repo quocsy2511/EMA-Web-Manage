@@ -4,6 +4,7 @@ import { Header as HeaderLayout } from "antd/es/layout/layout";
 import { HiOutlineBell, HiOutlineBellAlert } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { IoLogOutOutline } from "react-icons/io5";
+import { FaUser } from "react-icons/fa";
 import {
   Link,
   useLocation,
@@ -124,40 +125,41 @@ const Header = ({ collapsed, setCollapsed }) => {
     );
   };
 
-  const {
-    data: notifications,
-    isLoading,
-    isError,
-  } = useQuery(["notifications", "10"], () => getAllNotification(10), {
-    select: (data) => {
-      return data.data;
-    },
-  });
+  // const {
+  //   data: notifications,
+  //   isLoading,
+  //   isError,
+  // } = useQuery(["notifications", "10"], () => getAllNotification(10), {
+  //   select: (data) => {
+  //     return data.data;
+  //   },
+  // });
   // console.log("notifications: ", notifications);
+  const notifications = [];
 
   const queryClient = useQueryClient();
-  const { mutate: seenNotificationMutate } = useMutation(
-    (notificationId) => seenNotification(notificationId),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.setQueryData(["notifications", "10"], (oldValue) => {
-          const updatedOldData = oldValue.map((item) => {
-            if (item.id === variables.notificationId) {
-              return { ...item, readFlag: 1 };
-            }
-            return item;
-          });
-          return updatedOldData;
-        });
-      },
-      onError: (error) => {
-        messageApi.open({
-          type: "error",
-          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-        });
-      },
-    }
-  );
+  // const { mutate: seenNotificationMutate } = useMutation(
+  //   (notificationId) => seenNotification(notificationId),
+  //   {
+  //     onSuccess: (data, variables) => {
+  //       queryClient.setQueryData(["notifications", "10"], (oldValue) => {
+  //         const updatedOldData = oldValue.map((item) => {
+  //           if (item.id === variables.notificationId) {
+  //             return { ...item, readFlag: 1 };
+  //           }
+  //           return item;
+  //         });
+  //         return updatedOldData;
+  //       });
+  //     },
+  //     onError: (error) => {
+  //       messageApi.open({
+  //         type: "error",
+  //         content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+  //       });
+  //     },
+  //   }
+  // );
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -191,23 +193,23 @@ const Header = ({ collapsed, setCollapsed }) => {
   ];
 
   const onClickNotification = (key) => {
-    if (
-      key.key === "navigate" &&
-      location.pathname !== "/manager/notification"
-    ) {
-      if (manager) {
-        navigate("/manager/notification");
-      } else {
-        navigate("/staff/notification");
-      }
-    }
-    const findNoti = notifications.find((noti) => noti.id === key.key);
-    dispatch(addNotification(findNoti));
-    if (findNoti?.type === "REQUEST" && staff) {
-      navigate("/staff/request");
-    } else if (findNoti?.type === "TASK" && staff) {
-      navigate("/staff");
-    }
+    // if (
+    //   key.key === "navigate" &&
+    //   location.pathname !== "/manager/notification"
+    // ) {
+    //   if (manager) {
+    //     navigate("/manager/notification");
+    //   } else {
+    //     navigate("/staff/notification");
+    //   }
+    // }
+    // const findNoti = notifications.find((noti) => noti.id === key.key);
+    // dispatch(addNotification(findNoti));
+    // if (findNoti?.type === "REQUEST" && staff) {
+    //   navigate("/staff/request");
+    // } else if (findNoti?.type === "TASK" && staff) {
+    //   navigate("/staff");
+    // }
   };
 
   return (
@@ -318,7 +320,11 @@ const Header = ({ collapsed, setCollapsed }) => {
                 <div className="w-2" />
                 <Avatar
                   size={40}
-                  icon={<p>icon</p>}
+                  icon={
+                    <div className="flex items-center justify-center h-full">
+                      <FaUser />
+                    </div>
+                  }
                   alt="user_image"
                   src={
                     manager?.avatar ??

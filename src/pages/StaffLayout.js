@@ -1,5 +1,5 @@
 import { Avatar, Layout, notification } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import SidebarStaff from "../components/Sidebar/SidebarStaff";
 import Header from "../components/Header/Header";
@@ -9,7 +9,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { io } from "socket.io-client";
 import { URL_SOCKET } from "../constants/api";
 import { socketActions } from "../store/socket";
-import { cleanUpOnMessage, cleanUpOnlineGroupUsersReceived, getOnlineGroupUsersSocket, socketListener } from "../utils/socket";
+import {
+  cleanUpOnMessage,
+  cleanUpOnlineGroupUsersReceived,
+  getOnlineGroupUsersSocket,
+  socketListener,
+} from "../utils/socket";
 import { getChatsList } from "../store/chats";
 
 const { Content } = Layout;
@@ -22,40 +27,6 @@ const StaffLayout = () => {
 
   // const [api, contextHolder] = notification.useNotification();
   const [notificationAPI, contextHolder] = notification.useNotification();
-
-  // useEffect(() => {
-  //   // console.log("Socket changed !!");
-  //   // console.log("socket:", socket);
-  //   if (!socket) {
-  //     const saveSocket = io(URL_SOCKET, {
-  //       auth: {
-  //         access_token: localStorage.getItem("token"),
-  //       },
-  //     });
-  //     dispatch(socketActions.saveSocket(saveSocket));
-  //     return;
-  //   }
-
-  //   socket?.on("notification", (data) => {
-  //     console.log("data:", data);
-  //     queryClient.invalidateQueries(["notifications", "10"]);
-  //     api.open({
-  //       message: <p className="text-base">Đã nhận 1 thông báo</p>,
-  //       description: (
-  //         <div className="flex items-center gap-x-3">
-  //           <Avatar src={data?.avatar} />
-  //           <p className="text-sm">
-  //             <span className="font-semibold">
-  //               {data?.content?.split("đã")[0]}{" "}
-  //             </span>
-  //             đã {data?.content?.split("đã")[1]}
-  //           </p>
-  //         </div>
-  //       ),
-  //       duration: 5,
-  //     });
-  //   });
-  // }, [socket]);
 
   useEffect(() => {
     // create socket connection
@@ -73,7 +44,7 @@ const StaffLayout = () => {
   }, []);
 
   return (
-    <div className="overflow-hidden overflow-y-scroll">
+    <Fragment>
       {contextHolder}
       <Layout
         style={{
@@ -81,15 +52,15 @@ const StaffLayout = () => {
         }}
       >
         <SidebarStaff collapsed={collapsed} />
-        
+
         <Content>
           <Header collapsed={collapsed} setCollapsed={setCollapsed} />
-          <div className="overflow-hidden overflow-y-scroll mt-[64px] ">
+          <div className="overflow-hidden overflow-y-scroll scrollbar-hide mt-[64px] ">
             <Outlet />
           </div>
         </Content>
       </Layout>
-    </div>
+    </Fragment>
   );
 };
 

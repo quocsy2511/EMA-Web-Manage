@@ -140,23 +140,43 @@ const EventPage = () => {
             },
             {
               value: "PENDING",
-              label: "Đang chuẩn bị",
+              label: (
+                <p className="text-slate-500" onClick={() => {}}>
+                  Chưa bắt đầu
+                </p>
+              ),
             },
             {
               value: "PREPARING",
-              label: "Đang chuẩn bị",
+              label: (
+                <p className="text-orange-500" onClick={() => {}}>
+                  Đang chuẩn bị
+                </p>
+              ),
             },
             {
               value: "PROCESSING",
-              label: "Đang diễn ra",
+              label: (
+                <p className="text-blue-500" onClick={() => {}}>
+                  Đang diễn ra
+                </p>
+              ),
             },
             {
               value: "DONE",
-              label: "Đã kết thúc",
+              label: (
+                <p className="text-green-500" onClick={() => {}}>
+                  Đã kết thúc
+                </p>
+              ),
             },
             {
               value: "CANCEL",
-              label: "Hủy bỏ",
+              label: (
+                <p className="text-red-500" onClick={() => {}}>
+                  Hủy bỏ
+                </p>
+              ),
             },
           ]}
           value={searchStatus}
@@ -206,10 +226,10 @@ const EventPage = () => {
                 animate={{ y: 0, opacity: 1 }}
               >
                 <div className="mt-5 flex flex-wrap gap-x-[2%] gap-y-7">
-                  {data.data.length > 0 ? (
+                  {data?.data?.length > 0 ? (
                     <AnimatePresence>
-                      {data.data.map((event) => (
-                        <EventItem key={event.id} event={event} />
+                      {data?.data?.map((event, index) => (
+                        <EventItem key={event?.id ?? index} event={event} />
                       ))}
                     </AnimatePresence>
                   ) : (
@@ -225,14 +245,16 @@ const EventPage = () => {
                 <div className="flex items-center justify-center gap-x-3 mt-8">
                   <MdOutlineKeyboardArrowLeft
                     className={`text-slate-500 ${
-                      data.prevPage
+                      data?.prevPage
                         ? "cursor-pointer hover:text-blue-600"
                         : "cursor-not-allowed"
                     }`}
-                    onClick={() => data.prevPage && setPage((prev) => prev - 1)}
+                    onClick={() =>
+                      data?.prevPage && setPage((prev) => prev - 1)
+                    }
                     size={25}
                   />
-                  {Array.from({ length: data.lastPage }, (_, index) => (
+                  {Array.from({ length: data?.lastPage }, (_, index) => (
                     <div
                       key={index}
                       className={`border border-slate-300 rounded-xl px-4 py-2 text-base font-medium cursor-pointer hover:bg-blue-200 ${
@@ -246,11 +268,13 @@ const EventPage = () => {
                   ))}
                   <MdOutlineKeyboardArrowRight
                     className={`text-slate-500 ${
-                      data.nextPage
+                      data?.nextPage
                         ? "cursor-pointer hover:text-blue-600"
                         : "cursor-not-allowed"
                     }`}
-                    onClick={() => data.nextPage && setPage((prev) => prev + 1)}
+                    onClick={() =>
+                      data?.nextPage && setPage((prev) => prev + 1)
+                    }
                     size={25}
                   />
                 </div>

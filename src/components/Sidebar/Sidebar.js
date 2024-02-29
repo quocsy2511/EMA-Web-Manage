@@ -125,10 +125,10 @@ const Sidebar = ({ collapsed }) => {
           <div className="demo-logo-vertical flex justify-center items-center p-4 dark:text-white">
             {!collapsed ? (
               <div className="flex flex-col gap-y-4">
-                <Avatar size={54} src={logo} />
-                <h3 className="text-center text-sm font-semibold dark:text-white text-secondary">
+                <Avatar size={150} src={logo} />
+                {/* <h3 className="text-center text-sm font-semibold dark:text-white text-secondary">
                   HREA
-                </h3>
+                </h3> */}
               </div>
             ) : (
               <div className="flex flex-col gap-y-[2px]">

@@ -71,7 +71,7 @@ export const socketListener = (dispatch, notificationAPI) => {
 
   // Get online / offline user
   socket.on("onlineGroupUsersReceived", (data) => {
-    console.log("online user > ", data);
+    // console.log("online user > ", data);
 
     dispatch(
       handleUpdateUsers({

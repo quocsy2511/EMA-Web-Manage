@@ -1,14 +1,29 @@
-import React, { Fragment, memo } from "react";
+import React, { Fragment, memo, useEffect, useState } from "react";
 import LockLoadingModal from "../../../components/Modal/LockLoadingModal";
 import { motion } from "framer-motion";
-import { ConfigProvider, DatePicker, Form, Input, message } from "antd";
+import {
+  App,
+  Button,
+  ConfigProvider,
+  DatePicker,
+  Form,
+  Input,
+  Select,
+  message,
+  notification,
+} from "antd";
 import viVN from "antd/locale/vi_VN";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import moment from "moment";
+import momenttz from "moment-timezone";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import TaskSection from "./TaskSection";
+import { useMutation } from "@tanstack/react-query";
+import { createTask } from "../../../apis/tasks";
+import SubTaskSection from "./SubTaskSection";
+import dayjs from "dayjs";
 
 const { RangePicker } = DatePicker;
 
@@ -16,17 +31,62 @@ const Title = memo(({ title }) => (
   <p className="text-lg font-medium">{title}</p>
 ));
 
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
+
 const EventAssignTaskPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { eventId, eventName } = location.state;
+  const {
+    eventId,
+    eventName,
+    dateRange,
+
+    // Task only
+    listDivision,
+
+    // Subtask only
+    taskId,
+    taskName,
+    taskResponsorId,
+    isSubTask,
+
+    // Update data : assignee of task -> [idStaff] | assignee of subtask: [{id->leader, id, id, ...}]
+    updateData,
+  } = location.state;
+
+  console.log("updateData > ", updateData);
+
+  const [isSelectDate, setIsSelectDate] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
+  const { notification } = App.useApp();
+
+  const { mutate: taskMutate, isLoading: taskIsLoading } = useMutation(
+    (task) => createTask(task),
+    {
+      onSuccess: (data) => {
+        notification.success({
+          message: <p className="font-medium">Tạo 1 hạng mục thành công</p>,
+          // description: "Hello, Ant Design!!",
+          placement: "topRight",
+          duration: 3,
+        });
+
+        navigate(-1);
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
 
   const onFinish = (values) => {
-    // console.log("Success:", values);
+    console.log("Success:", values);
     // values = {
     //   ...values,
     //   startDate: moment(values.date[0].$d).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
@@ -57,25 +117,36 @@ const EventAssignTaskPage = () => {
     //   console.log("Transform data: ", restValue);
     //   //call api
     //   uploadFileMutate({ formData, task: restValue });
-    // }
+    // }e
+
+    const taskPayload = {
+      eventID: eventId,
+      title: values?.title,
+      startDate: momenttz(values?.date[0]).format("YYYY-MM-DD"),
+      endDate: momenttz(values?.date[1]).format("YYYY-MM-DD"),
+      desc: JSON.stringify(values?.desc?.ops),
+      priority: values?.priority,
+      assignee: values?.assignee ?? [],
+      leader: isSubTask ? values?.leader : values?.assignee?.[0] ?? "",
+
+      // Optional
+      file: undefined,
+
+      // Subtask only
+      parentTask: isSubTask ? taskId : undefined,
+
+      // unexpected
+      estimationTime: 1,
+    };
+
+    taskMutate(taskPayload);
   };
 
   const onFinishFailed = (errorInfo) => {};
 
-  const handleValuesChange = (changedValues) => {
-    // const formFieldName = Object.keys(changedValues)[0];
-    // if (formFieldName === "assignee") {
-    //   setSelectedEmployeesId(changedValues[formFieldName]);
-    // }
-  };
-
   return (
     <Fragment>
       {contextHolder}
-      <LockLoadingModal
-        // isModalOpen={isLoading}
-        label="Đang tạo đề mục ..."
-      />
 
       <motion.div
         initial={{ y: -75 }}
@@ -90,7 +161,18 @@ const EventAssignTaskPage = () => {
           <Link to=".." relative="path">
             {eventName}{" "}
           </Link>
-          / Tạo đề mục
+          /{" "}
+          {!isSubTask ? (
+            "Tạo hạng mục"
+          ) : (
+            <>
+              Tạo công việc cho hạng mục [{" "}
+              <Link to={`/manager/event/${eventId}/${taskId}`} relative="path">
+                {taskName ?? "Công việc"}
+              </Link>
+              ]
+            </>
+          )}
         </p>
       </motion.div>
 
@@ -102,7 +184,9 @@ const EventAssignTaskPage = () => {
           {}
         )}
       >
-        <p>Tạo Hạng Mục</p>
+        <p className="text-3xl font-medium my-3 ml-5">
+          Thông Tin {isSubTask ? "Công Việc" : "Hạng Mục"}
+        </p>
         <Form
           className="p-5"
           form={form}
@@ -116,86 +200,107 @@ const EventAssignTaskPage = () => {
               e.preventDefault();
             }
           }}
-          onValuesChange={handleValuesChange}
-          //   initialValues={{
-          //     estimationTime: 1,
-          //     priority: "LOW",
-          //   }}
+          initialValues={{
+            title: updateData ? updateData?.title : undefined,
+            date: updateData ? updateData?.date : undefined,
+            priority: updateData ? updateData?.priority : "LOW",
+            desc: updateData
+              ? {
+                  ops: JSON.parse(
+                    updateData?.desc?.startsWith(`[{"insert":"`)
+                      ? updateData?.desc
+                      : parseJson(updateData?.desc)
+                  ),
+                }
+              : undefined,
+          }}
         >
           <div className="flex gap-x-10">
             <Form.Item
-              className="w-[55%]"
+              className="w-[40%]"
               label={<Title title="Tiêu đề" />}
               name="title"
               rules={[
                 {
                   required: true,
-                  message: "Nhập tiêu đề!",
+                  message: "Nhập tiêu đề !",
                 },
               ]}
             >
               <Input placeholder="Tên công việc" size="large" />
             </Form.Item>
             <Form.Item
-              className="w-[45%]"
+              className="w-[40%]"
               label={<Title title="Thời gian" />}
               name="date"
               rules={[
                 {
-                  validator: async (rule, value) => {
-                    if (value && value[0] && value[1]) {
-                      const startDate = moment(value[0].$d);
-                      const endDate = moment(value[1].$d);
-
-                      // Calculate the difference in minutes
-                      const diffInMinutes = endDate.diff(startDate, "minutes");
-
-                      if (diffInMinutes >= 15) {
-                        return Promise.resolve();
-                      } else {
-                        return Promise.reject(
-                          "Khoảng thời gian phải ít nhất là 15 phút"
-                        );
-                      }
-                    }
-                    return Promise.reject("Chọn khoảng thời gian thực hiện");
-                  },
+                  required: true,
+                  message: "chọn ngày thực hiện và kết thúc !",
                 },
               ]}
             >
               <ConfigProvider locale={viVN}>
                 <RangePicker
                   size="large"
+                  defaultValue={
+                    updateData && [
+                      dayjs(updateData?.date?.[0], "YYYY-MM-DD"),
+                      dayjs(updateData?.date?.[1], "YYYY-MM-DD"),
+                    ]
+                  }
                   onChange={(value) => {
-                    form.setFieldsValue({ date: value });
+                    if (value) {
+                      form.setFieldsValue({
+                        date: value?.map((item) => item?.$d),
+                      });
+                      setIsSelectDate(value?.map((item) => momenttz(item?.$d)));
+                    } else setIsSelectDate();
                   }}
-                  // showTime={{
-                  //   hideDisabledOptions: true,
-                  //   defaultValue: [moment(date[0]), moment(date[1])],
-                  // }}
-                  showTime
-                  // showSecond={false}
-                  //   disabledDate={(current) => {
-                  //     const startDate = moment(date[0]);
-                  //     const endDate = moment(date[1]);
+                  disabledDate={(current) => {
+                    const startDate = momenttz(dateRange[0], "YYYY-MM-DD");
+                    const endDate = momenttz(dateRange[1], "YYYY-MM-DD");
 
-                  //     if (parentTaskId) {
-                  //       if (startDate.isSame(endDate, "day"))
-                  //         return !current.isSame(startDate, "day");
-                  //       return (
-                  //         current && (current < startDate || current > endDate)
-                  //       );
-                  //     } else {
-                  //       const today = moment().startOf("day");
-                  //       return (
-                  //         current && current < today /*|| current > endDate*/
-                  //       );
-                  //     }
-                  //   }}
-                  format={"DD/MM/YYYY HH:mm:ss"}
+                    if (!isSubTask) return current && current < startDate;
+                    else
+                      return (
+                        (current && current < startDate) || current > endDate
+                      );
+                  }}
+                  format={"DD/MM/YYYY"}
                   className="w-full"
                 />
               </ConfigProvider>
+            </Form.Item>
+            <Form.Item
+              className="w-[20%]"
+              label={<Title title="Độ ưu tiên" />}
+              name="priority"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn độ ưu tiên !",
+                },
+              ]}
+            >
+              <Select
+                size="large"
+                placeholder="Mức độ"
+                options={[
+                  {
+                    value: "LOW",
+                    label: "Thấp",
+                  },
+                  {
+                    value: "MEDIUM",
+                    label: "Bình thường",
+                  },
+                  {
+                    value: "HIGH",
+                    label: "Cao",
+                  },
+                ]}
+              />
             </Form.Item>
           </div>
 
@@ -219,11 +324,40 @@ const EventAssignTaskPage = () => {
             />
           </Form.Item>
 
-          <TaskSection form={form} />
+          {isSubTask ? (
+            <SubTaskSection
+              form={form}
+              isSelectDate={isSelectDate}
+              taskResponsorId={taskResponsorId}
+              updateDataUser={updateData ? updateData?.assignee ?? [] : null}
+            />
+          ) : (
+            <TaskSection
+              form={form}
+              isSelectDate={isSelectDate}
+              listDivision={listDivision}
+              updateDataDivision={
+                updateData ? updateData?.assignee ?? [] : null
+              }
+            />
+          )}
+
+          <div className="flex justify-center items-center mt-10">
+            <Button
+              size="large"
+              type="primary"
+              onClick={() => {
+                form.submit();
+              }}
+              loading={taskIsLoading}
+            >
+              Hoàn Thành
+            </Button>
+          </div>
         </Form>
       </motion.div>
     </Fragment>
   );
 };
 
-export default EventAssignTaskPage;
+export default memo(EventAssignTaskPage);

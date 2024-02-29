@@ -1,5 +1,5 @@
+import React, { memo } from "react";
 import { Select } from "antd";
-import React from "react";
 import { motion } from "framer-motion";
 
 const EventTaskSelection = (props) => {
@@ -33,4 +33,4 @@ const EventTaskSelection = (props) => {
   );
 };
 
-export default EventTaskSelection;
+export default memo(EventTaskSelection);

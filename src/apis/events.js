@@ -10,11 +10,21 @@ export const createEvent = ({
   coverUrl,
   estBudget,
   eventTypeId,
+  customerName,
+  customerNationalId,
+  customerAddress,
+  customerEmail,
+  customerPhoneNumber,
+  contractValue,
+  paymentMethod,
+  paymentDate,
+  contactId,
 }) =>
   http({
-    url: "/event",
+    url: `/event?contactId=${contactId}`,
     method: "post",
     data: {
+      // Event payload
       eventName,
       description,
       startDate,
@@ -24,6 +34,16 @@ export const createEvent = ({
       coverUrl,
       estBudget,
       eventTypeId,
+
+      // Contract payload
+      customerName,
+      customerNationalId,
+      customerAddress,
+      customerEmail,
+      customerPhoneNumber,
+      contractValue,
+      paymentMethod,
+      paymentDate,
     },
   });
 
@@ -46,8 +66,7 @@ export const getFilterEvent = ({
     }${status ? `&status=${status}` : ""}`,
   });
 
-export const getDetailEvent = (eventId) =>
-  http({ url: `/event/${eventId}` });
+export const getDetailEvent = (eventId) => http({ url: `/event/${eventId}` });
 
 // mode = 1: assign , 2: delete
 export const updateDetailEvent = ({ eventId, ...event }) =>
@@ -73,11 +92,9 @@ export const getEventDetail = ({ eventId }) =>
     url: `/event/${eventId}`,
   });
 
-export const getEventTemplate = () =>
-  http({ url: "/event/template-event" });
+export const getEventTemplate = () => http({ url: "/event/template-event" });
 
-export const getTemplateEvent = () =>
-  http({ url: "/event/template-event" });
+export const getTemplateEvent = () => http({ url: "/event/template-event" });
 
 export const getStatistic = ({ type }) =>
   http({ url: `/event/statistic?mode=${type}` });

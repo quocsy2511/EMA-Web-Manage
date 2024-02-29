@@ -53,12 +53,14 @@ const HeaderEvent = ({
         divisionId,
         pageSize: 10,
         currentPage: 1,
-        role: "EMPLOYEE",
+        // role: "EMPLOYEE",
+        role: "Nh%C3%A2n%20Vi%C3%AAn",
       }),
     {
       select: (data) => {
-        const listUsers = data.data.map(({ ...item }) => {
-          item.dob = moment(item.dob).format("YYYY-MM-DD");
+        console.log("🚀 ~ data:", data);
+        const listUsers = data?.data?.map(({ ...item }) => {
+          item.dob = moment(item.dob).format("DD-MM-YYYY");
           return {
             key: item.id,
             ...item,
@@ -115,7 +117,7 @@ const HeaderEvent = ({
           label:
             item.id === filterMember ? (
               <div className="flex flex-row gap-x-2 justify-start items-center w-fit h-fit text-secondary text-base">
-                {item.role === "STAFF" ? (
+                {item.role === "Trưởng phòng" ? (
                   <>
                     <Tooltip
                       key={item.key}
@@ -146,7 +148,7 @@ const HeaderEvent = ({
               </div>
             ) : (
               <div className="flex flex-row gap-x-2 justify-start items-center w-fit h-fit opacity-60">
-                {item.role === "STAFF" ? (
+                {item.role === "Trưởng phòng" ? (
                   <>
                     <Tooltip
                       key={item.key}
@@ -245,7 +247,7 @@ const HeaderEvent = ({
   }, []);
 
   return (
-    <div className="p-4 left-0 bg-bgBoard z-40 right-0 top-14">
+    <div className="p-4 left-0 z-40 right-0 bg-bgBoard h-16">
       <AnimatePresence mode="wait">
         {!isLoadingUsers ? (
           !isErrorUsers ? (
@@ -257,14 +259,17 @@ const HeaderEvent = ({
             >
               <header className="flex justify-between  items-center w-full ml-8 mr-1">
                 {/* left header */}
-                <div className="flex items-center gap-x-4 ">
+                <div className="flex items-center gap-x-4 flex-row ">
+                  <span className="text-lg font-bold text-black">
+                    Sự kiện :
+                  </span>
                   <Select
                     value={
                       selectEvent ? JSON.stringify(selectEvent) : undefined
                     }
                     defaultValue={{ label: events[0].eventName, value: events }}
                     // bordered={false}
-                    className="min-w-[120px] shadow-md rounded-lg"
+                    className="min-w-[120px] shadow-sm rounded-lg"
                     popupMatchSelectWidth={false}
                     onChange={handleChangeEvent}
                     options={events.map((event) => {
@@ -284,7 +289,7 @@ const HeaderEvent = ({
                 {!isDashBoard && (
                   <div className="flex-1 flex justify-end items-center gap-x-3">
                     {/* budget */}
-                    {/* <div className="flex-1 flex flex-row gap-x-2 text-sm">
+                    <div className="flex-1 flex flex-row gap-x-2 text-sm">
                       <AnimatePresence mode="wait">
                         {!isBoardTask ? (
                           <motion.span
@@ -390,7 +395,7 @@ const HeaderEvent = ({
                           </motion.div>
                         )}
                       </AnimatePresence>
-                    </div> */}
+                    </div>
 
                     <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer">
                       <Avatar.Group

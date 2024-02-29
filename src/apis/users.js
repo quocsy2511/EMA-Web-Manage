@@ -34,7 +34,7 @@ export const getMember = ({ userId }) => http({ url: `/user/${userId}` });
 export const updateProfile = (user) =>
   http({ url: `/user/profile`, method: "put", data: user });
 
-export const getEmployeeByDate = ({ startDate, endDate }) =>
-  http({ url: `/user/getFreeEmployee/${startDate}/${endDate}` });
+export const getEmployee = ({ divisionId }) =>
+  http({ url: `/division/${divisionId}` });
 
 export const getRoles = () => http({ url: "/roles" });

@@ -1,7 +1,7 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, memo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Avatar, Button, Checkbox, Collapse, message } from "antd";
+import { App, Avatar, Button, Checkbox, Collapse, message } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllDivision } from "../../apis/divisions";
 import { defaultAvatar } from "../../constants/global";
@@ -20,6 +20,7 @@ const EventAssignDivisionPage = () => {
   console.log("selectedDivisions > ", selectedDivisions);
 
   const [messageApi, contextHolder] = message.useMessage();
+  const { notification } = App.useApp();
 
   const {
     data: divisions,
@@ -30,7 +31,7 @@ const EventAssignDivisionPage = () => {
     () => getAllDivision({ pageSize: 100, currentPage: 1, mode: 1 }),
     {
       select: (data) => {
-        return data.filter((item) => item.status);
+        return data?.filter((item) => item?.status);
       },
     }
   );
@@ -43,13 +44,16 @@ const EventAssignDivisionPage = () => {
       onSuccess: (data, variables) => {
         // TODO -> navigation
         queryClient.invalidateQueries(["event-detail", eventId]);
-        messageApi.open({
-          type: "success",
-          content: "Cập nhật bộ phận chịu trách nhiệm thành công.",
+        notification.success({
+          message: (
+            <p className="font-medium">
+              Cập nhật bộ phận chịu trách nhiệm thành công
+            </p>
+          ),
+          placement: "topRight",
+          duration: 3,
         });
-        setTimeout(() => {
-          navigate(-1);
-        }, 1000);
+        navigate(-1);
       },
       onError: (error) => {
         messageApi.open({
@@ -82,10 +86,10 @@ const EventAssignDivisionPage = () => {
   return (
     <Fragment>
       {contextHolder}
-      <LockLoadingModal
+      {/* <LockLoadingModal
         isModalOpen={isLoading}
         label="Đang cập nhật sự kiện ..."
-      />
+      /> */}
 
       <motion.div
         initial={{ y: -75 }}
@@ -123,7 +127,11 @@ const EventAssignDivisionPage = () => {
           <div className="mx-10 my-8 space-y-5">
             <div className="flex justify-between">
               <p className="text-xl font-medium">Chọn bộ phận phù hợp</p>
-              <Button type="primary" onClick={handleUpdateDivision}>
+              <Button
+                type="primary"
+                onClick={handleUpdateDivision}
+                loading={isLoading}
+              >
                 Áp dụng
               </Button>
             </div>
@@ -131,41 +139,41 @@ const EventAssignDivisionPage = () => {
               collapsible="icon"
               expandIconPosition="end"
               items={divisions?.map((division, index) => ({
-                key: division.id,
+                key: division?.id,
                 label: (
                   <div className="flex justify-between items-center mx-5">
                     <Checkbox
-                      checked={selectedDivisions.includes(division.id)}
+                      checked={selectedDivisions?.includes(division?.id)}
                       onChange={(e) => {
-                        toggleSelectedDivision(division.id);
+                        toggleSelectedDivision(division?.id);
                       }}
                     >
-                      <p className="text-base ml-3">{division.divisionName}</p>
+                      <p className="text-base ml-3">{division?.divisionName}</p>
                     </Checkbox>
                     <p className="text-base">
                       Đang tham gia{" "}
                       <span className="font-semibold">
-                        {division.assignEvents}
+                        {division?.assignEvents}
                       </span>{" "}
                       sự kiện
                     </p>
                   </div>
                 ),
                 children: (
-                  <div className="mx-5 space-y-5">
-                    {division.users?.map((user) => (
-                      <div className="flex space-x-5">
+                  <div className="flex flex-wrap items-center content-center space-y-2">
+                    {division?.users?.map((user) => (
+                      <div className="flex space-x-5 items-center w-1/3">
                         <Avatar
-                          src={user.profile?.avatar || defaultAvatar}
+                          src={user?.profile?.avatar || defaultAvatar}
                           size={45}
                         />
 
                         <div className="flex flex-col justify-between">
-                          <p className="text-xl font-medium">
-                            {user.profile?.fullName}
+                          <p className="text-xl font-medium truncate">
+                            {user?.profile?.fullName}
                           </p>
-                          <p className="text-sm text-slate-400">
-                            {user.role?.roleName}
+                          <p className="text-sm text-slate-400 truncate">
+                            {user?.role?.roleName}
                           </p>
                         </div>
                       </div>
@@ -185,4 +193,4 @@ const EventAssignDivisionPage = () => {
   );
 };
 
-export default EventAssignDivisionPage;
+export default memo(EventAssignDivisionPage);

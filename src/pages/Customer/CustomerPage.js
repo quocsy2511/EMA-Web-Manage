@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, memo, useEffect, useState } from "react";
 import { FloatButton, Popover, Select, message } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -17,51 +17,72 @@ import {
 } from "react-icons/lia";
 import { TbCategory } from "react-icons/tb";
 import { IoCheckmarkCircle, IoCloseCircleSharp } from "react-icons/io5";
-import { MdOutlineNewLabel } from "react-icons/md";
+import {
+  MdOutlineNewLabel,
+  MdOutlinePending,
+  MdCheckCircleOutline,
+} from "react-icons/md";
+import { IoMdCloseCircleOutline } from "react-icons/io";
 import LoadingItemIndicator from "../../components/Indicator/LoadingItemIndicator";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import ContactUpdateModal from "../../components/Modal/ContactUpdateModal";
 import { useNavigate } from "react-router-dom";
+import clsx from "clsx";
 
-const ContactItem = ({ customer, setSelectedContact }) => {
-  const handleSelectedContact = () => {
-    setSelectedContact(customer);
-  };
-  return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      onClick={handleSelectedContact}
-      className="px-6 py-4 border-y border-black/50 shadow-lg shadow-slate-300 cursor-pointer"
-    >
-      <p className="flex items-center text-base truncate">
-        <GoPerson className="text-xl mr-4 text-blue-500" /> Tên khách hàng -{" "}
-        {customer?.fullName}
-      </p>
-      <p className="flex items-center text-base truncate">
-        <GoMail className="text-xl mr-4 text-orange-500" /> Email -{" "}
-        {customer?.email}
-      </p>
-      <p className="flex items-center text-base truncate">
-        <LuSmartphone className="text-xl mr-4 text-sky-400" /> SĐT -{" "}
-        {customer?.phoneNumber}
-      </p>
-      <div className="flex justify-end">
-        <Popover
-          className="flex w-fit text-right space-x-2 justify-end items-center text-xs"
-          content="Ngày gửi"
-        >
-          <GoCalendar />{" "}
-          <p>{momenttz(customer?.createdAt).format("DD/MM/YYYY")}</p>
-        </Popover>
-      </div>
-    </motion.div>
-  );
-};
+const ContactItem = memo(
+  ({ customer, selectedContact, setSelectedContact }) => {
+    const handleSelectedContact = () => {
+      setSelectedContact(customer);
+    };
+    return (
+      <motion.div
+        whileHover={{ y: -3 }}
+        onClick={handleSelectedContact}
+        className={clsx(
+          "mx-3 px-6 py-4 border border-black/20 shadow-md shadow-slate-300 rounded-lg cursor-pointer relative hover:bg-slate-200/50 transition-colors duration-300",
+          { "bg-slate-200/50": customer?.id === selectedContact?.id }
+        )}
+      >
+        <div className="absolute top-2 right-2">
+          {customer.status === "PENDING" ? (
+            <MdOutlinePending className={clsx("text-2xl text-orange-300")} />
+          ) : customer.status === "ACCEPTED" ? (
+            <MdCheckCircleOutline className={clsx("text-2xl text-green-400")} />
+          ) : (
+            <IoMdCloseCircleOutline className={clsx("text-2xl text-red-600")} />
+          )}
+        </div>
+        <p className="flex items-center text-base truncate">
+          <GoPerson className="text-2xl mr-4 text-blue-500" />
+          <span className="font-medium truncate">{customer?.fullName}</span>
+        </p>
+        <p className="flex items-center text-base truncate">
+          <GoMail className="text-2xl mr-4 text-orange-500" />
+          <span className="font-medium truncate">{customer?.email}</span>
+        </p>
+        <p className="flex items-center text-base truncate font-medium">
+          <LuSmartphone className="text-2xl mr-4 text-sky-400" />
+          {customer?.phoneNumber}
+        </p>
+        <div className="flex justify-end">
+          <Popover
+            className="flex w-fit text-right space-x-2 justify-end items-center text-xs"
+            content="Ngày gửi"
+          >
+            <GoCalendar />{" "}
+            <p>{momenttz(customer?.createdAt).format("DD/MM/YYYY")}</p>
+          </Popover>
+        </div>
+      </motion.div>
+    );
+  }
+);
 
 const CustomerPage = () => {
   const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [renderContact, setRenderContact] = useState([]);
   const [sort, setSort] = useState("DESC");
   const [contactStatus, setContactStatus] = useState("ALL");
   const [selectedContact, setSelectedContact] = useState();
@@ -84,6 +105,18 @@ const CustomerPage = () => {
   );
   console.log("contacts > ", contacts);
 
+  useEffect(() => {
+    if (contacts?.currentPage === 1) {
+      if (contacts?.data) {
+        setRenderContact(contacts?.data);
+      }
+    } else {
+      if (contacts?.data) {
+        setRenderContact((prev) => [...prev, ...contacts?.data]);
+      }
+    }
+  }, [contacts]);
+
   const queryClient = useQueryClient();
   const { mutate, isLoading: updateIsLoading } = useMutation(
     ({ contactId, status, rejectNote }) =>
@@ -96,6 +129,7 @@ const CustomerPage = () => {
           sort,
           contactStatus,
         ]);
+
         messageApi.open({
           type: "success",
           content:
@@ -103,7 +137,9 @@ const CustomerPage = () => {
               ? "Chấp nhận 1 sự kiện từ khách hàng thành công"
               : "Đã từ chối 1 sự kiện từ khách hàng",
         });
-        setSelectedContact();
+        // setSelectedContact();
+
+        setIsModalOpen(false);
       },
       onError: (error) => {
         messageApi.open({
@@ -116,21 +152,23 @@ const CustomerPage = () => {
 
   useEffect(() => {
     refetch();
-  }, [currentPage, sort, contactStatus]);
+  }, [sort, contactStatus]);
 
   useEffect(() => {
-    setloadContact(true);
-    const identifier = setTimeout(() => {
-      setloadContact(false);
-    }, 800);
+    let identifier;
+    if (selectedContact) {
+      setloadContact(true);
+      identifier = setTimeout(() => {
+        setloadContact(false);
+      }, 800);
+    }
 
     return () => {
-      clearTimeout(identifier);
+      if (identifier) clearTimeout(identifier);
     };
   }, [selectedContact]);
 
   const handleUpdateContact = (contactId, status, rejectNote) => {
-    console.log(contactId, status, rejectNote);
     mutate({
       contactId,
       status,
@@ -141,12 +179,8 @@ const CustomerPage = () => {
   const goToCreateEventPage = () => {
     navigate("addition", {
       state: {
-        location: selectedContact.address,
-        startDate: selectedContact.startDate,
-        endDate: selectedContact.endDate,
-        estBudget: selectedContact.budget,
-        eventType: selectedContact.eventType.id,
         contactId: selectedContact.id,
+        eventType: selectedContact.eventType.id,
       },
     });
   };
@@ -168,6 +202,7 @@ const CustomerPage = () => {
           icon={<MdOutlineNewLabel className="scale-110" />}
         />
       </Popover>
+
       <ContactUpdateModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
@@ -175,6 +210,7 @@ const CustomerPage = () => {
         selectedContactId={selectedContact?.id}
         updateIsLoading={updateIsLoading}
       />
+
       <div className="flex w-full h-[calc(100vh-64px-6rem)] bg-white rounded-lg shadow-xl">
         <div className="w-[30%] flex flex-col border-r-2 border-black/20">
           <p className="text-2xl font-semibold p-5">Thông tin khách hàng</p>
@@ -183,6 +219,7 @@ const CustomerPage = () => {
               className="w-[50%]"
               defaultValue={contactStatus}
               onChange={(value) => {
+                setCurrentPage(1);
                 setContactStatus(value);
               }}
               options={[
@@ -216,7 +253,10 @@ const CustomerPage = () => {
                   <Popover content="Sắp xếp giảm dần theo ngày gửi">
                     <GrAscend
                       className="text-xl cursor-pointer"
-                      onClick={() => setSort("ASC")}
+                      onClick={() => {
+                        setCurrentPage(1);
+                        setSort("ASC");
+                      }}
                     />
                   </Popover>
                 </motion.div>
@@ -230,7 +270,10 @@ const CustomerPage = () => {
                   <Popover content="Sắp xếp tăng dần theo ngày gửi">
                     <GrDescend
                       className="text-xl cursor-pointer"
-                      onClick={() => setSort("DESC")}
+                      onClick={() => {
+                        setCurrentPage(1);
+                        setSort("DESC");
+                      }}
                     />
                   </Popover>
                 </motion.div>
@@ -250,12 +293,14 @@ const CustomerPage = () => {
                 Không có thông tin
               </p>
             ) : (
-              contacts?.data.map((contact) => {
+              // contacts?.data?.map((contact) => {
+              renderContact?.map((contact) => {
                 return (
                   <ContactItem
+                    key={contact?.id}
                     customer={contact}
+                    selectedContact={selectedContact}
                     setSelectedContact={setSelectedContact}
-                    key={contact.id}
                   />
                 );
               })
@@ -271,6 +316,7 @@ const CustomerPage = () => {
             )}
           </div>
         </div>
+
         <div className="flex-1 bg-[#ffffff]">
           {loadContact ? (
             <LoadingItemIndicator />
@@ -332,46 +378,87 @@ const CustomerPage = () => {
               </div>
 
               <div className="flex-1 flex flex-col justify-end items-end">
-                <div className="bg-white h-full flex items-end">
-                  <motion.button
-                    onClick={goToCreateEventPage}
-                    whileHover={{ y: -5 }}
-                    className="flex h-fit items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
-                  >
-                    <div className="py-3 pl-5 pr-3 bg-blue-500">
-                      <IoCloseCircleSharp className="text-white text-2xl" />
+                {selectedContact?.status === "ACCEPTED" && (
+                  <div className="bg-white h-full flex items-end">
+                    <div className="flex space-x-5 mt-10">
+                      <motion.button
+                        whileHover={{ y: -5 }}
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
+                      >
+                        <div className="py-3 pl-5 pr-3 bg-red-500">
+                          <IoCloseCircleSharp className="text-white text-2xl" />
+                        </div>
+                        <p className="py-3 pr-6 text-base font-medium">
+                          Từ chối
+                        </p>
+                      </motion.button>
+                      <motion.button
+                        onClick={goToCreateEventPage}
+                        whileHover={{ y: -5 }}
+                        className="flex h-fit items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
+                      >
+                        <div className="py-3 pl-5 pr-3 bg-blue-500">
+                          <IoCloseCircleSharp className="text-white text-2xl" />
+                        </div>
+                        <p className="py-3 pr-6 text-base font-medium">
+                          Tạo sự kiện
+                        </p>
+                      </motion.button>
                     </div>
-                    <p className="py-3 pr-6 text-base font-medium">
-                      Tạo sự kiện
-                    </p>
-                  </motion.button>
-                </div>
+                  </div>
+                )}
 
                 <div className="flex h-full space-x-5 justify-end items-center">
-                  <motion.button
-                    whileHover={{ y: -5 }}
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
-                  >
-                    <div className="py-3 pl-5 pr-3 bg-red-500">
-                      <IoCloseCircleSharp className="text-white text-2xl" />
+                  {selectedContact?.status === "PENDING" && (
+                    <div className="flex space-x-5">
+                      {/* <motion.button
+                        whileHover={{ y: -5 }}
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
+                      >
+                        <div className="py-3 pl-5 pr-3 bg-red-500">
+                          <IoCloseCircleSharp className="text-white text-2xl" />
+                        </div>
+                        <p className="py-3 pr-6 text-base font-medium">
+                          Từ chối
+                        </p>
+                      </motion.button> */}
+
+                      <motion.button
+                        whileHover={{ y: -5 }}
+                        onClick={() =>
+                          handleUpdateContact(selectedContact?.id, "ACCEPTED")
+                        }
+                        className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
+                      >
+                        <p className="py-3 pl-6 pr- text-base font-medium">
+                          Chấp thuận
+                        </p>
+                        <div className="py-3 pr-5 pl-3 bg-success">
+                          <IoCheckmarkCircle className="text-white text-2xl" />
+                        </div>
+                      </motion.button>
                     </div>
-                    <p className="py-3 pr-6 text-base font-medium">Từ chối</p>
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ y: -5 }}
-                    onClick={() =>
-                      handleUpdateContact(selectedContact.id, "ACCEPTED")
-                    }
-                    className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
-                  >
-                    <p className="py-3 pl-6 pr- text-base font-medium">
-                      Chấp thuận
-                    </p>
-                    <div className="py-3 pr-5 pl-3 bg-success">
-                      <IoCheckmarkCircle className="text-white text-2xl" />
-                    </div>
-                  </motion.button>
+                  )}
+
+                  {/* 
+                  {selectedContact?.status !== "ACCEPTED" && (
+                    <motion.button
+                      whileHover={{ y: -5 }}
+                      onClick={() =>
+                        handleUpdateContact(selectedContact?.id, "ACCEPTED")
+                      }
+                      className="flex items-center rounded-full overflow-hidden space-x-3 bg-white shadow-md shadow-slate-400"
+                    >
+                      <p className="py-3 pl-6 pr- text-base font-medium">
+                        Chấp thuận
+                      </p>
+                      <div className="py-3 pr-5 pl-3 bg-success">
+                        <IoCheckmarkCircle className="text-white text-2xl" />
+                      </div>
+                    </motion.button>
+                  )} */}
                 </div>
               </div>
             </div>
@@ -386,4 +473,4 @@ const CustomerPage = () => {
   );
 };
 
-export default CustomerPage;
+export default memo(CustomerPage);
