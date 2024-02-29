@@ -14,10 +14,12 @@ import { BsExclamationCircle } from "react-icons/bs";
 import {
   IoEllipsisHorizontalCircle,
   IoArrowForwardCircleOutline,
+  IoClose,
 } from "react-icons/io5";
 import { GoDotFill } from "react-icons/go";
 import clsx from "clsx";
 import { motion } from "framer-motion";
+import viVN from "antd/es/locale/vi_VN";
 
 const DrawerContainer = memo(
   ({
@@ -33,9 +35,16 @@ const DrawerContainer = memo(
     return (
       <Drawer
         title={
-          <p className="text-xl font-semibold">
-            Lịch trình ngày {calendarDateChecking?.clone().format("DD-MM-YYYY")}
-          </p>
+          <div className="flex items-center space-x-10">
+            <IoClose
+              className="text-xl text-slate-400"
+              onClose={() => setIsDrawerOpen(false)}
+            />
+            <p className="text-xl font-semibold">
+              Lịch trình ngày{" "}
+              {calendarDateChecking?.clone().format("DD-MM-YYYY")}
+            </p>
+          </div>
         }
         placement={"right"}
         closable={false}
@@ -46,67 +55,79 @@ const DrawerContainer = memo(
       >
         {/* Content */}
         <div className="space-y-10">
-          {tasks?.listEvent?.map((event) => {
-            // filter task list
-            const listTasks = event?.listTask?.filter((task) => {
-              const start = momenttz(task?.startDate, "DD-MM-YYYY");
-              const end = momenttz(task?.endDate, "DD-MM-YYYY");
+          {!tasks?.listEvent ? (
+            <p className="text-lg text-center">Chưa chọn khoảng thời gian cần kiểm tra !</p>
+          ) : tasks?.listEvent?.length === 0 ? (
+            <div>
+              <p className="text-lg text-center">Không có công việc nào !</p>
+            </div>
+          ) : (
+            tasks?.listEvent?.map((event) => {
+              // filter task list
+              const listTasks = event?.listTask?.filter((task) => {
+                const start = momenttz(task?.startDate, "DD-MM-YYYY");
+                const end = momenttz(task?.endDate, "DD-MM-YYYY");
 
-              if (
-                calendarDateChecking?.isBetween(start, end, "day") ||
-                calendarDateChecking?.isSame(start, "day") ||
-                calendarDateChecking?.isSame(end, "day")
-              ) {
-                return task;
-              }
-            });
+                if (
+                  calendarDateChecking?.isBetween(start, end, "day") ||
+                  calendarDateChecking?.isSame(start, "day") ||
+                  calendarDateChecking?.isSame(end, "day")
+                ) {
+                  return task;
+                }
+              });
 
-            if (listTasks?.length !== 0)
-              return (
-                <div key={event?.eventID} className="w-full space-y-3">
-                  <div className="flex items-center bg-gray-50 rounded-full">
-                    <div className="border-2 border-blue-500 rounded-full p-2">
-                      <MdEmojiEvents className="text-xl text-blue-500" />
-                    </div>
+              if (listTasks?.length !== 0)
+                return (
+                  <div key={event?.eventID} className="w-full space-y-3">
+                    <div className="flex items-center bg-gray-50 rounded-full">
+                      <div className="border-2 border-blue-500 rounded-full p-2">
+                        <MdEmojiEvents className="text-xl text-blue-500" />
+                      </div>
 
-                    <div className="flex-1 flex items-center space-x-2">
-                      <div className="bg-blue-500 h-0.5 flex-1" />
-                      <Tooltip title={event?.eventName}>
-                        <p className="w-auto max-w-xs text-center text-base font-medium truncate cursor-pointer">
-                          {event?.eventName}
-                        </p>
-                      </Tooltip>
-                      <div className="bg-blue-500 h-0.5 flex-1" />
-                    </div>
-                  </div>
-
-                  <div className="ml-5">
-                    {listTasks?.map((task) => {
-                      const icon = getPriority(task?.priority);
-                      const { textColor, statusText } = getColor(task?.status);
-
-                      return (
-                        <div
-                          key={task?.id}
-                          className="flex items-center space-x-3 bg-red-20"
-                        >
-                          {/* {icon} */}
-                          <GoDotFill className="text-sm" />
-                          <p className={`text-sm font-medium w-auto truncate`}>
-                            {task?.title} :{" "}
+                      <div className="flex-1 flex items-center space-x-2">
+                        <div className="bg-blue-500 h-0.5 flex-1" />
+                        <Tooltip title={event?.eventName}>
+                          <p className="w-auto max-w-xs text-center text-base font-medium truncate cursor-pointer">
+                            {event?.eventName}
                           </p>
-                          <p
-                            className={`text-xs font-medium ${textColor} truncate`}
+                        </Tooltip>
+                        <div className="bg-blue-500 h-0.5 flex-1" />
+                      </div>
+                    </div>
+
+                    <div className="ml-5">
+                      {listTasks?.map((task) => {
+                        const icon = getPriority(task?.priority);
+                        const { textColor, statusText } = getColor(
+                          task?.status
+                        );
+
+                        return (
+                          <div
+                            key={task?.id}
+                            className="flex items-center space-x-3 bg-red-20"
                           >
-                            {statusText}
-                          </p>
-                        </div>
-                      );
-                    })}
+                            {/* {icon} */}
+                            <GoDotFill className="text-sm" />
+                            <p
+                              className={`text-sm font-medium w-auto truncate`}
+                            >
+                              {task?.title} :{" "}
+                            </p>
+                            <p
+                              className={`text-xs font-medium ${textColor} truncate`}
+                            >
+                              {statusText}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-          })}
+                );
+            })
+          )}
         </div>
       </Drawer>
     );
@@ -122,6 +143,8 @@ const Item = memo(
     leader,
     handleSelectLeader,
     isSelectDate,
+
+    updateDataUser,
   }) => {
     return (
       <div className="relative">
@@ -223,7 +246,13 @@ const Item = memo(
   }
 );
 
-const SubTaskSection = ({ form, isSelectDate, taskResponsorId }) => {
+const SubTaskSection = ({
+  form,
+  isSelectDate,
+  taskResponsorId,
+  updateDataUser,
+}) => {
+  console.log("updateDataUser > ", updateDataUser);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [calendarChecking, setCalendarChecking] = useState();
   const [calendarDateChecking, setCalendarDateChecking] = useState();
@@ -231,12 +260,25 @@ const SubTaskSection = ({ form, isSelectDate, taskResponsorId }) => {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
+  useEffect(() => {
+    // Update subtask
+    if (updateDataUser) {
+      setSelectedEmployees(updateDataUser);
+      setLeader(updateDataUser?.[0]);
+    }
+  }, []);
+
   // Update assignee in form
   useEffect(() => {
     if (selectedEmployees.length === 0) {
       form.setFieldsValue({ assignee: undefined });
     } else {
       form.setFieldsValue({ assignee: selectedEmployees });
+    }
+
+    // handle remove the leader -> assign to the nearest
+    if (!selectedEmployees.includes(leader)) {
+      setLeader(selectedEmployees?.[0]);
     }
 
     console.log("update form > ", form.getFieldsValue());
@@ -262,11 +304,13 @@ const SubTaskSection = ({ form, isSelectDate, taskResponsorId }) => {
     () => getDivisionByStaff("id", taskResponsorId),
     {
       select: (data) => {
-        return data?.users?.map((user) => ({
-          id: user?.id,
-          fullName: user?.profile?.fullName,
-          role: user?.role?.roleName,
-        }));
+        return data?.users
+          ?.map((user) => ({
+            id: user?.id,
+            fullName: user?.profile?.fullName,
+            role: user?.role?.roleName,
+          }))
+          .slice(1);
       },
       refetchOnWindowFocus: false,
     }
@@ -434,7 +478,9 @@ const SubTaskSection = ({ form, isSelectDate, taskResponsorId }) => {
       <div className="flex space-x-10">
         <p className="w-1/3 text-lg font-medium">Nhân viên thực hiện</p>
         <p className="flex-1 text-black text-lg font-medium">
-          {calendarIsError ? (
+          {!isSelectDate ? (
+            "Chọn khoảng thời gian để kiểm tra"
+          ) : calendarIsError ? (
             "Không thể lấy dữ liệu! Hãy thử lại sau"
           ) : !calendarChecking ? (
             "Chọn 1 nhân viên để xem lịch trình"
@@ -470,6 +516,8 @@ const SubTaskSection = ({ form, isSelectDate, taskResponsorId }) => {
                     leader={leader}
                     handleSelectLeader={handleSelectLeader}
                     isSelectDate={isSelectDate}
+                    // Update data flow
+                    updateDataUser={updateDataUser}
                   />
                 ))
               )}
@@ -484,98 +532,111 @@ const SubTaskSection = ({ form, isSelectDate, taskResponsorId }) => {
               spinning={isSelectDate ? calendarIsLoading : false}
               className="mt-[15%]"
             >
-              <Calendar
-                headerRender={() => {}}
-                fullscreen={true}
-                disabledDate={(currentDate) => {
-                  const current = momenttz(currentDate?.$d);
-
-                  return (
-                    current.isBefore(isSelectDate?.[0], "day") ||
-                    current.isAfter(isSelectDate?.[1], "day")
-                  );
+              <ConfigProvider
+                locale={viVN}
+                theme={{
+                  token: {
+                    colorText: "#1677ff",
+                    colorTextHeading: "#000000",
+                    fontSize: 15,
+                    fontWeightStrong: 800,
+                    controlHeightLG: 30,
+                  },
                 }}
-                // locale={viVN}
-                onSelect={(value, info) => {
-                  setCalendarDateChecking(momenttz(value.$d));
-                  setIsDrawerOpen(true);
-                }}
-                onPanelChange={(value, mode) => {
-                  console.log("month change > ", value.format("YYYY-MM-DD"));
-                }}
-                cellRender={(current) => {
-                  let renderList;
-                  const currentMoment = momenttz(current?.$d);
+              >
+                <Calendar
+                  locale={viVN}
+                  headerRender={() => {}}
+                  fullscreen={true}
+                  disabledDate={(currentDate) => {
+                    const current = momenttz(currentDate?.$d);
 
-                  // Compare to the selected date
-                  if (
-                    currentMoment.isBetween(
-                      isSelectDate?.[0],
-                      isSelectDate?.[1],
-                      "day"
-                    ) ||
-                    currentMoment.isSame(isSelectDate?.[0], "day") ||
-                    currentMoment.isSame(isSelectDate?.[1], "day")
-                  ) {
-                    // Compare to the date gap in each task
-                    calendarData?.calendarTasks?.map((task) => {
-                      if (
-                        currentMoment.isBetween(
-                          task?.startDate,
-                          task?.endDate,
-                          "day"
-                        ) ||
-                        currentMoment.isSame(task?.startDate, "day") ||
-                        currentMoment.isSame(task?.endDate, "day")
-                      ) {
-                        if (renderList) renderList = [...renderList, task];
-                        else renderList = [task];
-                      }
-                    });
-                  }
-
-                  // return info.originNode;
-                  if (renderList)
                     return (
-                      <div className="gap-y-5 mb-3">
-                        {renderList?.map((item, index) => {
-                          const { borderColor, textColor, statusText } =
-                            getColor(item?.status);
+                      current.isBefore(isSelectDate?.[0], "day") ||
+                      current.isAfter(isSelectDate?.[1], "day")
+                    );
+                  }}
+                  onSelect={(value, info) => {
+                    setCalendarDateChecking(momenttz(value.$d));
+                    setIsDrawerOpen(true);
+                  }}
+                  onPanelChange={(value, mode) => {
+                    console.log("month change > ", value.format("YYYY-MM-DD"));
+                  }}
+                  cellRender={(current) => {
+                    let renderList;
+                    const currentMoment = momenttz(current?.$d);
 
-                          const icon = getPriority(item?.priority);
+                    // Compare to the selected date
+                    if (
+                      currentMoment.isBetween(
+                        isSelectDate?.[0],
+                        isSelectDate?.[1],
+                        "day"
+                      ) ||
+                      currentMoment.isSame(isSelectDate?.[0], "day") ||
+                      currentMoment.isSame(isSelectDate?.[1], "day")
+                    ) {
+                      // Compare to the date gap in each task
+                      calendarData?.calendarTasks?.map((task) => {
+                        if (
+                          currentMoment.isBetween(
+                            task?.startDate,
+                            task?.endDate,
+                            "day"
+                          ) ||
+                          currentMoment.isSame(task?.startDate, "day") ||
+                          currentMoment.isSame(task?.endDate, "day")
+                        ) {
+                          if (renderList) renderList = [...renderList, task];
+                          else renderList = [task];
+                        }
+                      });
+                    }
 
-                          return (
-                            <div>
-                              <Tooltip
-                                key={item?.id + index ?? index}
-                                placement="top"
-                                title={statusText}
-                                className="relative"
-                              >
-                                <div
-                                  className={clsx(
-                                    `border ${borderColor} py-1 px-3 rounded-xl mt-2`
-                                  )}
+                    // return info.originNode;
+                    if (renderList)
+                      return (
+                        <div className="gap-y-5 mb-3">
+                          {renderList?.map((item, index) => {
+                            const { borderColor, textColor, statusText } =
+                              getColor(item?.status);
+
+                            const icon = getPriority(item?.priority);
+
+                            return (
+                              <div>
+                                <Tooltip
+                                  key={item?.id + index ?? index}
+                                  placement="top"
+                                  title={statusText}
+                                  className="relative"
                                 >
-                                  <p
+                                  <div
                                     className={clsx(
-                                      `text-center text-xs ${textColor} font-normal truncate`
+                                      `border ${borderColor} py-1 px-3 rounded-xl mt-2`
                                     )}
                                   >
-                                    {item?.title}
-                                  </p>
-                                </div>
-                                <div className="absolute -top-[20%] left-1.5 bg-white rounded-full">
-                                  {icon}
-                                </div>
-                              </Tooltip>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                }}
-              />
+                                    <p
+                                      className={clsx(
+                                        `text-center text-xs ${textColor} font-normal truncate`
+                                      )}
+                                    >
+                                      {item?.title}
+                                    </p>
+                                  </div>
+                                  <div className="absolute -top-[20%] left-1.5 bg-white rounded-full">
+                                    {icon}
+                                  </div>
+                                </Tooltip>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                  }}
+                />
+              </ConfigProvider>
             </Spin>
           </div>
         </div>

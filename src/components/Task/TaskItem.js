@@ -9,13 +9,12 @@ import {
 import { AiOutlineEye } from "react-icons/ai";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import moment from "moment";
-import { useQuery } from "@tanstack/react-query";
-import { getUserById } from "../../apis/users";
-import { RiAttachment2 } from "react-icons/ri";
+import momenttz from "moment-timezone";
 import { MdMode } from "react-icons/md";
 import { defaultAvatar } from "../../constants/global";
+import { HiMiniPencilSquare } from "react-icons/hi2";
 import clsx from "clsx";
+import { FaUser } from "react-icons/fa";
 
 const TaskItem = ({
   task,
@@ -25,20 +24,58 @@ const TaskItem = ({
   setIsOpenModal,
   isDropdown,
   eventName,
+
+  // Update task
+  goToUpdateTask,
+  dateRange, // To navigate to task detail
+  listDivision, // To navigate to task detail
+
+  // Update subtask
+  goToUpdateSubtask,
 }) => {
+  console.log("task > ", task);
   const navigate = useNavigate();
 
-  console.log("task > ", task);
   const responsor = task?.assignTasks?.[0];
 
   const goToSubTask = () => {
-    if (eventName) navigate(`${task?.id}`, { state: { eventName } });
+    if (eventName)
+      navigate(`${task?.id}`, {
+        state: { eventName, dateRange, listDivision },
+      });
   };
 
   const openSubTaskModal = () => {
     setSelectedSubTask(task);
     setIsOpenModal(true);
   };
+
+  // const goToUpdateTask = () => {
+  //   const updateData = {
+  //     title: task?.title,
+  //     date: [
+  //       momenttz(task?.startDate).format("YYYY-MM-DD"),
+  //       momenttz(task?.endDate).format("YYYY-MM-DD"),
+  //     ],
+  //     priority: task?.priority,
+  //     desc: task?.description,
+  //     assignee: task?.assignTasks?.map((user) => user?.user?.id),
+  //   };
+
+  //   navigate("task", {
+  //     state: {
+  //       eventId,
+  //       eventName: eventDetail?.eventName,
+  //       dateRange: [eventDetail?.startDate, eventDetail?.endDate],
+  //       isSubTask: false,
+  //       listDivision: eventDetail?.listDivision?.map(
+  //         (division) => division?.divisionId
+  //       ),
+
+  //       updateData
+  //     },
+  //   });
+  // };
 
   let priority;
   switch (task?.priority) {
@@ -153,14 +190,14 @@ const TaskItem = ({
             <BsHourglassSplit size={15} />
             <p className="text-sm font-medium">
               {task?.startDate
-                ? moment(task.startDate).utc().format("DD/MM/YYYY")
+                ? momenttz(task.startDate).format("DD/MM/YYYY")
                 : "-- : --"}
             </p>
           </div>
           {/* <div className="flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-lg">
               <p className="text-sm font-medium">
                 {task?.startDate
-                  ? moment(task.startDate).utc().format("HH:mm")
+                  ? momenttz(task.startDate).format("HH:mm")
                   : "-- : --"}
               </p>
             </div> */}
@@ -174,14 +211,14 @@ const TaskItem = ({
             <BsHourglassBottom size={15} />
             <p className="text-sm font-medium">
               {task?.endDate
-                ? moment(task.endDate).utc().format("DD/MM/YYYY")
+                ? momenttz(task.endDate).format("DD/MM/YYYY")
                 : "-- : --"}
             </p>
           </div>
           {/* <div className="flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-lg">
               <p className="text-sm font-medium">
                 {task?.endDate
-                  ? moment(task.endDate).utc().format("HH:mm")
+                  ? momenttz(task.endDate).format("HH:mm")
                   : "-- : --"}
               </p>
             </div> */}
@@ -194,41 +231,72 @@ const TaskItem = ({
             size={40}
             alt="avatar"
             src={responsor?.user?.profile?.avatar ?? defaultAvatar}
-            defaultAvatar={defaultAvatar}
+            icon={
+              <div className="flex items-center justify-center h-full">
+                <FaUser />
+              </div>
+            }
           />
         </div>
       )}
 
       {!isSubtask ? (
-        <Popover
-          content={
-            <p className="text-sm font-medium">
-              {responsor ? "Xem công việc" : "Chưa giao việc"}
-            </p>
-          }
-        >
-          <Badge size="small" count={task?.subTask?.length}>
-            <AiOutlineEye
+        responsor ? (
+          <Popover
+            content={<p className="text-sm font-medium">Xem công việc</p>}
+          >
+            <Badge size="small" count={task?.subTask?.length}>
+              <AiOutlineEye
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  goToSubTask();
+                }}
+                size={30}
+                className="text-slate-400 hover:text-blue-400"
+              />
+            </Badge>
+          </Popover>
+        ) : (
+          <Popover
+            content={
+              <p className="text-sm text-center font-medium">
+                Chưa giao việc!
+                <br />
+                Yêu cầu cập nhật công việc
+              </p>
+            }
+          >
+            <HiMiniPencilSquare
               onClick={(e) => {
                 e.stopPropagation();
-                if (responsor) goToSubTask();
+
+                if (!isSubtask) {
+                  goToUpdateTask();
+                }
               }}
               size={30}
-              className="text-slate-400 hover:text-blue-400"
+              className="scale-90 text-slate-400 hover:text-orange-500"
             />
-          </Badge>
-        </Popover>
+          </Popover>
+        )
       ) : (
         !isDropdown && (
-          <MdMode
-            onClick={(e) => {
-              setSelectedSubTask(task);
-              setIsOpenUpdateSubTaskModal(true);
-              e.stopPropagation();
-            }}
-            className="text-slate-400 border-2 p-2 rounded-xl"
-            size={40}
-          />
+          <Popover
+            content={<p className="text-sm font-medium">Chỉnh sửa công việc</p>}
+          >
+            <HiMiniPencilSquare
+              onClick={(e) => {
+                e.stopPropagation();
+                // setSelectedSubTask(task);
+                // setIsOpenUpdateSubTaskModal(true);
+
+                goToUpdateSubtask();
+              }}
+              className="text-slate-400"
+              size={25}
+            />
+          </Popover>
         )
       )}
     </motion.div>

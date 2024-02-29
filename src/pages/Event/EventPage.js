@@ -140,23 +140,43 @@ const EventPage = () => {
             },
             {
               value: "PENDING",
-              label: "Đang chuẩn bị",
+              label: (
+                <p className="text-slate-500" onClick={() => {}}>
+                  Chưa bắt đầu
+                </p>
+              ),
             },
             {
               value: "PREPARING",
-              label: "Đang chuẩn bị",
+              label: (
+                <p className="text-orange-500" onClick={() => {}}>
+                  Đang chuẩn bị
+                </p>
+              ),
             },
             {
               value: "PROCESSING",
-              label: "Đang diễn ra",
+              label: (
+                <p className="text-blue-500" onClick={() => {}}>
+                  Đang diễn ra
+                </p>
+              ),
             },
             {
               value: "DONE",
-              label: "Đã kết thúc",
+              label: (
+                <p className="text-green-500" onClick={() => {}}>
+                  Đã kết thúc
+                </p>
+              ),
             },
             {
               value: "CANCEL",
-              label: "Hủy bỏ",
+              label: (
+                <p className="text-red-500" onClick={() => {}}>
+                  Hủy bỏ
+                </p>
+              ),
             },
           ]}
           value={searchStatus}

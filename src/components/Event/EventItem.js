@@ -19,17 +19,21 @@ const EventItem = ({ event }) => {
   const navigate = useNavigate();
 
   let status, statusColor, statusBgColor;
-
   switch (event?.status) {
     case "PENDING":
-      status = "Đang chuẩn bị";
+      status = "Chưa bắt đầu";
       statusColor = "text-slate-500";
       statusBgColor = "bg-slate-100";
       break;
-    case "PROCESSING":
-      status = "Đang diễn ra";
+    case "PREPARING":
+      status = "Đang chuẩn bị";
       statusColor = "text-orange-500";
       statusBgColor = "bg-orange-100";
+      break;
+    case "PROCESSING":
+      status = "Đang diễn ra";
+      statusColor = "text-blue-500";
+      statusBgColor = "bg-blue-100";
       break;
     case "DONE":
       status = "Đã kết thúc";
@@ -42,6 +46,9 @@ const EventItem = ({ event }) => {
       statusBgColor = "bg-red-100";
       break;
     default:
+      status = "Chưa bắt đầu";
+      statusColor = "text-slate-500";
+      statusBgColor = "bg-slate-100";
       break;
   }
 

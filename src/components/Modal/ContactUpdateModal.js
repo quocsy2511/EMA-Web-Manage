@@ -22,6 +22,9 @@ const ContactUpdateModal = ({
     if (selectReason === 0)
       handleUpdateContact(selectedContactId, "REJECTED", text);
     else handleUpdateContact(selectedContactId, "REJECTED", selectReason);
+
+    setSelectReason();
+    setText("");
   };
 
   return (

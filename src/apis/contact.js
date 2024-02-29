@@ -10,7 +10,7 @@ export const updateCustomerContacts = ({ contactId, status, rejectNote }) =>
   http({
     url: `/customer-contacts/${contactId}/status?status=${status}`,
     method: "put",
-    data: rejectNote ? rejectNote : undefined,
+    data: { rejectNote: rejectNote ? rejectNote : undefined },
   });
 
 export const getCustomerContactDetail = (id) =>
