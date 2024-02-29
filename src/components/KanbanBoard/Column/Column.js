@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import TaskKanbanBoard from "../TaskKanban/TaskKanbanBoard";
 import TaskModal from "../ModalKanban/TaskModal";
 import NewTaskModal from "../ModalKanban/NewTaskModal";
@@ -32,18 +32,18 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
   const [disableDoneTaskParent, setDisableDoneTaskParent] = useState(true);
 
   let completed = 0;
-  let subTask = TaskParent.subTask;
-  subTask.forEach((task) => {
+  let subTask = TaskParent?.subTask;
+  subTask?.forEach((task) => {
     if (task.status === "CONFIRM") {
       completed++;
     }
   });
 
-  const filteredSubTask = subTask.filter((task) => {
+  const filteredSubTask = subTask?.filter((task) => {
     if (selectedStatus === "clear") {
       return true;
     } else {
-      return task.status === selectedStatus;
+      return task?.status === selectedStatus;
     }
   });
 
@@ -66,8 +66,8 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
       label: "Các Công việc mẫu",
       children: taskTemplate?.map((task, index) => {
         return {
-          key: task.id,
-          label: task.title,
+          key: task?.id,
+          label: task?.title,
         };
       }),
     },
@@ -77,7 +77,7 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
     if (key === "newTaskDefault") {
       setAddNewTask(true);
     } else {
-      const newTaskTemplate = taskTemplate?.find((task) => task.id === key);
+      const newTaskTemplate = taskTemplate?.find((task) => task?.id === key);
       setAddNewTaskTemplate(true);
       setTaskTemplateModal(newTaskTemplate);
     }
@@ -109,18 +109,18 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
         <div className=" bg-bgSubtask py-4 scrollbar-hide rounded-xl w-full shadow-xl">
           {/* task parent */}
           <div
-            className="bg-blue-400 flex flex-col items-start gap-2  justify-start 
+            className="bg-blue-400 flex flex-col items-start gap-2 justify-start 
           w-[250px] mx-auto my-2 rounded-lg cursor-pointer py-4 px-1 hover:opacity-70 shadow-lg shadow-darkShadow"
             onClick={() => openTaskParentModal()}
           >
             <div className="flex items-start gap-2 w-full px-2">
               <span className={`rounded-full w-4 h-4 ${color} mt-[2px]`}></span>
               <div className="flex flex-col gap-y-[2px]  hover:text-secondary">
-                <p className=" max-w-[215px] whitespace-normal italic font-semibold text-white text-sm break-words ">
+                <p className="max-w-[215px] whitespace-normal italic font-bold truncate text-white text-base break-words ">
                   {TaskParent?.title} ({completed}/{TaskParent?.subTask?.length}
                   )
                 </p>
-                <p className="text-[8px] font-semibold text-white underline underline-offset-2">
+                <p className="text-xs font-semibold text-white underline underline-offset-2">
                   {startDate} - {endDate}
                 </p>
               </div>
@@ -129,14 +129,14 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
 
           {/* subtask */}
           <AnimatePresence mode="wait">
-            {subTask.length > 0 &&
-              filteredSubTask.map((subTask, index) => (
+            {subTask?.length > 0 &&
+              filteredSubTask?.map((subTask, index) => (
                 <TaskKanbanBoard
+                  key={subTask?.id}
                   setTaskSelected={setTaskSelected}
                   task={subTask}
                   setTaskParent={setIsTaskParent}
                   setIsOpenTaskModal={setIsOpenTaskModal}
-                  key={subTask.id}
                 />
               ))}
           </AnimatePresence>
@@ -197,4 +197,4 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
   );
 };
 
-export default Column;
+export default memo(Column);

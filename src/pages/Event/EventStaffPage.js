@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import HeaderEvent from "../../components/Header/HeaderEvent";
 import KanbanBoard from "../../components/KanbanBoard/KanbanBoard";
 import { useQuery } from "@tanstack/react-query";
@@ -75,21 +75,21 @@ const EventStaffPage = () => {
     isLoading,
   } = useQuery(["events"], () => getEventDivisions(), {
     select: (data) => {
-      const filteredEvents = data.filter(
-        (item) => item.status !== "DONE" && item.status !== "CANCEL"
+      const filteredEvents = data?.filter(
+        (item) => item?.status !== "DONE" && item?.status !== "CANCEL"
       );
-      const event = filteredEvents.map(({ ...item }) => {
-        item.startDate = moment(item.startDate).format("DD/MM/YYYY");
-        item.endDate = moment(item.endDate).format("DD/MM/YYYY");
+      const event = filteredEvents?.map(({ ...item }) => {
+        item.startDate = moment(item?.startDate).format("DD/MM/YYYY");
+        item.endDate = moment(item?.endDate).format("DD/MM/YYYY");
         return {
           ...item,
         };
       });
       return event;
     },
-
     refetchOnWindowFocus: false,
   });
+  console.log("listEvent > ", listEvent);
 
   const { data: staff } = useQuery(["staff"], () => getProfile(), {
     select: (data) => {
@@ -118,7 +118,7 @@ const EventStaffPage = () => {
       }),
     {
       select: (data) => {
-        return data.data;
+        return data?.data;
       },
 
       refetchOnWindowFocus: false,
@@ -139,7 +139,7 @@ const EventStaffPage = () => {
         }),
       {
         select: (data) => {
-          return data.data;
+          return data?.data;
         },
 
         refetchOnWindowFocus: false,
@@ -165,13 +165,13 @@ const EventStaffPage = () => {
     {
       select: (data) => {
         if (data && Array.isArray(data)) {
-          const taskParents = data.filter((task) => task.parent === null);
-          const formatDate = taskParents.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format(
+          const taskParents = data?.filter((task) => task?.parent === null);
+          const formatDate = taskParents?.map(({ ...item }) => {
+            item.startDate = moment(item?.startDate).format(
               "YYYY/MM/DD HH:mm:ss"
             );
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD HH:mm:ss");
-            if (item.subTask && Array.isArray(item.subTask)) {
+            item.endDate = moment(item?.endDate).format("YYYY/MM/DD HH:mm:ss");
+            if (item?.subTask && Array.isArray(item?.subTask)) {
               item.subTask.sort((a, b) => {
                 return (
                   listStatus.indexOf(a.status) - listStatus.indexOf(b.status)
@@ -205,14 +205,14 @@ const EventStaffPage = () => {
     {
       select: (data) => {
         if (data && Array.isArray(data)) {
-          const taskParents = data.filter((task) => task.parent !== null);
-          const formatDate = taskParents.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
-            if (item.subTask && Array.isArray(item.subTask)) {
+          const taskParents = data?.filter((task) => task?.parent !== null);
+          const formatDate = taskParents?.map(({ ...item }) => {
+            item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
+            item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
+            if (item?.subTask && Array.isArray(item.subTask)) {
               item.subTask.sort((a, b) => {
                 return (
-                  listStatus.indexOf(a.status) - listStatus.indexOf(b.status)
+                  listStatus?.indexOf(a.status) - listStatus?.indexOf(b.status)
                 );
               });
             }
@@ -231,7 +231,7 @@ const EventStaffPage = () => {
 
   useEffect(() => {
     if (staff?.id) {
-      setFilterMember(staff.id);
+      setFilterMember(staff?.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [staff?.id]);
@@ -246,7 +246,7 @@ const EventStaffPage = () => {
   //handle search task ch va task con
   function filterSubTasks(task, searchText) {
     const subtaskTitles = task?.subTask?.filter((subtask) =>
-      subtask?.title?.toLowerCase().includes(searchText?.toLowerCase())
+      subtask?.title?.toLowerCase()?.includes(searchText?.toLowerCase())
     );
 
     return subtaskTitles;
@@ -262,7 +262,7 @@ const EventStaffPage = () => {
 
           if (
             // parentTitle.includes(searchText?.toLowerCase()) ||
-            subTaskResults.length > 0
+            subTaskResults?.length > 0
           ) {
             // Nếu parent hoặc subTask thỏa mãn điều kiện, trả về task với danh sách subTask được cắt
             return { ...task, subTask: subTaskResults };
@@ -290,7 +290,7 @@ const EventStaffPage = () => {
     // Lặp qua từng task trong listTaskParents
     const updatedListTaskParents = listTaskParents?.map((task) => {
       // Kiểm tra xem task có subTask và có trong listTaskFilter không
-      if (task.subTask && Array.isArray(task.subTask)) {
+      if (task?.subTask && Array.isArray(task?.subTask)) {
         // Lọc ra các subTask có id giống với các task trong listTaskFilter
         const updatedSubTasks = task?.subTask?.filter((subtask) =>
           listTaskFilter?.some(
@@ -316,26 +316,26 @@ const EventStaffPage = () => {
   );
 
   useEffect(() => {
-    if (listEvent && listEvent.length > 0 && !!notification === false) {
-      setSelectEvent(listEvent[0]);
+    if (listEvent && listEvent?.length > 0 && !!notification === false) {
+      setSelectEvent(listEvent?.[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listEvent]);
 
   useEffect(() => {
-    if (selectEvent.id) {
+    if (selectEvent?.id) {
       refetchListBudgetConfirming();
       refetchListBudgetConfirmed();
       refetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectEvent, refetch, sort]);
+  }, [selectEvent?.id, refetch, sort]);
 
   return (
-    <div className="flex flex-col ">
+    <div className="flex flex-col">
       {!isLoading ? (
         !isError ? (
-          listEvent.length > 0 ? (
+          listEvent?.length > 0 ? (
             <>
               <HeaderEvent
                 statusSelected={statusSelected}
@@ -352,6 +352,7 @@ const EventStaffPage = () => {
                 searchText={searchText}
                 setFilterMember={setFilterMember}
               />
+
               {isBoardTask ? (
                 !isLoadingListTask ? (
                   !isErrorListTask ? (
@@ -405,4 +406,4 @@ const EventStaffPage = () => {
   );
 };
 
-export default EventStaffPage;
+export default memo(EventStaffPage);

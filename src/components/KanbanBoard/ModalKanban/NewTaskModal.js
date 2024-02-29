@@ -13,7 +13,7 @@ import {
   Upload,
   message,
 } from "antd";
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRouteLoaderData } from "react-router-dom";
@@ -37,7 +37,7 @@ const NewTaskModal = ({
 }) => {
   const { RangePicker } = DatePicker;
   const { Option } = Select;
-  const { id, eventID, title } = TaskParent;
+  const { id, eventID, title } = TaskParent ?? {};
   const [startDate, setStartDate] = useState("");
   console.log("🚀 ~ file: NewTaskModal.js:42 ~ startDate:", startDate);
   const [endDate, setEndDate] = useState("");
@@ -48,6 +48,7 @@ const NewTaskModal = ({
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
+
   const {
     data: employeesByDate,
     isError: isErrorEmployeesByDate,
@@ -62,14 +63,15 @@ const NewTaskModal = ({
       }),
     {
       select: (data) => {
-        const filteredData = data.filter(
+        const filteredData = data?.filter(
           (item) =>
-            item.division.id === divisionId && item.typeEmployee === "FULL_TIME"
+            item?.division?.id === divisionId && item?.typeEmployee === "FULL_TIME"
         );
-        const listEmployee = filteredData.map(({ ...item }) => {
-          item.dob = moment(item.dob).format("YYYY-MM-DD");
+        
+        const listEmployee = filteredData?.map(({ ...item }) => {
+          item.dob = moment(item?.dob).format("YYYY-MM-DD");
           return {
-            key: item.id,
+            key: item?.id,
             ...item,
           };
         });
@@ -143,8 +145,8 @@ const NewTaskModal = ({
 
   const onChangeDate = (value, dateString) => {
     // Chuyển đổi thành định dạng ISO 8601
-    const isoStartDate = moment(dateString[0]).toISOString();
-    const isoEndDate = moment(dateString[1]).toISOString();
+    const isoStartDate = moment(dateString?.[0]).toISOString();
+    const isoEndDate = moment(dateString?.[1]).toISOString();
     setStartDate(isoStartDate);
     setEndDate(isoEndDate);
     if (isoStartDate && isoEndDate) {
@@ -302,7 +304,7 @@ const NewTaskModal = ({
       startDate: startDate,
       endDate: endDate,
       parentTask: id,
-      leader: assignee[0].toString(),
+      leader: assignee?.[0]?.toString(),
       desc: JSON.stringify(values.desc.ops),
     };
 
@@ -430,13 +432,13 @@ const NewTaskModal = ({
                           return (
                             <Option
                               value={item?.id}
-                              label={item?.profile.fullName}
+                              label={item?.profile?.fullName}
                               key={item?.id}
                             >
                               <Space>
                                 <span
                                   role="img"
-                                  aria-label={item?.profile.fullName}
+                                  aria-label={item?.profile?.fullName}
                                 >
                                   {item.avatar ? (
                                     <Avatar src={item?.avatar} />
@@ -447,7 +449,7 @@ const NewTaskModal = ({
                                     />
                                   )}
                                 </span>
-                                {item?.profile.fullName}
+                                {item?.profile?.fullName}
                               </Space>
                             </Option>
                           );
@@ -597,4 +599,4 @@ const NewTaskModal = ({
   );
 };
 
-export default NewTaskModal;
+export default memo(NewTaskModal);
