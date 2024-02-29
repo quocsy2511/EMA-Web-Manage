@@ -156,7 +156,6 @@ const NewTaskModal = ({
       return current.isBefore(today) || current.isAfter(disableEndDate, "day");
     }
   };
-
   const tagRender = (props) => {
     const { label, value, closable, onClose } = props;
 
