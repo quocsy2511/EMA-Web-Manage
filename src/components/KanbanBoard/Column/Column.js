@@ -117,7 +117,7 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
               <span className={`rounded-full w-4 h-4 ${color} mt-[2px]`}></span>
               <div className="flex flex-col gap-y-[2px]  hover:text-secondary">
                 <p className=" max-w-[215px] whitespace-normal italic font-semibold text-white text-sm break-words ">
-                  {TaskParent?.title} ({completed}/{TaskParent?.subTask?.length}
+                  {TaskParent?.title}ađâsđâsđasad  ({completed}/{TaskParent?.subTask?.length}
                   )
                 </p>
                 <p className="text-[8px] font-semibold text-white underline underline-offset-2">
