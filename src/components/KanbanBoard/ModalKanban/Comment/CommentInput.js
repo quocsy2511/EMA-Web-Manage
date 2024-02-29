@@ -88,11 +88,13 @@ const CommentInput = ({ staff, taskSelected }) => {
   );
 
   const onFinish = (values) => {
+    console.log("🚀 ~ onFinish ~ values:", values);
     values = { ...values, taskID: taskId };
     if (!values.fileUrl || values.fileUrl?.length === 0) {
       console.log("NOOO FILE");
       const { fileUrl, ...restValue } = values;
-      mutate(restValue);
+      console.log("🚀 ~ onFinish ~ restValue:", restValue);
+      // mutate(restValue);
     } else {
       console.log("HAS FILE");
       const formData = new FormData();
