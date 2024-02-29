@@ -23,12 +23,15 @@ import TaskSection from "./TaskSection";
 import { useMutation } from "@tanstack/react-query";
 import { createTask } from "../../../apis/tasks";
 import SubTaskSection from "./SubTaskSection";
+import dayjs from "dayjs";
 
 const { RangePicker } = DatePicker;
 
 const Title = memo(({ title }) => (
   <p className="text-lg font-medium">{title}</p>
 ));
+
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
 const EventAssignTaskPage = () => {
   const location = useLocation();
@@ -47,7 +50,12 @@ const EventAssignTaskPage = () => {
     taskName,
     taskResponsorId,
     isSubTask,
+
+    // Update data : assignee of task -> [idStaff] | assignee of subtask: [{id->leader, id, id, ...}]
+    updateData,
   } = location.state;
+
+  console.log("updateData > ", updateData);
 
   const [isSelectDate, setIsSelectDate] = useState(false);
 
@@ -59,12 +67,6 @@ const EventAssignTaskPage = () => {
     (task) => createTask(task),
     {
       onSuccess: (data) => {
-        // notificationAPI.open({
-        //   message: <p className="text-base">Tạo 1 hạng mực thành công</p>,
-        //   // description: (),
-        //   duration: 2,
-        // });
-
         notification.success({
           message: <p className="font-medium">Tạo 1 hạng mục thành công</p>,
           // description: "Hello, Ant Design!!",
@@ -125,7 +127,7 @@ const EventAssignTaskPage = () => {
       desc: JSON.stringify(values?.desc?.ops),
       priority: values?.priority,
       assignee: values?.assignee ?? [],
-      leader: values?.assignee ?? "",
+      leader: isSubTask ? values?.leader : values?.assignee?.[0] ?? "",
 
       // Optional
       file: undefined,
@@ -142,20 +144,9 @@ const EventAssignTaskPage = () => {
 
   const onFinishFailed = (errorInfo) => {};
 
-  const handleValuesChange = (changedValues) => {
-    // const formFieldName = Object.keys(changedValues)[0];
-    // if (formFieldName === "assignee") {
-    //   setSelectedEmployeesId(changedValues[formFieldName]);
-    // }
-  };
-
   return (
     <Fragment>
       {contextHolder}
-      <LockLoadingModal
-        // isModalOpen={isLoading}
-        label={isSubTask ? "Đang tạo công việc" : "Đang tạo đề mục ..."}
-      />
 
       <motion.div
         initial={{ y: -75 }}
@@ -209,8 +200,20 @@ const EventAssignTaskPage = () => {
               e.preventDefault();
             }
           }}
-          onValuesChange={handleValuesChange}
-          initialValues={{ priority: "LOW" }}
+          initialValues={{
+            title: updateData ? updateData?.title : undefined,
+            date: updateData ? updateData?.date : undefined,
+            priority: updateData ? updateData?.priority : "LOW",
+            desc: updateData
+              ? {
+                  ops: JSON.parse(
+                    updateData?.desc?.startsWith(`[{"insert":"`)
+                      ? updateData?.desc
+                      : parseJson(updateData?.desc)
+                  ),
+                }
+              : undefined,
+          }}
         >
           <div className="flex gap-x-10">
             <Form.Item
@@ -240,6 +243,12 @@ const EventAssignTaskPage = () => {
               <ConfigProvider locale={viVN}>
                 <RangePicker
                   size="large"
+                  defaultValue={
+                    updateData && [
+                      dayjs(updateData?.date?.[0], "YYYY-MM-DD"),
+                      dayjs(updateData?.date?.[1], "YYYY-MM-DD"),
+                    ]
+                  }
                   onChange={(value) => {
                     if (value) {
                       form.setFieldsValue({
@@ -320,12 +329,16 @@ const EventAssignTaskPage = () => {
               form={form}
               isSelectDate={isSelectDate}
               taskResponsorId={taskResponsorId}
+              updateDataUser={updateData ? updateData?.assignee ?? [] : null}
             />
           ) : (
             <TaskSection
               form={form}
               isSelectDate={isSelectDate}
               listDivision={listDivision}
+              updateDataDivision={
+                updateData ? updateData?.assignee ?? [] : null
+              }
             />
           )}
 

@@ -4,6 +4,7 @@ import { Header as HeaderLayout } from "antd/es/layout/layout";
 import { HiOutlineBell, HiOutlineBellAlert } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { IoLogOutOutline } from "react-icons/io5";
+import { FaUser } from "react-icons/fa";
 import {
   Link,
   useLocation,
@@ -319,7 +320,11 @@ const Header = ({ collapsed, setCollapsed }) => {
                 <div className="w-2" />
                 <Avatar
                   size={40}
-                  icon={<p>icon</p>}
+                  icon={
+                    <div className="flex items-center justify-center h-full">
+                      <FaUser />
+                    </div>
+                  }
                   alt="user_image"
                   src={
                     manager?.avatar ??

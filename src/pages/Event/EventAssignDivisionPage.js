@@ -86,10 +86,10 @@ const EventAssignDivisionPage = () => {
   return (
     <Fragment>
       {contextHolder}
-      <LockLoadingModal
+      {/* <LockLoadingModal
         isModalOpen={isLoading}
         label="Đang cập nhật sự kiện ..."
-      />
+      /> */}
 
       <motion.div
         initial={{ y: -75 }}
@@ -127,7 +127,11 @@ const EventAssignDivisionPage = () => {
           <div className="mx-10 my-8 space-y-5">
             <div className="flex justify-between">
               <p className="text-xl font-medium">Chọn bộ phận phù hợp</p>
-              <Button type="primary" onClick={handleUpdateDivision}>
+              <Button
+                type="primary"
+                onClick={handleUpdateDivision}
+                loading={isLoading}
+              >
                 Áp dụng
               </Button>
             </div>

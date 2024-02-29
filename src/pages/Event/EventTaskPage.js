@@ -9,12 +9,10 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Avatar,
-  Button,
   Collapse,
-  ConfigProvider,
+  Dropdown,
   FloatButton,
   Image,
-  Popconfirm,
   Popover,
   Progress,
   Tooltip,
@@ -29,9 +27,7 @@ import {
   BsHourglassSplit,
   BsHourglassBottom,
   BsTagsFill,
-  BsPlus,
   BsCalendarWeekFill,
-  BsArrowRight,
   BsMicrosoftTeams,
 } from "react-icons/bs";
 import { RiEditFill, RiAdvertisementFill, RiAddFill } from "react-icons/ri";
@@ -56,22 +52,26 @@ import {
   FcMediumPriority,
 } from "react-icons/fc";
 import { IoSettingsOutline } from "react-icons/io5";
+import { GrStatusInfo } from "react-icons/gr";
+import { FaRegPenToSquare, FaFilePdf } from "react-icons/fa6";
 import EventTaskSelection from "../../components/Selection/EventTaskSelection";
 import TaskItem from "../../components/Task/TaskItem";
 import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getDetailEvent, updateStatusEvent } from "../../apis/events";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
+import momenttz from "moment-timezone";
 import "moment/locale/vi";
 import { filterTask, getTasks, getTemplateTask } from "../../apis/tasks";
 import EmptyList from "../../components/Error/EmptyList";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import EventUpdateModal from "../../components/Modal/EventUpdateModal";
-import { getContract } from "../../apis/contract";
+import { getContract, getContractEvidence } from "../../apis/contract";
 import DocReviewerModal from "../../components/Modal/DocReviewerModal";
 import ContractCreatePage from "../../components/Modal/ContractCreatePage";
+import clsx from "clsx";
 
 moment.locale("vi"); // Set the locale to Vietnam
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
@@ -92,15 +92,9 @@ const color = {
 };
 
 const EventTaskPage = () => {
-  const eventId = useParams().eventId;
+  const eventId = useParams()?.eventId;
   const manager = useRouteLoaderData("manager");
   const navigate = useNavigate();
-  const location = useLocation();
-  console.log("location.state > ", location);
-  console.log(
-    "location?.state?.toggleCreateTaskSucess > ",
-    location?.state?.toggleCreateTaskSucess
-  );
 
   const [assigneeSelection, setAssigneeSelection] = useState();
   const [prioritySelection, setPrioritySelection] = useState();
@@ -109,14 +103,6 @@ const EventTaskPage = () => {
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
-
-  useEffect(() => {
-    location?.state?.toggleCreateTaskSucess &&
-      messageApi.open({
-        type: "success",
-        content: "Đã tạo 1 hạng mục !!",
-      });
-  }, [location?.state?.toggleCreateTaskSucess]);
 
   const {
     data: eventDetail,
@@ -136,26 +122,19 @@ const EventTaskPage = () => {
   });
   console.log("contract > ", contract);
 
-  // const {
-  //   data: tasks,
-  //   isLoading: taskIsLoading,
-  //   isError: taskIsError,
-  // } = useQuery(
-  //   ["tasks", eventId],
-  //   () =>
-  //     getTasks({
-  //       fieldName: "eventID",
-  //       conValue: eventId,
-  //       pageSize: 100,
-  //       currentPage: 1,
-  //     }),
-  //   {
-  //     select: (data) => {
-  //       return data.filter((item) => !item.parent);
-  //     },
-  //     refetchOnWindowFocus: false,
-  //   }
-  // );
+  const {
+    data: contractEvidence,
+    isLoading: contractEvidenceIsLoading,
+    isError: contractEvidenceIsError,
+  } = useQuery(
+    ["contract-evidence", contract?.id],
+    () => getContractEvidence(contract?.id),
+    {
+      refetchOnWindowFocus: false,
+      enabled: !!contract?.id,
+    }
+  );
+  console.log("contractEvidence > ", contractEvidence);
 
   const {
     data: filterTasks,
@@ -182,24 +161,56 @@ const EventTaskPage = () => {
   );
   console.log("filterTasks > ", filterTasks);
 
-  // const { mutate, isLoading: mutateIsLoading } = useMutation(
-  //   (eventId, status) => updateStatusEvent(eventId, status),
-  //   {
-  //     onSuccess: (data) => {
-  //       messageApi.open({
-  //         type: "success",
-  //         content: "Sự kiến đã kết thúc !!",
-  //       });
-  //       navigate("/manager/event");
-  //     },
-  //     onError: (error) => {
-  //       messageApi.open({
-  //         type: "error",
-  //         content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-  //       });
-  //     },
-  //   }
-  // );
+  const queryClient = useQueryClient();
+  const { mutate: updateStatusMutate, isLoading: updateStatusIsLoading } =
+    useMutation((status) => updateStatusEvent(eventId, status), {
+      onSuccess: (data, variables) => {
+        console.log("ddddd > ", data, variables);
+        let status;
+        switch (variables?.status) {
+          case "PENDING":
+            status = "CHƯA BẮT ĐẦU";
+            break;
+          case "PREPARING":
+            status = "ĐANG CHUẨN BỊ";
+            break;
+          case "PROCESSING":
+            status = "DANG DIỄN RA";
+            break;
+          case "DONE":
+            status = "ĐÃ KẾT THÚC";
+            break;
+          case "CANCEL":
+            status = "HỦY BỎ";
+            break;
+
+          default:
+            break;
+        }
+
+        messageApi.open({
+          type: "success",
+          content: status ? (
+            <p>
+              Cập nhật trạng thái sự kiện thành{" "}
+              <span className="font-medium">{status}</span>
+            </p>
+          ) : (
+            "Đã cập nhật sự kiện"
+          ),
+        });
+
+        queryClient.setQueryData(["event-detail", eventId], (oldValue) => {
+          return { ...oldValue, status: variables?.status };
+        });
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    });
 
   useEffect(() => {
     if (assigneeSelection || prioritySelection || statusSelection) {
@@ -229,6 +240,34 @@ const EventTaskPage = () => {
     }
   };
 
+  const goToUpdateTask = (task) => {
+    const updateData = {
+      title: task?.title,
+      date: [
+        momenttz(task?.startDate).format("YYYY-MM-DD"),
+        momenttz(task?.endDate).format("YYYY-MM-DD"),
+      ],
+      priority: task?.priority,
+      desc: task?.description,
+      // assignee: task?.assignTasks?.map((user) => user?.user?.id),
+      assignee: [], // In case guarantee that this task is not assigned to anyone
+    };
+
+    navigate("task", {
+      state: {
+        eventId,
+        eventName: eventDetail?.eventName,
+        dateRange: [eventDetail?.startDate, eventDetail?.endDate],
+        isSubTask: false,
+        listDivision: eventDetail?.listDivision?.map(
+          (division) => division?.divisionId
+        ),
+
+        updateData,
+      },
+    });
+  };
+
   const goToAssignDivision = () => {
     navigate("division", {
       state: {
@@ -254,32 +293,6 @@ const EventTaskPage = () => {
         <AnErrorHasOccured />
       </div>
     );
-
-  let status, statusColor, statusBgColor;
-  switch (eventDetail?.status) {
-    case "PENDING":
-      status = "Đang chuẩn bị";
-      statusColor = "text-slate-500";
-      statusBgColor = "bg-slate-100";
-      break;
-    case "PROCESSING":
-      status = "Đang diễn ra";
-      statusColor = "text-orange-500";
-      statusBgColor = "bg-orange-100";
-      break;
-    case "DONE":
-      status = "Đã kết thúc";
-      statusColor = "text-green-500";
-      statusBgColor = "bg-green-100";
-      break;
-    case "CANCEL":
-      status = "Hủy bỏ";
-      statusColor = "text-red-500";
-      statusBgColor = "bg-red-100";
-      break;
-    default:
-      break;
-  }
 
   return (
     <Fragment>
@@ -310,6 +323,7 @@ const EventTaskPage = () => {
         messageApi={messageApi}
         eventId={eventId}
       />
+
       <div className="flex justify-between items-center">
         <div>
           <motion.div
@@ -361,23 +375,140 @@ const EventTaskPage = () => {
             <div className="w-5" />
 
             <p
-              className={`text-sm font-medium px-4 py-1.5 ${statusBgColor} ${statusColor} shadow-md shadow-slate-300 rounded-xl`}
+              className={clsx(
+                "text-sm font-medium px-4 py-1.5 shadow-md shadow-slate-300 rounded-xl",
+                {
+                  "text-slate-500 bg-slate-100":
+                    eventDetail?.status === "PENDING",
+                },
+                {
+                  "text-orange-500 bg-orange-100":
+                    eventDetail?.status === "PREPARING",
+                },
+                {
+                  "text-blue-500 bg-blue-100":
+                    eventDetail?.status === "PROCESSING",
+                },
+                {
+                  "text-green-500 bg-green-100": eventDetail?.status === "DONE",
+                },
+                { "text-red-500 bg-red-100": eventDetail?.status === "CANCEL" }
+              )}
             >
-              {status}
+              {eventDetail?.status === "PENDING"
+                ? "Chưa bắt đầu"
+                : eventDetail?.status === "PREPARING"
+                ? "Đang chuẩn bị"
+                : eventDetail?.status === "PROCESSING"
+                ? "Đang diễn ra"
+                : eventDetail?.status === "DONE"
+                ? "Đã kết thúc"
+                : eventDetail?.status === "CANCEL"
+                ? "Hủy bỏ"
+                : "Chưa bắt đầu"}
             </p>
           </motion.div>
         </div>
+
         <Popover
           className="mr-10"
           content={<p className="text-base">Cài đặt sự kiện</p>}
         >
-          <motion.div
-            className="flex items-center gap-x-2 text-base text-slate-500 cursor-pointer"
-            whileHover={{ y: -2, color: "#000000" }}
-            onClick={goToAssignDivision}
+          <Dropdown
+            placement="bottomLeft"
+            arrow
+            trigger={["click"]}
+            menu={{
+              items: [
+                {
+                  key: "1",
+                  type: "group",
+                  label: (
+                    <p className="text-lg text-black px-2 flex items-center border-b">
+                      <GrStatusInfo className="text-base mr-3" />
+                      Trạng Thái
+                    </p>
+                  ),
+                  children: [
+                    // {
+                    //   key: "PENDING",
+                    //   label: (
+                    //     <p
+                    //       className="text-sm text-slate-500"
+                    //       onClick={() => updateStatusMutate("PENDING")}
+                    //     >
+                    //       Chưa bắt đầu
+                    //     </p>
+                    //   ),
+                    // },
+                    // {
+                    //   key: "PREPARING",
+                    //   label: (
+                    //     <p
+                    //       className="text-sm text-orange-500"
+                    //       onClick={() => updateStatusMutate("PREPARING")}
+                    //     >
+                    //       Đang chuẩn bị
+                    //     </p>
+                    //   ),
+                    // },
+                    {
+                      key: "PROCESSING",
+                      label: (
+                        <p
+                          className="text-sm text-blue-500"
+                          onClick={() => updateStatusMutate("PROCESSING")}
+                        >
+                          Đang diễn ra
+                        </p>
+                      ),
+                    },
+                    {
+                      key: "DONE",
+                      label: (
+                        <p
+                          className="text-sm text-green-500"
+                          onClick={() => updateStatusMutate("DONE")}
+                        >
+                          Đã kết thúc
+                        </p>
+                      ),
+                    },
+                    {
+                      key: "CANCEL",
+                      label: (
+                        <p
+                          className="text-sm text-red-500"
+                          onClick={() => updateStatusMutate("CANCEL")}
+                        >
+                          Hủy bỏ
+                        </p>
+                      ),
+                    },
+                  ],
+                },
+                {
+                  key: "2",
+                  label: (
+                    <div
+                      onClick={() => setIsModalOpen(true)}
+                      className="text-lg text-black px-2 flex items-center border-b"
+                    >
+                      <FaRegPenToSquare className="text-base mr-3" />
+                      <p>Thông Tin</p>
+                    </div>
+                  ),
+                },
+              ],
+            }}
           >
-            <IoSettingsOutline className="text-2xl" />
-          </motion.div>
+            <motion.div
+              className="flex items-center gap-x-2 text-base text-slate-500 cursor-pointer pr-2"
+              whileHover={{ scale: 1.02, color: "#000000" }}
+            >
+              <IoSettingsOutline className="text-2xl" />
+            </motion.div>
+          </Dropdown>
         </Popover>
       </div>
 
@@ -393,6 +524,7 @@ const EventTaskPage = () => {
               "https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
             }
             width={"100%"}
+            className="bg-slate-200"
           />
         </div>
         <div className="mx-10 my-8">
@@ -400,15 +532,14 @@ const EventTaskPage = () => {
             <p className="flex-1 text-3xl font-bold">
               {eventDetail?.eventName}
             </p>
+
             <Popover
               content={
                 <p className="text-base">
-                  {contractIsLoading
+                  {contractIsLoading || contractEvidenceIsLoading
                     ? "Đang tải ..."
-                    : contractIsError
+                    : contractIsError || contractEvidenceIsError
                     ? "Không thể lấy dữ liệu"
-                    : Object.keys(contract).length === 0
-                    ? "Tạo hợp đồng"
                     : "Hợp đồng"}
                 </p>
               }
@@ -417,24 +548,37 @@ const EventTaskPage = () => {
                 className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
                 whileHover={{ y: -4 }}
                 onClick={() => {
-                  if (!contractIsLoading && !contractIsError)
-                    if (Object.keys(contract).length === 0)
-                      setIsContractModalOpen(true);
+                  // Create contract -> Disabled
+                  // if (!contractIsLoading && !contractIsError)
+                  //   if (Object.keys(contract).length === 0)
+                  //     setIsContractModalOpen(true);
                 }}
               >
-                {contractIsLoading || contractIsError || !contract ? (
-                  <FaFileContract className="text-lg" />
+                {contractIsLoading ||
+                contractIsError ||
+                !contract ||
+                contractEvidenceIsLoading ||
+                contractEvidenceIsError ||
+                !contractEvidence ? (
+                  <FaFilePdf className="text-lg" />
                 ) : (
                   <a
                     className="hover:text-inherit"
-                    href={contract?.contractFileUrl}
-                    download={contract?.contractFileName}
+                    href={
+                      contract &&
+                      contractEvidence &&
+                      (contractEvidence?.length > 0
+                        ? contractEvidence?.[0]?.evidenceUrl
+                        : contract?.contractFileUrl ?? null)
+                    }
+                    target="_blank"
                   >
-                    <FaFileContract className="text-lg" />
+                    <FaFilePdf className="text-lg" />
                   </a>
                 )}
               </motion.div>
             </Popover>
+
             <Popover content={<p className="text-base">Điều chỉnh bộ phận</p>}>
               <motion.div
                 className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
@@ -454,7 +598,7 @@ const EventTaskPage = () => {
                 </motion.div>
               </Popover>
             </Link>
-            <Popover content={<p className="text-base">Chỉnh sửa sự kiện</p>}>
+            {/* <Popover content={<p className="text-base">Chỉnh sửa sự kiện</p>}>
               <motion.div
                 className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
                 whileHover={{ y: -4 }}
@@ -462,7 +606,7 @@ const EventTaskPage = () => {
               >
                 <RiEditFill className="text-lg" />
               </motion.div>
-            </Popover>
+            </Popover> */}
           </div>
 
           <p
@@ -739,6 +883,15 @@ const EventTaskPage = () => {
                                   task={task}
                                   isSubtask={false}
                                   eventName={eventDetail?.eventName}
+                                  // Go to update task
+                                  goToUpdateTask={() => goToUpdateTask(task)}
+                                  dateRange={[
+                                    eventDetail?.startDate,
+                                    eventDetail?.endDate,
+                                  ]}
+                                  listDivision={eventDetail?.listDivision?.map(
+                                    (division) => division?.divisionId
+                                  )}
                                 />
                               ),
                               children:

@@ -13,24 +13,23 @@ import {
   FcMediumPriority,
 } from "react-icons/fc";
 import { BsHourglassBottom, BsHourglassSplit, BsPlus } from "react-icons/bs";
-import { BiCheck, BiRightArrowAlt } from "react-icons/bi";
-import { VscDebugStart } from "react-icons/vsc";
-import { MdMode } from "react-icons/md";
-import { Avatar, Button, Card, FloatButton, message, Progress } from "antd";
+import { BiRightArrowAlt } from "react-icons/bi";
+import { LuSettings } from "react-icons/lu";
+import { Avatar, Card, FloatButton, message, Popover, Progress } from "antd";
 import TaskItem from "../../components/Task/TaskItem";
 import CommentInTask from "../../components/Comment/CommentInTask";
 import SubTaskModal from "../../components/Modal/SubTaskModal";
-import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTasks, updateTaskStatus } from "../../apis/tasks";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import { getComment } from "../../apis/comments";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
-import moment from "moment";
 import TaskUpdateModal from "../../components/Modal/TaskUpdateModal";
 import { useDispatch, useSelector } from "react-redux";
 import { redirectionActions } from "../../store/redirection";
+import moment from "moment";
+import momenttz from "moment-timezone";
 
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
@@ -41,6 +40,7 @@ const EventSubTaskPage = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  console.log("location > ", location.state);
 
   const dispatch = useDispatch();
   const { redirect } = useSelector((state) => state.redirection);
@@ -140,16 +140,74 @@ const EventSubTaskPage = () => {
     });
   };
 
-  const goToCreateTask = () => {
+  const goToCreateSubTask = () => {
     navigate(`/manager/event/${eventId}/task`, {
       state: {
         eventId,
         eventName: location.state?.eventName,
         dateRange: [tasks?.startDate, tasks?.endDate],
+
+        isSubTask: true,
         taskId: tasks?.id,
         taskName: tasks?.title,
         taskResponsorId: tasks?.assignTasks?.[0]?.user?.id,
+      },
+    });
+  };
+
+  const goToUpdateTask = () => {
+    const updateData = {
+      title: tasks?.title,
+      date: [
+        momenttz(tasks?.startDate).format("YYYY-MM-DD"),
+        momenttz(tasks?.endDate).format("YYYY-MM-DD"),
+      ],
+      priority: tasks?.priority,
+      desc: tasks?.description,
+      assignee: tasks?.assignTasks?.map((user) => user?.user?.id),
+    };
+    console.log("hello > ", updateData);
+
+    navigate(`/manager/event/${eventId}/task`, {
+      state: {
+        eventId,
+        eventName: tasks?.eventDivision?.event?.eventName,
+        dateRange: location.state?.dateRange,
+
+        isSubTask: false,
+        listDivision: location.state?.listDivision,
+
+        updateData,
+      },
+    });
+  };
+
+  const goToUpdateSubtask = (task) => {
+    const updateData = {
+      title: task?.title,
+      date: [
+        momenttz(task?.startDate).format("YYYY-MM-DD"),
+        momenttz(task?.endDate).format("YYYY-MM-DD"),
+      ],
+      priority: task?.priority,
+      desc: task?.description,
+      assignee: task?.assignTasks?.map((user) => user?.user?.id),
+    };
+
+    navigate(`/manager/event/${eventId}/task`, {
+      state: {
+        eventId,
+        eventName: tasks?.eventDivision?.event?.eventName,
+        dateRange: [
+          momenttz(tasks?.startDate).format("YYYY-MM-DD"),
+          momenttz(tasks?.endDate).format("YYYY-MM-DD"),
+        ],
         isSubTask: true,
+        taskId: tasks?.id,
+        taskName: tasks?.title,
+        taskResponsorId: tasks?.assignTasks?.[0]?.user?.id,
+
+        updateData,
       },
     });
   };
@@ -232,19 +290,19 @@ const EventSubTaskPage = () => {
     <Fragment>
       {contextHolder}
       <FloatButton
-        onClick={goToCreateTask}
+        onClick={goToCreateSubTask}
         icon={<BsPlus />}
         type="primary"
         tooltip={<p>Tạo công việc</p>}
       />
 
-      <TaskUpdateModal
+      {/* <TaskUpdateModal
         isModalOpen={isOpenUpdateTaskModal}
         setIsModalOpen={setIsOpenUpdateTaskModal}
         eventID={eventId}
         task={tasks}
         isSubTask={false}
-      />
+      /> */}
 
       <motion.div
         initial={{ y: -75, opacity: 0 }}
@@ -415,6 +473,18 @@ const EventSubTaskPage = () => {
               src={tasks?.assignTasks?.[0]?.user?.profile?.avatar}
             />
           </motion.div>
+
+          <Popover
+            content={<p className="text-sm font-medium">Chỉnh sửa hạng mục</p>}
+          >
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              className="cursor-pointer"
+              onClick={goToUpdateTask}
+            >
+              <LuSettings className="text-3xl hover:text-black text-slate-300 transition-colors duration-300" />
+            </motion.div>
+          </Popover>
         </div>
 
         {/* Desc */}
@@ -505,6 +575,8 @@ const EventSubTaskPage = () => {
                       setSelectedSubTask={setSelectedSubTask}
                       setIsOpenUpdateSubTaskModal={setIsOpenUpdateSubTaskModal}
                       setIsOpenModal={setIsOpenModal}
+                      // Go to update subtask
+                      goToUpdateSubtask={() => goToUpdateSubtask(subtask)}
                     />
                   );
               })
@@ -521,15 +593,6 @@ const EventSubTaskPage = () => {
                   setIsOpenModal={setIsOpenModal}
                   selectedSubTask={selectedSubTask}
                   resetTaskRedirect={resetTaskRedirect}
-                />
-                <TaskUpdateModal
-                  isModalOpen={isOpenUpdateSubTaskModal}
-                  setIsModalOpen={setIsOpenUpdateSubTaskModal}
-                  eventID={eventId}
-                  task={selectedSubTask}
-                  isSubTask={true}
-                  staffId={tasks?.assignTasks?.[0]?.user.id}
-                  parentTaskId={tasks.id}
                 />
               </>
             )}

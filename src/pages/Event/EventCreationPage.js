@@ -26,10 +26,7 @@ import { createEvent, getEventType } from "../../apis/events";
 import { uploadFile } from "../../apis/files";
 import { createContract } from "../../apis/contract";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
-import {
-  getCustomerContactDetail,
-  updateCustomerContacts,
-} from "../../apis/contact";
+import { getCustomerContactDetail } from "../../apis/contact";
 import dayjs from "dayjs";
 import clsx from "clsx";
 
@@ -70,63 +67,74 @@ const EventCreationPage = () => {
     { refetchOnWindowFocus: false }
   );
 
-  const { mutate: updateContactMutate, isLoading: updateContactIsLoading } =
-    useMutation(
-      ({ contactId, eventId, status }) =>
-        updateCustomerContacts({ contactId, status }),
-      {
-        onSuccess: (data, variables) => {
-          notification.success({
-            message: <p className="font-medium">Tạo sự kiện thành công</p>,
-            // description: "Hello, Ant Design!!",
-            placement: "topRight",
-            duration: 3,
-          });
-          navigate(-1);
+  // const { mutate: updateContactMutate, isLoading: updateContactIsLoading } =
+  //   useMutation(
+  //     ({ contactId, eventId, status }) =>
+  //       updateCustomerContacts({ contactId, status }),
+  //     {
+  //       onSuccess: (data, variables) => {
+  //         notification.success({
+  //           message: <p className="font-medium">Tạo sự kiện thành công</p>,
+  //           // description: "Hello, Ant Design!!",
+  //           placement: "topRight",
+  //           duration: 3,
+  //         });
+  //         navigate(-1);
 
-          // navigate(
-          //   `/manager/event/${variables?.eventId}`,
-          //   { replace: true }
-          // );
-        },
-        onError: (error) => {
-          messageApi.open({
-            type: "error",
-            content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-          });
-        },
-      }
-    );
+  //         // navigate(
+  //         //   `/manager/event/${variables?.eventId}`,
+  //         //   { replace: true }
+  //         // );
+  //       },
+  //       onError: (error) => {
+  //         messageApi.open({
+  //           type: "error",
+  //           content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+  //         });
+  //       },
+  //     }
+  //   );
 
-  // Create contract after create event
-  const { mutate: createContractMutate, isLoading: createContractIsLoading } =
-    useMutation(
-      ({ eventId, contract }) => createContract({ eventId, contract }),
-      {
-        onSuccess: (data, variables) => {
-          updateContactMutate({
-            contactId: location.state?.contactId,
-            eventId: variables?.eventId,
-            status: "SUCCESS",
-          });
-        },
-        onError: (error) => {
-          messageApi.open({
-            type: "error",
-            content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-          });
-        },
-      }
-    );
+  // // Create contract after create event
+  // const { mutate: createContractMutate, isLoading: createContractIsLoading } =
+  //   useMutation(
+  //     ({ eventId, contract }) => createContract({ eventId, contract }),
+  //     {
+  //       onSuccess: (data, variables) => {
+  //         updateContactMutate({
+  //           contactId: location.state?.contactId,
+  //           eventId: variables?.eventId,
+  //           status: "SUCCESS",
+  //         });
+  //       },
+  //       onError: (error) => {
+  //         messageApi.open({
+  //           type: "error",
+  //           content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+  //         });
+  //       },
+  //     }
+  //   );
 
   // Create event after upload banner image
   const { mutate: createEventMutate, isLoading: createEventIsLoading } =
-    useMutation(({ event, contract }) => createEvent(event), {
+    useMutation((event) => createEvent(event), {
       onSuccess: (data, variables) => {
-        createContractMutate({
-          eventId: data?.split(" ")?.[0],
-          contract: variables?.contract,
+        // createContractMutate({
+        //   eventId: data?.split(" ")?.[0],
+        //   contract: variables?.contract,
+        // });
+        console.log("event success data > ", data);
+
+        notification.success({
+          message: <p className="font-medium">Tạo sự kiện thành công</p>,
+          // description: "Hello, Ant Design!!",
+          placement: "topRight",
+          duration: 3,
         });
+
+        navigate(-1);
+        // navigate(`/manager/event/${variables?.eventId}`, { replace: true });
       },
       onError: (error) => {
         messageApi.open({
@@ -142,11 +150,13 @@ const EventCreationPage = () => {
     {
       onSuccess: (data, variables) => {
         console.log("variables upload > ", variables);
-        variables.event = { coverUrl: data.downloadUrl, ...variables.event };
-        createEventMutate({
-          event: variables.event,
-          contract: variables.contract,
-        });
+        variables.event = {
+          coverUrl: data.downloadUrl,
+          ...variables.event,
+          ...variables.contract,
+          contactId: location.state?.contactId,
+        };
+        createEventMutate(variables.event);
       },
       onError: () => {
         messageApi.open({
@@ -818,10 +828,9 @@ const EventCreationPage = () => {
     <Fragment>
       <LockLoadingModal
         isModalOpen={
-          uploadIsLoading ||
-          createEventIsLoading ||
-          createContractIsLoading ||
-          createContractIsLoading
+          uploadIsLoading || createEventIsLoading
+          // createContractIsLoading ||
+          // createContractIsLoading
         }
         label="Đang khởi tạo sự kiện ..."
       />
