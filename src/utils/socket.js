@@ -6,11 +6,16 @@ import { chatsActions } from "../store/chats";
 import { Avatar } from "antd";
 
 export const socket = io(URL_SOCKET, {
-  withCredentials: true,
+  // withCredentials: true,
   auth: {
     access_token: localStorage.getItem("token"),
   },
 });
+
+export const setSocketToken = (token) => {
+  socket.auth.access_token = token;
+  socket.disconnect().connect(); // Reconnect
+};
 
 export const socketListener = (dispatch, notificationAPI) => {
   // create connection
@@ -31,7 +36,7 @@ export const socketListener = (dispatch, notificationAPI) => {
       message: <p className="text-base">Đã nhận 1 thông báo</p>,
       description: (
         <div className="flex items-center gap-x-3">
-          <Avatar src={data?.avatar} />
+          <Avatar src={data?.avatarSender} />
           <p className="text-sm">
             <span className="font-semibold">
               {data?.content?.split("đã")[0]}{" "}
@@ -63,6 +68,7 @@ export const socketListener = (dispatch, notificationAPI) => {
       chatDetailActions.updateChatDetail({
         email: message?.author?.email,
         newMessage: customNewMessage,
+        chatId: newConservations?.id,
       })
     );
 

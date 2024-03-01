@@ -28,7 +28,7 @@ const EventAssignDivisionPage = () => {
     isError: divisionsIsError,
   } = useQuery(
     ["divisions"],
-    () => getAllDivision({ pageSize: 100, currentPage: 1, mode: 1 }),
+    () => getAllDivision({ pageSize: 25, currentPage: 1, mode: 1 }),
     {
       select: (data) => {
         return data?.filter((item) => item?.status);
