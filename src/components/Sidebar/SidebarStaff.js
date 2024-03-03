@@ -1,6 +1,7 @@
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
-import { BsJournalCheck, BsMailbox, BsPersonVcard } from "react-icons/bs";
+import { BsJournalCheck, BsPersonVcard } from "react-icons/bs";
+import { MdOutlineCelebration, MdOutlineCalendarMonth } from "react-icons/md";
 import { HiOutlineHome } from "react-icons/hi2";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
@@ -39,10 +40,17 @@ const SidebarStaff = ({ collapsed }) => {
 
   const sideBarItems = [
     getItem(
-      <LabelText text="Sự kiện" />,
+      <LabelText text="Trang chủ" />,
       "/staff",
       <p>
         <HiOutlineHome className="text-[#2196f3]" size={24} />
+      </p>
+    ),
+    getItem(
+      <LabelText text="Sự kiện" />,
+      "/staff/event",
+      <p>
+        <MdOutlineCelebration className="text-[#FF5722]" size={24} />
       </p>
     ),
     // getItem(
@@ -59,18 +67,18 @@ const SidebarStaff = ({ collapsed }) => {
     //     <BsMailbox className="text-[#FF5722]" size={24} />
     //   </p>
     // ),
-    getItem(
-      <LabelText text="Thống kê" />,
-      "/staff/dashboard",
-      <BsPersonVcard className="text-[#795548]" size={24} />
-    ),
-    getItem(
-      <LabelText text="Chấm công" />,
-      "/staff/timekeeping",
-      <p>
-        <BsJournalCheck className="text-[#333333]" size={24} />
-      </p>
-    ),
+    // getItem(
+    //   <LabelText text="Thống kê" />,
+    //   "/staff/dashboard",
+    //   <BsPersonVcard className="text-[#795548]" size={24} />
+    // ),
+    // getItem(
+    //   <LabelText text="Chấm công" />,
+    //   "/staff/timekeeping",
+    //   <p>
+    //     <BsJournalCheck className="text-[#333333]" size={24} />
+    //   </p>
+    // ),
     // getItem(
     //   <LabelText text="Thu chi" />,
     //   "/staff/budget",
@@ -79,10 +87,17 @@ const SidebarStaff = ({ collapsed }) => {
     //   </p>
     // ),
     getItem(
+      <LabelText text="Lịch trình" />,
+      "/staff/schedule",
+      <p>
+        <MdOutlineCalendarMonth className="text-[#795548]" size={24} />
+      </p>
+    ),
+    getItem(
       <LabelText text="Chat" />,
       "/staff/chat",
       <p>
-        <IoChatboxOutline className="text-[#FF5722]" size={24} />
+        <IoChatboxOutline className="text-[#9c27b0]" size={24} />
       </p>
     ),
   ];

@@ -41,15 +41,25 @@ const EventAssignTaskPage = lazy(() =>
 
 // Staff pages
 const StaffLayout = lazy(() => import("./pages/StaffLayout"));
-const EventStaffPage = lazy(() => import("./pages/Event/EventStaffPage"));
+const EventStaffLayout = lazy(() =>
+  import("./pages/Event/EventStaffPage/EventStaffLayout.js")
+);
+const EventStaffPage = lazy(() =>
+  import("./pages/Event/EventStaffPage/EventStaffPage.js")
+);
+const EventStaffHomePage = lazy(() =>
+  import("./pages/Event/EventStaffPage/EventStaffHomePage.js")
+);
 const TimekeepingStaffPage = lazy(() =>
   import("./pages/Timekeeping/TimekeepingStaffPage")
 );
 const DashboardPageStaff = lazy(() =>
   import("./pages/Dashboard/DashboardPageStaff")
 );
+const StaffSchedulePage = lazy(() =>
+  import("./pages/Schedule/StaffSchedulePage.js")
+);
 const TaskPageStaff = lazy(() => import("./pages/Task/MyTaskPageStaff"));
-const StaffChatPage = lazy(() => import("./pages/Chat/StaffChatPage.js"));
 
 // Admin pages
 const AdminLayout = lazy(() => import("./pages/AdminLayout.js"));
@@ -242,7 +252,42 @@ const router = createBrowserRouter([
         index: true,
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
-            <EventStaffPage />
+            <DashboardPageStaff />
+          </Suspense>
+        ),
+      },
+      {
+        path: "event",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            {/* <EventStaffPage /> */}
+            <EventStaffLayout />
+          </Suspense>
+        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<LoadingPageIndicator />}>
+                <EventStaffHomePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: ":eventId",
+            element: (
+              <Suspense fallback={<LoadingPageIndicator />}>
+                <EventStaffPage />
+              </Suspense>
+            ),
+          },
+        ],
+      },
+      {
+        path: "schedule",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <StaffSchedulePage />
           </Suspense>
         ),
       },
@@ -259,14 +304,6 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <TimekeepingStaffPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "dashboard",
-        element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
-            <DashboardPageStaff />
           </Suspense>
         ),
       },

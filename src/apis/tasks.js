@@ -116,3 +116,8 @@ export const getTemplateTask = (templateEventID) =>
   http({
     url: `/task/template-task?fieldName=eventID&conValue=${templateEventID}&sizePage=5&currentPage=1`,
   });
+
+export const getTaskFilterByDate = ({ userId, date, dateEnd }) =>
+  http({
+    url: `/task/filterByDate?userId=${userId}&date=${date}&dateEnd=${dateEnd}`,
+  });
