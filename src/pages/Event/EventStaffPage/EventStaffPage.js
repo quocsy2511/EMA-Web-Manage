@@ -6,7 +6,7 @@ import { getEventDivisions } from "../../../apis/events";
 import AnErrorHasOccured from "../../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
-import { Empty } from "antd";
+import { Empty, message } from "antd";
 import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
 import { filterTask } from "../../../apis/tasks";
 import BudgetStaff from "../../../components/KanbanBoard/BudgetStaff/BudgetStaff";
@@ -29,7 +29,7 @@ const EventStaffPage = () => {
 
   const location = useLocation();
   const selectEvent = location.state?.event ?? {};
-  console.log("selectEvent > ", selectEvent);
+  // console.log("selectEvent > ", selectEvent);
   const listEvent = location.state?.listEvent ?? [];
 
   // const [isDashBoard, setIsDashBoard] = useState(false);
@@ -223,6 +223,7 @@ const EventStaffPage = () => {
     }
   );
 
+  // console.log("🚀 ~ EventStaffPage ~ listTaskFilter:", listTaskFilter);
   //handle search task ch va task con
   function filterSubTasks(task, searchText) {
     const subtaskTitles = task?.subTask?.filter((subtask) =>
@@ -253,18 +254,11 @@ const EventStaffPage = () => {
         })
         .filter((task) => task !== null);
 
-      console.log(
-        "🚀 ~ file: EventStaffPage.js:187 ~ updateListTaskParents ~ filteredTaskParents:",
-        filteredTaskParents
-      );
+      // console.log(
+      //   "🚀 ~ file: EventStaffPage.js:187 ~ updateListTaskParents ~ filteredTaskParents:",
+      //   filteredTaskParents
+      // );
       return filteredTaskParents;
-    }
-
-    //check ng dùng chọn filter
-    if (listTaskFilter?.length === 0) {
-      // Nếu listTaskFilter rỗng, refetch listTaskParents
-      refetch();
-      return listTaskParents;
     }
 
     // Lặp qua từng task trong listTaskParents
@@ -285,6 +279,13 @@ const EventStaffPage = () => {
         return task;
       }
     });
+
+    // check ng dùng chọn filter
+    if (listTaskFilter?.length === 0 && staff?.id === filterMember) {
+      // Nếu listTaskFilter rỗng, refetch listTaskParents
+      refetch();
+      return listTaskParents;
+    }
 
     return updatedListTaskParents;
   }

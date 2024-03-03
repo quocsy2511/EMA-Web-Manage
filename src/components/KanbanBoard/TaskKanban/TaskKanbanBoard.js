@@ -116,18 +116,21 @@ const TaskKanbanBoard = ({
       exit={{ opacity: 0 }}
     >
       <div
-        className="w-[250px] min-h-[138px] mx-auto my-5 rounded-lg bg-white  shadow-darkShadow py-3 px-3 shadow-lg hover:opacity-60  cursor-pointer"
+        className="overflow-hidden w-[250px] min-h-[138px] mx-auto my-5 rounded-lg bg-white  shadow-darkShadow py-3 px-3 shadow-lg hover:opacity-60  cursor-pointer"
         onClick={() => openTaskModalHandler()}
       >
-        <p
-          className={
-            task.status === "CANCEL" || task.status === "OVERDUE"
-              ? "font-normal text-sm tracking-wide hover:text-secondary break-words line-through decoration-red-700 decoration-2 opacity-30"
-              : "font-normal text-sm tracking-wide hover:text-secondary break-words"
-          }
-        >
-          {task?.title}
-        </p>
+        <Tooltip title={task?.title}>
+          <p
+            className={
+              task.status === "CANCEL" || task.status === "OVERDUE"
+                ? "font-normal text-sm tracking-wide hover:text-secondary truncate line-through decoration-red-700 decoration-2 opacity-30"
+                : "font-normal text-sm tracking-wide hover:text-secondary truncate"
+            }
+          >
+            {task?.title}
+          </p>
+        </Tooltip>
+
         {/* Sumary */}
         <div className="flex justify-start items-center gap-x-2 cursor-pointer mt-1 flex-wrap">
           {task?.endDate !== null && (

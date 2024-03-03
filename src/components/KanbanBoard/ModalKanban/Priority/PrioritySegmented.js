@@ -11,7 +11,7 @@ const PrioritySegmented = ({
 }) => {
   const queryClient = useQueryClient();
   const taskID = taskSelected?.id;
-  const eventID = taskSelected?.event?.id;
+  const eventID = taskSelected?.eventDivision?.event?.id;
   const parentTask = taskSelected?.parent?.id;
   const optionsPriority = [
     { label: "THẤP", value: "LOW" },

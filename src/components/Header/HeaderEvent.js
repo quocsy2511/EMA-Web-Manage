@@ -51,12 +51,12 @@ const HeaderEvent = ({
         divisionId,
         pageSize: 10,
         currentPage: 1,
-        // role: "EMPLOYEE",
-        role: "Nh%C3%A2n%20Vi%C3%AAn",
+        role: "Nhân Viên",
+        // role: "Nh%C3%A2n%20Vi%C3%AAn",
       }),
     {
       select: (data) => {
-        console.log("🚀 ~ data:", data);
+        // console.log("🚀 ~ data:", data);
         const listUsers = data?.data?.map(({ ...item }) => {
           item.dob = moment(item.dob).format("DD-MM-YYYY");
           return {

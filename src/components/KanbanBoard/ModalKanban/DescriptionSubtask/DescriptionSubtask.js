@@ -10,7 +10,9 @@ import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { getTasks, updateTask } from "../../../../apis/tasks";
-const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
+import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 const DescriptionSubtask = ({
   description,
   setDescription,
@@ -21,12 +23,20 @@ const DescriptionSubtask = ({
   const [form] = Form.useForm();
   const taskID = taskSelected?.id;
   const [descriptionQuill, setDescriptionQuill] = useState({
-    ops: JSON.parse(description?.startsWith(`[{"insert":"`) ? description : parseJson(description)),
+    ops: JSON.parse(
+      description?.startsWith(`[{"insert":"`)
+        ? description
+        : parseJson(description)
+    ),
   });
   const [isOpenQuill, seItsOpenQuill] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: subtaskDetails } = useQuery(
+  const {
+    data: subtaskDetails,
+    isLoading: isLoadingSubtask,
+    isError: isErrorSubtask,
+  } = useQuery(
     ["subtaskDetails", taskID],
     () =>
       getTasks({
@@ -68,7 +78,7 @@ const DescriptionSubtask = ({
   );
 
   const onFinish = (value) => {
-    const eventID = taskSelected.event.id;
+    const eventID = taskSelected?.eventDivision?.event.id;
     const parentTask = taskSelected.parent.id;
     const {
       approvedBy,
@@ -116,7 +126,11 @@ const DescriptionSubtask = ({
                   className="text-base italic text-black "
                   dangerouslySetInnerHTML={{
                     __html: new QuillDeltaToHtmlConverter(
-                      JSON.parse(description?.startsWith(`[{"insert":"`) ? description : parseJson(description))
+                      JSON.parse(
+                        description?.startsWith(`[{"insert":"`)
+                          ? description
+                          : parseJson(description)
+                      )
                     ).convert(),
                   }}
                 ></p>
@@ -131,38 +145,46 @@ const DescriptionSubtask = ({
           <>
             {isOpenQuill && !disableUpdate ? (
               <>
-                <Form onFinish={onFinish} form={form}>
-                  <Form.Item
-                    name="desc"
-                    initialValue={descriptionQuill}
-                    className="mb-0"
-                  >
-                    <ReactQuill
-                      theme="snow"
-                      onChange={(content, delta, source, editor) => {
-                        form.setFieldsValue({ desc: editor.getContents() });
-                      }}
-                      className="bg-transparent  py-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full"
-                    />
-                  </Form.Item>
-                  <div className="flex flex-row">
-                    <Button
-                      type="link"
-                      className="flex items-center justify-center"
-                      onClick={() => seItsOpenQuill(false)}
-                      loading={isLoading}
-                    >
-                      <CloseOutlined className="text-red-400" />
-                    </Button>
-                    <Button
-                      htmlType="submit"
-                      type="primary"
-                      className="flex items-center justify-center"
-                    >
-                      <SendOutlined />
-                    </Button>
-                  </div>
-                </Form>
+                {!isLoadingSubtask ? (
+                  !isErrorSubtask ? (
+                    <Form onFinish={onFinish} form={form}>
+                      <Form.Item
+                        name="desc"
+                        initialValue={descriptionQuill}
+                        className="mb-0"
+                      >
+                        <ReactQuill
+                          theme="snow"
+                          onChange={(content, delta, source, editor) => {
+                            form.setFieldsValue({ desc: editor.getContents() });
+                          }}
+                          className="bg-transparent  py-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full"
+                        />
+                      </Form.Item>
+                      <div className="flex flex-row">
+                        <Button
+                          type="link"
+                          className="flex items-center justify-center"
+                          onClick={() => seItsOpenQuill(false)}
+                          loading={isLoading}
+                        >
+                          <CloseOutlined className="text-red-400" />
+                        </Button>
+                        <Button
+                          htmlType="submit"
+                          type="primary"
+                          className="flex items-center justify-center"
+                        >
+                          <SendOutlined />
+                        </Button>
+                      </div>
+                    </Form>
+                  ) : (
+                    <AnErrorHasOccured />
+                  )
+                ) : (
+                  <LoadingComponentIndicator />
+                )}
               </>
             ) : (
               <div
@@ -170,12 +192,18 @@ const DescriptionSubtask = ({
                 onClick={() => seItsOpenQuill(true)}
               >
                 {subtaskDetails?.[0].description !== undefined &&
-                  subtaskDetails?.[0].description !== null ? (
+                subtaskDetails?.[0].description !== null ? (
                   <p
                     className="text-base italic text-black "
                     dangerouslySetInnerHTML={{
                       __html: new QuillDeltaToHtmlConverter(
-                        JSON.parse(subtaskDetails?.[0].description?.startsWith(`[{"insert":"`) ? subtaskDetails?.[0].description : parseJson(subtaskDetails?.[0].description))
+                        JSON.parse(
+                          subtaskDetails?.[0].description?.startsWith(
+                            `[{"insert":"`
+                          )
+                            ? subtaskDetails?.[0].description
+                            : parseJson(subtaskDetails?.[0].description)
+                        )
                       ).convert(),
                     }}
                   ></p>

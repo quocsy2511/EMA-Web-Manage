@@ -50,6 +50,7 @@ const StaffLayout = () => {
         style={{
           minHeight: "100vh",
         }}
+        className="bg-bgG"
       >
         <SidebarStaff collapsed={collapsed} />
 

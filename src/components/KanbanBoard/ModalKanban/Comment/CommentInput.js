@@ -69,7 +69,12 @@ const CommentInput = ({ staff, taskSelected }) => {
       onSuccess: (data, variables) => {
         const comment = variables.comment;
         variables.comment = {
-          file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
+          file: [
+            {
+              fileName: data?.fileName ? data?.fileName : "tài liệu công việc",
+              fileUrl: data.downloadUrl,
+            },
+          ],
           ...comment,
         };
         console.log(
@@ -94,7 +99,7 @@ const CommentInput = ({ staff, taskSelected }) => {
       console.log("NOOO FILE");
       const { fileUrl, ...restValue } = values;
       console.log("🚀 ~ onFinish ~ restValue:", restValue);
-      // mutate(restValue);
+      mutate(restValue);
     } else {
       console.log("HAS FILE");
       const formData = new FormData();
