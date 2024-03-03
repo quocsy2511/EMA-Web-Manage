@@ -36,21 +36,32 @@ const chatDetailSlice = createSlice({
   initialState,
   reducers: {
     updateChatDetail(state, action) {
-      // newest group mess equal to new mess (same user)
-      if (state.chatDetail.length > 0) {
-        if (state.chatDetail[0].email === action.payload.email) {
-          state.chatDetail[0].messageList = [
-            action.payload.newMessage,
-            ...state.chatDetail[0].messageList,
-          ];
-        } else {
-          const newGroupMessage = {
-            email: action.payload.email,
-            messageList: [action.payload.newMessage],
-          };
-          state.chatDetail = [newGroupMessage, ...state.chatDetail];
+      // checking if new message recieve at the same chat
+      if (action.payload.chatId === state.chatId) {
+        // newest group mess equal to new mess (same user)
+        if (state.chatDetail.length > 0) {
+          if (state.chatDetail[0].email === action.payload.email) {
+            state.chatDetail[0].messageList = [
+              action.payload.newMessage,
+              ...state.chatDetail[0].messageList,
+            ];
+          } else {
+            const newGroupMessage = {
+              email: action.payload.email,
+              messageList: [action.payload.newMessage],
+            };
+            state.chatDetail = [newGroupMessage, ...state.chatDetail];
+          }
         }
       }
+    },
+    resetChatDetail(state, action) {
+      state.startKey = null;
+      state.chatId = "";
+      state.chatTitle = {};
+      state.chatDetail = [];
+      state.status = "idle";
+      state.error = null;
     },
   },
 

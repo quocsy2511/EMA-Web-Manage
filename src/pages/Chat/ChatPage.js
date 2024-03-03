@@ -59,7 +59,6 @@ const SingleMessage = memo(({ isMe, index, length, content }) => {
 });
 
 const MessageItem = memo(({ isMe, messageList }) => {
-  console.log("MessageItem > ", isMe, messageList);
   const avatar = messageList?.[0]?.author?.profile?.avatar ?? defaultAvatar;
   const name = messageList?.[0]?.author?.profile?.fullName;
   return (
@@ -194,7 +193,6 @@ const ChatPage = () => {
   console.log("chats > ", chats);
   const chatDetail = useSelector((state) => state.chatDetail);
   console.log("chatDetail > ", chatDetail);
-  console.log("chatDetail.chatDetail > ", chatDetail.chatDetail);
   const { onlineUsers, offlineUsers } = useSelector(
     (state) => state.onlineUser
   );
@@ -206,7 +204,6 @@ const ChatPage = () => {
 
   const userEmail = managerEmail ? managerEmail : staffEmail;
   const userId = managerId ? managerId : staffId;
-  console.log("userEmail > ", userEmail);
 
   const [searchInput, setSearchInput] = useState("");
   const [chatInput, setChatInput] = useState("");
@@ -353,7 +350,7 @@ const ChatPage = () => {
   };
 
   const handleSubmitChatMessage = (e) => {
-    if (e.target.value !== "") {
+    if (e?.target?.value !== "") {
       // create new mesage
       messageMutate({ id: chatDetail.chatId, content: e.target.value });
 
@@ -696,9 +693,12 @@ const ChatPage = () => {
                     if (e.target.value === "")
                       onTypingStopSocket(chatDetail.chatId);
                     else onTypingStartSocket(chatDetail.chatId);
-                    setChatInput(e.target.value);
+                    setChatInput(e.target.value ?? "");
                   }}
-                  onPressEnter={handleSubmitChatMessage}
+                  onPressEnter={(e) => {
+                    handleSubmitChatMessage(e);
+                    onTypingStopSocket(chatDetail.chatId);
+                  }}
                   onFocus={() => {}}
                   onBlur={() => {
                     onTypingStopSocket(chatDetail.chatId);

@@ -89,6 +89,8 @@ const CustomerPage = () => {
   const [loadContact, setloadContact] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  console.log("selectedContact > ", selectedContact);
+
   const [messageApi, contextHolder] = message.useMessage();
 
   const {
@@ -137,7 +139,7 @@ const CustomerPage = () => {
               ? "Chấp nhận 1 sự kiện từ khách hàng thành công"
               : "Đã từ chối 1 sự kiện từ khách hàng",
         });
-        // setSelectedContact();
+        setSelectedContact((prev) => ({ ...prev, status: variables.status }));
 
         setIsModalOpen(false);
       },
@@ -211,7 +213,7 @@ const CustomerPage = () => {
         updateIsLoading={updateIsLoading}
       />
 
-      <div className="flex w-full h-[calc(100vh-64px-6rem)] bg-white rounded-lg shadow-xl">
+      <div className="flex h-[calc(100vh-64px-7rem)] bg-white rounded-lg shadow-xl">
         <div className="w-[30%] flex flex-col border-r-2 border-black/20">
           <p className="text-2xl font-semibold p-5">Thông tin khách hàng</p>
           <div className="flex justify-between items-center px-5">
@@ -317,20 +319,20 @@ const CustomerPage = () => {
           </div>
         </div>
 
-        <div className="flex-1 bg-[#ffffff]">
+        <div className="flex-1 overflow-hidden bg-[#ffffff]">
           {loadContact ? (
             <LoadingItemIndicator />
           ) : selectedContact ? (
-            <div className="flex flex-col w-full h-full px-10 py-5">
+            <div className="flex flex-col overflow-hidden h-full px-10 py-5 ">
               <p className="text-2xl font-semibold text-center">
                 Thông tin sự kiện
               </p>
-              <div className="flex items-center text-lg mt-14">
-                <div className="flex items-center w-[25%] font-semibold space-x-2 border-b border-black/30">
+              <div className="flex flex-col text-lg mt-14 overflow-hidden">
+                <div className="flex items-center font-semibold space-x-2">
                   <GoLocation />
                   <p>Địa điểm</p>
                 </div>
-                <p className="w-fit border-b border-black/30 truncate">
+                <p className="line-clamp-2">
                   {selectedContact?.address}
                 </p>
               </div>
@@ -357,11 +359,11 @@ const CustomerPage = () => {
               </div>
 
               <div className="flex items-center text-lg mt-10">
-                <div className="flex items-center w-[25%] font-semibold space-x-2 border-b border-black/30">
+                <div className="flex items-center font-semibold space-x-2 border-b border-black/30">
                   <LiaMoneyBillSolid />
                   <p>Ngân sách ước tính</p>
                 </div>
-                <p className="w-fit border-b border-black/30">
+                <p className="w-fit border-b border-black/30 pl-10">
                   {selectedContact?.budget?.toLocaleString("en-US") ?? 100000}{" "}
                   VNĐ
                 </p>

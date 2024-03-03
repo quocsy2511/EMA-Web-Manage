@@ -21,6 +21,7 @@ import TEXT from "../../constants/string";
 import { defaultAvatar } from "../../constants/global";
 import { chatsActions } from "../../store/chats";
 import { closeConnectSocket } from "../../utils/socket";
+import { chatDetailActions } from "../../store/chat_detail";
 
 const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
@@ -125,17 +126,18 @@ const Header = ({ collapsed, setCollapsed }) => {
     );
   };
 
-  // const {
-  //   data: notifications,
-  //   isLoading,
-  //   isError,
-  // } = useQuery(["notifications", "10"], () => getAllNotification(10), {
-  //   select: (data) => {
-  //     return data.data;
-  //   },
-  // });
-  // console.log("notifications: ", notifications);
-  const notifications = [];
+  const {
+    data: notifications,
+    isLoading,
+    isError,
+  } = useQuery(["notifications", "10"], () => getAllNotification(10), {
+    select: (data) => {
+      return data?.data;
+    },
+    refetchOnWindowFocus: false,
+  });
+  console.log("notifications: ", notifications);
+  // const notifications = [];
 
   const queryClient = useQueryClient();
   // const { mutate: seenNotificationMutate } = useMutation(
@@ -166,6 +168,7 @@ const Header = ({ collapsed, setCollapsed }) => {
 
     closeConnectSocket();
     dispatch(chatsActions.resetChats());
+    dispatch(chatDetailActions.resetChatDetail());
 
     navigate("/");
   };

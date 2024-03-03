@@ -147,8 +147,13 @@ const Item = memo(
 
     updateDataDivision,
   }) => {
+    console.log("division > ", division);
     //
-    if (updateDataDivision && updateDataDivision?.[0] === division?.userId) {
+    if (
+      updateDataDivision &&
+      !selectedId &&
+      updateDataDivision?.[0] === division?.userId
+    ) {
       handleSelectDivision(division);
     }
 
@@ -161,16 +166,16 @@ const Item = memo(
           transition={{ duration: 0.3, type: "tween" }}
           className={clsx(
             "flex space-x-5 items-center rounded-xl p-3 border-2 cursor-pointer",
-            { "border-blue-400": selectedId?.id === division?.id }
+            { "border-blue-400": selectedId === division?.userId }
           )}
         >
           <div
             className={clsx(
               "flex items-center justify-center w-10 h-10 border rounded-full",
-              { "border-blue-500": selectedId?.id === division?.id }
+              { "border-blue-500": selectedId === division?.userId }
             )}
           >
-            {selectedId?.id === division?.id && (
+            {selectedId === division?.userId && (
               <FaCheck className="text-blue-500 text-base" />
             )}
           </div>
@@ -224,11 +229,18 @@ const TaskSection = ({
   listDivision,
   updateDataDivision,
 }) => {
+  console.log("updateDataDivision > ", updateDataDivision);
   const [selectedId, setSelectedId] = useState();
   const [calendarChecking, setCalendarChecking] = useState();
   const [calendarDateChecking, setCalendarDateChecking] = useState();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (updateDataDivision) {
+      setSelectedId(updateDataDivision?.[0]);
+    }
+  }, []);
 
   // Reset calendarChecking
   useEffect(() => {
@@ -241,16 +253,17 @@ const TaskSection = ({
     isError: divisionsIsError,
   } = useQuery(
     ["divisions"],
-    () => getAllDivision({ pageSize: 100, currentPage: 1, mode: 1 }),
+    () => getAllDivision({ pageSize: 25, currentPage: 1, mode: 1 }),
     {
       select: (data) => {
+        console.log("data > ", data);
         return data
           ?.filter(
             (division) =>
               division?.status && listDivision?.includes(division?.id)
           )
           .map((division) => ({
-            id: division?.users?.[0]?.id,
+            id: division?.id,
             divisionName: division?.divisionName,
             userId: division?.users?.[0]?.id,
             userName: division?.users?.[0]?.profile?.fullName,
@@ -258,7 +271,6 @@ const TaskSection = ({
       },
     }
   );
-  console.log("divisions > ", divisions);
 
   const {
     data: calendarData,
@@ -306,8 +318,8 @@ const TaskSection = ({
   console.log("calendarData > ", calendarData);
 
   const handleSelectDivision = (division) => {
-    setSelectedId(division);
-    form.setFieldsValue({ assignee: [division?.id] });
+    setSelectedId(division?.userId);
+    form.setFieldsValue({ assignee: [division?.userId] });
     console.log(form.getFieldsValue());
   };
 

@@ -10,6 +10,7 @@ import { URL_SOCKET } from "../../constants/api";
 import { useDispatch } from "react-redux";
 import { socketActions } from "../../store/socket";
 import TEXT from "../../constants/string";
+import { setSocketToken } from "../../utils/socket";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ const LoginPage = () => {
       localStorage.setItem("token", accessToken);
 
       const role = jwt(accessToken).role;
+
+      setSocketToken(accessToken);
       // const socket = io(URL_SOCKET, {
       //   auth: {
       //     access_token: localStorage.getItem("token"),
