@@ -14,7 +14,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import moment from "moment";
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import { useRouteLoaderData } from "react-router-dom";
 import { getAllUser } from "../../../apis/users";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
@@ -338,4 +338,4 @@ const NewTaskModalTemplate = ({
   );
 };
 
-export default NewTaskModalTemplate;
+export default memo(NewTaskModalTemplate);

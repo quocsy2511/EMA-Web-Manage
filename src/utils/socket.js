@@ -2,8 +2,8 @@ import { io } from "socket.io-client";
 import { URL_SOCKET } from "../constants/api";
 import { chatDetailActions } from "../store/chat_detail";
 import { handleUpdateUsers } from "../store/online_user";
-import { chatsActions } from "../store/chats";
 import { Avatar } from "antd";
+import { chatsActions } from "../store/chats";
 
 export const socket = io(URL_SOCKET, {
   // withCredentials: true,
@@ -77,7 +77,7 @@ export const socketListener = (dispatch, notificationAPI) => {
 
   // Get online / offline user
   socket.on("onlineGroupUsersReceived", (data) => {
-    console.log("online user > ", data);
+    // console.log("online user > ", data);
 
     dispatch(
       handleUpdateUsers({

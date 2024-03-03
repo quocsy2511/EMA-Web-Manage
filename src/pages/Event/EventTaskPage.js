@@ -78,6 +78,7 @@ import {
 import DocReviewerModal from "../../components/Modal/DocReviewerModal";
 import ContractCreatePage from "../../components/Modal/ContractCreatePage";
 import clsx from "clsx";
+import defaultBanner from "../../assets/images/default_banner_images.png";
 
 moment.locale("vi"); // Set the locale to Vietnam
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
@@ -516,28 +517,6 @@ const EventTaskPage = () => {
                     </p>
                   ),
                   children: [
-                    // {
-                    //   key: "PENDING",
-                    //   label: (
-                    //     <p
-                    //       className="text-sm text-slate-500"
-                    //       onClick={() => updateStatusMutate("PENDING")}
-                    //     >
-                    //       Chưa bắt đầu
-                    //     </p>
-                    //   ),
-                    // },
-                    // {
-                    //   key: "PREPARING",
-                    //   label: (
-                    //     <p
-                    //       className="text-sm text-orange-500"
-                    //       onClick={() => updateStatusMutate("PREPARING")}
-                    //     >
-                    //       Đang chuẩn bị
-                    //     </p>
-                    //   ),
-                    // },
                     {
                       key: "PROCESSING",
                       label: (
@@ -603,14 +582,14 @@ const EventTaskPage = () => {
         animate={{ y: 0 }}
         className="bg-white rounded-2xl mt-8 overflow-hidden"
       >
-        <div className="h-40 w-full overflow-hidden">
+        <div className="h-40 w-full overflow-hidden border-b-2 border-slate-400">
           <Image
             src={
               eventDetail?.coverUrl ??
               "https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
             }
             width={"100%"}
-            className="bg-slate-200"
+            fallback={defaultBanner}
           />
         </div>
         <div className="mx-10 my-8">

@@ -171,9 +171,11 @@ const EventCreationPage = () => {
     return {
       eventName: values?.eventName,
       description: JSON.stringify(values?.description.ops),
-      startDate: values?.date?.[0],
-      processingDate: values?.processingDate,
+      // ===========================================
+      startDate: values?.processingDate,
+      processingDate: values?.date?.[0],
       endDate: values?.date?.[1],
+      // ===========================================
       location: values?.location,
       estBudget: +values?.estBudget,
       eventTypeId: values?.eventTypeId,

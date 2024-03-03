@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
-import HeaderEvent from "../../components/Header/HeaderEvent";
-import KanbanBoard from "../../components/KanbanBoard/KanbanBoard";
+import React, { memo, useEffect, useState } from "react";
+import HeaderEvent from "../../../components/Header/HeaderEvent";
+import KanbanBoard from "../../../components/KanbanBoard/KanbanBoard";
 import { useQuery } from "@tanstack/react-query";
-import { getEventDivisions } from "../../apis/events";
-import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import { getEventDivisions } from "../../../apis/events";
+import AnErrorHasOccured from "../../../components/Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
 import { Empty } from "antd";
 import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
-import { filterTask } from "../../apis/tasks";
-import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
-import { getProfile } from "../../apis/users";
-import { getBudget } from "../../apis/budgets";
-import { useRouteLoaderData } from "react-router-dom";
+import { filterTask } from "../../../apis/tasks";
+import BudgetStaff from "../../../components/KanbanBoard/BudgetStaff/BudgetStaff";
+import { getProfile } from "../../../apis/users";
+import { getBudget } from "../../../apis/budgets";
+import { useLocation, useRouteLoaderData } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 moment.suppressDeprecationWarnings = true;
@@ -26,14 +26,19 @@ const EventStaffPage = () => {
     "CANCEL",
     "OVERDUE",
   ];
+
+  const location = useLocation();
+  const selectEvent = location.state?.event ?? {};
+  console.log("selectEvent > ", selectEvent);
+  const listEvent = location.state?.listEvent ?? [];
+
   // const [isDashBoard, setIsDashBoard] = useState(false);
   const [isBoardTask, setIsBoardTask] = useState(true);
   const [searchText, setSearchText] = useState(null);
   const [sort, setSort] = useState("DESC");
   const [statusSelected, setStatusSelected] = useState("clear");
-  const idStaff = useRouteLoaderData("staff").id;
-  const [selectEvent, setSelectEvent] = useState({});
-
+  // const [selectEvent, setSelectEvent] = useState({});
+  const staff = useRouteLoaderData("staff");
   const notification = useSelector((state) => state.notification);
 
   // const {
@@ -69,83 +74,74 @@ const EventStaffPage = () => {
   //   }
   // }, [isLoadingEventDetail, isErrorEventDetail, eventDetail]);
 
-  const {
-    data: listEvent,
-    isError,
-    isLoading,
-  } = useQuery(["events"], () => getEventDivisions(), {
-    select: (data) => {
-      const filteredEvents = data.filter(
-        (item) => item.status !== "DONE" && item.status !== "CANCEL"
-      );
-      const event = filteredEvents.map(({ ...item }) => {
-        item.startDate = moment(item.startDate).format("DD/MM/YYYY");
-        item.endDate = moment(item.endDate).format("DD/MM/YYYY");
-        return {
-          ...item,
-        };
-      });
-      return event;
-    },
-
-    refetchOnWindowFocus: false,
-  });
-
-  const { data: staff } = useQuery(["staff"], () => getProfile(), {
-    select: (data) => {
-      return data;
-    },
-
-    refetchOnWindowFocus: false,
-  });
+  // const {
+  //   data: listEvent,
+  //   isError,
+  //   isLoading,
+  // } = useQuery(["events"], () => getEventDivisions(), {
+  //   select: (data) => {
+  //     const filteredEvents = data?.filter(
+  //       (item) => item?.status !== "DONE" && item?.status !== "CANCEL"
+  //     );
+  //     const event = filteredEvents?.map(({ ...item }) => {
+  //       item.startDate = moment(item?.startDate).format("DD/MM/YYYY");
+  //       item.endDate = moment(item?.endDate).format("DD/MM/YYYY");
+  //       return {
+  //         ...item,
+  //       };
+  //     });
+  //     return event;
+  //   },
+  //   refetchOnWindowFocus: false,
+  // });
 
   const [filterMember, setFilterMember] = useState(staff?.id);
 
-  const {
-    data: listBudgetConfirming,
-    isError: isErrorListBudgetConfirming,
-    isLoading: isLoadingListBudgetConfirming,
-    refetch: refetchListBudgetConfirming,
-  } = useQuery(
-    ["listBudgetConfirming"],
-    () =>
-      getBudget({
-        eventID: selectEvent?.id,
-        pageSize: 50,
-        currentPage: 1,
-        mode: 1,
-        userID: idStaff,
-      }),
-    {
-      select: (data) => {
-        return data.data;
-      },
+  // const {
+  //   data: listBudgetConfirming,
+  //   isError: isErrorListBudgetConfirming,
+  //   isLoading: isLoadingListBudgetConfirming,
+  //   refetch: refetchListBudgetConfirming,
+  // } = useQuery(
+  //   ["listBudgetConfirming"],
+  //   () =>
+  //     getBudget({
+  //       eventID: selectEvent?.id,
+  //       pageSize: 50,
+  //       currentPage: 1,
+  //       mode: 1,
+  //       userID: staff.id,
+  //     }),
+  //   {
+  //     select: (data) => {
+  //       return data.data;
+  //     },
 
-      refetchOnWindowFocus: false,
-      enabled: !!selectEvent?.id,
-    }
-  );
+  //     refetchOnWindowFocus: false,
+  //     enabled: !!selectEvent?.id,
+  //   }
+  // );
 
-  const { data: listBudgetConfirmed, refetch: refetchListBudgetConfirmed } =
-    useQuery(
-      ["listBudgetConfirmed"],
-      () =>
-        getBudget({
-          eventID: selectEvent?.id,
-          pageSize: 50,
-          currentPage: 1,
-          mode: 2,
-          userID: idStaff,
-        }),
-      {
-        select: (data) => {
-          return data.data;
-        },
+  // const { data: listBudgetConfirmed, refetch: refetchListBudgetConfirmed } =
+  //   useQuery(
+  //     ["listBudgetConfirmed"],
+  //     () =>
+  //       getBudget({
+  //         eventID: selectEvent?.id,
+  //         pageSize: 50,
+  //         currentPage: 1,
+  //         mode: 2,
+  //         userID: staff.id,
+  //       }),
+  //     {
+  //       select: (data) => {
+  //         return data.data;
+  //       },
 
-        refetchOnWindowFocus: false,
-        enabled: !!selectEvent?.id,
-      }
-    );
+  //       refetchOnWindowFocus: false,
+  //       enabled: !!selectEvent?.id,
+  //     }
+  //   );
 
   const {
     data: listTaskParents,
@@ -153,7 +149,7 @@ const EventStaffPage = () => {
     isLoading: isLoadingListTask,
     refetch,
   } = useQuery(
-    ["tasks"],
+    ["tasks", staff?.id, selectEvent?.id],
     () =>
       filterTask({
         assignee: staff?.id,
@@ -165,13 +161,11 @@ const EventStaffPage = () => {
     {
       select: (data) => {
         if (data && Array.isArray(data)) {
-          const taskParents = data.filter((task) => task.parent === null);
-          const formatDate = taskParents.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format(
-              "YYYY/MM/DD HH:mm:ss"
-            );
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD HH:mm:ss");
-            if (item.subTask && Array.isArray(item.subTask)) {
+          const taskParents = data?.filter((task) => task?.parent === null);
+          const formatDate = taskParents?.map(({ ...item }) => {
+            item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
+            item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
+            if (item?.subTask && Array.isArray(item?.subTask)) {
               item.subTask.sort((a, b) => {
                 return (
                   listStatus.indexOf(a.status) - listStatus.indexOf(b.status)
@@ -205,14 +199,14 @@ const EventStaffPage = () => {
     {
       select: (data) => {
         if (data && Array.isArray(data)) {
-          const taskParents = data.filter((task) => task.parent !== null);
-          const formatDate = taskParents.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
-            if (item.subTask && Array.isArray(item.subTask)) {
+          const taskParents = data?.filter((task) => task?.parent !== null);
+          const formatDate = taskParents?.map(({ ...item }) => {
+            item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
+            item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
+            if (item?.subTask && Array.isArray(item.subTask)) {
               item.subTask.sort((a, b) => {
                 return (
-                  listStatus.indexOf(a.status) - listStatus.indexOf(b.status)
+                  listStatus?.indexOf(a.status) - listStatus?.indexOf(b.status)
                 );
               });
             }
@@ -229,24 +223,10 @@ const EventStaffPage = () => {
     }
   );
 
-  useEffect(() => {
-    if (staff?.id) {
-      setFilterMember(staff.id);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [staff?.id]);
-
-  useEffect(() => {
-    if (staff?.id) {
-      refetchListTaskFilter();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterMember]);
-
   //handle search task ch va task con
   function filterSubTasks(task, searchText) {
     const subtaskTitles = task?.subTask?.filter((subtask) =>
-      subtask?.title?.toLowerCase().includes(searchText?.toLowerCase())
+      subtask?.title?.toLowerCase()?.includes(searchText?.toLowerCase())
     );
 
     return subtaskTitles;
@@ -262,7 +242,7 @@ const EventStaffPage = () => {
 
           if (
             // parentTitle.includes(searchText?.toLowerCase()) ||
-            subTaskResults.length > 0
+            subTaskResults?.length > 0
           ) {
             // Nếu parent hoặc subTask thỏa mãn điều kiện, trả về task với danh sách subTask được cắt
             return { ...task, subTask: subTaskResults };
@@ -290,7 +270,7 @@ const EventStaffPage = () => {
     // Lặp qua từng task trong listTaskParents
     const updatedListTaskParents = listTaskParents?.map((task) => {
       // Kiểm tra xem task có subTask và có trong listTaskFilter không
-      if (task.subTask && Array.isArray(task.subTask)) {
+      if (task?.subTask && Array.isArray(task?.subTask)) {
         // Lọc ra các subTask có id giống với các task trong listTaskFilter
         const updatedSubTasks = task?.subTask?.filter((subtask) =>
           listTaskFilter?.some(
@@ -315,94 +295,88 @@ const EventStaffPage = () => {
     searchText
   );
 
-  useEffect(() => {
-    if (listEvent && listEvent.length > 0 && !!notification === false) {
-      setSelectEvent(listEvent[0]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listEvent]);
+  // useEffect(() => {
+  //   if (listEvent && listEvent?.length > 0 && !!notification === false) {
+  //     setSelectEvent(listEvent?.[0]);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [listEvent]);
 
   useEffect(() => {
-    if (selectEvent.id) {
-      refetchListBudgetConfirming();
-      refetchListBudgetConfirmed();
+    if (staff?.id) {
+      setFilterMember(staff?.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staff?.id]);
+
+  useEffect(() => {
+    if (staff?.id) {
+      refetchListTaskFilter();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterMember]);
+
+  useEffect(() => {
+    if (selectEvent?.id) {
+      // refetchListBudgetConfirming();
+      // refetchListBudgetConfirmed();
       refetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectEvent, refetch, sort]);
+  }, [selectEvent?.id, refetch, sort]);
 
   return (
-    <div className="flex flex-col ">
-      {!isLoading ? (
-        !isError ? (
-          listEvent.length > 0 ? (
-            <>
-              <HeaderEvent
-                statusSelected={statusSelected}
-                setStatusSelected={setStatusSelected}
-                filterMember={filterMember}
-                setSort={setSort}
-                sort={sort}
-                events={listEvent}
-                setSelectEvent={setSelectEvent}
-                selectEvent={selectEvent}
-                setIsBoardTask={setIsBoardTask}
-                isBoardTask={isBoardTask}
-                setSearchText={setSearchText}
-                searchText={searchText}
-                setFilterMember={setFilterMember}
-              />
-              {isBoardTask ? (
-                !isLoadingListTask ? (
-                  !isErrorListTask ? (
-                    <KanbanBoard
-                      selectedStatus={statusSelected}
-                      selectEvent={selectEvent}
-                      listTaskParents={searchFilterTask}
-                    />
-                  ) : (
-                    <AnErrorHasOccured />
-                  )
-                ) : (
-                  <LoadingComponentIndicator />
-                )
-              ) : !isLoadingListBudgetConfirming ? (
+    <div className="flex flex-col">
+      <HeaderEvent
+        statusSelected={statusSelected}
+        setStatusSelected={setStatusSelected}
+        filterMember={filterMember}
+        setSort={setSort}
+        sort={sort}
+        events={listEvent}
+        selectEvent={selectEvent}
+        setIsBoardTask={setIsBoardTask}
+        isBoardTask={isBoardTask}
+        setSearchText={setSearchText}
+        searchText={searchText}
+        setFilterMember={setFilterMember}
+      />
+
+      {isBoardTask ? (
+        !isLoadingListTask ? (
+          !isErrorListTask ? (
+            <KanbanBoard
+              selectedStatus={statusSelected}
+              selectEvent={selectEvent}
+              listTaskParents={searchFilterTask}
+            />
+          ) : (
+            <AnErrorHasOccured />
+          )
+        ) : (
+          <LoadingComponentIndicator />
+        )
+      ) : (
+        <div>
+          {/* !isLoadingListBudgetConfirming ? (
                 !isErrorListBudgetConfirming ? (
-                  <BudgetStaff
+                  
+                    <BudgetStaff
                     listBudgetConfirmed={listBudgetConfirmed}
                     listBudgetConfirming={listBudgetConfirming}
                     selectEvent={selectEvent}
                   />
+                  
                 ) : (
                   <AnErrorHasOccured />
                 )
               ) : (
                 <LoadingComponentIndicator />
-              )}
-            </>
-          ) : (
-            <div className="mt-56">
-              <Empty description={false} />
-              <div>
-                <h1 className="text-center mt-6 font-extrabold text-xl ">
-                  Hiện tại bạn đang không tham gia vào sự kiện nào{"  "}
-                  <SmileTwoTone twoToneColor="#52c41a" />
-                </h1>
-                <h3 className="text-center text-sm text-gray-400 mt-4">
-                  Vui lòng liên hệ quản lí để tham gia vào sự kiện . Cảm ơn{" "}
-                  <HeartTwoTone twoToneColor="#eb2f96" />
-                </h3>
-              </div>
-            </div>
-          )
-        ) : (
-          <AnErrorHasOccured />
-        )
-      ) : (
-        <LoadingComponentIndicator />
+              ) */}
+        </div>
       )}
     </div>
   );
 };
 
-export default EventStaffPage;
+export default memo(EventStaffPage);

@@ -4,7 +4,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Avatar, Tag, Tooltip } from "antd";
-import React from "react";
+import React, { memo } from "react";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import { getComment } from "../../../apis/comments";
@@ -19,7 +19,7 @@ const TaskKanbanBoard = ({
   task,
   setTaskSelected,
 }) => {
-  const { id, status } = task;
+  const { id, status } = task ?? {};
   const {
     data: subtaskDetails,
     isError: isErrorSubtaskDetails,
@@ -35,12 +35,12 @@ const TaskKanbanBoard = ({
       }),
     {
       select: (data) => {
-        if (data.startDate && data.endDate) {
+        if (data?.startDate && data?.endDate) {
           const formatDate = data.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format(
+            item.startDate = moment(item?.startDate).format(
               "YYYY/MM/DD HH:mm:ss"
             );
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD HH:mm:ss");
+            item.endDate = moment(item?.endDate).format("YYYY/MM/DD HH:mm:ss");
             return {
               ...item,
             };
@@ -49,7 +49,7 @@ const TaskKanbanBoard = ({
         }
         return data;
       },
-      
+
       refetchOnWindowFocus: false,
       enabled: !!task?.id,
     }
@@ -69,14 +69,14 @@ const TaskKanbanBoard = ({
   } = useQuery(["comments", id], () => getComment(id), {
     select: (data) => {
       const formatDate = data.map(({ ...item }) => {
-        item.createdAt = moment(item.createdAt).format("MM/DD HH:mm");
+        item.createdAt = moment(item?.createdAt).format("MM/DD HH:mm");
         return {
           ...item,
         };
       });
       return formatDate;
     },
-    
+
     refetchOnWindowFocus: false,
     enabled: !!task,
   });
@@ -84,7 +84,7 @@ const TaskKanbanBoard = ({
   let totalTaskFiles = subtaskDetails?.[0]?.taskFiles?.length;
   let totalFiles = totalTaskFiles;
   listComments?.forEach((item) => {
-    let totalCommentFiles = item.commentFiles.length;
+    let totalCommentFiles = item?.commentFiles?.length;
     totalFiles += totalCommentFiles;
   });
 
@@ -133,16 +133,16 @@ const TaskKanbanBoard = ({
           {task?.endDate !== null && (
             <span
               className={`px-[6px] py-[2px] w-fit text-xs font-medium flex justify-start items-center gap-x-1 ${
-                task.status === "CANCEL" || task.status === "OVERDUE"
+                task?.status === "CANCEL" || task?.status === "OVERDUE"
                   ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
-                  : task.status === "DONE"
+                  : task?.status === "DONE"
                   ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
-                  : task.status === "CONFIRM"
+                  : task?.status === "CONFIRM"
                   ? "bg-purple-300 bg-opacity-20 text-purple-600 rounded-md"
                   : ""
               }`}
             >
-              {task.status === "CONFIRM" ? (
+              {task?.status === "CONFIRM" ? (
                 <CheckSquareOutlined className="text-purple-600" />
               ) : (
                 <svg
@@ -160,7 +160,7 @@ const TaskKanbanBoard = ({
                   />
                 </svg>
               )}
-              {formattedDate(task.endDate)}
+              {formattedDate(task?.endDate)}
             </span>
           )}
 
@@ -168,7 +168,7 @@ const TaskKanbanBoard = ({
             {!isLoadingListComments ? (
               !isErrorListComments ? (
                 <motion.div
-                  key={`subtask-${task.id}`}
+                  key={`subtask-${task?.id}`}
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: 20, opacity: 0 }}
@@ -214,7 +214,7 @@ const TaskKanbanBoard = ({
               )
             ) : (
               <motion.div
-                key={`loading-subtask-${task.id}`}
+                key={`loading-subtask-${task?.id}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -246,13 +246,13 @@ const TaskKanbanBoard = ({
               {!isLoadingSubtaskDetails ? (
                 !isErrorSubtaskDetails ? (
                   <motion.div
-                    key={`cmt-subtask-${task.id}`}
+                    key={`cmt-subtask-${task?.id}`}
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 20, opacity: 0 }}
                   >
-                    {subtaskDetails?.[0].assignTasks.length > 0 &&
-                      subtaskDetails?.[0].assignTasks.map((item, index) => (
+                    {subtaskDetails?.[0].assignTasks?.length > 0 &&
+                      subtaskDetails?.[0].assignTasks?.map((item, index) => (
                         <Tooltip
                           key={index}
                           title={item.user?.profile?.fullName}
@@ -295,4 +295,4 @@ const TaskKanbanBoard = ({
   );
 };
 
-export default TaskKanbanBoard;
+export default memo(TaskKanbanBoard);

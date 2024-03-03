@@ -45,3 +45,5 @@ export const getDivisionFreeUser = (fieldName, conValue, startDate, endDate) =>
   http({
     url: `/division/list/assignee/employee?fieldName=${fieldName}&conValue=${conValue}&startDate=${startDate}&endDate=${endDate}`,
   });
+
+export const getDivisionDetail = (divisionId) => http({ url: `/division/${divisionId}` });

@@ -31,9 +31,10 @@ const LoginPage = () => {
       //   },
       // });
 
-      if (role === TEXT.MANAGER) navigate("/manager");
-      else if (role === TEXT.STAFF) navigate("/staff");
-      else if (role === TEXT.ADMINISTRATOR) navigate("/administrator");
+      if (role === TEXT.MANAGER) navigate("/manager", { replace: true });
+      else if (role === TEXT.STAFF) navigate("/staff", { replace: true });
+      else if (role === TEXT.ADMINISTRATOR)
+        navigate("/administrator", { replace: true });
     },
   });
 

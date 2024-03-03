@@ -1,5 +1,5 @@
 import { Avatar, Layout, notification } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import SidebarStaff from "../components/Sidebar/SidebarStaff";
 import Header from "../components/Header/Header";
@@ -44,7 +44,7 @@ const StaffLayout = () => {
   }, []);
 
   return (
-    <div className="overflow-hidden overflow-y-scroll">
+    <Fragment>
       {contextHolder}
       <Layout
         style={{
@@ -55,12 +55,12 @@ const StaffLayout = () => {
 
         <Content>
           <Header collapsed={collapsed} setCollapsed={setCollapsed} />
-          <div className="overflow-hidden overflow-y-scroll mt-[64px] ">
+          <div className="overflow-hidden overflow-y-scroll scrollbar-hide mt-[64px] ">
             <Outlet />
           </div>
         </Content>
       </Layout>
-    </div>
+    </Fragment>
   );
 };
 

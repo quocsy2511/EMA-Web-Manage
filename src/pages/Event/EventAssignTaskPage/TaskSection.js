@@ -15,7 +15,12 @@ import {
 } from "react-icons/io5";
 import { BsExclamationCircle } from "react-icons/bs";
 import { GoDotFill } from "react-icons/go";
-import viVN from "antd/es/locale/vi_VN";
+
+import dayjs from "dayjs";
+import "dayjs/locale/vi";
+import vi_VN from "antd/locale/vi_VN";
+
+dayjs.locale("vi");
 
 const DrawerContainer = memo(
   ({
@@ -48,7 +53,6 @@ const DrawerContainer = memo(
         open={isDrawerOpen}
         key={"right"}
         width={"30%"}
-        className="bg-red-200"
       >
         {/* Content */}
         <div className="space-y-10">
@@ -462,7 +466,7 @@ const TaskSection = ({
               className="mt-[15%]"
             >
               <ConfigProvider
-                locale={viVN}
+                locale={vi_VN}
                 theme={{
                   token: {
                     colorText: "#1677ff",
@@ -474,6 +478,7 @@ const TaskSection = ({
                 }}
               >
                 <Calendar
+                  locale={vi_VN}
                   headerRender={() => {}}
                   fullscreen={true}
                   disabledDate={(currentDate) => {
@@ -501,10 +506,9 @@ const TaskSection = ({
                       currentMoment.isBetween(
                         isSelectDate?.[0],
                         isSelectDate?.[1],
-                        "day"
-                      ) ||
-                      currentMoment.isSame(isSelectDate?.[0], "day") ||
-                      currentMoment.isSame(isSelectDate?.[1], "day")
+                        "day",
+                        "[]"
+                      )
                     ) {
                       // Compare to the date gap in each task
                       calendarData?.calendarTasks?.map((task) => {

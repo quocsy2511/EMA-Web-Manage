@@ -1,5 +1,5 @@
 import { Modal } from "antd";
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import TaskModalContent from "./TaskModalContent";
 
@@ -68,4 +68,4 @@ const TaskModal = ({
   );
 };
 
-export default TaskModal;
+export default memo(TaskModal);

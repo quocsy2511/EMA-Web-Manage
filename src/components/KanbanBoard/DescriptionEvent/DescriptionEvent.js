@@ -1,5 +1,5 @@
 import { CaretRightOutlined } from "@ant-design/icons";
-import { Card, Collapse, Tag } from "antd";
+import { Card, Collapse, Tag, Tooltip } from "antd";
 import Meta from "antd/es/card/Meta";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import React from "react";
@@ -21,7 +21,7 @@ const DescriptionEvent = ({ selectEvent }) => {
     //colorMapping[status] ở đây để truy suất value bằng key
     return colorMapping[value];
   };
-  const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
+  const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
   return (
     <motion.div
       animate={{ opacity: [1, 0.2, 1] }}
@@ -41,23 +41,27 @@ const DescriptionEvent = ({ selectEvent }) => {
             description={`${selectEvent?.startDate} - ${selectEvent?.endDate}`}
           />
         </Card>
-        <Card className="w-1/4">
-          <Meta
-            avatar={
-              <FaSearchLocation className=" text-blue-500 mt-1" size={20} />
-            }
-            title="Địa điểm diễn ra"
-            description={selectEvent?.location}
-          />
+        <Card className="w-1/4 overflow-hidden truncate">
+          <Tooltip title={selectEvent?.location}>
+            <Meta
+              avatar={
+                <FaSearchLocation className=" text-blue-500 mt-1" size={20} />
+              }
+              title="Địa điểm diễn ra"
+              description={selectEvent?.location}
+              className="truncate"
+            />
+          </Tooltip>
         </Card>
 
-        <Card className="w-1/4">
+        <Card className="w-1/4 overflow-hidden">
           <Meta
             avatar={
               <FaMoneyBillWave className=" text-green-500 mt-1" size={20} />
             }
             title="Chi phí dự kiến"
             description={`${selectEvent?.estBudget?.toLocaleString()} VND`}
+            className="truncate"
           />
         </Card>
         <Card className="w-1/4">
@@ -105,7 +109,11 @@ const DescriptionEvent = ({ selectEvent }) => {
                   className="text-base w-2/3  px-2 italic text-black break-words"
                   dangerouslySetInnerHTML={{
                     __html: new QuillDeltaToHtmlConverter(
-                      JSON.parse(selectEvent?.description?.startsWith(`[{"insert":"`) ? selectEvent?.description : parseJson(selectEvent?.description))
+                      JSON.parse(
+                        selectEvent?.description?.startsWith(`[{"insert":"`)
+                          ? selectEvent?.description
+                          : parseJson(selectEvent?.description)
+                      )
                     ).convert(),
                   }}
                 ></p>

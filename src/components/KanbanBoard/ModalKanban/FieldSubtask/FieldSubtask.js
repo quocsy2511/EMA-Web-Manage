@@ -234,33 +234,8 @@ const FieldSubtask = ({
           </div>
         </div>
       </div>
-      {/* task EstimateTimeout */}
+      {/* process */}
       <div className=" flex flex-row gap-x-6">
-        <div className="flex flex-col w-1/2 pl-12 mt-4">
-          <h4 className="text-sm font-semibold flex flex-row gap-x-2 mb-2">
-            <TagOutlined />
-            Thời gian làm ước tính (giờ)
-          </h4>
-          <>
-            {disableUpdate ? (
-              <EstimateTime
-                taskParent={taskParent}
-                taskSelected={taskSelected}
-                updateEstimateTime={updateEstimateTime}
-                setUpdateEstimateTime={setUpdateEstimateTime}
-                disableUpdate={disableUpdate}
-              />
-            ) : (
-              <EstimateTime
-                taskParent={taskParent}
-                taskSelected={taskSelected}
-                updateEstimateTime={updateEstimateTime}
-                setUpdateEstimateTime={setUpdateEstimateTime}
-                disableUpdate={false}
-              />
-            )}
-          </>
-        </div>
         <div className="flex flex-col w-1/2 mt-2">
           <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden ">
             <h4 className="text-sm font-semibold flex flex-row gap-x-2">

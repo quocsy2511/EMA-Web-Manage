@@ -10,23 +10,21 @@ import {
   Segmented,
   Select,
   Space,
+  Tag,
   Upload,
   message,
 } from "antd";
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRouteLoaderData } from "react-router-dom";
-import { getAllUser, getEmployeeByDate } from "../../../apis/users";
+import { getEmployee } from "../../../apis/users";
 import moment from "moment";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
-// import { debounce } from "lodash";
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
-import { UploadOutlined, UserOutlined } from "@ant-design/icons";
-// import dayjs from "dayjs";
-// import viVN from "antd/locale/vi_VN";
+import { StarFilled, UploadOutlined, UserOutlined } from "@ant-design/icons";
 
 const NewTaskModal = ({
   addNewTask,
@@ -37,51 +35,42 @@ const NewTaskModal = ({
 }) => {
   const { RangePicker } = DatePicker;
   const { Option } = Select;
-  const { id, eventID, title } = TaskParent;
+  const { id, eventID, title } = TaskParent ?? {};
   const [startDate, setStartDate] = useState("");
-  console.log("🚀 ~ file: NewTaskModal.js:42 ~ startDate:", startDate);
   const [endDate, setEndDate] = useState("");
-  console.log("🚀 ~ file: NewTaskModal.js:43 ~ endDate:", endDate);
-  const [disabledEmployee, setDisabledEmployee] = useState(true);
   const [description, setDescription] = useState("");
   const [assignee, setAssignee] = useState([]);
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
+  const [form] = Form.useForm();
+
   const {
-    data: employeesByDate,
-    isError: isErrorEmployeesByDate,
-    isLoading: isLoadingEmployeesByDate,
-    refetch: refetchEmployees,
+    data: employees,
+    isError: isErrorEmployees,
+    isLoading: isLoadingEmployees,
+    // refetch: refetchEmployees,
   } = useQuery(
-    ["employees-by-Date"],
+    ["employees"],
     () =>
-      getEmployeeByDate({
-        startDate: startDate,
-        endDate: endDate,
+      getEmployee({
+        divisionId,
       }),
     {
       select: (data) => {
-        const filteredData = data.filter(
-          (item) =>
-            item.division.id === divisionId && item.typeEmployee === "FULL_TIME"
-        );
-        const listEmployee = filteredData.map(({ ...item }) => {
-          item.dob = moment(item.dob).format("YYYY-MM-DD");
+        // console.log("🚀 ~ data:", data?.users);
+
+        const listEmployee = data?.users?.map(({ ...item }) => {
+          item.dob = moment(item?.dob).format("YYYY-MM-DD");
           return {
-            key: item.id,
+            key: item?.id,
             ...item,
           };
         });
         return listEmployee;
       },
       refetchOnWindowFocus: false,
-      enabled: !!startDate && !!endDate,
     }
-  );
-  console.log(
-    "🚀 ~ file: NewTaskModal.js:56 ~ employeesByDate:",
-    employeesByDate
   );
 
   const queryClient = useQueryClient();
@@ -118,8 +107,14 @@ const NewTaskModal = ({
           data
         );
         const task = variables.task;
+        console.log("🚀 ~ useMutation ~ variables.task:", variables.task);
         variables.task = {
-          file: [{ fileName: data?.fileName, fileUrl: data?.downloadUrl }],
+          file: [
+            {
+              fileName: data?.fileName ? data?.fileName : "tài liệu công việc",
+              fileUrl: data?.downloadUrl,
+            },
+          ],
           ...task,
         };
         submitFormTask(variables.task);
@@ -143,36 +138,14 @@ const NewTaskModal = ({
 
   const onChangeDate = (value, dateString) => {
     // Chuyển đổi thành định dạng ISO 8601
-    const isoStartDate = moment(dateString[0]).toISOString();
-    const isoEndDate = moment(dateString[1]).toISOString();
+    const isoStartDate = moment(dateString?.[0]).toISOString();
+    const isoEndDate = moment(dateString?.[1]).toISOString();
     setStartDate(isoStartDate);
     setEndDate(isoEndDate);
-    if (isoStartDate && isoEndDate) {
-      console.log("ok");
-      setDisabledEmployee(false);
-      // refetchEmployees();
-    } else {
-      console.log("not");
-      setDisabledEmployee(true);
-    }
   };
 
   //validate pick date
   const today = moment();
-  const todayFormat = moment().format("YYYY-MM-DD HH:mm:ss");
-  const checkStartDateFormat = moment(disableStartDate).format("YYYY-MM-DD");
-  const checkEndDateFormat = moment(disableEndDate).format("YYYY-MM-DD");
-
-  const hourStartDate = moment(disableStartDate).format("HH");
-
-  const minutesStartDate = moment(disableStartDate).format("mm");
-  const hourCurrentDate = moment(todayFormat).format("HH");
-
-  const minutesCurrentDate = moment(todayFormat).format("mm");
-
-  const hourEndDate = moment(disableEndDate).format("HH");
-  const minutesEndDate = moment(disableEndDate).format("mm");
-
   const disabledDate = (current) => {
     if (current.isBefore(disableStartDate, "day")) {
       return (
@@ -182,116 +155,28 @@ const NewTaskModal = ({
     } else {
       return current.isBefore(today) || current.isAfter(disableEndDate, "day");
     }
-
-    // return current.isBefore(today) || current.isAfter(disableEndDate, "day");
-  };
-  //validate pick timess
-  const range = (start, end) => {
-    const result = [];
-    for (let i = start; i < end; i++) {
-      result.push(i);
-    }
-    return result;
   };
 
-  const disabledRangeTime = (current, type) => {
-    //check xem có phải chọn ngày bắt đầu với kết thúc ko ? ko thì sẽ ko bắt time
-    if (
-      !current?.isAfter(disableStartDate, "day") ||
-      !current?.isBefore(disableEndDate, "day")
-    ) {
-      if (!today.isBefore(disableStartDate, "day")) {
-        //Trường hợp  ngày hôm nay nó trùng ngày bắt đầu không ?
-        if (type === "start") {
-          if (!current?.isBefore(disableEndDate, "day")) {
-            //check xem có phải chọn ngày bắt đầu là ngày kết thúc của task ko ?
-            return {
-              disabledHours: () => range(hourEndDate, 24),
-              disabledMinutes: () => range(minutesEndDate, 60),
-            };
-          } else if (!current?.isAfter(disableStartDate, "day")) {
-            //check xem có phải chọn ngày bắt đầu là ngày bắt đầu của task ko ?
-            return {
-              disabledHours: () => range(0, hourCurrentDate),
-              disabledMinutes: () => range(0, minutesCurrentDate),
-            };
-          }
-        } else {
-          // đây là chọn ngày kết thúc
-          if (!current?.isAfter(disableStartDate, "day")) {
-            return {
-              disabledHours: () => range(0, hourCurrentDate),
-              disabledMinutes: () => range(0, minutesCurrentDate),
-            };
-          } else if (!current?.isBefore(disableEndDate, "day")) {
-            return {
-              disabledHours: () => range(hourEndDate, 24),
-              disabledMinutes: () => range(minutesEndDate, 60),
-            };
-          }
-          return {
-            disabledHours: () => range(hourEndDate, 24),
-            disabledMinutes: () => range(minutesEndDate, 60),
-          };
-        }
-      } else if (
-        checkStartDateFormat.toString() === checkEndDateFormat.toString()
-      ) {
-        //Trường hợp trong 1 ngày
-        if (type === "start") {
-          // return {
-          //   disabledHours: () => range(0, hourStartDate),
-          //   disabledMinutes: () => range(0, minutesStartDate),
-          // };
-          return {
-            disabledHours: () =>
-              range(0, hourStartDate).concat(range(hourEndDate, 24)), // Sửa đoạn này
-            disabledMinutes: () =>
-              range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
-          };
-        }
-        return {
-          disabledHours: () =>
-            range(0, hourStartDate).concat(range(hourEndDate, 24)), // Sửa đoạn này
-          disabledMinutes: () =>
-            range(0, minutesStartDate).concat(range(minutesEndDate, 60)),
-        };
-      } else {
-        // trường hợp ngày hôm nay trước ngày bắt đầu
-        if (type === "start") {
-          if (!current?.isBefore(disableEndDate, "day")) {
-            // nếu chọn ngày enđate
-            return {
-              disabledHours: () => range(hourEndDate, 24),
-              disabledMinutes: () => range(minutesEndDate, 60),
-            };
-          } else if (!current?.isAfter(disableStartDate, "day")) {
-            //ngày bắt đầu startdate
-            return {
-              disabledHours: () => range(0, hourStartDate),
-              disabledMinutes: () => range(0, minutesStartDate),
-            };
-          }
-          if (!current?.isAfter(disableStartDate, "day")) {
-            //chọn ngày kết thúc là ngày cuối
-            return {
-              disabledHours: () => range(0, hourStartDate),
-              disabledMinutes: () => range(0, minutesStartDate),
-            };
-          }
-          return {
-            disabledHours: () => range(hourEndDate, 24),
-            disabledMinutes: () => range(minutesEndDate, 60),
-          };
-        }
-      }
-    } else {
-      //các ngày ở giữa ngày bắt đầu và kết thúc thì sẽ ko bắt gì cả
-      return {
-        disabledHours: () => range(0, 0),
-        disabledMinutes: () => range(0, 0),
-      };
-    }
+  const tagRender = (props) => {
+    const { label, value, closable, onClose } = props;
+
+    const onPreventMouseDown = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    return (
+      <Tag
+        color="gold"
+        onMouseDown={onPreventMouseDown}
+        closable={closable}
+        onClose={onClose}
+        style={{
+          marginRight: 3,
+        }}
+      >
+        {label}
+      </Tag>
+    );
   };
 
   const onFinish = (values) => {
@@ -302,7 +187,7 @@ const NewTaskModal = ({
       startDate: startDate,
       endDate: endDate,
       parentTask: id,
-      leader: assignee[0].toString(),
+      leader: assignee?.[0]?.toString(),
       desc: JSON.stringify(values.desc.ops),
     };
 
@@ -318,7 +203,6 @@ const NewTaskModal = ({
     }
   };
 
-  const [form] = Form.useForm();
   return (
     <div>
       <Modal
@@ -381,19 +265,13 @@ const NewTaskModal = ({
               ]}
               hasFeedback
             >
-              {/* <ConfigProvider locale={viVN}> */}
               <RangePicker
                 placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
-                disabledTime={disabledRangeTime}
                 disabledDate={disabledDate}
-                showTime={{
-                  format: "HH:mm:ss",
-                  hideDisabledOptions: true,
-                }}
                 onChange={onChangeDate}
                 formatDate="YYYY/MM/DD HH:mm:ss"
+                className="w-full"
               />
-              {/* </ConfigProvider> */}
             </Form.Item>
             {/* member */}
             <Form.Item
@@ -406,12 +284,9 @@ const NewTaskModal = ({
                   message: "Hãy chọn nhân viên!",
                 },
               ]}
-              // validateStatus="warning"
-              help="Cần chọn thời gian để chọn nhân viên"
               hasFeedback
             >
               <Select
-                disabled={disabledEmployee}
                 autoFocus
                 allowClear
                 mode="multiple"
@@ -421,25 +296,26 @@ const NewTaskModal = ({
                 }}
                 onChange={(value) => handleChangeSelectMember(value)}
                 optionLabelProp="label"
+                tagRender={tagRender}
               >
                 <>
-                  {!isLoadingEmployeesByDate ? (
-                    !isErrorEmployeesByDate ? (
+                  {!isLoadingEmployees ? (
+                    !isErrorEmployees ? (
                       <>
-                        {employeesByDate?.map((item, index) => {
+                        {employees?.map((item, index) => {
                           return (
                             <Option
                               value={item?.id}
-                              label={item?.profile.fullName}
+                              label={item?.profile?.fullName}
                               key={item?.id}
                             >
                               <Space>
                                 <span
                                   role="img"
-                                  aria-label={item?.profile.fullName}
+                                  aria-label={item?.profile?.fullName}
                                 >
-                                  {item.avatar ? (
-                                    <Avatar src={item?.avatar} />
+                                  {item?.profile?.avatar ? (
+                                    <Avatar src={item?.profile?.avatar} />
                                   ) : (
                                     <Avatar
                                       icon={<UserOutlined />}
@@ -447,7 +323,7 @@ const NewTaskModal = ({
                                     />
                                   )}
                                 </span>
-                                {item?.profile.fullName}
+                                <span>{item?.profile?.fullName}</span>
                               </Space>
                             </Option>
                           );
@@ -462,39 +338,6 @@ const NewTaskModal = ({
                 </>
               </Select>
             </Form.Item>
-            {/* Estimated */}
-            <Form.Item
-              initialValue={0.0}
-              label="Ước tính giờ làm"
-              name="estimationTime"
-              className="text-sm font-medium "
-              rules={[
-                // {
-                //   pattern: /^\d*$/,
-                //   message: "Chỉ được nhập số",
-                // },
-                {
-                  validator: async (_, value) => {
-                    if (!/^\d*$/.test(value)) {
-                      throw new Error("Chỉ được nhập số");
-                    }
-                  },
-                },
-                {
-                  type: "number",
-                  min: 0,
-                  message: "Bắt buộc nhập số lớn hơn 0",
-                },
-              ]}
-            >
-              <InputNumber
-                placeholder="Chọn thời gian ước tính làm"
-                className="w-1/3"
-                // type="number"
-                // step="0.1"
-                // stringMode
-              />
-            </Form.Item>
             {/* priority */}
             <Form.Item
               label="Độ ưu tiên"
@@ -503,7 +346,6 @@ const NewTaskModal = ({
               initialValue={priority.value}
             >
               <Segmented
-                // defaultValue="LOW"
                 options={[
                   { label: "THẤP", value: "LOW" },
                   { label: "TRUNG BÌNH", value: "MEDIUM" },
@@ -597,4 +439,4 @@ const NewTaskModal = ({
   );
 };
 
-export default NewTaskModal;
+export default memo(NewTaskModal);
