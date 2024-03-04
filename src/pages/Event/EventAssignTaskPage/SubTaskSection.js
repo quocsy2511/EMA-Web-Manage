@@ -539,7 +539,7 @@ const SubTaskSection = ({
               className="mt-[15%]"
             >
               <ConfigProvider
-                locale={viVN}
+                locale={vi_VN}
                 theme={{
                   token: {
                     colorText: "#1677ff",

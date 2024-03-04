@@ -8,6 +8,7 @@ import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
+import SettingPage from "./pages/Setting/SettingPage";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -365,6 +366,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <DivisionPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "setting",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <SettingPage />
           </Suspense>
         ),
       },
