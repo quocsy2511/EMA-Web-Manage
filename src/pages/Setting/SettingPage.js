@@ -34,7 +34,6 @@ const SettingPage = () => {
     }
   };
 
-  console.log("1", eventType?.[0]?.id);
   const onFinish = (value) => {};
   return (
     <section className="  w-full px-7 py-7 bg-[#f5f5f5]">
