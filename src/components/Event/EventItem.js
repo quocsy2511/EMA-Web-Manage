@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Avatar, Tooltip } from "antd";
 import {
   BsHourglassBottom,
@@ -150,4 +150,4 @@ const EventItem = ({ event }) => {
   );
 };
 
-export default EventItem;
+export default memo(EventItem);

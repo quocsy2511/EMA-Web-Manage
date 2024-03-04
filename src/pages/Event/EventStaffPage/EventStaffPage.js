@@ -1,18 +1,18 @@
 import React, { memo, useEffect, useState } from "react";
-import HeaderEvent from "../../components/Header/HeaderEvent";
-import KanbanBoard from "../../components/KanbanBoard/KanbanBoard";
+import HeaderEvent from "../../../components/Header/HeaderEvent";
+import KanbanBoard from "../../../components/KanbanBoard/KanbanBoard";
 import { useQuery } from "@tanstack/react-query";
-import { getEventDivisions } from "../../apis/events";
-import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import { getEventDivisions } from "../../../apis/events";
+import AnErrorHasOccured from "../../../components/Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
 import { Empty } from "antd";
 import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
-import { filterTask } from "../../apis/tasks";
-import BudgetStaff from "../../components/KanbanBoard/BudgetStaff/BudgetStaff";
-import { getProfile } from "../../apis/users";
-import { getBudget } from "../../apis/budgets";
-import { useRouteLoaderData } from "react-router-dom";
+import { filterTask } from "../../../apis/tasks";
+import BudgetStaff from "../../../components/KanbanBoard/BudgetStaff/BudgetStaff";
+import { getProfile } from "../../../apis/users";
+import { getBudget } from "../../../apis/budgets";
+import { useLocation, useRouteLoaderData } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 moment.suppressDeprecationWarnings = true;
@@ -26,12 +26,18 @@ const EventStaffPage = () => {
     "CANCEL",
     "OVERDUE",
   ];
+
+  const location = useLocation();
+  const selectEvent = location.state?.event ?? {};
+  console.log("selectEvent > ", selectEvent);
+  const listEvent = location.state?.listEvent ?? [];
+
   // const [isDashBoard, setIsDashBoard] = useState(false);
   const [isBoardTask, setIsBoardTask] = useState(true);
   const [searchText, setSearchText] = useState(null);
   const [sort, setSort] = useState("DESC");
   const [statusSelected, setStatusSelected] = useState("clear");
-  const [selectEvent, setSelectEvent] = useState({});
+  // const [selectEvent, setSelectEvent] = useState({});
   const staff = useRouteLoaderData("staff");
   const notification = useSelector((state) => state.notification);
 
@@ -68,26 +74,26 @@ const EventStaffPage = () => {
   //   }
   // }, [isLoadingEventDetail, isErrorEventDetail, eventDetail]);
 
-  const {
-    data: listEvent,
-    isError,
-    isLoading,
-  } = useQuery(["events"], () => getEventDivisions(), {
-    select: (data) => {
-      const filteredEvents = data?.filter(
-        (item) => item?.status !== "DONE" && item?.status !== "CANCEL"
-      );
-      const event = filteredEvents?.map(({ ...item }) => {
-        item.startDate = moment(item?.startDate).format("DD/MM/YYYY");
-        item.endDate = moment(item?.endDate).format("DD/MM/YYYY");
-        return {
-          ...item,
-        };
-      });
-      return event;
-    },
-    refetchOnWindowFocus: false,
-  });
+  // const {
+  //   data: listEvent,
+  //   isError,
+  //   isLoading,
+  // } = useQuery(["events"], () => getEventDivisions(), {
+  //   select: (data) => {
+  //     const filteredEvents = data?.filter(
+  //       (item) => item?.status !== "DONE" && item?.status !== "CANCEL"
+  //     );
+  //     const event = filteredEvents?.map(({ ...item }) => {
+  //       item.startDate = moment(item?.startDate).format("DD/MM/YYYY");
+  //       item.endDate = moment(item?.endDate).format("DD/MM/YYYY");
+  //       return {
+  //         ...item,
+  //       };
+  //     });
+  //     return event;
+  //   },
+  //   refetchOnWindowFocus: false,
+  // });
 
   const [filterMember, setFilterMember] = useState(staff?.id);
 
@@ -143,7 +149,7 @@ const EventStaffPage = () => {
     isLoading: isLoadingListTask,
     refetch,
   } = useQuery(
-    ["tasks"],
+    ["tasks", staff?.id, selectEvent?.id],
     () =>
       filterTask({
         assignee: staff?.id,
@@ -289,12 +295,12 @@ const EventStaffPage = () => {
     searchText
   );
 
-  useEffect(() => {
-    if (listEvent && listEvent?.length > 0 && !!notification === false) {
-      setSelectEvent(listEvent?.[0]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listEvent]);
+  // useEffect(() => {
+  //   if (listEvent && listEvent?.length > 0 && !!notification === false) {
+  //     setSelectEvent(listEvent?.[0]);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [listEvent]);
 
   useEffect(() => {
     if (staff?.id) {
@@ -321,43 +327,38 @@ const EventStaffPage = () => {
 
   return (
     <div className="flex flex-col">
-      {!isLoading ? (
-        !isError ? (
-          listEvent?.length > 0 ? (
-            <>
-              <HeaderEvent
-                statusSelected={statusSelected}
-                setStatusSelected={setStatusSelected}
-                filterMember={filterMember}
-                setSort={setSort}
-                sort={sort}
-                events={listEvent}
-                setSelectEvent={setSelectEvent}
-                selectEvent={selectEvent}
-                setIsBoardTask={setIsBoardTask}
-                isBoardTask={isBoardTask}
-                setSearchText={setSearchText}
-                searchText={searchText}
-                setFilterMember={setFilterMember}
-              />
+      <HeaderEvent
+        statusSelected={statusSelected}
+        setStatusSelected={setStatusSelected}
+        filterMember={filterMember}
+        setSort={setSort}
+        sort={sort}
+        events={listEvent}
+        selectEvent={selectEvent}
+        setIsBoardTask={setIsBoardTask}
+        isBoardTask={isBoardTask}
+        setSearchText={setSearchText}
+        searchText={searchText}
+        setFilterMember={setFilterMember}
+      />
 
-              {isBoardTask ? (
-                !isLoadingListTask ? (
-                  !isErrorListTask ? (
-                    <KanbanBoard
-                      selectedStatus={statusSelected}
-                      selectEvent={selectEvent}
-                      listTaskParents={searchFilterTask}
-                    />
-                  ) : (
-                    <AnErrorHasOccured />
-                  )
-                ) : (
-                  <LoadingComponentIndicator />
-                )
-              ) : (
-                <div>
-                  {/* !isLoadingListBudgetConfirming ? (
+      {isBoardTask ? (
+        !isLoadingListTask ? (
+          !isErrorListTask ? (
+            <KanbanBoard
+              selectedStatus={statusSelected}
+              selectEvent={selectEvent}
+              listTaskParents={searchFilterTask}
+            />
+          ) : (
+            <AnErrorHasOccured />
+          )
+        ) : (
+          <LoadingComponentIndicator />
+        )
+      ) : (
+        <div>
+          {/* !isLoadingListBudgetConfirming ? (
                 !isErrorListBudgetConfirming ? (
                   
                     <BudgetStaff
@@ -372,29 +373,7 @@ const EventStaffPage = () => {
               ) : (
                 <LoadingComponentIndicator />
               ) */}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="mt-56">
-              <Empty description={false} />
-              <div>
-                <h1 className="text-center mt-6 font-extrabold text-xl ">
-                  Hiện tại bạn đang không tham gia vào sự kiện nào{"  "}
-                  <SmileTwoTone twoToneColor="#52c41a" />
-                </h1>
-                <h3 className="text-center text-sm text-gray-400 mt-4">
-                  Vui lòng liên hệ quản lí để tham gia vào sự kiện . Cảm ơn{" "}
-                  <HeartTwoTone twoToneColor="#eb2f96" />
-                </h3>
-              </div>
-            </div>
-          )
-        ) : (
-          <AnErrorHasOccured />
-        )
-      ) : (
-        <LoadingComponentIndicator />
+        </div>
       )}
     </div>
   );

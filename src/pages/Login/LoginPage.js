@@ -12,6 +12,7 @@ import { socketActions } from "../../store/socket";
 import TEXT from "../../constants/string";
 import loginBg from "../../assets/images/login-Bg-svg.svg";
 import { CarryOutOutlined } from "@ant-design/icons";
+import { setSocketToken } from "../../utils/socket";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -24,9 +25,18 @@ const LoginPage = () => {
       localStorage.setItem("token", accessToken);
 
       const role = jwt(accessToken).role;
-      if (role === TEXT.MANAGER) navigate("/manager");
-      else if (role === TEXT.STAFF) navigate("/staff");
-      else if (role === TEXT.ADMINISTRATOR) navigate("/administrator");
+
+      setSocketToken(accessToken);
+      // const socket = io(URL_SOCKET, {
+      //   auth: {
+      //     access_token: localStorage.getItem("token"),
+      //   },
+      // });
+
+      if (role === TEXT.MANAGER) navigate("/manager", { replace: true });
+      else if (role === TEXT.STAFF) navigate("/staff", { replace: true });
+      else if (role === TEXT.ADMINISTRATOR)
+        navigate("/administrator", { replace: true });
     },
   });
 

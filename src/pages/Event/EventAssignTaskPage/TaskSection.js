@@ -15,7 +15,12 @@ import {
 } from "react-icons/io5";
 import { BsExclamationCircle } from "react-icons/bs";
 import { GoDotFill } from "react-icons/go";
-import viVN from "antd/es/locale/vi_VN";
+
+import dayjs from "dayjs";
+import "dayjs/locale/vi";
+import vi_VN from "antd/locale/vi_VN";
+
+dayjs.locale("vi");
 
 const DrawerContainer = memo(
   ({
@@ -48,12 +53,13 @@ const DrawerContainer = memo(
         open={isDrawerOpen}
         key={"right"}
         width={"30%"}
-        className="bg-red-200"
       >
         {/* Content */}
         <div className="space-y-10">
           {!tasks?.listEvent ? (
-            <p className="text-lg text-center">Chưa chọn khoảng thời gian cần kiểm tra !</p>
+            <p className="text-lg text-center">
+              Chưa chọn khoảng thời gian cần kiểm tra !
+            </p>
           ) : tasks?.listEvent?.length === 0 ? (
             <div>
               <p className="text-lg text-center">Không có công việc nào !</p>
@@ -141,8 +147,13 @@ const Item = memo(
 
     updateDataDivision,
   }) => {
+    console.log("division > ", division);
     //
-    if (updateDataDivision && updateDataDivision?.[0] === division?.userId) {
+    if (
+      updateDataDivision &&
+      !selectedId &&
+      updateDataDivision?.[0] === division?.userId
+    ) {
       handleSelectDivision(division);
     }
 
@@ -155,16 +166,16 @@ const Item = memo(
           transition={{ duration: 0.3, type: "tween" }}
           className={clsx(
             "flex space-x-5 items-center rounded-xl p-3 border-2 cursor-pointer",
-            { "border-blue-400": selectedId?.id === division?.id }
+            { "border-blue-400": selectedId === division?.userId }
           )}
         >
           <div
             className={clsx(
               "flex items-center justify-center w-10 h-10 border rounded-full",
-              { "border-blue-500": selectedId?.id === division?.id }
+              { "border-blue-500": selectedId === division?.userId }
             )}
           >
-            {selectedId?.id === division?.id && (
+            {selectedId === division?.userId && (
               <FaCheck className="text-blue-500 text-base" />
             )}
           </div>
@@ -218,11 +229,18 @@ const TaskSection = ({
   listDivision,
   updateDataDivision,
 }) => {
+  console.log("updateDataDivision > ", updateDataDivision);
   const [selectedId, setSelectedId] = useState();
   const [calendarChecking, setCalendarChecking] = useState();
   const [calendarDateChecking, setCalendarDateChecking] = useState();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (updateDataDivision) {
+      setSelectedId(updateDataDivision?.[0]);
+    }
+  }, []);
 
   // Reset calendarChecking
   useEffect(() => {
@@ -235,16 +253,17 @@ const TaskSection = ({
     isError: divisionsIsError,
   } = useQuery(
     ["divisions"],
-    () => getAllDivision({ pageSize: 100, currentPage: 1, mode: 1 }),
+    () => getAllDivision({ pageSize: 25, currentPage: 1, mode: 1 }),
     {
       select: (data) => {
+        console.log("data > ", data);
         return data
           ?.filter(
             (division) =>
               division?.status && listDivision?.includes(division?.id)
           )
           .map((division) => ({
-            id: division?.users?.[0]?.id,
+            id: division?.id,
             divisionName: division?.divisionName,
             userId: division?.users?.[0]?.id,
             userName: division?.users?.[0]?.profile?.fullName,
@@ -252,7 +271,6 @@ const TaskSection = ({
       },
     }
   );
-  console.log("divisions > ", divisions);
 
   const {
     data: calendarData,
@@ -300,8 +318,8 @@ const TaskSection = ({
   console.log("calendarData > ", calendarData);
 
   const handleSelectDivision = (division) => {
-    setSelectedId(division);
-    form.setFieldsValue({ assignee: [division?.id] });
+    setSelectedId(division?.userId);
+    form.setFieldsValue({ assignee: [division?.userId] });
     console.log(form.getFieldsValue());
   };
 
@@ -448,7 +466,7 @@ const TaskSection = ({
               className="mt-[15%]"
             >
               <ConfigProvider
-                locale={viVN}
+                locale={vi_VN}
                 theme={{
                   token: {
                     colorText: "#1677ff",
@@ -460,6 +478,7 @@ const TaskSection = ({
                 }}
               >
                 <Calendar
+                  locale={vi_VN}
                   headerRender={() => {}}
                   fullscreen={true}
                   disabledDate={(currentDate) => {
@@ -487,10 +506,9 @@ const TaskSection = ({
                       currentMoment.isBetween(
                         isSelectDate?.[0],
                         isSelectDate?.[1],
-                        "day"
-                      ) ||
-                      currentMoment.isSame(isSelectDate?.[0], "day") ||
-                      currentMoment.isSame(isSelectDate?.[1], "day")
+                        "day",
+                        "[]"
+                      )
                     ) {
                       // Compare to the date gap in each task
                       calendarData?.calendarTasks?.map((task) => {

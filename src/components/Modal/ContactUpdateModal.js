@@ -84,7 +84,7 @@ const ContactUpdateModal = ({
           onChange={(target) => setText(target.target.value)}
           rows={4}
           placeholder="Nhập lý do khác ..."
-          maxLength={6}
+          cols={5}
           disabled={selectReason !== 0}
         />
       </div>

@@ -19,7 +19,12 @@ import {
 import { GoDotFill } from "react-icons/go";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import viVN from "antd/es/locale/vi_VN";
+
+import dayjs from "dayjs";
+import "dayjs/locale/vi";
+import vi_VN from "antd/locale/vi_VN";
+
+dayjs.locale("vi");
 
 const DrawerContainer = memo(
   ({
@@ -56,7 +61,9 @@ const DrawerContainer = memo(
         {/* Content */}
         <div className="space-y-10">
           {!tasks?.listEvent ? (
-            <p className="text-lg text-center">Chưa chọn khoảng thời gian cần kiểm tra !</p>
+            <p className="text-lg text-center">
+              Chưa chọn khoảng thời gian cần kiểm tra !
+            </p>
           ) : tasks?.listEvent?.length === 0 ? (
             <div>
               <p className="text-lg text-center">Không có công việc nào !</p>
@@ -533,7 +540,7 @@ const SubTaskSection = ({
               className="mt-[15%]"
             >
               <ConfigProvider
-                locale={viVN}
+                locale={vi_VN}
                 theme={{
                   token: {
                     colorText: "#1677ff",
@@ -544,98 +551,102 @@ const SubTaskSection = ({
                   },
                 }}
               >
-                <Calendar
-                  locale={viVN}
-                  headerRender={() => {}}
-                  fullscreen={true}
-                  disabledDate={(currentDate) => {
-                    const current = momenttz(currentDate?.$d);
+                <ConfigProvider locale={vi_VN}>
+                  <Calendar
+                    headerRender={() => {}}
+                    fullscreen={true}
+                    disabledDate={(currentDate) => {
+                      const current = momenttz(currentDate?.$d);
 
-                    return (
-                      current.isBefore(isSelectDate?.[0], "day") ||
-                      current.isAfter(isSelectDate?.[1], "day")
-                    );
-                  }}
-                  onSelect={(value, info) => {
-                    setCalendarDateChecking(momenttz(value.$d));
-                    setIsDrawerOpen(true);
-                  }}
-                  onPanelChange={(value, mode) => {
-                    console.log("month change > ", value.format("YYYY-MM-DD"));
-                  }}
-                  cellRender={(current) => {
-                    let renderList;
-                    const currentMoment = momenttz(current?.$d);
-
-                    // Compare to the selected date
-                    if (
-                      currentMoment.isBetween(
-                        isSelectDate?.[0],
-                        isSelectDate?.[1],
-                        "day"
-                      ) ||
-                      currentMoment.isSame(isSelectDate?.[0], "day") ||
-                      currentMoment.isSame(isSelectDate?.[1], "day")
-                    ) {
-                      // Compare to the date gap in each task
-                      calendarData?.calendarTasks?.map((task) => {
-                        if (
-                          currentMoment.isBetween(
-                            task?.startDate,
-                            task?.endDate,
-                            "day"
-                          ) ||
-                          currentMoment.isSame(task?.startDate, "day") ||
-                          currentMoment.isSame(task?.endDate, "day")
-                        ) {
-                          if (renderList) renderList = [...renderList, task];
-                          else renderList = [task];
-                        }
-                      });
-                    }
-
-                    // return info.originNode;
-                    if (renderList)
                       return (
-                        <div className="gap-y-5 mb-3">
-                          {renderList?.map((item, index) => {
-                            const { borderColor, textColor, statusText } =
-                              getColor(item?.status);
+                        current.isBefore(isSelectDate?.[0], "day") ||
+                        current.isAfter(isSelectDate?.[1], "day")
+                      );
+                    }}
+                    onSelect={(value, info) => {
+                      setCalendarDateChecking(momenttz(value.$d));
+                      setIsDrawerOpen(true);
+                    }}
+                    onPanelChange={(value, mode) => {
+                      console.log(
+                        "month change > ",
+                        value.format("YYYY-MM-DD")
+                      );
+                    }}
+                    cellRender={(current) => {
+                      let renderList;
+                      const currentMoment = momenttz(current?.$d);
 
-                            const icon = getPriority(item?.priority);
+                      // Compare to the selected date
+                      if (
+                        currentMoment.isBetween(
+                          isSelectDate?.[0],
+                          isSelectDate?.[1],
+                          "day"
+                        ) ||
+                        currentMoment.isSame(isSelectDate?.[0], "day") ||
+                        currentMoment.isSame(isSelectDate?.[1], "day")
+                      ) {
+                        // Compare to the date gap in each task
+                        calendarData?.calendarTasks?.map((task) => {
+                          if (
+                            currentMoment.isBetween(
+                              task?.startDate,
+                              task?.endDate,
+                              "day"
+                            ) ||
+                            currentMoment.isSame(task?.startDate, "day") ||
+                            currentMoment.isSame(task?.endDate, "day")
+                          ) {
+                            if (renderList) renderList = [...renderList, task];
+                            else renderList = [task];
+                          }
+                        });
+                      }
 
-                            return (
-                              <div>
-                                <Tooltip
-                                  key={item?.id + index ?? index}
-                                  placement="top"
-                                  title={statusText}
-                                  className="relative"
-                                >
-                                  <div
-                                    className={clsx(
-                                      `border ${borderColor} py-1 px-3 rounded-xl mt-2`
-                                    )}
+                      // return info.originNode;
+                      if (renderList)
+                        return (
+                          <div className="gap-y-5 mb-3">
+                            {renderList?.map((item, index) => {
+                              const { borderColor, textColor, statusText } =
+                                getColor(item?.status);
+
+                              const icon = getPriority(item?.priority);
+
+                              return (
+                                <div>
+                                  <Tooltip
+                                    key={item?.id + index ?? index}
+                                    placement="top"
+                                    title={statusText}
+                                    className="relative"
                                   >
-                                    <p
+                                    <div
                                       className={clsx(
-                                        `text-center text-xs ${textColor} font-normal truncate`
+                                        `border ${borderColor} py-1 px-3 rounded-xl mt-2`
                                       )}
                                     >
-                                      {item?.title}
-                                    </p>
-                                  </div>
-                                  <div className="absolute -top-[20%] left-1.5 bg-white rounded-full">
-                                    {icon}
-                                  </div>
-                                </Tooltip>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                  }}
-                />
+                                      <p
+                                        className={clsx(
+                                          `text-center text-xs ${textColor} font-normal truncate`
+                                        )}
+                                      >
+                                        {item?.title}
+                                      </p>
+                                    </div>
+                                    <div className="absolute -top-[20%] left-1.5 bg-white rounded-full">
+                                      {icon}
+                                    </div>
+                                  </Tooltip>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                    }}
+                  />
+                </ConfigProvider>
               </ConfigProvider>
             </Spin>
           </div>

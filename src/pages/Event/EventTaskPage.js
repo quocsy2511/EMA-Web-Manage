@@ -13,9 +13,11 @@ import {
   Dropdown,
   FloatButton,
   Image,
+  Modal,
   Popover,
   Progress,
   Tooltip,
+  Upload,
   message,
 } from "antd";
 import {
@@ -68,10 +70,15 @@ import { filterTask, getTasks, getTemplateTask } from "../../apis/tasks";
 import EmptyList from "../../components/Error/EmptyList";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import EventUpdateModal from "../../components/Modal/EventUpdateModal";
-import { getContract, getContractEvidence } from "../../apis/contract";
+import {
+  getContract,
+  getContractEvidence,
+  postContractEvidence,
+} from "../../apis/contract";
 import DocReviewerModal from "../../components/Modal/DocReviewerModal";
 import ContractCreatePage from "../../components/Modal/ContractCreatePage";
 import clsx from "clsx";
+import defaultBanner from "../../assets/images/default_banner_images.png";
 
 moment.locale("vi"); // Set the locale to Vietnam
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
@@ -101,6 +108,11 @@ const EventTaskPage = () => {
   const [statusSelection, setStatusSelection] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false); // update event
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
+
+  const [isUpdateContractModalOpen, setIsUpdateContractModalOpen] =
+    useState(false);
+  const [updateContractFile, setUpdateContractFile] = useState();
+  console.log("updateContractFile > ", updateContractFile);
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -212,6 +224,20 @@ const EventTaskPage = () => {
       },
     });
 
+  const {
+    mutate: contractEvidenceMutate,
+    isLoading: contractEvidenceMutateIsLoading,
+  } = useMutation((formData) => postContractEvidence(contract?.id, formData), {
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Đã cập nhật hợp đồng",
+      });
+      setIsUpdateContractModalOpen(false);
+      queryClient.invalidateQueries(["contract-evidence", contract?.id]);
+    },
+  });
+
   useEffect(() => {
     if (assigneeSelection || prioritySelection || statusSelection) {
     }
@@ -310,6 +336,67 @@ const EventTaskPage = () => {
         }
         className="cursor-pointer"
       />
+
+      <Modal
+        title="Cập nhật hợp đồng"
+        open={isUpdateContractModalOpen}
+        onOk={() => {
+          if (updateContractFile) {
+            if (updateContractFile?.size > 10 * 1024 * 1024) {
+              messageApi.open({
+                type: "warning",
+                content: "File quá lớn ! Chỉ cho phép dung lượng < 10MB.",
+              });
+            } else {
+              const formData = new FormData();
+              formData.append("file", updateContractFile);
+              formData.append("folderName", "contract");
+
+              contractEvidenceMutate(formData);
+            }
+          }
+        }}
+        onCancel={() => setIsUpdateContractModalOpen(false)}
+        width={"20%"}
+        cancelText="Hủy"
+        confirmLoading={contractEvidenceMutateIsLoading}
+      >
+        <div className="flex items-center justify-center">
+          <Upload
+            className="flex items-center gap-x-3"
+            maxCount={1}
+            listType="picture-circle"
+            customRequest={({ file, onSuccess }) => {
+              setTimeout(() => {
+                onSuccess("ok");
+              }, 0);
+            }}
+            showUploadList={{
+              showPreviewIcon: false,
+              // showRemoveIcon: false,
+            }}
+            accept=".pdf"
+            beforeUpload={(file) => {
+              return new Promise((resolve, reject) => {
+                if (file && file?.size > 10 * 1024 * 1024) {
+                  reject("File quá lớn ( <10MB )");
+                  messageApi.open({
+                    type: "warning",
+                    content: "File quá lớn ! Chỉ cho phép dung lượng < 10MB.",
+                  });
+                  return false;
+                } else {
+                  setUpdateContractFile(file);
+                  resolve();
+                  return true;
+                }
+              });
+            }}
+          >
+            Tệp Tin PDF
+          </Upload>
+        </div>
+      </Modal>
 
       <EventUpdateModal
         isModalOpen={isModalOpen}
@@ -430,28 +517,6 @@ const EventTaskPage = () => {
                     </p>
                   ),
                   children: [
-                    // {
-                    //   key: "PENDING",
-                    //   label: (
-                    //     <p
-                    //       className="text-sm text-slate-500"
-                    //       onClick={() => updateStatusMutate("PENDING")}
-                    //     >
-                    //       Chưa bắt đầu
-                    //     </p>
-                    //   ),
-                    // },
-                    // {
-                    //   key: "PREPARING",
-                    //   label: (
-                    //     <p
-                    //       className="text-sm text-orange-500"
-                    //       onClick={() => updateStatusMutate("PREPARING")}
-                    //     >
-                    //       Đang chuẩn bị
-                    //     </p>
-                    //   ),
-                    // },
                     {
                       key: "PROCESSING",
                       label: (
@@ -517,14 +582,14 @@ const EventTaskPage = () => {
         animate={{ y: 0 }}
         className="bg-white rounded-2xl mt-8 overflow-hidden"
       >
-        <div className="h-40 w-full overflow-hidden">
+        <div className="h-40 w-full overflow-hidden border-b-2 border-slate-400">
           <Image
             src={
               eventDetail?.coverUrl ??
               "https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
             }
             width={"100%"}
-            className="bg-slate-200"
+            fallback={defaultBanner}
           />
         </div>
         <div className="mx-10 my-8">
@@ -532,52 +597,93 @@ const EventTaskPage = () => {
             <p className="flex-1 text-3xl font-bold">
               {eventDetail?.eventName}
             </p>
-
-            <Popover
-              content={
-                <p className="text-base">
-                  {contractIsLoading || contractEvidenceIsLoading
-                    ? "Đang tải ..."
-                    : contractIsError || contractEvidenceIsError
-                    ? "Không thể lấy dữ liệu"
-                    : "Hợp đồng"}
-                </p>
-              }
+            <Dropdown
+              placement="bottomLeft"
+              arrow
+              trigger={["click"]}
+              menu={{
+                items: [
+                  {
+                    key: "1",
+                    label: (
+                      <a
+                        href={
+                          contract &&
+                          contractEvidence &&
+                          (contractEvidence?.length > 0
+                            ? contractEvidence?.[0]?.evidenceUrl
+                            : contract?.contractFileUrl ?? null)
+                        }
+                        target="_blank"
+                        className=""
+                      >
+                        Xem hợp đồng
+                      </a>
+                    ),
+                  },
+                  {
+                    key: "2",
+                    disabled:
+                      !!contractEvidence && contractEvidence?.length > 0,
+                    label: (
+                      <div
+                        onClick={() => setIsUpdateContractModalOpen(true)}
+                        className=""
+                      >
+                        <p>Cập nhật hợp đồng</p>
+                      </div>
+                    ),
+                  },
+                ],
+              }}
             >
-              <motion.div
-                className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
-                whileHover={{ y: -4 }}
-                onClick={() => {
-                  // Create contract -> Disabled
-                  // if (!contractIsLoading && !contractIsError)
-                  //   if (Object.keys(contract).length === 0)
-                  //     setIsContractModalOpen(true);
-                }}
+              <Popover
+                content={
+                  <p className="text-base">
+                    {contractIsLoading || contractEvidenceIsLoading
+                      ? "Đang tải ..."
+                      : contractIsError || contractEvidenceIsError
+                      ? "Không thể lấy dữ liệu"
+                      : "Hợp đồng"}
+                  </p>
+                }
               >
-                {contractIsLoading ||
-                contractIsError ||
-                !contract ||
-                contractEvidenceIsLoading ||
-                contractEvidenceIsError ||
-                !contractEvidence ? (
-                  <FaFilePdf className="text-lg" />
-                ) : (
-                  <a
-                    className="hover:text-inherit"
-                    href={
-                      contract &&
-                      contractEvidence &&
-                      (contractEvidence?.length > 0
-                        ? contractEvidence?.[0]?.evidenceUrl
-                        : contract?.contractFileUrl ?? null)
-                    }
-                    target="_blank"
-                  >
+                <motion.div
+                  className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
+                  whileHover={{ y: -4 }}
+                  onClick={() => {
+                    // Create contract -> Disabled
+                    // if (!contractIsLoading && !contractIsError)
+                    //   if (Object.keys(contract).length === 0)
+                    //     setIsContractModalOpen(true);
+                  }}
+                >
+                  {/* {contractIsLoading ||
+                  contractIsError ||
+                  !contract ||
+                  contractEvidenceIsLoading ||
+                  contractEvidenceIsError ||
+                  !contractEvidence ? (
                     <FaFilePdf className="text-lg" />
-                  </a>
-                )}
-              </motion.div>
-            </Popover>
+                  ) : (
+                    <a
+                      className="hover:text-inherit"
+                      // href={
+                      //   contract &&
+                      //   contractEvidence &&
+                      //   (contractEvidence?.length > 0
+                      //     ? contractEvidence?.[0]?.evidenceUrl
+                      //     : contract?.contractFileUrl ?? null)
+                      // }
+                      // target="_blank"
+                    >
+                      <FaFilePdf className="text-lg" />
+                    </a>
+                  )} */}
+                  <FaFilePdf className="text-lg" />
+                </motion.div>
+              </Popover>
+            </Dropdown>
 
             <Popover content={<p className="text-base">Điều chỉnh bộ phận</p>}>
               <motion.div
