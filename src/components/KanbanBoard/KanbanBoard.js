@@ -16,6 +16,7 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
   const dispatch = useDispatch();
 
   const notification = useSelector((state) => state.notification);
+  console.log("🚀 ~ KanbanBoard ~ notification:", notification);
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);

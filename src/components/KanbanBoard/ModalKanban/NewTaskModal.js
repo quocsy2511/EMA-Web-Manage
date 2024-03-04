@@ -3,6 +3,7 @@ import {
   Avatar,
   Button,
   DatePicker,
+  Drawer,
   Form,
   Input,
   InputNumber,
@@ -96,6 +97,9 @@ const NewTaskModal = ({
 
   const onCloseModal = () => {
     console.log("Close");
+    setAddNewTask(false);
+  };
+  const onClose = () => {
     setAddNewTask(false);
   };
 
@@ -205,11 +209,14 @@ const NewTaskModal = ({
 
   return (
     <div>
-      <Modal
+      <Drawer
+        placement="right"
+        size={800}
         title={`Danh sách công việc - ${title}`}
         open={addNewTask}
         footer={false}
         onCancel={onCloseModal}
+        onClose={onClose}
         width={900}
         className="text-lg font-bold"
       >
@@ -434,7 +441,7 @@ const NewTaskModal = ({
             </Form.Item>
           </Form>
         </div>
-      </Modal>
+      </Drawer>
     </div>
   );
 };

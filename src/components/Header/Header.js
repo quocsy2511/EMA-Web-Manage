@@ -36,12 +36,11 @@ const Header = ({ collapsed, setCollapsed }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const NotiLabel = ({ item }) => {
+    console.log("🚀 ~ NotiLabel ~ item:", item);
     let time;
     const currentDate = moment().subtract(7, "hours");
     const targetDate = moment(item.createdAt);
     const duration = moment.duration(currentDate.diff(targetDate));
-
-    console.log("item noti: ", item);
 
     if (duration.asMinutes() < 1) {
       // Less than 1 minute
