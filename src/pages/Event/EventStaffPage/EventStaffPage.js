@@ -6,7 +6,7 @@ import { getEventDivisions } from "../../../apis/events";
 import AnErrorHasOccured from "../../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
-import { Empty } from "antd";
+import { Empty, message } from "antd";
 import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
 import { filterTask } from "../../../apis/tasks";
 import BudgetStaff from "../../../components/KanbanBoard/BudgetStaff/BudgetStaff";
@@ -29,7 +29,7 @@ const EventStaffPage = () => {
 
   const location = useLocation();
   const selectEvent = location.state?.event ?? {};
-  console.log("selectEvent > ", selectEvent);
+  // console.log("selectEvent > ", selectEvent);
   const listEvent = location.state?.listEvent ?? [];
 
   // const [isDashBoard, setIsDashBoard] = useState(false);
@@ -40,61 +40,6 @@ const EventStaffPage = () => {
   // const [selectEvent, setSelectEvent] = useState({});
   const staff = useRouteLoaderData("staff");
   const notification = useSelector((state) => state.notification);
-
-  // const {
-  //   data: eventDetail,
-  //   refetch: refetchEventDetail,
-  //   isError: isErrorEventDetail,
-  //   isLoading: isLoadingEventDetail,
-  // } = useQuery(
-  //   ["event-detail"],
-  //   () => getEventDetail({ eventId: notification?.eventId }),
-  //   {
-  //     select: (data) => {
-  //       return data;
-  //     },
-  //     enabled: !!notification?.eventId,
-  //   }
-  // );
-
-  // useEffect(() => {
-  //   if (notification?.eventId) {
-  //     refetchEventDetail();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [notification?.eventId]);
-  // useEffect(() => {
-  //   if (isLoadingEventDetail) {
-  //     console.log("Đang tải dữ liệu...");
-  //   } else if (isErrorEventDetail) {
-  //     console.log("Có lỗi khi tải dữ liệu...");
-  //   } else {
-  //     // Nếu không có lỗi và không đang tải, có thể setSelectEvent
-  //     setSelectEvent(eventDetail);
-  //   }
-  // }, [isLoadingEventDetail, isErrorEventDetail, eventDetail]);
-
-  // const {
-  //   data: listEvent,
-  //   isError,
-  //   isLoading,
-  // } = useQuery(["events"], () => getEventDivisions(), {
-  //   select: (data) => {
-  //     const filteredEvents = data?.filter(
-  //       (item) => item?.status !== "DONE" && item?.status !== "CANCEL"
-  //     );
-  //     const event = filteredEvents?.map(({ ...item }) => {
-  //       item.startDate = moment(item?.startDate).format("DD/MM/YYYY");
-  //       item.endDate = moment(item?.endDate).format("DD/MM/YYYY");
-  //       return {
-  //         ...item,
-  //       };
-  //     });
-  //     return event;
-  //   },
-  //   refetchOnWindowFocus: false,
-  // });
-
   const [filterMember, setFilterMember] = useState(staff?.id);
 
   // const {
@@ -160,22 +105,29 @@ const EventStaffPage = () => {
       }),
     {
       select: (data) => {
+        // console.log("🚀 ~ EventStaffPage ~ data:", data);
         if (data && Array.isArray(data)) {
           const taskParents = data?.filter((task) => task?.parent === null);
           const formatDate = taskParents?.map(({ ...item }) => {
             item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
             item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
+
             if (item?.subTask && Array.isArray(item?.subTask)) {
               item.subTask.sort((a, b) => {
-                return (
-                  listStatus.indexOf(a.status) - listStatus.indexOf(b.status)
-                );
+                const sortByStatus =
+                  listStatus.indexOf(a.status) - listStatus.indexOf(b.status);
+                if (sortByStatus === 0) {
+                  return moment(b.createdAt).diff(moment(a.createdAt));
+                }
+                return sortByStatus;
               });
             }
+
             return {
               ...item,
             };
           });
+
           return formatDate;
         }
         return data;
@@ -186,7 +138,11 @@ const EventStaffPage = () => {
     }
   );
 
-  const { data: listTaskFilter, refetch: refetchListTaskFilter } = useQuery(
+  const {
+    data: listTaskFilter,
+    refetch: refetchListTaskFilter,
+    isLoadingTaskFilter,
+  } = useQuery(
     ["tasks-filter-member"],
     () =>
       filterTask({
@@ -223,6 +179,7 @@ const EventStaffPage = () => {
     }
   );
 
+  // console.log("🚀 ~ EventStaffPage ~ listTaskFilter:", listTaskFilter);
   //handle search task ch va task con
   function filterSubTasks(task, searchText) {
     const subtaskTitles = task?.subTask?.filter((subtask) =>
@@ -253,18 +210,11 @@ const EventStaffPage = () => {
         })
         .filter((task) => task !== null);
 
-      console.log(
-        "🚀 ~ file: EventStaffPage.js:187 ~ updateListTaskParents ~ filteredTaskParents:",
-        filteredTaskParents
-      );
+      // console.log(
+      //   "🚀 ~ file: EventStaffPage.js:187 ~ updateListTaskParents ~ filteredTaskParents:",
+      //   filteredTaskParents
+      // );
       return filteredTaskParents;
-    }
-
-    //check ng dùng chọn filter
-    if (listTaskFilter?.length === 0) {
-      // Nếu listTaskFilter rỗng, refetch listTaskParents
-      refetch();
-      return listTaskParents;
     }
 
     // Lặp qua từng task trong listTaskParents
@@ -286,15 +236,24 @@ const EventStaffPage = () => {
       }
     });
 
+    // check ng dùng chọn filter
+    if (listTaskFilter?.length === 0 && staff?.id === filterMember) {
+      // Nếu listTaskFilter rỗng, refetch listTaskParents
+      refetch();
+      return listTaskParents;
+    }
+
     return updatedListTaskParents;
   }
 
-  const searchFilterTask = updateListTaskParents(
-    listTaskParents,
-    listTaskFilter,
-    searchText
-  );
-
+  let searchFilterTask;
+  if (!isLoadingTaskFilter && !isLoadingListTask) {
+    searchFilterTask = updateListTaskParents(
+      listTaskParents,
+      listTaskFilter,
+      searchText
+    );
+  }
   // useEffect(() => {
   //   if (listEvent && listEvent?.length > 0 && !!notification === false) {
   //     setSelectEvent(listEvent?.[0]);

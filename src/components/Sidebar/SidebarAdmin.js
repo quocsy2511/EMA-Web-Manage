@@ -5,8 +5,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
 import { AnimatePresence, motion } from "framer-motion";
 import { HiOutlineUserGroup, HiOutlineUser } from "react-icons/hi2";
+import { IoSettingsOutline } from "react-icons/io5";
 import { BsPersonVcard } from "react-icons/bs";
 import logo from "../../assets/images/logo.png";
+import { SettingOutlined } from "@ant-design/icons";
 
 //label cho than side bar
 const LabelText = ({ text }) => (
@@ -52,6 +54,14 @@ const SidebarAdmin = ({ collapsed }) => {
       "/administrator/division",
       <p>
         <HiOutlineUserGroup className="text-[#4CAF50]" size={24} />
+      </p>
+    ),
+    getItem(
+      <LabelText text="Cài đặt" />,
+      "Cài đặt",
+      "/administrator/setting",
+      <p>
+        <IoSettingsOutline className="text-gray-400" size={24} />
       </p>
     ),
   ];

@@ -38,13 +38,13 @@ const FileInput = ({ taskSelected, setUpdateFileList }) => {
         setUpdateFileList((prev) => [
           ...prev,
           {
-            fileName: data?.fileName,
+            fileName: data?.fileName ? data?.fileName : "tài liệ công việc",
             fileUrl: data?.downloadUrl,
             taskID: taskID,
           },
         ]);
         const fileObj = {
-          fileName: data?.fileName,
+          fileName: data?.fileName ? data?.fileName : "tài liệ công việc",
           fileUrl: data?.downloadUrl,
           taskID,
         };

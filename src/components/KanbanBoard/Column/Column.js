@@ -5,6 +5,7 @@ import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
 import { AnimatePresence } from "framer-motion";
 import moment from "moment";
+import { Tooltip } from "antd";
 
 const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
   const colors = [
@@ -79,17 +80,30 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
           w-[250px] mx-auto my-2 rounded-lg cursor-pointer py-4 px-1 hover:opacity-70 shadow-lg shadow-darkShadow"
             onClick={() => openTaskParentModal()}
           >
-            <div className="flex items-start gap-2 w-full px-2">
-              <span className={`rounded-full w-4 h-4 ${color} mt-[2px]`}></span>
-              <div className="flex flex-col gap-y-[2px]  hover:text-secondary">
-                <p className=" max-w-[215px] whitespace-normal italic font-semibold text-white text-sm break-words ">
-                  {TaskParent?.title}({completed}/{TaskParent?.subTask?.length})
-                </p>
-                <p className="text-xs font-semibold text-white underline underline-offset-2">
-                  {startDate} - {endDate}
-                </p>
+            <Tooltip title={TaskParent?.title}>
+              <div className="flex items-start gap-2 w-full px-2">
+                <span
+                  className={`rounded-full w-4 h-4 ${color} mt-[2px]`}
+                ></span>
+                <div className="flex flex-col gap-y-[2px] w-[90%] overflow-hidden  hover:text-secondary">
+                  <div className="overflow-hidden  flex w-full gap-x-1">
+                    <div className="overflow-hidden max-w-[80%] ">
+                      <p className=" italic font-semibold text-white text-sm truncate">
+                        {TaskParent?.title}
+                      </p>
+                    </div>
+
+                    <span className="italic font-semibold text-white text-sm w-[15%]">
+                      ({completed}/{TaskParent?.subTask?.length})
+                    </span>
+                  </div>
+
+                  <p className="text-xs font-semibold text-white underline underline-offset-2">
+                    {startDate} - {endDate}
+                  </p>
+                </div>
               </div>
-            </div>
+            </Tooltip>
           </div>
 
           {/* subtask */}

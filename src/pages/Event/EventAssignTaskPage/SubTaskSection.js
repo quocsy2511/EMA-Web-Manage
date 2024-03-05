@@ -19,9 +19,8 @@ import {
 import { GoDotFill } from "react-icons/go";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-
+import viVN from "antd/locale/vi_VN";
 import dayjs from "dayjs";
-import "dayjs/locale/vi";
 import vi_VN from "antd/locale/vi_VN";
 
 dayjs.locale("vi");
@@ -540,7 +539,7 @@ const SubTaskSection = ({
               className="mt-[15%]"
             >
               <ConfigProvider
-                locale={viVN}
+                locale={vi_VN}
                 theme={{
                   token: {
                     colorText: "#1677ff",

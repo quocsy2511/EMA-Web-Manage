@@ -41,15 +41,14 @@ const DescriptionEvent = ({ selectEvent }) => {
             description={`${selectEvent?.startDate} - ${selectEvent?.endDate}`}
           />
         </Card>
-        <Card className="w-1/4 overflow-hidden truncate">
+        <Card className="w-1/4 overflow-hidden ">
           <Tooltip title={selectEvent?.location}>
             <Meta
               avatar={
                 <FaSearchLocation className=" text-blue-500 mt-1" size={20} />
               }
               title="Địa điểm diễn ra"
-              description={selectEvent?.location}
-              className="truncate"
+              description={<p className="truncate">{selectEvent?.location}</p>}
             />
           </Tooltip>
         </Card>

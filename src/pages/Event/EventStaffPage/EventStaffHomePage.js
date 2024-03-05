@@ -186,7 +186,7 @@ const EventStaffHomePage = () => {
     },
     refetchOnWindowFocus: false,
   });
-  console.log("listEvent > ", listEvent);
+  // console.log("listEvent > ", listEvent);
 
   const {
     data: listUsers,
@@ -209,7 +209,7 @@ const EventStaffHomePage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("listUsers > ", listUsers);
+  // console.log("listUsers > ", listUsers);
 
   const handleSelectStatus = (status) => {
     setSelectedStatus(status);

@@ -4,6 +4,8 @@ import { Form, Input, message } from "antd";
 import { debounce } from "lodash";
 import React, { useRef } from "react";
 import { getTasks, updateTask } from "../../../../apis/tasks";
+import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
 
 const TitleSubtask = ({
   disableUpdate,
@@ -12,6 +14,7 @@ const TitleSubtask = ({
   title,
   setTitle,
 }) => {
+  console.log("🚀 ~ taskSelected:", taskSelected);
   const inputRef = useRef(null);
   const taskID = taskSelected?.id;
 
@@ -27,7 +30,11 @@ const TitleSubtask = ({
     }
   };
 
-  const { data: subtaskDetails } = useQuery(
+  const {
+    data: subtaskDetails,
+    isError,
+    isLoading,
+  } = useQuery(
     ["subtaskDetails", taskID],
     () =>
       getTasks({
@@ -65,8 +72,8 @@ const TitleSubtask = ({
   });
 
   const onFinish = (values) => {
-    const eventID = taskSelected.event.id;
-    const parentTask = taskSelected.parent.id;
+    const eventID = taskSelected?.eventDivision?.event?.id;
+    const parentTask = taskSelected?.parent?.id;
     const {
       approvedBy,
       assignTasks,
@@ -115,26 +122,36 @@ const TitleSubtask = ({
           disabled={taskParent}
         />
       ) : (
-        <Form onFinish={onFinish} className="w-full">
-          <Form.Item
-            name="title"
-            initialValue={subtaskDetails?.[0].title}
-            className="w-full mb-2"
-          >
-            <Input
-              onPressEnter={onPressEnter}
-              autoComplete="false"
-              ref={inputRef}
-              className="truncate bg-transparent px-4 py-2 rounded-md text-3xl font-bold border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer h-fit"
-              placeholder="Tên công việc ...."
-              value={subtaskDetails?.[0].title}
-              onChange={(e) => titleDebounced(e.target.value)}
-              id="board-name-input"
-              type="text"
-              disabled={disableUpdate}
-            />
-          </Form.Item>
-        </Form>
+        <>
+          {!isLoading ? (
+            !isError ? (
+              <Form onFinish={onFinish} className="w-full">
+                <Form.Item
+                  name="title"
+                  initialValue={subtaskDetails?.[0].title}
+                  className="w-full mb-2"
+                >
+                  <Input
+                    onPressEnter={onPressEnter}
+                    autoComplete="false"
+                    ref={inputRef}
+                    className="truncate bg-transparent px-4 py-2 rounded-md text-3xl font-bold border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer h-fit"
+                    placeholder="Tên công việc ...."
+                    value={subtaskDetails?.[0].title}
+                    onChange={(e) => titleDebounced(e.target.value)}
+                    id="board-name-input"
+                    type="text"
+                    disabled={disableUpdate}
+                  />
+                </Form.Item>
+              </Form>
+            ) : (
+              <AnErrorHasOccured />
+            )
+          ) : (
+            <LoadingComponentIndicator />
+          )}
+        </>
       )}
     </div>
   );
