@@ -22,7 +22,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
       <motion.div layout className="flex space-x-3">
         {/* <IoLocationSharp className="text-xl" /> */}
         {icon}
-        <p className="text-sm font-normal truncate">{text}</p>
+        <span className="text-sm font-normal truncate">{text}</span>
       </motion.div>
     </Tooltip>
   ));
@@ -48,6 +48,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
     default:
       break;
   }
+  console.log("event > ", event);
 
   return (
     <motion.div
@@ -78,14 +79,26 @@ const EventItem = memo(({ event, gotoEventPage }) => {
             <div className="flex-1">
               <LabelItem
                 icon={<LuCalendarClock className="text-xl text-orange-500" />}
-                text={<p>{momenttz(event?.startDate).format("DD-MM-YYYY")}</p>}
+                text={
+                  <p>
+                    {momenttz(event?.startDate, "DD/MM/YYYY").format(
+                      "DD-MM-YYYY"
+                    )}
+                  </p>
+                }
                 tooltip="Thời gian tổ chức"
               />
             </div>
             <div className="flex-1">
               <LabelItem
                 icon={<LuCalendarX2 className="text-xl text-green-500" />}
-                text={<p>{momenttz(event?.endDate).format("DD-MM-YYYY")}</p>}
+                text={
+                  <p>
+                    {momenttz(event?.endDate, "DD/MM/YYYY").format(
+                      "DD-MM-YYYY"
+                    )}
+                  </p>
+                }
                 tooltip="Thời gian kết thúc"
               />
             </div>
@@ -109,7 +122,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
                     ? "tháng"
                     : "năm"
                 }`}
-                tooltip="Thời gian còn lại"
+                tooltip="Thời gian còn lại trước khi kết thúc sự kiện"
               />
             </div>
           </div>
@@ -311,13 +324,13 @@ const EventStaffHomePage = () => {
           className="flex flex-wrap mt-8"
         >
           {listEventIsLoading ? (
-            <p className="text-2xl font-medium flex items-center justify-center w-full min-h-[calc(100vh/2)]">
+            <div className="text-2xl font-medium flex items-center justify-center w-full min-h-[calc(100vh/2)]">
               <LoadingComponentIndicator />
-            </p>
+            </div>
           ) : listEventIsError ? (
-            <p className="text-2xl font-medium flex items-center justify-center w-full min-h-[calc(100vh/2)]">
+            <div className="text-2xl font-medium flex items-center justify-center w-full min-h-[calc(100vh/2)]">
               Chưa tham gia sự kiện nào !
-            </p>
+            </div>
           ) : (
             <AnimatePresence>
               {listEvent?.map((event) => (

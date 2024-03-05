@@ -9,6 +9,7 @@ import { BsPersonVcard, BsJournalCheck, BsMailbox } from "react-icons/bs";
 import { IoMailOutline } from "react-icons/io5";
 import { IoChatboxOutline } from "react-icons/io5";
 import logo from "../../assets/images/logo.png";
+import logo_domain from "../../assets/images/logo_domain.png";
 
 //label cho than side bar
 const LabelText = ({ text }) => (
@@ -56,14 +57,14 @@ const Sidebar = ({ collapsed }) => {
         <HiOutlineCalendarDays className="text-[#9c27b0]" size={24} />
       </p>
     ),
-    getItem(
-      <LabelText text="Chấm công" />,
-      "Chấm công",
-      "/manager/timekeeping",
-      <p>
-        <BsJournalCheck className="text-[#333333]" size={24} />
-      </p>
-    ),
+    // getItem(
+    //   <LabelText text="Chấm công" />,
+    //   "Chấm công",
+    //   "/manager/timekeeping",
+    //   <p>
+    //     <BsJournalCheck className="text-[#333333]" size={24} />
+    //   </p>
+    // ),
     getItem(
       <LabelText text="Yêu cầu" />,
       "Yêu cầu",
@@ -124,16 +125,9 @@ const Sidebar = ({ collapsed }) => {
           {/* logo here */}
           <div className="demo-logo-vertical flex justify-center items-center p-4 dark:text-white">
             {!collapsed ? (
-              <div className="flex flex-col gap-y-4">
-                <Avatar size={150} src={logo} />
-                {/* <h3 className="text-center text-sm font-semibold dark:text-white text-secondary">
-                  HREA
-                </h3> */}
-              </div>
+              <img src={logo} className="h-24" />
             ) : (
-              <div className="flex flex-col gap-y-[2px]">
-                <Avatar size={34} src={logo} />
-              </div>
+              <img src={logo_domain} className="" />
             )}
           </div>
 

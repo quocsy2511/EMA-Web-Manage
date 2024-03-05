@@ -41,6 +41,7 @@ import {
 import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
 import { MdEmojiEvents } from "react-icons/md";
 import avatarDefault from "../../../assets/images/empty_event.png";
+import clsx from "clsx";
 
 const NewTaskModal = ({
   addNewTask,
@@ -573,19 +574,18 @@ const NewTaskModal = ({
                     {item?.listEvent?.map((event) => (
                       <div key={event?.eventID}>
                         {/* listEvent */}
-                        <div className=" px-3 py-1 rounded-lg bg-blue-400 flex flex-row justify-start items-center gap-x-1 overflow-hidden mb-2">
+                        <div className=" px-3 py-2 rounded-lg bg-blue-400 flex flex-row justify-start items-center gap-x-1 overflow-hidden mb-2">
                           <CaretDownOutlined className="text-white" />
                           <Tooltip title={event?.eventName}>
-                            <p className="text-sm text-white font-normal pr-4 truncate cursor-pointer">
+                            <p className="text-base text-white pr-4 truncate cursor-pointer font-medium">
                               {event?.eventName}
                             </p>
                           </Tooltip>
                         </div>
 
                         {/* List Task */}
-                        <div className="w-full pt-3 overflow-hidden ">
+                        <div className="w-full pt-3 overflow-hidden pl-10">
                           <Timeline
-                            mode="right"
                             items={event?.listTask
                               ?.filter(
                                 (item) =>
@@ -593,30 +593,17 @@ const NewTaskModal = ({
                                   item.status === "PROCESSING"
                               )
                               ?.map((task) => {
-                                const startDate = moment(
-                                  task?.startDate
-                                ).format("DD-MM-YYYY");
-                                const endDate = moment(task?.endDate).format(
-                                  "DD-MM-YYYY"
-                                );
                                 return {
-                                  label: (
-                                    <>
-                                      <p className="flex justify-start items-center gap-x-2 font-medium text-black">
-                                        {moment(selectedDateSchedule).format(
-                                          "DD-MM-YYYY"
-                                        )}
-                                      </p>
-                                    </>
-                                  ),
                                   children: (
                                     <>
                                       <p
-                                        className={
-                                          task?.status === "PENDING"
-                                            ? "text-yellow-500"
-                                            : "text-green-500"
-                                        }
+                                        className={clsx(
+                                          "text-base text-green-500",
+                                          {
+                                            "text-yellow-500":
+                                              task?.status === "PENDING",
+                                          }
+                                        )}
                                       >
                                         {task?.title}
                                       </p>
@@ -625,11 +612,11 @@ const NewTaskModal = ({
                                   dot: (
                                     <>
                                       {task?.priority === "HIGH" ? (
-                                        <ClockCircleOutlined className="timeline-clock-icon text-red-500" />
+                                        <ClockCircleOutlined className="text-lg timeline-clock-icon text-red-500" />
                                       ) : task?.priority === "MEDIUM" ? (
-                                        <FieldTimeOutlined className="timeline-clock-icon text-gray-500" />
+                                        <FieldTimeOutlined className="text-lg timeline-clock-icon text-gray-500" />
                                       ) : (
-                                        <HistoryOutlined className="timeline-clock-icon text-green-500" />
+                                        <HistoryOutlined className="text-lg timeline-clock-icon text-green-500" />
                                       )}
                                     </>
                                   ),

@@ -25,7 +25,6 @@ import {
   onTypingStopSocket,
   socket,
 } from "../../utils/socket";
-import { handleUpdateUsers } from "../../store/online_user";
 
 const now = momenttz().tz("Asia/Bangkok");
 

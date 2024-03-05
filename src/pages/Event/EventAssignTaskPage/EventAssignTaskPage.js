@@ -337,6 +337,7 @@ const EventAssignTaskPage = () => {
             <TaskSection
               form={form}
               isSelectDate={isSelectDate}
+              eventId={eventId}
               listDivision={listDivision}
               updateDataDivision={
                 updateData ? updateData?.assignee ?? [] : null

@@ -6,9 +6,10 @@ import { HiOutlineHome } from "react-icons/hi2";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
 import { Avatar, ConfigProvider, Menu } from "antd";
-import logo from "../../assets/images/logo.png";
 import { AnimatePresence, motion } from "framer-motion";
 import { IoChatboxOutline } from "react-icons/io5";
+import logo from "../../assets/images/logo.png";
+import logo_domain from "../../assets/images/logo_domain.png";
 
 const SidebarStaff = ({ collapsed }) => {
   const [colorTheme, setColorTheme] = useDarkMode();
@@ -127,16 +128,9 @@ const SidebarStaff = ({ collapsed }) => {
           {/* logo here */}
           <div className="demo-logo-vertical flex justify-center items-center p-4">
             {!collapsed ? (
-              <div className="flex flex-col gap-y-4">
-                <Avatar size={54} src={logo} />
-                <h3 className="text-center text-sm font-semibold text-secondary">
-                  HREA
-                </h3>
-              </div>
+              <img src={logo} className="h-24" />
             ) : (
-              <div className="flex flex-col gap-y-[2px]">
-                <Avatar size={34} src={logo} />
-              </div>
+              <img src={logo_domain} className="" />
             )}
           </div>
 

@@ -175,7 +175,6 @@ const EventSubTaskPage = () => {
         dateRange: location.state?.dateRange,
 
         isSubTask: false,
-        listDivision: location.state?.listDivision,
 
         updateData,
       },

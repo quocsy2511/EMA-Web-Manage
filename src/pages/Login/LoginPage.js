@@ -13,6 +13,7 @@ import TEXT from "../../constants/string";
 import loginBg from "../../assets/images/login-Bg-svg.svg";
 import { CarryOutOutlined } from "@ant-design/icons";
 import { setSocketToken } from "../../utils/socket";
+import logo from "../../assets/images/logo.png";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -52,13 +53,14 @@ const LoginPage = () => {
             <div className="flex h-full w-full">
               {/* left */}
               <div className="min-h-full flex justify-center items-center rounded-lg w-1/2 p-5 ">
-                <div className="with-full">
+                <div className="with-full flex flex-col items-center">
                   <div className="text-center mb-5">
-                    <CarryOutOutlined className="text-[#212121] text-[6rem]" />
+                    {/* <CarryOutOutlined className="text-[#212121] text-[6rem]" /> */}
+                    <img src={logo} className="w-36" />
                   </div>
-                  <div className="mb-5">
-                    <h2 className="text-[#212121] text-center text-lg">
-                      Công việc của ban được quản lí dễ dàng hơn
+                  <div className="mb-5 mt-2">
+                    <h2 className="text-[#212121] text-center text-xl font-medium">
+                      Hỗ trợ quản lý công việc của bạn dễ dàng hơn
                     </h2>
                   </div>
                   <div>
@@ -115,7 +117,7 @@ const LoginPage = () => {
                       className="mt-1"
                     >
                       <Input.Password
-                        placeholder="password"
+                        placeholder="Mật khẩu"
                         className="py-5 px-3 rounded-lg"
                         autoComplete="curren-password"
                       />

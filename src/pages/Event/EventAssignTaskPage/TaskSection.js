@@ -1,12 +1,28 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
-import { Calendar, ConfigProvider, Drawer, Form, Spin, Tooltip } from "antd";
-import { FaCheck } from "react-icons/fa6";
-import { MdArrowForwardIos, MdEmojiEvents } from "react-icons/md";
+import {
+  Calendar,
+  ConfigProvider,
+  Drawer,
+  Dropdown,
+  Form,
+  Spin,
+  Tooltip,
+} from "antd";
+import {
+  FaCheck,
+  FaCircleArrowDown,
+  FaCircleExclamation,
+} from "react-icons/fa6";
+import { MdArrowForwardIos, MdCategory, MdEmojiEvents } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import momenttz from "moment-timezone";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { getAllDivision, getDivisionFreeUser } from "../../../apis/divisions";
+import {
+  getAllDivision,
+  getDivisionFreeUser,
+  getFreeDivision,
+} from "../../../apis/divisions";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 import clsx from "clsx";
 import {
@@ -19,36 +35,151 @@ import { GoDotFill } from "react-icons/go";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import vi_VN from "antd/locale/vi_VN";
+import { PiDotsThreeCircleVerticalFill } from "react-icons/pi";
+
+const now = momenttz();
 
 dayjs.locale("vi");
 
-const DrawerContainer = memo(
-  ({
-    isDrawerOpen,
-    setIsDrawerOpen,
-    calendarDateChecking,
-    tasks,
-    getColor,
-    getPriority,
-  }) => {
-    console.log("tasks> ", tasks);
+const StatusRender = memo(({ bg, text }) => (
+  <div className="flex space-x-2 items-center mr-10">
+    <div className={`w-2 h-2 ${bg} rounded-full`} />
+    <p className="text-sm font-medium">{text}</p>
+  </div>
+));
 
+const PriorityRender = memo(({ icon, text }) => (
+  <div className="flex space-x-2 items-center mr-10">
+    <div className="">{icon}</div>
+    <p className="w-3/4 text-sm font-medium truncate">{text}</p>
+  </div>
+));
+
+const DrawerContainer = memo(
+  ({ isDrawerOpen, setIsDrawerOpen, getColor, divisionChecking }) => {
+    console.log("divisionChecking > ", divisionChecking);
     return (
       <Drawer
         title={
-          <div className="flex items-center space-x-10">
-            <IoClose
-              className="text-xl text-slate-400"
-              onClose={() => setIsDrawerOpen(false)}
-            />
-            <p className="text-xl font-semibold">
-              Lịch trình ngày{" "}
-              {calendarDateChecking?.clone().format("DD-MM-YYYY")}
-            </p>
+          <div className="flex justify-between items-center space-x-3 w-full">
+            <div className="">
+              <p className="text-base font-semibold truncate">
+                Lịch trình ngày{" "}
+                <span className="underline truncate">
+                  {momenttz(divisionChecking?.date).format("DD-MM-YYYY")}{" "}
+                </span>
+                của{" "}
+                <span className="underline truncate">
+                  {divisionChecking?.division?.divisionName}
+                </span>
+              </p>
+            </div>
+
+            <div className="border-2 border-black rounded-md p-1 cursor-pointer">
+              <Dropdown
+                placement="bottomLeft"
+                menu={{
+                  items: [
+                    {
+                      key: "status",
+                      label: "Trạng thái",
+                      type: "group",
+                      children: [
+                        {
+                          key: 1,
+                          label: (
+                            <StatusRender
+                              bg="bg-gray-400"
+                              text="Đang chuẩn bị"
+                            />
+                          ),
+                        },
+                        {
+                          key: 2,
+                          label: (
+                            <StatusRender
+                              bg="bg-blue-400"
+                              text="Đang thực hiện"
+                            />
+                          ),
+                        },
+                        {
+                          key: 3,
+                          label: (
+                            <StatusRender bg="bg-green-500" text="Hoàn thành" />
+                          ),
+                        },
+                        {
+                          key: 4,
+                          label: (
+                            <StatusRender
+                              bg="bg-purple-500"
+                              text="Đã xác thực"
+                            />
+                          ),
+                        },
+                        {
+                          key: 5,
+                          label: <StatusRender bg="bg-red-500" text="Hủy bỏ" />,
+                        },
+                        {
+                          key: 6,
+                          label: (
+                            <StatusRender bg="bg-orange-500" text="Quá hạn" />
+                          ),
+                        },
+                      ],
+                    },
+                    {
+                      key: "priority",
+                      label: "Độ ưu tiên",
+                      type: "group",
+                      children: [
+                        {
+                          key: 1,
+                          label: (
+                            <PriorityRender
+                              icon={
+                                <FaCircleArrowDown className="text-lg text-green-500" />
+                              }
+                              text="Thấp"
+                            />
+                          ),
+                        },
+                        {
+                          key: 1,
+                          label: (
+                            <PriorityRender
+                              icon={
+                                <PiDotsThreeCircleVerticalFill className="text-xl text-orange-400 rotate-90" />
+                              }
+                              text="Trung bình"
+                            />
+                          ),
+                        },
+                        {
+                          key: 1,
+                          label: (
+                            <PriorityRender
+                              icon={
+                                <FaCircleExclamation className="text-lg text-red-500" />
+                              }
+                              text="Cao"
+                            />
+                          ),
+                        },
+                      ],
+                    },
+                  ],
+                }}
+                arrow
+              >
+                <MdCategory className="text-lg" />
+              </Dropdown>
+            </div>
           </div>
         }
         placement={"right"}
-        closable={false}
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
         key={"right"}
@@ -56,31 +187,23 @@ const DrawerContainer = memo(
       >
         {/* Content */}
         <div className="space-y-10">
-          {!tasks?.listEvent ? (
-            <p className="text-lg text-center">
-              Chưa chọn khoảng thời gian cần kiểm tra !
-            </p>
-          ) : tasks?.listEvent?.length === 0 ? (
+          {!divisionChecking?.division?.users?.[0]?.listEvent?.length === 0 ? (
             <div>
               <p className="text-lg text-center">Không có công việc nào !</p>
             </div>
           ) : (
-            tasks?.listEvent?.map((event) => {
+            divisionChecking?.division?.users?.[0]?.listEvent?.map((event) => {
               // filter task list
               const listTasks = event?.listTask?.filter((task) => {
-                const start = momenttz(task?.startDate, "DD-MM-YYYY");
-                const end = momenttz(task?.endDate, "DD-MM-YYYY");
-
                 if (
-                  calendarDateChecking?.isBetween(start, end, "day") ||
-                  calendarDateChecking?.isSame(start, "day") ||
-                  calendarDateChecking?.isSame(end, "day")
+                  divisionChecking?.date >= task?.startDate &&
+                  divisionChecking?.date <= task?.endDate
                 ) {
                   return task;
                 }
               });
 
-              if (listTasks?.length !== 0)
+              if (!!listTasks?.length)
                 return (
                   <div key={event?.eventID} className="w-full space-y-3">
                     <div className="flex items-center bg-gray-50 rounded-full">
@@ -99,12 +222,9 @@ const DrawerContainer = memo(
                       </div>
                     </div>
 
-                    <div className="ml-5">
+                    <div className="ml-5 space-y-1">
                       {listTasks?.map((task) => {
-                        const icon = getPriority(task?.priority);
-                        const { textColor, statusText } = getColor(
-                          task?.status
-                        );
+                        const { textColor } = getColor(task?.status);
 
                         return (
                           <div
@@ -112,17 +232,19 @@ const DrawerContainer = memo(
                             className="flex items-center space-x-3 bg-red-20"
                           >
                             {/* {icon} */}
-                            <GoDotFill className="text-sm" />
+                            <GoDotFill className={`${textColor}`} />
                             <p
                               className={`text-sm font-medium w-auto truncate`}
                             >
-                              {task?.title} :{" "}
+                              {task?.title}
                             </p>
-                            <p
-                              className={`text-xs font-medium ${textColor} truncate`}
-                            >
-                              {statusText}
-                            </p>
+                            {task?.priority === "LOW" ? (
+                              <FaCircleArrowDown className="text-lg text-green-500" />
+                            ) : task?.priority === "MEDIUM" ? (
+                              <PiDotsThreeCircleVerticalFill className="text-2xl text-orange-400 rotate-90" />
+                            ) : (
+                              <FaCircleExclamation className="text-lg text-red-500" />
+                            )}
                           </div>
                         );
                       })}
@@ -137,190 +259,125 @@ const DrawerContainer = memo(
   }
 );
 
-const Item = memo(
-  ({
-    division,
-    selectedId,
-    handleSelectDivision,
-    setCalendarChecking,
-    isSelectDate,
-
-    updateDataDivision,
-  }) => {
-    console.log("division > ", division);
-    //
-    if (
-      updateDataDivision &&
-      !selectedId &&
-      updateDataDivision?.[0] === division?.userId
-    ) {
-      handleSelectDivision(division);
-    }
-
-    return (
-      <div className="relative">
-        <motion.div
-          onClick={() => handleSelectDivision(division)}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.3, type: "tween" }}
+const Item = memo(({ division, selectedId, handleSelectDivision }) => {
+  return (
+    <div className="relative">
+      <motion.div
+        onClick={() => handleSelectDivision(division)}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.3, type: "tween" }}
+        className={clsx(
+          "flex space-x-5 items-center rounded-xl p-3 border-2 cursor-pointer group",
+          { "border-blue-400": selectedId === division?.users?.[0]?.id },
+          {
+            "hover:border-blue-500 transition-colors":
+              selectedId !== division?.users?.[0]?.id,
+          }
+        )}
+      >
+        <div
           className={clsx(
-            "flex space-x-5 items-center rounded-xl p-3 border-2 cursor-pointer",
-            { "border-blue-400": selectedId === division?.userId }
+            "flex items-center justify-center w-10 h-10 border rounded-full",
+            { "border-blue-500": selectedId === division?.users?.[0]?.id },
+            {
+              "group-hover:border-blue-500 transition-colors":
+                selectedId !== division?.users?.[0]?.id,
+            }
           )}
         >
-          <div
-            className={clsx(
-              "flex items-center justify-center w-10 h-10 border rounded-full",
-              { "border-blue-500": selectedId === division?.userId }
-            )}
+          {selectedId === division?.users?.[0]?.id && (
+            <FaCheck className="text-blue-500 text-base" />
+          )}
+        </div>
+
+        <div className="flex-1">
+          <p className="text-base font-medium truncate">
+            {division?.divisionName}
+          </p>
+          <p className="text-sm truncate">
+            Do{" "}
+            <span className="font-medium text-blue-600">
+              {division?.users?.[0]?.profile?.fullName}
+            </span>{" "}
+            quản lý
+          </p>
+        </div>
+
+        {division?.users?.[0]?.isFree ? (
+          <div></div>
+        ) : (
+          <Tooltip
+            title={`Đang tham gia ${division?.users?.[0]?.listEvent?.length} sự kiện`}
           >
-            {selectedId === division?.userId && (
-              <FaCheck className="text-blue-500 text-base" />
-            )}
-          </div>
-          <div className="flex-1">
-            <p className="text-base font-medium truncate">
-              {division?.divisionName}
+            <p className="bg-red-500 text-white font-medium w-5 h-5 rounded-full flex items-center justify-center">
+              {division?.users?.[0]?.listEvent?.length}
             </p>
-            <p className="text-sm truncate">
-              Do{" "}
-              <span className="font-medium text-blue-600">
-                {division?.userName}
-              </span>{" "}
-              quản lý
-            </p>
-          </div>
-          <div className="absolute right-0 top-0 bottom-0">
-            <Tooltip
-              title={
-                isSelectDate ? (
-                  "Xem chi tiết lịch trình"
-                ) : (
-                  <p className="text-center">
-                    Vui lòng chọn thời gian để có thể xem lịch trình
-                  </p>
-                )
-              }
-              className="h-full px-5"
-            >
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isSelectDate) {
-                    setCalendarChecking(division);
-                  }
-                }}
-                className="group flex justify-center items-center"
-              >
-                <MdArrowForwardIos className="text-xl text-slate-300 cursor-pointer group-hover:text-black transition-colors" />
-              </div>
-            </Tooltip>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-);
+          </Tooltip>
+        )}
+      </motion.div>
+    </div>
+  );
+});
 
-const TaskSection = ({
-  form,
-  isSelectDate,
-  listDivision,
-  updateDataDivision,
-}) => {
+const TaskSection = ({ form, isSelectDate, eventId, updateDataDivision }) => {
   console.log("updateDataDivision > ", updateDataDivision);
+  console.log("isSelectDate > ", isSelectDate);
   const [selectedId, setSelectedId] = useState();
-  const [calendarChecking, setCalendarChecking] = useState();
-  const [calendarDateChecking, setCalendarDateChecking] = useState();
-
+  const [divisionChecking, setDivisionChecking] = useState();
+  const [selectedDate, setSelectedDate] = useState();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
+    // update tassk
     if (updateDataDivision) {
       setSelectedId(updateDataDivision?.[0]);
     }
-  }, []);
 
-  // Reset calendarChecking
-  useEffect(() => {
-    if (!isSelectDate) setCalendarChecking();
-  }, [isSelectDate]);
+    // init calendar date
+    const numOfDaysInCurrentMonth = now
+      .clone()
+      .month(now.clone().month() + 1)
+      .daysInMonth();
+
+    setSelectedDate([
+      now
+        .clone()
+        .startOf("month")
+        .subtract(42 - numOfDaysInCurrentMonth, "days")
+        .format("YYYY-MM-DD"),
+      now
+        .clone()
+        .endOf("month")
+        .add(42 - numOfDaysInCurrentMonth, "days")
+        .format("YYYY-MM-DD"),
+    ]);
+  }, []);
 
   const {
     data: divisions,
-    isLoading: divisionsLoading,
+    isLoading: divisionsIsLoading,
     isError: divisionsIsError,
   } = useQuery(
-    ["divisions"],
-    () => getAllDivision({ pageSize: 25, currentPage: 1, mode: 1 }),
+    ["free-division", eventId, selectedDate?.[0], selectedDate?.[1]],
+    () => getFreeDivision(eventId, selectedDate?.[0], selectedDate?.[1]),
     {
       select: (data) => {
-        console.log("data > ", data);
-        return data
-          ?.filter(
-            (division) =>
-              division?.status && listDivision?.includes(division?.id)
-          )
-          .map((division) => ({
-            id: division?.id,
-            divisionName: division?.divisionName,
-            userId: division?.users?.[0]?.id,
-            userName: division?.users?.[0]?.profile?.fullName,
-          }));
+        return data;
       },
-    }
-  );
-
-  const {
-    data: calendarData,
-    isLoading: calendarIsLoading,
-    isError: calendarIsError,
-  } = useQuery(
-    [
-      "free-user",
-      "id",
-      calendarChecking?.userId,
-      isSelectDate?.[0]?.format("DD-MM-YYYY"),
-      isSelectDate?.[1]?.format("DD-MM-YYYY"),
-    ],
-    () =>
-      getDivisionFreeUser(
-        "id",
-        calendarChecking?.userId,
-        isSelectDate?.[0]?.format("DD-MM-YYYY"),
-        isSelectDate?.[1]?.format("DD-MM-YYYY")
-      ),
-    {
-      select: (data) => {
-        const userTasks = data?.users?.find(
-          (item) => item?.id === calendarChecking?.userId
-        );
-
-        return {
-          ...data,
-          tasks: userTasks,
-          calendarTasks: userTasks?.listEvent
-            ?.map((event) => {
-              return event?.listTask?.map((task) => ({
-                ...task,
-                startDate: momenttz(task?.startDate, "DD-MM-YYYY"),
-                endDate: momenttz(task?.endDate, "DD-MM-YYYY"),
-              }));
-            })
-            ?.flat(),
-        };
-      },
-      enabled: !!isSelectDate && !!calendarChecking?.userId,
       refetchOnWindowFocus: false,
+      enabled: !!selectedDate,
     }
   );
-  console.log("calendarData > ", calendarData);
+  console.log("divisions > ", divisions);
 
   const handleSelectDivision = (division) => {
-    setSelectedId(division?.userId);
-    form.setFieldsValue({ assignee: [division?.userId] });
-    console.log(form.getFieldsValue());
+    setSelectedId(division?.users?.[0]?.id);
+    form.setFieldsValue({ assignee: [division?.users?.[0]?.id] });
+  };
+
+  const handleSetDivisionChecking = (division, date) => {
+    setDivisionChecking({ division, date });
   };
 
   const getColor = (status) => {
@@ -407,159 +464,178 @@ const TaskSection = ({
         isDrawerOpen={isDrawerOpen}
         // isDrawerOpen
         setIsDrawerOpen={setIsDrawerOpen}
-        calendarDateChecking={calendarDateChecking}
-        tasks={calendarData?.tasks}
         getColor={getColor}
         getPriority={getPriority}
+        divisionChecking={divisionChecking}
       />
 
       <div className="flex space-x-10">
-        <p className="w-1/3 text-lg font-medium">Bộ phận chịu trách nhiệm</p>
+        <p className="w-1/4 text-lg font-medium">Bộ phận chịu trách nhiệm</p>
         <p className="flex-1 text-black text-lg font-medium">
-          {calendarIsError
-            ? "Không thể lấy dữ liệu! Hãy thử lại sau"
-            : !calendarChecking
-            ? "Chọn 1 bộ phận để xem lịch trình"
-            : "Lịch trình của"}{" "}
-          <span className="text-black">{calendarChecking?.divisionName}</span>
+          {isSelectDate
+            ? `Lịch trình bắt đầu từ ngày ${isSelectDate?.[0].format(
+                "DD-MM-YYYY"
+              )}`
+            : "Lịch trình"}
         </p>
       </div>
 
-      <div className="flex space-x-10 h-screen">
-        {/* Division list */}
-        <div className="w-1/3 h-full max-h-screen overflow-scroll scrollbar-hide">
-          <Form.Item name="assignee">
-            <div className="space-y-5 mt-5 px-3">
-              {divisionsLoading ? (
-                <div className="mt-5">
-                  <LoadingComponentIndicator />
-                </div>
-              ) : divisionsIsError ? (
-                <p className="mt-5 text-lg font-medium">
-                  Không thể lấy dữ liệu hãy thử lại sau !
-                </p>
-              ) : (
-                divisions?.map((division, index) => (
-                  <Item
-                    key={division?.id ?? index}
-                    division={division}
-                    selectedId={selectedId}
-                    handleSelectDivision={handleSelectDivision}
-                    setCalendarChecking={setCalendarChecking}
-                    isSelectDate={isSelectDate}
-                    // Update data flow
-                    updateDataDivision={
-                      updateDataDivision ? updateDataDivision : null
-                    }
-                  />
-                ))
-              )}
-            </div>
-          </Form.Item>
-        </div>
+      <Spin spinning={divisionsIsLoading} className="my-[15%]">
+        <div className="flex space-x-10 h-screen">
+          {/* Division list */}
+          <div className="w-1/4 h-full max-h-screen overflow-scroll scrollbar-hide">
+            <Form.Item name="assignee">
+              <div className="space-y-5 mt-5 px-3">
+                {divisionsIsError ? (
+                  <p className="mt-10 text-lg font-medium text-center">
+                    Không thể lấy dữ liệu hãy thử lại sau !
+                  </p>
+                ) : (
+                  divisions?.map((division) => (
+                    <Item
+                      key={division?.id ?? index}
+                      division={division}
+                      selectedId={selectedId}
+                      handleSelectDivision={handleSelectDivision}
+                      isSelectDate={isSelectDate}
+                      // Update data flow
+                      updateDataDivision={
+                        updateDataDivision ? updateDataDivision : null
+                      }
+                    />
+                  ))
+                )}
+              </div>
+            </Form.Item>
+          </div>
 
-        {/* Calendar */}
-        <div className="flex-1">
-          <div className="mt-2 border h-full">
-            <Spin
-              spinning={isSelectDate ? calendarIsLoading : false}
-              className="mt-[15%]"
-            >
+          {/* Calendar */}
+          <div className="flex-1">
+            <div className="mt-2 border h-full">
               <ConfigProvider
                 locale={vi_VN}
-                theme={{
-                  token: {
-                    colorText: "#1677ff",
-                    colorTextHeading: "#000000",
-                    fontSize: 15,
-                    fontWeightStrong: 800,
-                    controlHeightLG: 30,
-                  },
-                }}
+                // theme={{
+                //   token: {
+                //     colorText: "#1677ff",
+                //     colorTextHeading: "#000000",
+                //     fontSize: 15,
+                //     fontWeightStrong: 800,
+                //     controlHeightLG: 30,
+                //   },
+                // }}
               >
                 <Calendar
-                  locale={vi_VN}
-                  headerRender={() => {}}
                   fullscreen={true}
-                  disabledDate={(currentDate) => {
-                    const current = momenttz(currentDate?.$d);
-
-                    return (
-                      current.isBefore(isSelectDate?.[0], "day") ||
-                      current.isAfter(isSelectDate?.[1], "day")
-                    );
-                  }}
-                  // locale={viVN}
-                  onSelect={(value, info) => {
-                    setCalendarDateChecking(momenttz(value.$d));
-                    setIsDrawerOpen(true);
-                  }}
+                  value={
+                    isSelectDate
+                      ? dayjs(
+                          isSelectDate?.[0]?.format("YYYY-MM-DD"),
+                          "YYYY-MM-DD"
+                        )
+                      : undefined
+                  }
+                  // onSelect={(value, info) => {
+                  //   setCalendarDateChecking(momenttz(value.$d));
+                  //   setIsDrawerOpen(true);
+                  // }}
                   onPanelChange={(value, mode) => {
-                    console.log("month change > ", value.format("YYYY-MM-DD"));
+                    console.log("onPanelChange > ", value, mode);
+
+                    const numOfDaysInCurrentMonth = value
+                      .clone()
+                      .month(value.clone().month() + 1)
+                      .daysInMonth();
+
+                    setSelectedDate([
+                      value
+                        .clone()
+                        .startOf("month")
+                        .subtract(42 - numOfDaysInCurrentMonth, "days")
+                        .format("YYYY-MM-DD"),
+                      value
+                        .clone()
+                        .endOf("month")
+                        .add(42 - numOfDaysInCurrentMonth, "days")
+                        .format("YYYY-MM-DD"),
+                    ]);
                   }}
                   cellRender={(current) => {
-                    let renderList;
-                    const currentMoment = momenttz(current?.$d);
+                    let renderList = [];
+                    const currentMoment = momenttz(current?.$d).format(
+                      "YYYY-MM-DD"
+                    );
 
-                    // Compare to the selected date
-                    if (
-                      currentMoment.isBetween(
-                        isSelectDate?.[0],
-                        isSelectDate?.[1],
-                        "day",
-                        "[]"
-                      )
-                    ) {
-                      // Compare to the date gap in each task
-                      calendarData?.calendarTasks?.map((task) => {
+                    divisions?.map((division) => {
+                      const user = division?.users?.[0];
+
+                      if (!!user?.listEvent?.length) {
                         if (
-                          currentMoment.isBetween(
-                            task?.startDate,
-                            task?.endDate,
-                            "day"
-                          ) ||
-                          currentMoment.isSame(task?.startDate, "day") ||
-                          currentMoment.isSame(task?.endDate, "day")
+                          !renderList?.find((item) => item?.id === division?.id)
                         ) {
-                          if (renderList) renderList = [...renderList, task];
-                          else renderList = [task];
+                          if (
+                            user?.listEvent?.[0]?.listTask?.find(
+                              (task) =>
+                                currentMoment >= task?.startDate &&
+                                currentMoment <= task?.endDate
+                            )
+                          ) {
+                            renderList = [...renderList, division];
+                          }
                         }
-                      });
-                    }
+                      }
+                    });
 
                     // return info.originNode;
-                    if (renderList)
+                    if (!!renderList?.length)
                       return (
                         <div className="gap-y-5 mb-3">
-                          {renderList?.map((item, index) => {
-                            const { borderColor, textColor, statusText } =
-                              getColor(item?.status);
+                          {renderList?.map((item) => {
+                            const { borderColor, textColor } = getColor(
+                              item?.status
+                            );
 
-                            const icon = getPriority(item?.priority);
+                            let countTask = 0;
+                            item?.users?.[0]?.listEvent?.map((event) => {
+                              event?.listTask?.filter((task) => {
+                                if (
+                                  currentMoment >= task?.startDate &&
+                                  currentMoment <= task?.endDate
+                                ) {
+                                  countTask++;
+                                }
+                              });
+                            });
 
                             return (
-                              <div>
+                              <div
+                                key={currentMoment + item?.id}
+                                onClick={() =>
+                                  handleSetDivisionChecking(
+                                    item,
+                                    currentMoment
+                                  ) & setIsDrawerOpen(true)
+                                }
+                              >
                                 <Tooltip
-                                  key={item?.id + index ?? index}
                                   placement="top"
-                                  title={statusText}
+                                  title={`Gồm ${countTask} hạng mục`}
                                   className="relative"
                                 >
                                   <div
                                     className={clsx(
-                                      `border ${borderColor} py-1 px-3 rounded-xl mt-2`
+                                      `border ${borderColor} py-1 px-3 rounded-md mt-2 relative`
                                     )}
                                   >
                                     <p
                                       className={clsx(
-                                        `text-center text-xs ${textColor} font-normal truncate`
+                                        `text-center text-base ${textColor} font-normal truncate`
                                       )}
                                     >
-                                      {item?.title}
+                                      {item?.divisionName}
                                     </p>
-                                  </div>
-                                  <div className="absolute -top-[20%] left-1.5 bg-white rounded-full">
-                                    {icon}
+                                    <div className="absolute -top-2 right-3 text-xs text-blue-500 font-semibold border border-black bg-white w-4 h-4 flex items-center justify-center rounded-full">
+                                      {countTask}
+                                    </div>
                                   </div>
                                 </Tooltip>
                               </div>
@@ -570,10 +646,10 @@ const TaskSection = ({
                   }}
                 />
               </ConfigProvider>
-            </Spin>
+            </div>
           </div>
         </div>
-      </div>
+      </Spin>
     </Fragment>
   );
 };

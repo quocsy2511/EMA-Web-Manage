@@ -41,6 +41,7 @@ import {
 } from "react-icons/pi";
 import { LiaClipboardListSolid } from "react-icons/lia";
 import {
+  MdCelebration,
   MdDesignServices,
   MdFilterListAlt,
   MdIntegrationInstructions,
@@ -258,9 +259,6 @@ const EventTaskPage = () => {
           eventName: eventDetail?.eventName,
           dateRange: [eventDetail?.startDate, eventDetail?.endDate],
           isSubTask: false,
-          listDivision: eventDetail?.listDivision?.map(
-            (division) => division?.divisionId
-          ),
         },
       });
     }
@@ -285,9 +283,6 @@ const EventTaskPage = () => {
         eventName: eventDetail?.eventName,
         dateRange: [eventDetail?.startDate, eventDetail?.endDate],
         isSubTask: false,
-        listDivision: eventDetail?.listDivision?.map(
-          (division) => division?.divisionId
-        ),
 
         updateData,
       },
@@ -299,9 +294,6 @@ const EventTaskPage = () => {
       state: {
         eventId: eventDetail?.id,
         eventName: eventDetail?.eventName,
-        listDivisionId: eventDetail?.listDivision?.map(
-          (division) => division?.divisionId
-        ),
       },
     });
   };
@@ -580,7 +572,7 @@ const EventTaskPage = () => {
       <motion.div
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="bg-white rounded-2xl mt-8 overflow-hidden"
+        className="bg-white rounded-2xl mt-8 pb-5 overflow-hidden"
       >
         <div className="h-40 w-full overflow-hidden border-b-2 border-slate-400">
           <Image
@@ -651,35 +643,7 @@ const EventTaskPage = () => {
                 <motion.div
                   className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
                   whileHover={{ y: -4 }}
-                  onClick={() => {
-                    // Create contract -> Disabled
-                    // if (!contractIsLoading && !contractIsError)
-                    //   if (Object.keys(contract).length === 0)
-                    //     setIsContractModalOpen(true);
-                  }}
                 >
-                  {/* {contractIsLoading ||
-                  contractIsError ||
-                  !contract ||
-                  contractEvidenceIsLoading ||
-                  contractEvidenceIsError ||
-                  !contractEvidence ? (
-                    <FaFilePdf className="text-lg" />
-                  ) : (
-                    <a
-                      className="hover:text-inherit"
-                      // href={
-                      //   contract &&
-                      //   contractEvidence &&
-                      //   (contractEvidence?.length > 0
-                      //     ? contractEvidence?.[0]?.evidenceUrl
-                      //     : contract?.contractFileUrl ?? null)
-                      // }
-                      // target="_blank"
-                    >
-                      <FaFilePdf className="text-lg" />
-                    </a>
-                  )} */}
                   <FaFilePdf className="text-lg" />
                 </motion.div>
               </Popover>
@@ -704,15 +668,6 @@ const EventTaskPage = () => {
                 </motion.div>
               </Popover>
             </Link>
-            {/* <Popover content={<p className="text-base">Chỉnh sửa sự kiện</p>}>
-              <motion.div
-                className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
-                whileHover={{ y: -4 }}
-                onClick={() => setIsModalOpen(true)}
-              >
-                <RiEditFill className="text-lg" />
-              </motion.div>
-            </Popover> */}
           </div>
 
           <p
@@ -737,6 +692,10 @@ const EventTaskPage = () => {
             <Tag
               icon={<FcMoneyTransfer size={20} />}
               text={`${eventDetail?.estBudget?.toLocaleString("en-US")} VNĐ`}
+            />
+            <Tag
+              icon={<MdCelebration size={20} color={color.green} />}
+              text={`${eventDetail?.typeName}`}
             />
             {!!filterTasks?.length && (
               <Tag
@@ -773,47 +732,7 @@ const EventTaskPage = () => {
                   className=""
                   color={color.green}
                 />
-                <p className="text-lg font-semibold">Ngày bắt đầu</p>
-              </div>
-              <div className="flex items-center gap-x-2">
-                <div className="w-5" />
-                <p className="text-xs text-slate-400">
-                  {new Date(eventDetail?.processingDate).toLocaleDateString(
-                    "vi-VN",
-                    {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }
-                  )}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-x-2">
-                <BsHourglassBottom size={20} color={color.green} />
-                <p className="text-lg font-semibold">Ngày kết thúc</p>
-              </div>
-              <div className="flex items-center gap-x-2">
-                <div className="w-5" />
-                <p className="text-xs text-slate-400">
-                  {/* {moment(data.endDate).format("dddd, D [tháng] M, YYYY")} */}
-                  {new Date(eventDetail?.endDate).toLocaleDateString("vi-VN", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-x-2">
-                <BsHourglassSplit size={20} color={color.green} />
-                <p className="text-lg font-semibold">Ngày diễn ra</p>
+                <p className="text-lg font-semibold">Ngày chuẩn bị</p>
               </div>
               <div className="flex items-center gap-x-2">
                 <div className="w-5" />
@@ -831,7 +750,47 @@ const EventTaskPage = () => {
               </div>
             </div>
 
-            <div className="w-[40%]">
+            <div>
+              <div className="flex items-center gap-x-2">
+                <BsHourglassBottom size={20} color={color.green} />
+                <p className="text-lg font-semibold">Ngày bắt đầu sự kiện</p>
+              </div>
+              <div className="flex items-center gap-x-2">
+                <div className="w-5" />
+                <p className="text-xs text-slate-400">
+                  {/* {moment(data.endDate).format("dddd, D [tháng] M, YYYY")} */}
+                  {new Date(eventDetail?.processingDate).toLocaleDateString(
+                    "vi-VN",
+                    {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center gap-x-2">
+                <BsHourglassSplit size={20} color={color.green} />
+                <p className="text-lg font-semibold">Ngày kết thúc sự kiện</p>
+              </div>
+              <div className="flex items-center gap-x-2">
+                <div className="w-5" />
+                <p className="text-xs text-slate-400">
+                  {new Date(eventDetail?.endDate).toLocaleDateString("vi-VN", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex-1">
               <p className="text-base font-semibold">Tiến độ các hạng mục</p>
               {filterTasks && filterTasks?.length !== 0 ? (
                 <Tooltip
@@ -844,7 +803,7 @@ const EventTaskPage = () => {
                     percent={(
                       (filterTasks?.filter((task) => task.status === "CONFIRM")
                         .length / filterTasks?.length ?? 1) * 100
-                    ).toFixed(2)}
+                    )?.toFixed(2)}
                   />
                 </Tooltip>
               ) : (
