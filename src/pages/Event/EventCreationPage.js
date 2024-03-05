@@ -893,6 +893,7 @@ const EventCreationPage = () => {
                     customerNationalId: contactInfo?.customerInfo?.nationalId,
                     customerPhoneNumber: contactInfo?.customerInfo?.phoneNumber,
                     contractValue: contactInfo?.budget ?? 0,
+                    paymentMethod: "Chuyển Khoản",
                   },
                 }}
               >

@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { HiOutlineUserGroup, HiOutlineUser } from "react-icons/hi2";
 import { BsPersonVcard } from "react-icons/bs";
 import logo from "../../assets/images/logo.png";
+import logo_domain from "../../assets/images/logo_domain.png";
 
 //label cho than side bar
 const LabelText = ({ text }) => (
@@ -90,16 +91,9 @@ const SidebarAdmin = ({ collapsed }) => {
           {/* logo here */}
           <div className="demo-logo-vertical flex justify-center items-center p-4 dark:text-white">
             {!collapsed ? (
-              <div className="flex flex-col gap-y-4">
-                <Avatar size={54} src={logo} />
-                <h3 className="text-center text-sm font-semibold dark:text-white text-secondary">
-                  HREA
-                </h3>
-              </div>
+              <img src={logo} className="h-24" />
             ) : (
-              <div className="flex flex-col gap-y-[2px]">
-                <Avatar size={34} src={logo} />
-              </div>
+              <img src={logo_domain} className="" />
             )}
           </div>
 

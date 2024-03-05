@@ -16,7 +16,9 @@ const EventAssignDivisionPage = () => {
   const navigate = useNavigate();
   const { eventId, eventName, listDivisionId } = location.state;
 
-  const [selectedDivisions, setSelectedDivisions] = useState(listDivisionId);
+  const [selectedDivisions, setSelectedDivisions] = useState(
+    listDivisionId ?? []
+  );
   console.log("selectedDivisions > ", selectedDivisions);
 
   const [messageApi, contextHolder] = message.useMessage();
@@ -65,8 +67,8 @@ const EventAssignDivisionPage = () => {
   );
 
   const toggleSelectedDivision = (id) => {
-    if (!!selectedDivisions.find((item) => item === id)) {
-      setSelectedDivisions((prev) => prev.filter((item) => item !== id));
+    if (!!selectedDivisions?.find((item) => item === id)) {
+      setSelectedDivisions((prev) => prev?.filter((item) => item !== id));
     } else {
       setSelectedDivisions((prev) => [...prev, id]);
     }

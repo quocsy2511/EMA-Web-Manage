@@ -1,58 +1,181 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
-import { Calendar, ConfigProvider, Drawer, Form, Spin, Tooltip } from "antd";
+import {
+  Calendar,
+  ConfigProvider,
+  Drawer,
+  Dropdown,
+  Form,
+  Spin,
+  Tooltip,
+} from "antd";
 import momenttz from "moment-timezone";
 import { useQuery } from "@tanstack/react-query";
+import { getDivisionFreeUser } from "../../../apis/divisions";
+import { MdEmojiEvents, MdCategory } from "react-icons/md";
 import {
-  getDivisionByStaff,
-  getDivisionFreeUser,
-} from "../../../apis/divisions";
-import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
-import { MdArrowForwardIos, MdEmojiEvents } from "react-icons/md";
-import { FaCheck } from "react-icons/fa6";
+  FaCheck,
+  FaCircleArrowDown,
+  FaCircleExclamation,
+} from "react-icons/fa6";
 import { PiMedal } from "react-icons/pi";
 import { BsExclamationCircle } from "react-icons/bs";
 import {
   IoEllipsisHorizontalCircle,
   IoArrowForwardCircleOutline,
-  IoClose,
 } from "react-icons/io5";
 import { GoDotFill } from "react-icons/go";
-import clsx from "clsx";
+import { IoIosCheckbox } from "react-icons/io";
+import { PiDotsThreeCircleVerticalFill } from "react-icons/pi";
 import { motion } from "framer-motion";
+import clsx from "clsx";
+import TEXT from "../../../constants/string";
 
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import vi_VN from "antd/locale/vi_VN";
 
+const now = momenttz();
+
 dayjs.locale("vi");
 
+const StatusRender = memo(({ bg, text }) => (
+  <div className="flex space-x-2 items-center mr-10">
+    <div className={`w-2 h-2 ${bg} rounded-full`} />
+    <p className="text-sm font-medium">{text}</p>
+  </div>
+));
+
+const PriorityRender = memo(({ icon, text }) => (
+  <div className="flex space-x-2 items-center mr-10">
+    <div className="">{icon}</div>
+    <p className="w-3/4 text-sm font-medium truncate">{text}</p>
+  </div>
+));
+
 const DrawerContainer = memo(
-  ({
-    isDrawerOpen,
-    setIsDrawerOpen,
-    calendarDateChecking,
-    tasks,
-    getColor,
-    getPriority,
-  }) => {
-    console.log("tasks> ", tasks);
+  ({ isDrawerOpen, setIsDrawerOpen, getColor, userChecking }) => {
+    console.log("userChecking> ", userChecking);
 
     return (
       <Drawer
         title={
-          <div className="flex items-center space-x-10">
-            <IoClose
-              className="text-xl text-slate-400"
-              onClose={() => setIsDrawerOpen(false)}
-            />
-            <p className="text-xl font-semibold">
+          <div className="flex justify-between items-center space-x-3">
+            <p className="flex-1 text-base font-semibold truncate">
               Lịch trình ngày{" "}
-              {calendarDateChecking?.clone().format("DD-MM-YYYY")}
+              <span className="underline">
+                {momenttz(userChecking?.date).format("DD-MM-YYYY")}{" "}
+              </span>
+              của{" "}
+              <span className="underline">
+                {userChecking?.user?.profile?.fullName}
+              </span>
             </p>
+
+            <div className="border-2 border-black rounded-md p-1 cursor-pointer">
+              <Dropdown
+                placement="bottomLeft"
+                menu={{
+                  items: [
+                    {
+                      key: "status",
+                      label: "Trạng thái",
+                      type: "group",
+                      children: [
+                        {
+                          key: 1,
+                          label: (
+                            <StatusRender
+                              bg="bg-gray-400"
+                              text="Đang chuẩn bị"
+                            />
+                          ),
+                        },
+                        {
+                          key: 2,
+                          label: (
+                            <StatusRender
+                              bg="bg-blue-400"
+                              text="Đang thực hiện"
+                            />
+                          ),
+                        },
+                        {
+                          key: 3,
+                          label: (
+                            <StatusRender bg="bg-green-500" text="Hoàn thành" />
+                          ),
+                        },
+                        {
+                          key: 4,
+                          label: (
+                            <StatusRender
+                              bg="bg-purple-500"
+                              text="Đã xác thực"
+                            />
+                          ),
+                        },
+                        {
+                          key: 5,
+                          label: <StatusRender bg="bg-red-500" text="Hủy bỏ" />,
+                        },
+                        {
+                          key: 6,
+                          label: (
+                            <StatusRender bg="bg-orange-500" text="Quá hạn" />
+                          ),
+                        },
+                      ],
+                    },
+                    {
+                      key: "priority",
+                      label: "Độ ưu tiên",
+                      type: "group",
+                      children: [
+                        {
+                          key: 1,
+                          label: (
+                            <PriorityRender
+                              icon={
+                                <FaCircleArrowDown className="text-lg text-green-500" />
+                              }
+                              text="Thấp"
+                            />
+                          ),
+                        },
+                        {
+                          key: 1,
+                          label: (
+                            <PriorityRender
+                              icon={
+                                <PiDotsThreeCircleVerticalFill className="text-xl text-orange-400 rotate-90" />
+                              }
+                              text="Trung bình"
+                            />
+                          ),
+                        },
+                        {
+                          key: 1,
+                          label: (
+                            <PriorityRender
+                              icon={
+                                <FaCircleExclamation className="text-lg text-red-500" />
+                              }
+                              text="Cao"
+                            />
+                          ),
+                        },
+                      ],
+                    },
+                  ],
+                }}
+                arrow
+              >
+                <MdCategory className="text-lg" />
+              </Dropdown>
+            </div>
           </div>
         }
         placement={"right"}
-        closable={false}
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
         key={"right"}
@@ -60,31 +183,20 @@ const DrawerContainer = memo(
       >
         {/* Content */}
         <div className="space-y-10">
-          {!tasks?.listEvent ? (
-            <p className="text-lg text-center">
-              Chưa chọn khoảng thời gian cần kiểm tra !
-            </p>
-          ) : tasks?.listEvent?.length === 0 ? (
+          {!userChecking?.user?.listEvent?.length ? (
             <div>
               <p className="text-lg text-center">Không có công việc nào !</p>
             </div>
           ) : (
-            tasks?.listEvent?.map((event) => {
+            userChecking?.user?.listEvent?.map((event) => {
               // filter task list
-              const listTasks = event?.listTask?.filter((task) => {
-                const start = momenttz(task?.startDate, "DD-MM-YYYY");
-                const end = momenttz(task?.endDate, "DD-MM-YYYY");
+              const listTasks = event?.listTask?.filter(
+                (task) =>
+                  userChecking?.date >= task?.startDate &&
+                  userChecking?.date <= task?.endDate
+              );
 
-                if (
-                  calendarDateChecking?.isBetween(start, end, "day") ||
-                  calendarDateChecking?.isSame(start, "day") ||
-                  calendarDateChecking?.isSame(end, "day")
-                ) {
-                  return task;
-                }
-              });
-
-              if (listTasks?.length !== 0)
+              if (!!listTasks?.length)
                 return (
                   <div key={event?.eventID} className="w-full space-y-3">
                     <div className="flex items-center bg-gray-50 rounded-full">
@@ -103,12 +215,9 @@ const DrawerContainer = memo(
                       </div>
                     </div>
 
-                    <div className="ml-5">
+                    <div className="ml-5 space-y-1">
                       {listTasks?.map((task) => {
-                        const icon = getPriority(task?.priority);
-                        const { textColor, statusText } = getColor(
-                          task?.status
-                        );
+                        const { textColor } = getColor(task?.status);
 
                         return (
                           <div
@@ -116,17 +225,19 @@ const DrawerContainer = memo(
                             className="flex items-center space-x-3 bg-red-20"
                           >
                             {/* {icon} */}
-                            <GoDotFill className="text-sm" />
+                            <GoDotFill className={`${textColor}`} />
                             <p
                               className={`text-sm font-medium w-auto truncate`}
                             >
-                              {task?.title} :{" "}
+                              {task?.title}
                             </p>
-                            <p
-                              className={`text-xs font-medium ${textColor} truncate`}
-                            >
-                              {statusText}
-                            </p>
+                            {task?.priority === "LOW" ? (
+                              <FaCircleArrowDown className="text-lg text-green-500" />
+                            ) : task?.priority === "MEDIUM" ? (
+                              <PiDotsThreeCircleVerticalFill className="text-2xl text-orange-400 rotate-90" />
+                            ) : (
+                              <FaCircleExclamation className="text-lg text-red-500" />
+                            )}
                           </div>
                         );
                       })}
@@ -146,12 +257,8 @@ const Item = memo(
     user,
     selectedEmployees,
     handleSelectUser,
-    handleSelectCalendarChecking,
     leader,
     handleSelectLeader,
-    isSelectDate,
-
-    updateDataUser,
   }) => {
     return (
       <div className="relative">
@@ -161,17 +268,21 @@ const Item = memo(
           whileTap={{ scale: 0.95 }}
           transition={{ duration: 0.3, type: "tween" }}
           className={clsx(
-            "flex space-x-5 items-center rounded-xl p-3 border-2 cursor-pointer ",
+            "flex space-x-2 items-center rounded-xl pl-1 border-2 cursor-pointer group relative",
             { "border-blue-400": selectedEmployees?.includes(user?.id) },
-            { "border-orange-400": leader === user?.id }
+            { "border-orange-400": leader === user?.id },
+            { "hover:border-blue-500": leader !== user?.id },
+            { "hover:border-orange-400": !leader }
           )}
         >
-          <div className="min-w-[10%] ">
+          <div className="min-w-[10%] py-3 p-3">
             <div
               className={clsx(
-                "flex items-center justify-center w-10 h-10 border rounded-full",
+                "flex items-center justify-center w-10 h-10 border transition-colors rounded-full",
                 { "border-blue-500": selectedEmployees?.includes(user?.id) },
-                { "border-orange-400": leader === user?.id }
+                { "border-orange-400": leader === user?.id },
+                { "group-hover:border-blue-500": leader !== user?.id },
+                { "group-hover:border-orange-400": !leader }
               )}
             >
               {selectedEmployees?.includes(user?.id) && (
@@ -183,32 +294,49 @@ const Item = memo(
               )}
             </div>
           </div>
+
           <div className="flex-1">
-            <p className="max-w-[45%] text-base font-medium truncate">
-              {user?.fullName}
+            <p className="text-base font-medium truncate">
+              {user?.profile?.fullName}
             </p>
 
             <div className="flex items-center space-x-2">
-              <p className="text-sm truncate">
-                Chức vụ{" "}
-                <span
-                  className={clsx("font-medium text-blue-600", {
-                    "text-orange-400": leader === user?.id,
-                  })}
-                >
-                  {user?.role}
-                </span>{" "}
-              </p>
-              {selectedEmployees?.includes(user?.id) && (
+              {user?.isFree ? (
+                <div className="flex space-x-5 items-center justify-between pr-3">
+                  <p className="text-sm truncate">Chưa có công việc</p>
+                  <IoIosCheckbox className="text-green-500 text-xl" />
+                </div>
+              ) : (
+                <p className="text-sm truncate">
+                  Đang phụ trách{" "}
+                  <span
+                    className={clsx("font-medium text-blue-600", {
+                      "text-orange-400": leader === user?.id,
+                    })}
+                  >
+                    {user?.totalTask ?? 0}
+                  </span>{" "}
+                  công việc
+                </p>
+              )}
+            </div>
+          </div>
+
+          {selectedEmployees?.includes(user?.id) && (
+            <div className="absolute -top-4 right-5">
+              <Tooltip title={leader !== user?.id && "Đổi leader"}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
                     handleSelectLeader(user);
                   }}
+                  className={clsx("border-2 bg-white rounded-full p-1", {
+                    "border-orange-400": leader === user?.id,
+                  })}
                 >
                   <PiMedal
                     className={clsx(
-                      "text-xl",
+                      "text-2xl",
                       {
                         "text-slate-300": leader !== user?.id,
                       },
@@ -218,35 +346,9 @@ const Item = memo(
                     )}
                   />
                 </div>
-              )}
+              </Tooltip>
             </div>
-          </div>
-          <div className="absolute right-0 top-0 bottom-0">
-            <Tooltip
-              title={
-                isSelectDate ? (
-                  "Xem chi tiết lịch trình"
-                ) : (
-                  <p className="text-center">
-                    Vui lòng chọn thời gian để có thể xem lịch trình
-                  </p>
-                )
-              }
-              className="h-full px-5"
-            >
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isSelectDate) {
-                    handleSelectCalendarChecking(user);
-                  }
-                }}
-                className="group flex justify-center items-center"
-              >
-                <MdArrowForwardIos className="text-xl text-slate-300 cursor-pointer group-hover:text-black transition-colors" />
-              </div>
-            </Tooltip>
-          </div>
+          )}
         </motion.div>
       </div>
     );
@@ -259,12 +361,10 @@ const SubTaskSection = ({
   taskResponsorId,
   updateDataUser,
 }) => {
-  console.log("updateDataUser > ", updateDataUser);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
-  const [calendarChecking, setCalendarChecking] = useState();
-  const [calendarDateChecking, setCalendarDateChecking] = useState();
+  const [userChecking, setUserChecking] = useState();
   const [leader, setLeader] = useState();
-
+  const [selectedDate, setSelectedDate] = useState();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
@@ -273,6 +373,25 @@ const SubTaskSection = ({
       setSelectedEmployees(updateDataUser);
       setLeader(updateDataUser?.[0]);
     }
+
+    // init calendar date
+    const numOfDaysInCurrentMonth = now
+      .clone()
+      .month(now.clone().month() + 1)
+      .daysInMonth();
+
+    setSelectedDate([
+      now
+        .clone()
+        .startOf("month")
+        .subtract(42 - numOfDaysInCurrentMonth, "days")
+        .format("YYYY-MM-DD"),
+      now
+        .clone()
+        .endOf("month")
+        .add(42 - numOfDaysInCurrentMonth, "days")
+        .format("YYYY-MM-DD"),
+    ]);
   }, []);
 
   // Update assignee in form
@@ -297,76 +416,31 @@ const SubTaskSection = ({
     else form.setFieldsValue({ leader: undefined });
   }, [leader]);
 
-  // Reset calendarChecking
-  useEffect(() => {
-    if (!isSelectDate) setCalendarChecking();
-  }, [isSelectDate]);
-
   const {
-    data: employees,
-    isLoading: employeesIsLoading,
-    isError: employeesIsError,
+    data: users,
+    isLoading: usersIsloading,
+    isError: usersIsError,
   } = useQuery(
-    ["divisions", taskResponsorId],
-    () => getDivisionByStaff("id", taskResponsorId),
-    {
-      select: (data) => {
-        return data?.users
-          ?.map((user) => ({
-            id: user?.id,
-            fullName: user?.profile?.fullName,
-            role: user?.role?.roleName,
-          }))
-          .slice(1);
-      },
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  const {
-    data: calendarData,
-    isLoading: calendarIsLoading,
-    isError: calendarIsError,
-  } = useQuery(
-    [
-      "free-user",
-      "id",
-      calendarChecking?.id,
-      isSelectDate?.[0]?.format("DD-MM-YYYY"),
-      isSelectDate?.[1]?.format("DD-MM-YYYY"),
-    ],
+    ["free-user", taskResponsorId, selectedDate?.[0], selectedDate?.[1]],
     () =>
       getDivisionFreeUser(
         "id",
-        calendarChecking?.id,
-        isSelectDate?.[0]?.format("DD-MM-YYYY"),
-        isSelectDate?.[1]?.format("DD-MM-YYYY")
+        taskResponsorId,
+        selectedDate?.[0],
+        selectedDate?.[1]
       ),
     {
       select: (data) => {
-        const userTasks = data?.users?.find(
-          (item) => item?.id === calendarChecking?.id
+        return data?.users?.filter(
+          (user) => user?.role?.roleName === TEXT.EMPLOYEE
         );
-
-        return {
-          ...data,
-          tasks: userTasks,
-          calendarTasks: userTasks?.listEvent
-            ?.map((event) => {
-              return event?.listTask?.map((task) => ({
-                ...task,
-                startDate: momenttz(task?.startDate, "DD-MM-YYYY"),
-                endDate: momenttz(task?.endDate, "DD-MM-YYYY"),
-              }));
-            })
-            ?.flat(),
-        };
       },
-      enabled: !!isSelectDate && !!calendarChecking?.id,
       refetchOnWindowFocus: false,
+      enabled: !!selectedDate,
     }
   );
-  console.log("calendarData > ", calendarData);
+
+  console.log("users > ", users);
 
   const handleSelectUser = (employee) => {
     if (selectedEmployees?.length === 0) {
@@ -386,8 +460,8 @@ const SubTaskSection = ({
     setLeader(employee?.id);
   };
 
-  const handleSelectCalendarChecking = (employee) => {
-    setCalendarChecking(employee);
+  const handleSetUserChecking = (user, date) => {
+    setUserChecking({ user, date });
   };
 
   const getColor = (status) => {
@@ -440,218 +514,148 @@ const SubTaskSection = ({
     return { borderColor, textColor, statusText };
   };
 
-  const getPriority = (priority) => {
-    let icon;
-
-    switch (priority) {
-      case "LOW":
-        icon = (
-          <IoArrowForwardCircleOutline className="text-sm text-green-500 rotate-90" />
-        );
-        break;
-      case "MEDIUM":
-        icon = (
-          <IoEllipsisHorizontalCircle className="text-sm text-orange-400" />
-        );
-        break;
-      case "HIGH":
-        icon = <BsExclamationCircle className="text-sm text-red-500" />;
-        break;
-
-      default:
-        icon = (
-          <IoArrowForwardCircleOutline className="text-sm text-green-500 rotate-90" />
-        );
-        break;
-    }
-
-    return icon;
-  };
-
   return (
     <Fragment>
       <DrawerContainer
         isDrawerOpen={isDrawerOpen}
-        // isDrawerOpen
         setIsDrawerOpen={setIsDrawerOpen}
-        calendarDateChecking={calendarDateChecking}
-        tasks={calendarData?.tasks}
         getColor={getColor}
-        getPriority={getPriority}
+        userChecking={userChecking}
       />
 
       <Form.Item name="leader" />
 
       <div className="flex space-x-10">
-        <p className="w-1/3 text-lg font-medium">Nhân viên thực hiện</p>
+        <p className="w-1/4 text-lg font-medium">Nhân viên thực hiện</p>
         <p className="flex-1 text-black text-lg font-medium">
-          {!isSelectDate ? (
-            "Chọn khoảng thời gian để kiểm tra"
-          ) : calendarIsError ? (
-            "Không thể lấy dữ liệu! Hãy thử lại sau"
-          ) : !calendarChecking ? (
-            "Chọn 1 nhân viên để xem lịch trình"
-          ) : (
-            <span className="text-black">
-              Lịch trình của {calendarChecking?.fullName}
-            </span>
-          )}
+          {isSelectDate
+            ? `Lịch trình bắt đầu từ ngày ${isSelectDate?.[0].format(
+                "DD-MM-YYYY"
+              )}`
+            : "Lịch trình"}
         </p>
       </div>
 
-      <div className="flex space-x-10 h-screen">
-        {/* Employee list */}
-        <div className="w-1/3 h-full overflow-scroll scrollbar-hide">
-          <Form.Item name="assignee">
-            <div className="space-y-5 mt-5 px-3">
-              {employeesIsLoading ? (
-                <div className="mt-5">
-                  <LoadingComponentIndicator />
-                </div>
-              ) : employeesIsError ? (
-                <p className="mt-5 text-lg font-medium">
-                  Không thể lấy dữ liệu hãy thử lại sau !
-                </p>
-              ) : (
-                employees?.map((user) => (
-                  <Item
-                    key={user?.id}
-                    user={user}
-                    selectedEmployees={selectedEmployees}
-                    handleSelectUser={handleSelectUser}
-                    handleSelectCalendarChecking={handleSelectCalendarChecking}
-                    leader={leader}
-                    handleSelectLeader={handleSelectLeader}
-                    isSelectDate={isSelectDate}
-                    // Update data flow
-                    updateDataUser={updateDataUser}
-                  />
-                ))
-              )}
-            </div>
-          </Form.Item>
-        </div>
+      <Spin spinning={usersIsloading} className="my-[15%]">
+        <div className="flex space-x-10 h-screen">
+          {/* Employee list */}
+          <div className="w-1/4 h-full overflow-scroll scrollbar-hide">
+            <Form.Item name="assignee">
+              <div className="space-y-5 mt-5 px-3">
+                {usersIsError ? (
+                  <p className="mt-10 text-lg font-medium text-center">
+                    Không thể lấy dữ liệu hãy thử lại sau !
+                  </p>
+                ) : (
+                  users?.map((user) => (
+                    <Item
+                      key={user?.id}
+                      user={user}
+                      selectedEmployees={selectedEmployees}
+                      handleSelectUser={handleSelectUser}
+                      leader={leader}
+                      handleSelectLeader={handleSelectLeader}
+                    />
+                  ))
+                )}
+              </div>
+            </Form.Item>
+          </div>
 
-        {/* Calendar */}
-        <div className="flex-1">
-          <div className="mt-2 border h-full">
-            <Spin
-              spinning={isSelectDate ? calendarIsLoading : false}
-              className="mt-[15%]"
-            >
-              <ConfigProvider
-                locale={viVN}
-                theme={{
-                  token: {
-                    colorText: "#1677ff",
-                    colorTextHeading: "#000000",
-                    fontSize: 15,
-                    fontWeightStrong: 800,
-                    controlHeightLG: 30,
-                  },
+          {/* Calendar */}
+          <div className="flex-1 border">
+            <ConfigProvider locale={vi_VN}>
+              <Calendar
+                // fullscreen={true}
+                value={
+                  isSelectDate
+                    ? dayjs(
+                        isSelectDate?.[0]?.format("YYYY-MM-DD"),
+                        "YYYY-MM-DD"
+                      )
+                    : undefined
+                }
+                // onSelect={(value, info) => {
+                //   // setCalendarDateChecking(momenttz(value.$d));
+                //   !!userChecking && setIsDrawerOpen(true);
+                // }}
+                onPanelChange={(value, mode) => {
+                  console.log("onPanelChange > ", value, mode);
+
+                  const numOfDaysInCurrentMonth = value
+                    .clone()
+                    .month(value.clone().month() + 1)
+                    .daysInMonth();
+
+                  setSelectedDate([
+                    value
+                      .clone()
+                      .startOf("month")
+                      .subtract(42 - numOfDaysInCurrentMonth, "days")
+                      .format("YYYY-MM-DD"),
+                    value
+                      .clone()
+                      .endOf("month")
+                      .add(42 - numOfDaysInCurrentMonth, "days")
+                      .format("YYYY-MM-DD"),
+                  ]);
                 }}
-              >
-                <ConfigProvider locale={vi_VN}>
-                  <Calendar
-                    headerRender={() => {}}
-                    fullscreen={true}
-                    disabledDate={(currentDate) => {
-                      const current = momenttz(currentDate?.$d);
+                cellRender={(current) => {
+                  let renderList = [];
+                  const currentMoment = momenttz(current?.$d).format(
+                    "YYYY-MM-DD"
+                  );
 
-                      return (
-                        current.isBefore(isSelectDate?.[0], "day") ||
-                        current.isAfter(isSelectDate?.[1], "day")
-                      );
-                    }}
-                    onSelect={(value, info) => {
-                      setCalendarDateChecking(momenttz(value.$d));
-                      setIsDrawerOpen(true);
-                    }}
-                    onPanelChange={(value, mode) => {
-                      console.log(
-                        "month change > ",
-                        value.format("YYYY-MM-DD")
-                      );
-                    }}
-                    cellRender={(current) => {
-                      let renderList;
-                      const currentMoment = momenttz(current?.$d);
-
-                      // Compare to the selected date
-                      if (
-                        currentMoment.isBetween(
-                          isSelectDate?.[0],
-                          isSelectDate?.[1],
-                          "day"
-                        ) ||
-                        currentMoment.isSame(isSelectDate?.[0], "day") ||
-                        currentMoment.isSame(isSelectDate?.[1], "day")
-                      ) {
-                        // Compare to the date gap in each task
-                        calendarData?.calendarTasks?.map((task) => {
+                  users?.map((user) => {
+                    if (!!user?.listEvent?.length) {
+                      user?.listEvent?.map((event) => {
+                        if (
+                          event?.listTask?.find(
+                            (task) =>
+                              currentMoment >= task?.startDate &&
+                              currentMoment <= task?.endDate
+                          )
+                        ) {
                           if (
-                            currentMoment.isBetween(
-                              task?.startDate,
-                              task?.endDate,
-                              "day"
-                            ) ||
-                            currentMoment.isSame(task?.startDate, "day") ||
-                            currentMoment.isSame(task?.endDate, "day")
+                            !renderList?.find((item) => item?.id === user?.id)
                           ) {
-                            if (renderList) renderList = [...renderList, task];
-                            else renderList = [task];
+                            renderList = [...renderList, user];
                           }
-                        });
-                      }
+                        }
+                      });
+                    }
+                  });
 
-                      // return info.originNode;
-                      if (renderList)
-                        return (
-                          <div className="gap-y-5 mb-3">
-                            {renderList?.map((item, index) => {
-                              const { borderColor, textColor, statusText } =
-                                getColor(item?.status);
-
-                              const icon = getPriority(item?.priority);
-
-                              return (
-                                <div>
-                                  <Tooltip
-                                    key={item?.id + index ?? index}
-                                    placement="top"
-                                    title={statusText}
-                                    className="relative"
-                                  >
-                                    <div
-                                      className={clsx(
-                                        `border ${borderColor} py-1 px-3 rounded-xl mt-2`
-                                      )}
-                                    >
-                                      <p
-                                        className={clsx(
-                                          `text-center text-xs ${textColor} font-normal truncate`
-                                        )}
-                                      >
-                                        {item?.title}
-                                      </p>
-                                    </div>
-                                    <div className="absolute -top-[20%] left-1.5 bg-white rounded-full">
-                                      {icon}
-                                    </div>
-                                  </Tooltip>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        );
-                    }}
-                  />
-                </ConfigProvider>
-              </ConfigProvider>
-            </Spin>
+                  // return info.originNode;
+                  if (!!renderList?.length) {
+                    return (
+                      <div className="gap-y-5 mb-3 mt-2 space-y-2">
+                        {renderList?.map((user, index) => (
+                          <motion.div
+                            key={currentMoment + user?.id}
+                            className=""
+                            whileHover={{ y: -2 }}
+                            onClick={() =>
+                              handleSetUserChecking(user, currentMoment) &
+                              setIsDrawerOpen(true)
+                            }
+                          >
+                            {/* <Tooltip title="Xem chi tiết"> */}
+                            <p className="text-sm text-center font-medium truncate border border-black/30 rounded-full py-1 px-3 hover:border-black transition-colors">
+                              {user?.profile?.fullName}
+                            </p>
+                            {/* </Tooltip> */}
+                          </motion.div>
+                        ))}
+                      </div>
+                    );
+                  }
+                }}
+              />
+            </ConfigProvider>
           </div>
         </div>
-      </div>
+      </Spin>
     </Fragment>
   );
 };

@@ -46,4 +46,10 @@ export const getDivisionFreeUser = (fieldName, conValue, startDate, endDate) =>
     url: `/division/list/assignee/employee?fieldName=${fieldName}&conValue=${conValue}&startDate=${startDate}&endDate=${endDate}`,
   });
 
-export const getDivisionDetail = (divisionId) => http({ url: `/division/${divisionId}` });
+export const getFreeDivision = (eventID, startDate, endDate) =>
+  http({
+    url: `/division/list/assignee/division?eventID=${eventID}&startDate=${startDate}&endDate=${endDate}`,
+  });
+
+export const getDivisionDetail = (divisionId) =>
+  http({ url: `/division/${divisionId}` });
