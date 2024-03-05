@@ -217,6 +217,7 @@ const StaffSchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [checkedDateData, setCheckedDateData] = useState([]);
+  
   console.log("checkedDateData > ", checkedDateData);
 
   const [messageApi, contextHolder] = message.useMessage();
@@ -334,7 +335,6 @@ const StaffSchedulePage = () => {
 
                 !!list.length && setCheckedDateData(list);
               }}
-              
               cellRender={(current, info) => {
                 let renderList;
                 const currentString = momenttz(current?.$d).format(

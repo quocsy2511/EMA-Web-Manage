@@ -9,7 +9,12 @@ import vi_VN from "antd/locale/vi_VN";
 import { useRouteLoaderData } from "react-router-dom";
 import { Calendar, ConfigProvider, Drawer, Spin, Tooltip, message } from "antd";
 
-const ScheduleEmloyees = ({ childrenDrawer, setChildrenDrawer ,checkedDateData, setCheckedDateData}) => {
+const ScheduleEmloyees = ({
+  childrenDrawer,
+  setChildrenDrawer,
+  setSelectedDateSchedule,
+  setCheckedDateData,
+}) => {
   const [selectedDate, setSelectedDate] = useState([
     "03-03-2024",
     "06-03-2024",
@@ -17,8 +22,6 @@ const ScheduleEmloyees = ({ childrenDrawer, setChildrenDrawer ,checkedDateData, 
   const now = momenttz();
   const staff = useRouteLoaderData("staff");
   const [messageApi, contextHolder] = message.useMessage();
-  
-  
 
   const {
     data: employeeAssignees,
@@ -39,7 +42,19 @@ const ScheduleEmloyees = ({ childrenDrawer, setChildrenDrawer ,checkedDateData, 
           (item) => item.role.roleName === "Nhân Viên"
         );
 
-        return filterEmployee;
+        const filteredEmployees = filterEmployee.map((employee) => ({
+          ...employee,
+          listEvent: employee.listEvent?.map((event) => ({
+            ...event,
+            listTask: event.listTask?.filter(
+              (task) =>
+                task.status === "PENDING" || task.status === "PROCESSING"
+            ),
+          })),
+        }));
+
+        console.log("🚀 ~ updatedListEvent:", filteredEmployees);
+        return filteredEmployees;
       },
       refetchOnWindowFocus: false,
       //   enabled: !!selectedDate,
@@ -99,24 +114,26 @@ const ScheduleEmloyees = ({ childrenDrawer, setChildrenDrawer ,checkedDateData, 
             ]);
           }}
           onSelect={(value) => {
-            console.log("value > ", value);
-            const list = [];
+            // console.log("value > ", value);
+            let list = [];
             const currentMoment = momenttz(value?.$d).format("YYYY-MM-DD");
-
+            setSelectedDateSchedule(currentMoment);
             employeeAssignees?.map((user) => {
               if (!!user?.listEvent?.length) {
-                if (!list?.find((item) => item?.id === user?.id)) {
+                user?.listEvent?.map((event) => {
                   if (
-                    user?.listEvent?.[0]?.listTask?.find(
+                    event?.listTask?.find(
                       (task) =>
                         currentMoment >= task?.startDate &&
                         currentMoment <= task?.endDate
                     )
                   ) {
-                    !childrenDrawer && setChildrenDrawer(true);
-                    list.push(user);
+                    if (!list?.find((item) => item?.id === user?.id)) {
+                      setChildrenDrawer(true);
+                      list = [...list, user];
+                    }
                   }
-                }
+                });
               }
             });
 

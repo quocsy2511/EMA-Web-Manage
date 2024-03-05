@@ -49,7 +49,7 @@ const NewTaskModal = ({
   disableEndDate,
   disableStartDate,
 }) => {
-  console.log("🚀 ~ TaskParent:", TaskParent);
+  // console.log("🚀 ~ TaskParent:", TaskParent);
   const eventID = TaskParent?.eventDivision?.event?.id;
   const { RangePicker } = DatePicker;
   const { Option } = Select;
@@ -63,6 +63,15 @@ const NewTaskModal = ({
   const divisionId = useRouteLoaderData("staff").divisionID;
   const staffId = useRouteLoaderData("staff").id;
   const [form] = Form.useForm();
+  const [childrenDrawer, setChildrenDrawer] = useState(false);
+  const [checkedDateData, setCheckedDateData] = useState([]);
+  const [selectedDateSchedule, setSelectedDateSchedule] = useState("");
+  console.log("🚀 ~ selectedDateSchedule:", selectedDateSchedule);
+  // console.log("🚀 ~ checkedDateData:", checkedDateData);
+
+  const onChildrenDrawerClose = () => {
+    setChildrenDrawer(false);
+  };
 
   const {
     data: employees,
@@ -215,6 +224,7 @@ const NewTaskModal = ({
       desc: JSON.stringify(values.desc.ops),
     };
 
+    console.log("🚀 ~ onFinish ~ task:", task);
     if (values.fileUrl === undefined || values.fileUrl?.length === 0) {
       console.log("NOOO FILE");
       submitFormTask(task);
@@ -226,19 +236,15 @@ const NewTaskModal = ({
       uploadFileMutate({ formData, task });
     }
   };
-  const [childrenDrawer, setChildrenDrawer] = useState(false);
-  const [checkedDateData, setCheckedDateData] = useState([]);
-  console.log("🚀 ~ checkedDateData:", checkedDateData);
 
-  const onChildrenDrawerClose = () => {
-    setChildrenDrawer(false);
-  };
   return (
     <>
       <Drawer
         placement="right"
         size={800}
-        title={`Danh sách công việc - ${title}`}
+        title={`Danh sách công việc - ${moment(selectedDateSchedule).format(
+          "DD-MM-YYYY"
+        )}`}
         open={addNewTask}
         footer={false}
         onCancel={onCloseModal}
@@ -340,7 +346,7 @@ const NewTaskModal = ({
                 className="text-sm font-medium m-0 w-1/2 flex justify-start items-center gap-x-2"
                 initialValue={priority.value}
               >
-                <>
+                <div>
                   <span className="text-sm font-medium mr-2">Độ ưu tiên: </span>
                   <Segmented
                     options={[
@@ -351,7 +357,7 @@ const NewTaskModal = ({
                     value={priority.value}
                     onChange={setPriority}
                   />
-                </>
+                </div>
               </Form.Item>
               {/* file */}
               <Form.Item
@@ -374,7 +380,7 @@ const NewTaskModal = ({
                   },
                 ]}
               >
-                <>
+                <div>
                   <span className="text-sm font-medium mr-2">Tài liệu : </span>
                   <Upload
                     className="upload-list-inline"
@@ -404,7 +410,7 @@ const NewTaskModal = ({
                   >
                     <Button icon={<UploadOutlined />}>Tải tài liệu</Button>
                   </Upload>
-                </>
+                </div>
               </Form.Item>
             </div>
 
@@ -482,6 +488,7 @@ const NewTaskModal = ({
                 childrenDrawer={childrenDrawer}
                 setCheckedDateData={setCheckedDateData}
                 setChildrenDrawer={setChildrenDrawer}
+                setSelectedDateSchedule={setSelectedDateSchedule}
               />
             </div>
 
@@ -499,7 +506,7 @@ const NewTaskModal = ({
           </Form>
         </div>
         <Drawer
-          title="Lịch chi tiết công việc của nhân viên"
+          title={`Danh sách công việc - ${title}`}
           width={550}
           closable={false}
           onClose={onChildrenDrawerClose}
@@ -596,9 +603,9 @@ const NewTaskModal = ({
                                   label: (
                                     <>
                                       <p className="flex justify-start items-center gap-x-2 font-medium text-black">
-                                        {startDate}{" "}
-                                        <SwapRightOutlined className="text-gray-400 font-normal" />{" "}
-                                        {endDate}
+                                        {moment(selectedDateSchedule).format(
+                                          "DD-MM-YYYY"
+                                        )}
                                       </p>
                                     </>
                                   ),

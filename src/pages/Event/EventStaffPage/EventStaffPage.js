@@ -111,18 +111,23 @@ const EventStaffPage = () => {
           const formatDate = taskParents?.map(({ ...item }) => {
             item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
             item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
+
             if (item?.subTask && Array.isArray(item?.subTask)) {
-              // console.log("🚀 ~ formatDate ~ item?.subTask:", item?.subTask);
               item.subTask.sort((a, b) => {
-                return (
-                  listStatus.indexOf(a.status) - listStatus.indexOf(b.status)
-                );
+                const sortByStatus =
+                  listStatus.indexOf(a.status) - listStatus.indexOf(b.status);
+                if (sortByStatus === 0) {
+                  return moment(b.createdAt).diff(moment(a.createdAt));
+                }
+                return sortByStatus;
               });
             }
+
             return {
               ...item,
             };
           });
+
           return formatDate;
         }
         return data;
