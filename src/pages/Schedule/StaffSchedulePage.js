@@ -334,12 +334,12 @@ const StaffSchedulePage = () => {
 
                 !!list.length && setCheckedDateData(list);
               }}
+              
               cellRender={(current, info) => {
                 let renderList;
                 const currentString = momenttz(current?.$d).format(
                   "YYYY-MM-DD"
                 );
-
                 tasks?.map((task) => {
                   if (
                     currentString >= task?.startDate &&
@@ -371,7 +371,6 @@ const StaffSchedulePage = () => {
                     <div className="space-y-1">
                       {renderList?.map((item) => {
                         const { bg } = checkStatus(item?.status);
-
                         return (
                           <div
                             key={currentString + item?.id}

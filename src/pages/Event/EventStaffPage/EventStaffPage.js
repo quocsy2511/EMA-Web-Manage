@@ -40,61 +40,6 @@ const EventStaffPage = () => {
   // const [selectEvent, setSelectEvent] = useState({});
   const staff = useRouteLoaderData("staff");
   const notification = useSelector((state) => state.notification);
-
-  // const {
-  //   data: eventDetail,
-  //   refetch: refetchEventDetail,
-  //   isError: isErrorEventDetail,
-  //   isLoading: isLoadingEventDetail,
-  // } = useQuery(
-  //   ["event-detail"],
-  //   () => getEventDetail({ eventId: notification?.eventId }),
-  //   {
-  //     select: (data) => {
-  //       return data;
-  //     },
-  //     enabled: !!notification?.eventId,
-  //   }
-  // );
-
-  // useEffect(() => {
-  //   if (notification?.eventId) {
-  //     refetchEventDetail();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [notification?.eventId]);
-  // useEffect(() => {
-  //   if (isLoadingEventDetail) {
-  //     console.log("Đang tải dữ liệu...");
-  //   } else if (isErrorEventDetail) {
-  //     console.log("Có lỗi khi tải dữ liệu...");
-  //   } else {
-  //     // Nếu không có lỗi và không đang tải, có thể setSelectEvent
-  //     setSelectEvent(eventDetail);
-  //   }
-  // }, [isLoadingEventDetail, isErrorEventDetail, eventDetail]);
-
-  // const {
-  //   data: listEvent,
-  //   isError,
-  //   isLoading,
-  // } = useQuery(["events"], () => getEventDivisions(), {
-  //   select: (data) => {
-  //     const filteredEvents = data?.filter(
-  //       (item) => item?.status !== "DONE" && item?.status !== "CANCEL"
-  //     );
-  //     const event = filteredEvents?.map(({ ...item }) => {
-  //       item.startDate = moment(item?.startDate).format("DD/MM/YYYY");
-  //       item.endDate = moment(item?.endDate).format("DD/MM/YYYY");
-  //       return {
-  //         ...item,
-  //       };
-  //     });
-  //     return event;
-  //   },
-  //   refetchOnWindowFocus: false,
-  // });
-
   const [filterMember, setFilterMember] = useState(staff?.id);
 
   // const {
@@ -160,12 +105,14 @@ const EventStaffPage = () => {
       }),
     {
       select: (data) => {
+        // console.log("🚀 ~ EventStaffPage ~ data:", data);
         if (data && Array.isArray(data)) {
           const taskParents = data?.filter((task) => task?.parent === null);
           const formatDate = taskParents?.map(({ ...item }) => {
             item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
             item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
             if (item?.subTask && Array.isArray(item?.subTask)) {
+              // console.log("🚀 ~ formatDate ~ item?.subTask:", item?.subTask);
               item.subTask.sort((a, b) => {
                 return (
                   listStatus.indexOf(a.status) - listStatus.indexOf(b.status)
@@ -186,7 +133,11 @@ const EventStaffPage = () => {
     }
   );
 
-  const { data: listTaskFilter, refetch: refetchListTaskFilter } = useQuery(
+  const {
+    data: listTaskFilter,
+    refetch: refetchListTaskFilter,
+    isLoadingTaskFilter,
+  } = useQuery(
     ["tasks-filter-member"],
     () =>
       filterTask({
@@ -290,12 +241,14 @@ const EventStaffPage = () => {
     return updatedListTaskParents;
   }
 
-  const searchFilterTask = updateListTaskParents(
-    listTaskParents,
-    listTaskFilter,
-    searchText
-  );
-
+  let searchFilterTask;
+  if (!isLoadingTaskFilter && !isLoadingListTask) {
+    searchFilterTask = updateListTaskParents(
+      listTaskParents,
+      listTaskFilter,
+      searchText
+    );
+  }
   // useEffect(() => {
   //   if (listEvent && listEvent?.length > 0 && !!notification === false) {
   //     setSelectEvent(listEvent?.[0]);

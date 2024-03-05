@@ -135,7 +135,7 @@ const Header = ({ collapsed, setCollapsed }) => {
     },
     refetchOnWindowFocus: false,
   });
-  console.log("notifications: ", notifications);
+  // console.log("notifications: ", notifications);
   // const notifications = [];
 
   const queryClient = useQueryClient();

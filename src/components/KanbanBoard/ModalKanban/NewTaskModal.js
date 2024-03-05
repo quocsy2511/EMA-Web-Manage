@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
+  Badge,
   Button,
   DatePicker,
   Drawer,
@@ -12,6 +13,8 @@ import {
   Select,
   Space,
   Tag,
+  Timeline,
+  Tooltip,
   Upload,
   message,
 } from "antd";
@@ -25,7 +28,19 @@ import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
-import { StarFilled, UploadOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  CaretDownOutlined,
+  ClockCircleOutlined,
+  FieldTimeOutlined,
+  HistoryOutlined,
+  StarFilled,
+  SwapRightOutlined,
+  UploadOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
+import { MdEmojiEvents } from "react-icons/md";
+import avatarDefault from "../../../assets/images/empty_event.png";
 
 const NewTaskModal = ({
   addNewTask,
@@ -34,9 +49,11 @@ const NewTaskModal = ({
   disableEndDate,
   disableStartDate,
 }) => {
+  console.log("🚀 ~ TaskParent:", TaskParent);
+  const eventID = TaskParent?.eventDivision?.event?.id;
   const { RangePicker } = DatePicker;
   const { Option } = Select;
-  const { id, eventID, title } = TaskParent ?? {};
+  const { id, title } = TaskParent ?? {};
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [description, setDescription] = useState("");
@@ -44,6 +61,7 @@ const NewTaskModal = ({
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
+  const staffId = useRouteLoaderData("staff").id;
   const [form] = Form.useForm();
 
   const {
@@ -79,7 +97,8 @@ const NewTaskModal = ({
     (task) => createTask(task),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("tasks");
+        queryClient.invalidateQueries(["tasks", staffId, eventID]);
+        // queryClient.invalidateQueries("tasks-filter-member");
         message.open({
           type: "success",
           content: "Tạo một công việc mới thành công",
@@ -102,7 +121,9 @@ const NewTaskModal = ({
   const onClose = () => {
     setAddNewTask(false);
   };
-
+  const onSubmitData = () => {
+    setAddNewTask(false);
+  };
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
     useMutation(({ formData, task }) => uploadFile(formData), {
       onSuccess: (data, variables) => {
@@ -205,9 +226,15 @@ const NewTaskModal = ({
       uploadFileMutate({ formData, task });
     }
   };
+  const [childrenDrawer, setChildrenDrawer] = useState(false);
+  const [checkedDateData, setCheckedDateData] = useState([]);
+  console.log("🚀 ~ checkedDateData:", checkedDateData);
 
+  const onChildrenDrawerClose = () => {
+    setChildrenDrawer(false);
+  };
   return (
-    <div>
+    <>
       <Drawer
         placement="right"
         size={800}
@@ -217,25 +244,29 @@ const NewTaskModal = ({
         onCancel={onCloseModal}
         onClose={onClose}
         width={900}
-        className="text-lg font-bold"
+        className="text-lg font-bold overflow-hidden"
       >
-        <div className="mt-4 p-4">
+        <div className="px-4 pb-4">
           <Form
             form={form}
             onFinish={onFinish}
             size="large"
-            labelCol={{
-              span: 4,
-            }}
-            wrapperCol={{
-              span: 20,
-            }}
-            layout="horizontal"
+            // labelCol={{
+            //   span: 4,
+            // }}
+            // wrapperCol={{
+            //   span: 20,
+            // }}
+            layout="vertical"
             autoComplete="off"
+            className="m-0 p-0 "
           >
             {/* title */}
             <Form.Item
               label="Tên công việc"
+              labelCol={{
+                style: { padding: 0 },
+              }}
               name="title"
               className="text-sm font-medium "
               rules={[
@@ -262,6 +293,9 @@ const NewTaskModal = ({
               name="date"
               label="Thời hạn"
               className="text-sm font-medium "
+              labelCol={{
+                style: { padding: 0 },
+              }}
               rules={[
                 {
                   type: "array",
@@ -279,11 +313,109 @@ const NewTaskModal = ({
                 className="w-full"
               />
             </Form.Item>
+            {/* description */}
+            <Form.Item
+              initialValue={description}
+              label="Mô tả"
+              className="text-sm font-medium "
+              name="desc"
+              labelCol={{
+                style: { padding: 0 },
+              }}
+            >
+              <ReactQuill
+                theme="snow"
+                value={description}
+                onChange={(content, delta, source, editor) => {
+                  form.setFieldsValue({ desc: editor.getContents() });
+                }}
+                className="bg-transparent  py-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full "
+              />
+            </Form.Item>
+            <div className="flex w-full justify-between items-center my-2">
+              {/* priority */}
+              <Form.Item
+                // label="Độ ưu tiên"
+                name="priority"
+                className="text-sm font-medium m-0 w-1/2 flex justify-start items-center gap-x-2"
+                initialValue={priority.value}
+              >
+                <>
+                  <span className="text-sm font-medium mr-2">Độ ưu tiên: </span>
+                  <Segmented
+                    options={[
+                      { label: "THẤP", value: "LOW" },
+                      { label: "TRUNG BÌNH", value: "MEDIUM" },
+                      { label: "CAO", value: "HIGH" },
+                    ]}
+                    value={priority.value}
+                    onChange={setPriority}
+                  />
+                </>
+              </Form.Item>
+              {/* file */}
+              <Form.Item
+                // label="Tài liệu"
+                className="text-sm font-medium m-0 w-1/2 flex justify-start items-center gap-x-2"
+                name="fileUrl"
+                valuePropName="fileList"
+                getValueFromEvent={(e) => e?.fileList}
+                rules={[
+                  {
+                    validator(_, fileList) {
+                      return new Promise((resolve, reject) => {
+                        if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                          reject("File quá lớn ( dung lượng < 10MB )");
+                        } else {
+                          resolve();
+                        }
+                      });
+                    },
+                  },
+                ]}
+              >
+                <>
+                  <span className="text-sm font-medium mr-2">Tài liệu : </span>
+                  <Upload
+                    className="upload-list-inline"
+                    maxCount={1}
+                    // listType="picture"
+                    action=""
+                    customRequest={({ file, onSuccess }) => {
+                      setTimeout(() => {
+                        onSuccess("ok");
+                      }, 0);
+                    }}
+                    showUploadList={{
+                      showPreviewIcon: false,
+                    }}
+                    beforeUpload={(file) => {
+                      return new Promise((resolve, reject) => {
+                        if (file && file?.size > 10 * 1024 * 1024) {
+                          reject("File quá lớn ( <10MB )");
+                          return false;
+                        } else {
+                          setFileList(file);
+                          resolve();
+                          return true;
+                        }
+                      });
+                    }}
+                  >
+                    <Button icon={<UploadOutlined />}>Tải tài liệu</Button>
+                  </Upload>
+                </>
+              </Form.Item>
+            </div>
+
             {/* member */}
             <Form.Item
               label="Phân công"
               name="assignee"
-              className="text-sm font-medium mb-8"
+              className="text-sm font-medium mt-4"
+              labelCol={{
+                style: { padding: 0 },
+              }}
               rules={[
                 {
                   required: true,
@@ -292,22 +424,22 @@ const NewTaskModal = ({
               ]}
               hasFeedback
             >
-              <Select
-                autoFocus
-                allowClear
-                mode="multiple"
-                placeholder="Người được chọn đầu tiên là nhóm trưởng"
-                style={{
-                  width: "100%",
-                }}
-                onChange={(value) => handleChangeSelectMember(value)}
-                optionLabelProp="label"
-                tagRender={tagRender}
-              >
-                <>
-                  {!isLoadingEmployees ? (
-                    !isErrorEmployees ? (
-                      <>
+              <>
+                {!isLoadingEmployees ? (
+                  !isErrorEmployees ? (
+                    <>
+                      <Select
+                        autoFocus
+                        allowClear
+                        mode="multiple"
+                        placeholder="Người được chọn đầu tiên là nhóm trưởng"
+                        style={{
+                          width: "100%",
+                        }}
+                        onChange={(value) => handleChangeSelectMember(value)}
+                        optionLabelProp="label"
+                        tagRender={tagRender}
+                      >
                         {employees?.map((item, index) => {
                           return (
                             <Option
@@ -334,114 +466,180 @@ const NewTaskModal = ({
                             </Option>
                           );
                         })}
-                      </>
-                    ) : (
-                      <AnErrorHasOccured />
-                    )
+                      </Select>
+                    </>
                   ) : (
-                    <LoadingComponentIndicator />
-                  )}
-                </>
-              </Select>
+                    <AnErrorHasOccured />
+                  )
+                ) : (
+                  <LoadingComponentIndicator />
+                )}
+              </>
             </Form.Item>
-            {/* priority */}
-            <Form.Item
-              label="Độ ưu tiên"
-              name="priority"
-              className="text-sm font-medium "
-              initialValue={priority.value}
-            >
-              <Segmented
-                options={[
-                  { label: "THẤP", value: "LOW" },
-                  { label: "TRUNG BÌNH", value: "MEDIUM" },
-                  { label: "CAO", value: "HIGH" },
-                ]}
-                value={priority.value}
-                onChange={setPriority}
+            <div className="w-full overflow-hidden ">
+              <ScheduleEmloyees
+                checkedDateData={checkedDateData}
+                childrenDrawer={childrenDrawer}
+                setCheckedDateData={setCheckedDateData}
+                setChildrenDrawer={setChildrenDrawer}
               />
-            </Form.Item>
-            {/* description */}
-            <Form.Item
-              initialValue={description}
-              label="Mô tả"
-              className="text-sm font-medium "
-              name="desc"
-            >
-              <ReactQuill
-                theme="snow"
-                value={description}
-                onChange={(content, delta, source, editor) => {
-                  form.setFieldsValue({ desc: editor.getContents() });
-                }}
-                className="bg-transparent  py-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full "
-              />
-            </Form.Item>
-            {/* file */}
-            <Form.Item
-              label="Tài liệu"
-              className="text-sm font-medium "
-              name="fileUrl"
-              valuePropName="fileList"
-              getValueFromEvent={(e) => e?.fileList}
-              rules={[
-                {
-                  validator(_, fileList) {
-                    return new Promise((resolve, reject) => {
-                      if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
-                        reject("File quá lớn ( dung lượng < 10MB )");
-                      } else {
-                        resolve();
-                      }
-                    });
-                  },
-                },
-              ]}
-            >
-              <Upload
-                // className="upload-list-inline"
-                maxCount={1}
-                listType="picture"
-                action=""
-                customRequest={({ file, onSuccess }) => {
-                  setTimeout(() => {
-                    onSuccess("ok");
-                  }, 0);
-                }}
-                showUploadList={{
-                  showPreviewIcon: false,
-                }}
-                beforeUpload={(file) => {
-                  return new Promise((resolve, reject) => {
-                    if (file && file?.size > 10 * 1024 * 1024) {
-                      reject("File quá lớn ( <10MB )");
-                      return false;
-                    } else {
-                      setFileList(file);
-                      resolve();
-                      return true;
-                    }
-                  });
-                }}
-              >
-                <Button icon={<UploadOutlined />}>Tải tài liệu</Button>
-              </Upload>
-            </Form.Item>
+            </div>
+
             <Form.Item wrapperCol={{ span: 24 }}>
               <Button
                 type="primary"
                 htmlType="submit"
+                loading={isLoadingUploadFile || isLoading}
                 block
                 className="mt-9"
-                loading={isLoadingUploadFile || isLoading}
               >
                 Tạo công việc
               </Button>
             </Form.Item>
           </Form>
         </div>
+        <Drawer
+          title="Lịch chi tiết công việc của nhân viên"
+          width={550}
+          closable={false}
+          onClose={onChildrenDrawerClose}
+          open={childrenDrawer}
+        >
+          {checkedDateData?.length > 0 && (
+            <div className="w-full py-1  h-full">
+              {/* info */}
+              <div className="flex flex-row justify-start items-center gap-x-3 mb-1">
+                <div className="flex flex-row justify-center items-start gap-x-2">
+                  <p className="font-semibold text-sm">Độ ưu tiên :</p>
+                </div>
+                <div className="flex flex-row justify-center items-start gap-x-2">
+                  <Badge
+                    count={
+                      <ClockCircleOutlined className="pt-1 text-red-500" />
+                    }
+                  />
+                  <p>Cao</p>
+                </div>
+                <div className="flex flex-row justify-center items-start gap-x-2">
+                  <Badge
+                    count={<FieldTimeOutlined className="pt-1 text-gray-500" />}
+                  />
+                  <p>Bình thường</p>
+                </div>
+                <div className="flex flex-row justify-center items-start gap-x-2">
+                  <Badge
+                    count={<HistoryOutlined className="pt-1 text-green-500" />}
+                  />
+                  <p>Thấp</p>
+                </div>
+              </div>
+              <div className="flex flex-row justify-start items-center gap-x-3 mb-4">
+                <div className="flex flex-row justify-center items-start gap-x-2">
+                  <p className="font-semibold text-sm">
+                    Trạng thái công việc :
+                  </p>
+                </div>
+                <div className="flex flex-row justify-center items-start gap-x-2">
+                  <Badge color="blue" text="Đang diễn ra" />
+                </div>
+                <div className="flex flex-row justify-center items-start gap-x-2">
+                  <Badge color="yellow" text="Đang chuẩn bị" />
+                </div>
+              </div>
+
+              {checkedDateData?.map((item) => (
+                <div
+                  className="w-full mb-5 border-b-2 border-b-slate-300 pt-3 "
+                  key={item?.id}
+                >
+                  {/* header */}
+                  <div className="flex justify-start items-center  mb-2 gap-x-3">
+                    <Avatar src={item?.profile?.avatar} size="large" />
+                    <Tooltip title="testing">
+                      <p className="w-auto max-w-xs text-center text-base font-medium truncate cursor-pointer">
+                        {item?.profile?.fullName}
+                      </p>
+                    </Tooltip>
+                  </div>
+                  {/* content */}
+                  <div>
+                    {item?.listEvent?.map((event) => (
+                      <div key={event?.eventID}>
+                        {/* listEvent */}
+                        <div className=" px-3 py-1 rounded-lg bg-blue-400 flex flex-row justify-start items-center gap-x-1 overflow-hidden mb-2">
+                          <CaretDownOutlined className="text-white" />
+                          <Tooltip title={event?.eventName}>
+                            <p className="text-sm text-white font-normal pr-4 truncate cursor-pointer">
+                              {event?.eventName}
+                            </p>
+                          </Tooltip>
+                        </div>
+
+                        {/* List Task */}
+                        <div className="w-full pt-3 overflow-hidden ">
+                          <Timeline
+                            mode="right"
+                            items={event?.listTask
+                              ?.filter(
+                                (item) =>
+                                  item.status === "PENDING" ||
+                                  item.status === "PROCESSING"
+                              )
+                              ?.map((task) => {
+                                const startDate = moment(
+                                  task?.startDate
+                                ).format("DD-MM-YYYY");
+                                const endDate = moment(task?.endDate).format(
+                                  "DD-MM-YYYY"
+                                );
+                                return {
+                                  label: (
+                                    <>
+                                      <p className="flex justify-start items-center gap-x-2 font-medium text-black">
+                                        {startDate}{" "}
+                                        <SwapRightOutlined className="text-gray-400 font-normal" />{" "}
+                                        {endDate}
+                                      </p>
+                                    </>
+                                  ),
+                                  children: (
+                                    <>
+                                      <p
+                                        className={
+                                          task?.status === "PENDING"
+                                            ? "text-yellow-500"
+                                            : "text-green-500"
+                                        }
+                                      >
+                                        {task?.title}
+                                      </p>
+                                    </>
+                                  ),
+                                  dot: (
+                                    <>
+                                      {task?.priority === "HIGH" ? (
+                                        <ClockCircleOutlined className="timeline-clock-icon text-red-500" />
+                                      ) : task?.priority === "MEDIUM" ? (
+                                        <FieldTimeOutlined className="timeline-clock-icon text-gray-500" />
+                                      ) : (
+                                        <HistoryOutlined className="timeline-clock-icon text-green-500" />
+                                      )}
+                                    </>
+                                  ),
+                                };
+                              })}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Drawer>
       </Drawer>
-    </div>
+    </>
   );
 };
 
