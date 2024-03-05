@@ -4,7 +4,7 @@ import { Outlet } from "react-router";
 const EventStaffLayout = () => {
   return (
     <Fragment>
-      <div className="">
+      <div className="bg-bgG">
         <Outlet />
       </div>
     </Fragment>

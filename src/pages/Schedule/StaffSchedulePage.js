@@ -217,6 +217,7 @@ const StaffSchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [checkedDateData, setCheckedDateData] = useState([]);
+  
   console.log("checkedDateData > ", checkedDateData);
 
   const [messageApi, contextHolder] = message.useMessage();
@@ -339,7 +340,6 @@ const StaffSchedulePage = () => {
                 const currentString = momenttz(current?.$d).format(
                   "YYYY-MM-DD"
                 );
-
                 tasks?.map((task) => {
                   if (
                     currentString >= task?.startDate &&
@@ -371,7 +371,6 @@ const StaffSchedulePage = () => {
                     <div className="space-y-1">
                       {renderList?.map((item) => {
                         const { bg } = checkStatus(item?.status);
-
                         return (
                           <div
                             key={currentString + item?.id}

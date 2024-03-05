@@ -121,3 +121,13 @@ export const getTaskFilterByDate = ({ userId, date, dateEnd }) =>
   http({
     url: `/task/filterByDate?userId=${userId}&date=${date}&dateEnd=${dateEnd}`,
   });
+
+export const getListAssigneeEmployee = ({
+  fieldName,
+  userId,
+  dateStart,
+  dateEnd,
+}) =>
+  http({
+    url: `/division/list/assignee/employee?fieldName=${fieldName}&conValue=${userId}&startDate=${dateStart}&endDate=${dateEnd}`,
+  });

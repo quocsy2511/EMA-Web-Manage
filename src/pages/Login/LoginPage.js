@@ -10,7 +10,10 @@ import { URL_SOCKET } from "../../constants/api";
 import { useDispatch } from "react-redux";
 import { socketActions } from "../../store/socket";
 import TEXT from "../../constants/string";
+import loginBg from "../../assets/images/login-Bg-svg.svg";
+import { CarryOutOutlined } from "@ant-design/icons";
 import { setSocketToken } from "../../utils/socket";
+import logo from "../../assets/images/logo.png";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -44,74 +47,111 @@ const LoginPage = () => {
 
   return (
     <Fragment>
-      {/* <video className="w-full h-screen object-cover" src={videoBg} autoPlay loop muted/> */}
-      <section className="bg-white  min-h-screen flex items-center justify-center ">
-        <div className="bg-gradient-to-t from-blue-200 to-white flex rounded-2xl shadow-lg max-w-3xl p-5 items-center h-[500px]  ">
-          <div className="md:w-1/2 px-8 md:px-16">
-            <h2 className="font-bold text-2xl text-[#002D74]">Login</h2>
-            <p className="text-xs mt-4 text-[#002D74]">
-              If you are already a member, easily log in
-            </p>
-            <Form
-              name="login"
-              style={{
-                maxWidth: 600,
-                marginTop: 24,
-              }}
-              onFinish={onFinish}
-            >
-              <Form.Item
-                name="email"
-                rules={[
-                  {
-                    required: true,
-                    message: "Hãy nhập email!",
-                  },
-                ]}
-              >
-                <Input placeholder="Email" className="p-2 rounded-lg " />
-              </Form.Item>
+      <div className="flex flex-shrink flex-grow h-[100vh] order-3 scroll-smooth scrollbar-hide p-[3rem] py-2 bg-white justify-center overflow-y-auto">
+        <div className="flex flex-col min-w-0 p-[3rem] ">
+          <div className="w-[1560px] bg-white  h-full">
+            <div className="flex h-full w-full">
+              {/* left */}
+              <div className="min-h-full flex justify-center items-center rounded-lg w-1/2 p-5 ">
+                <div className="with-full flex flex-col items-center">
+                  <div className="text-center mb-5">
+                    {/* <CarryOutOutlined className="text-[#212121] text-[6rem]" /> */}
+                    <img src={logo} className="w-36" />
+                  </div>
+                  <div className="mb-5 mt-2">
+                    <h2 className="text-[#212121] text-center text-xl font-medium">
+                      Hỗ trợ quản lý công việc của bạn dễ dàng hơn
+                    </h2>
+                  </div>
+                  <div>
+                    <img src={loginBg} alt="loginBg" className="" />
+                  </div>
+                </div>
+              </div>
+              {/* right */}
+              <div className="min-h-full flex justify-center items-center  border-0 w-1/2">
+                <div className="w-full h-[90%] border-0 max-w-[32rem] bg-[#484c7f] shadow-lg rounded-lg p-[3rem] text-[#f8f9fa]">
+                  <div className="mb-3">
+                    <h1 className="text-white text-center text-5xl font-bold">
+                      Đăng nhập
+                    </h1>
+                  </div>
+                  <div className="mb-16">
+                    <h3 className="text-gray-300 text-center text-lg">
+                      Truy cập vào ứng dụng quản lí của chúng tôi.
+                    </h3>
+                  </div>
+                  <Form
+                    name="login"
+                    onFinish={onFinish}
+                    className="p-0 m-0 text-white"
+                    layout="vertical"
+                    size="large"
+                  >
+                    <label className="font-bold text-white">Email</label>
+                    <Form.Item
+                      name="email"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Hãy nhập email!",
+                        },
+                      ]}
+                      className="mt-1"
+                    >
+                      <Input
+                        placeholder="Email"
+                        className=" rounded-lg py-5 px-3"
+                      />
+                    </Form.Item>
 
-              <Form.Item
-                name="password"
-                rules={[
-                  {
-                    required: true,
-                    message: "Hãy nhập mật khẩu!",
-                  },
-                ]}
-              >
-                <Input.Password
-                  placeholder="password"
-                  className="p-2 rounded-lg"
-                  autoComplete="curren-password"
-                />
-              </Form.Item>
+                    <label className="font-bold text-white">Mật khẩu</label>
+                    <Form.Item
+                      name="password"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Hãy nhập mật khẩu!",
+                        },
+                      ]}
+                      className="mt-1"
+                    >
+                      <Input.Password
+                        placeholder="Mật khẩu"
+                        className="py-5 px-3 rounded-lg"
+                        autoComplete="curren-password"
+                      />
+                    </Form.Item>
 
-              <Form.Item
-                wrapperCol={{
-                  span: 24,
-                }}
-              >
-                <Button
-                  type="primary"
-                  className="hover:scale-105 duration-300 w-full"
-                  htmlType="submit"
-                  loading={isLoading}
-                >
-                  Login
-                </Button>
-              </Form.Item>
-            </Form>
-            <div className="mt-5 text-xs border-t border-[#002D74] py-4 text-[#002D74]">
-              <a href="#">Forgot your password?</a>
+                    <Form.Item
+                      wrapperCol={{
+                        span: 24,
+                      }}
+                    >
+                      <Button
+                        type="primary"
+                        className="hover:scale-105 duration-300 w-full"
+                        htmlType="submit"
+                        loading={isLoading}
+                      >
+                        Đăng nhập
+                      </Button>
+                    </Form.Item>
+                  </Form>
+                  <div className="mt-5 text-xs border-t border-white py-4 text-white">
+                    <a
+                      href="#"
+                      className="text-base hover:text-blue-300 text-orange-300"
+                    >
+                      Quên mật khẩu ?
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div className=" w-1/2 h-full flex justify-center items-center">
-            <video className="rounded-2xl" src={videoBg} autoPlay loop muted />
-          </div>
         </div>
-      </section>
+      </div>
     </Fragment>
   );
 };

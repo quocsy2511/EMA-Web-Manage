@@ -29,9 +29,7 @@ import { PiDotsThreeCircleVerticalFill } from "react-icons/pi";
 import { motion } from "framer-motion";
 import clsx from "clsx";
 import TEXT from "../../../constants/string";
-
 import dayjs from "dayjs";
-import "dayjs/locale/vi";
 import vi_VN from "antd/locale/vi_VN";
 
 const now = momenttz();
