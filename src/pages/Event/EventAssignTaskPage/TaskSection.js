@@ -136,7 +136,7 @@ const DrawerContainer = memo(
                       type: "group",
                       children: [
                         {
-                          key: 1,
+                          key: 7,
                           label: (
                             <PriorityRender
                               icon={
@@ -147,7 +147,7 @@ const DrawerContainer = memo(
                           ),
                         },
                         {
-                          key: 1,
+                          key: 8,
                           label: (
                             <PriorityRender
                               icon={
@@ -158,7 +158,7 @@ const DrawerContainer = memo(
                           ),
                         },
                         {
-                          key: 1,
+                          key: 9,
                           label: (
                             <PriorityRender
                               icon={
@@ -493,7 +493,7 @@ const TaskSection = ({ form, isSelectDate, eventId, updateDataDivision }) => {
                 ) : (
                   divisions?.map((division) => (
                     <Item
-                      key={division?.id ?? index}
+                      key={division?.id}
                       division={division}
                       selectedId={selectedId}
                       handleSelectDivision={handleSelectDivision}

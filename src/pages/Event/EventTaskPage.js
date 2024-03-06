@@ -266,6 +266,7 @@ const EventTaskPage = () => {
 
   const goToUpdateTask = (task) => {
     const updateData = {
+      id: task?.id,
       title: task?.title,
       date: [
         momenttz(task?.startDate).format("YYYY-MM-DD"),

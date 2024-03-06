@@ -157,6 +157,7 @@ const EventSubTaskPage = () => {
 
   const goToUpdateTask = () => {
     const updateData = {
+      id: tasks?.id,
       title: tasks?.title,
       date: [
         momenttz(tasks?.startDate).format("YYYY-MM-DD"),
@@ -183,6 +184,7 @@ const EventSubTaskPage = () => {
 
   const goToUpdateSubtask = (task) => {
     const updateData = {
+      id: task?.id,
       title: task?.title,
       date: [
         momenttz(task?.startDate).format("YYYY-MM-DD"),

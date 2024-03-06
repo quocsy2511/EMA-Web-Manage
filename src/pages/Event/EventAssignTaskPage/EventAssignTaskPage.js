@@ -21,7 +21,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import TaskSection from "./TaskSection";
 import { useMutation } from "@tanstack/react-query";
-import { createTask } from "../../../apis/tasks";
+import { assignMember, createTask, updateTask } from "../../../apis/tasks";
 import SubTaskSection from "./SubTaskSection";
 import dayjs from "dayjs";
 
@@ -85,6 +85,43 @@ const EventAssignTaskPage = () => {
     }
   );
 
+  const { mutate: updateTaskMutate, isLoading: updateTaskIsLoading } =
+    useMutation((updatedTask) => updateTask(updatedTask), {
+      onSuccess: (data) => {
+        notification.success({
+          message: <p className="font-medium">Cập nhật hạng mục thành công</p>,
+          placement: "topRight",
+          duration: 3,
+        });
+        navigate(-1);
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "Không thể cập nhật! Hãy thử lại sau",
+        });
+      },
+    });
+
+  const { mutate: updateAssignMutate, isLoading: updateAssignIsLoading } =
+    useMutation((data) => assignMember(data), {
+      onSuccess: (data) => {
+        notification.success({
+          message: <p className="font-medium">Cập nhật hạng mục thành công</p>,
+          placement: "topRight",
+          duration: 3,
+        });
+
+        navigate(-1);
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "Không thể cập nhật! Hãy thử lại sau",
+        });
+      },
+    });
+
   const onFinish = (values) => {
     console.log("Success:", values);
     // values = {
@@ -117,29 +154,81 @@ const EventAssignTaskPage = () => {
     //   console.log("Transform data: ", restValue);
     //   //call api
     //   uploadFileMutate({ formData, task: restValue });
-    // }e
+    // }
 
-    const taskPayload = {
-      eventID: eventId,
-      title: values?.title,
-      startDate: momenttz(values?.date[0]).format("YYYY-MM-DD"),
-      endDate: momenttz(values?.date[1]).format("YYYY-MM-DD"),
-      desc: JSON.stringify(values?.desc?.ops),
-      priority: values?.priority,
-      assignee: values?.assignee ?? [],
-      leader: isSubTask ? values?.leader : values?.assignee?.[0] ?? "",
+    if (!updateData) {
+      const taskPayload = {
+        eventID: eventId,
+        title: values?.title,
+        startDate: momenttz(values?.date[0]).format("YYYY-MM-DD"),
+        endDate: momenttz(values?.date[1]).format("YYYY-MM-DD"),
+        desc: JSON.stringify(values?.desc?.ops),
+        priority: values?.priority,
+        assignee: values?.assignee ?? [],
+        leader: isSubTask ? values?.leader : values?.assignee?.[0] ?? "",
 
-      // Optional
-      file: undefined,
+        // Optional
+        file: undefined,
 
-      // Subtask only
-      parentTask: isSubTask ? taskId : undefined,
+        // Subtask only
+        parentTask: isSubTask ? taskId : undefined,
 
-      // unexpected
-      estimationTime: 1,
-    };
+        // unexpected
+        estimationTime: 1,
+      };
 
-    taskMutate(taskPayload);
+      taskMutate(taskPayload);
+    } else {
+      const updatedDesc = JSON.parse(
+        updateData?.desc?.startsWith(`[{"insert":"`)
+          ? updateData?.desc
+          : parseJson(updateData?.desc)
+      );
+
+      if (
+        updateData?.title !== values?.title ||
+        updateData?.date?.[0] !== values?.date?.[0] ||
+        updateData?.date?.[1] !== values?.date?.[1] ||
+        updateData?.priority !== values?.priority ||
+        JSON.stringify(values?.desc?.ops) !== JSON.stringify(updatedDesc)
+      ) {
+        // update task
+        const updatedValue = {
+          title: values?.title,
+          eventID: eventId,
+          startDate: momenttz(values?.date[0]).format("YYYY-MM-DD"),
+          endDate: momenttz(values?.date[1]).format("YYYY-MM-DD"),
+          description: JSON.stringify(values?.desc?.ops),
+          priority: values?.priority,
+
+          // Subtask only
+          parentTask: isSubTask ? taskId : undefined,
+
+          // unexpected
+          estimationTime: 1,
+          effort: 1,
+
+          taskID: updateData?.id,
+        };
+        console.log("change > ", updatedValue);
+        updateTaskMutate(updatedValue);
+      }
+
+      if (!isSubTask) {
+        if (updateData?.assignee?.[0] !== values?.assignee?.[0]) {
+          console.log("assign task again");
+
+          // assign task again
+          updateAssignMutate({
+            taskID: updateData?.id,
+            assignee: values?.assignee ?? [],
+            leader: values?.assignee?.[0],
+          });
+        }
+      } else {
+        // check assign subtask
+      }
+    }
   };
 
   const onFinishFailed = (errorInfo) => {};
@@ -213,6 +302,7 @@ const EventAssignTaskPage = () => {
                   ),
                 }
               : undefined,
+            assignee: updateData ? updateData?.assignee : undefined,
           }}
         >
           <div className="flex gap-x-10">
@@ -346,16 +436,29 @@ const EventAssignTaskPage = () => {
           )}
 
           <div className="flex justify-center items-center mt-10">
-            <Button
-              size="large"
-              type="primary"
-              onClick={() => {
-                form.submit();
-              }}
-              loading={taskIsLoading}
-            >
-              Hoàn Thành
-            </Button>
+            {!!updateData ? (
+              <Button
+                size="large"
+                type="primary"
+                onClick={() => {
+                  form.submit();
+                }}
+                // loading={taskIsLoading}
+              >
+                Cập nhật
+              </Button>
+            ) : (
+              <Button
+                size="large"
+                type="primary"
+                onClick={() => {
+                  form.submit();
+                }}
+                loading={taskIsLoading}
+              >
+                Hoàn Thành
+              </Button>
+            )}
           </div>
         </Form>
       </motion.div>

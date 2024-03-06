@@ -121,15 +121,19 @@ const EventItem = ({ event }) => {
             maxPopoverTrigger="hover"
             maxStyle={{ color: "#D25B68", backgroundColor: "#F4D7DA" }}
           >
-            {event?.listDivision?.map((item, index) => (
-              <Tooltip
-                key={item?.divisionId ?? index}
-                title={`${item?.fullName} - ${item?.divisionName}`}
-                placement="top"
-              >
-                <Avatar src={item?.avatar} key={item?.avatar} />
-              </Tooltip>
-            ))}
+            {!event?.listDivision?.length ? (
+              <p className="text-sm text-red-400 font-medium">Chưa có</p>
+            ) : (
+              event?.listDivision?.map((item, index) => (
+                <Tooltip
+                  key={item?.divisionId ?? index}
+                  title={`${item?.fullName} - ${item?.divisionName}`}
+                  placement="top"
+                >
+                  <Avatar src={item?.avatar} key={item?.avatar} />
+                </Tooltip>
+              ))
+            )}
           </Avatar.Group>
         </div>
         <div className="flex justify-between items-center text-black">

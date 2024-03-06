@@ -54,7 +54,11 @@ const EventCreationPage = () => {
     () => getCustomerContactDetail(location.state?.contactId),
     {
       select: (data) => {
-        return data;
+        return {
+          ...data,
+          startDate: momenttz(data?.startDate).format("YYYY-MM-DD"),
+          endDate: momenttz(data?.endDate).format("YYYY-MM-DD"),
+        };
       },
       refetchOnWindowFocus: false,
     }

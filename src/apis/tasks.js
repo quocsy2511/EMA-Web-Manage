@@ -73,14 +73,14 @@ export const updateTaskStatus = ({ taskID, status }) =>
     method: "put",
   });
 
-export const assignMember = (data) =>
+export const assignMember = ({ taskID, assignee, leader }) =>
   http({
     url: "/assign-task",
     method: "post",
     data: {
-      taskID: data.taskID,
-      assignee: data.assignee,
-      leader: data.leader ?? "",
+      taskID: taskID,
+      assignee: assignee ?? [],
+      leader: leader ?? "",
     },
   });
 

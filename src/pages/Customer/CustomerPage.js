@@ -39,17 +39,30 @@ const ContactItem = memo(
         whileHover={{ y: -3 }}
         onClick={handleSelectedContact}
         className={clsx(
-          "mx-3 px-6 py-4 border border-black/20 shadow-md shadow-slate-300 rounded-lg cursor-pointer relative hover:bg-slate-200/50 transition-colors duration-300",
+          "mx-3 px-6 py-4 border border-black/20 shadow-md shadow-slate-300 rounded-lg cursor-pointer relative hover:bg-slate-200/50 transition-colors duration-300 space-y-3",
           { "bg-slate-200/50": customer?.id === selectedContact?.id }
         )}
       >
         <div className="absolute top-2 right-2">
           {customer.status === "PENDING" ? (
-            <MdOutlinePending className={clsx("text-2xl text-orange-300")} />
+            // <MdOutlinePending className={clsx("text-2xl text-orange-300")} />
+            <p className="text-xs text-orange-500 border border-orangtext-orange-500 rounded-lg px-2 py-1">
+              chờ duyệt
+            </p>
           ) : customer.status === "ACCEPTED" ? (
-            <MdCheckCircleOutline className={clsx("text-2xl text-green-400")} />
+            // <MdCheckCircleOutline className={clsx("text-2xl text-green-400")} />
+            <p className="text-xs text-green-500 border border-green-500 rounded-lg px-2 py-1">
+              Đã chấp nhận
+            </p>
+          ) : customer.status === "SUCCESS" ? (
+            // <MdCheckCircleOutline className={clsx("text-2xl text-green-400")} />
+            <p className="text-xs text-blue-500 border border-blue-500 rounded-lg px-2 py-1">
+              Đã tạo sự kiện
+            </p>
           ) : (
-            <IoMdCloseCircleOutline className={clsx("text-2xl text-red-600")} />
+            <p className="text-xs text-red-500 border border-red-500 rounded-lg px-2 py-1">
+              Đã từ chối
+            </p>
           )}
         </div>
         <p className="flex items-center text-base truncate">
@@ -332,9 +345,7 @@ const CustomerPage = () => {
                   <GoLocation />
                   <p>Địa điểm</p>
                 </div>
-                <p className="line-clamp-2">
-                  {selectedContact?.address}
-                </p>
+                <p className="line-clamp-2">{selectedContact?.address}</p>
               </div>
 
               <div className="flex mt-10">
