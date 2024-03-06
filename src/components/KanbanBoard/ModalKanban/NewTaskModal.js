@@ -243,9 +243,7 @@ const NewTaskModal = ({
       <Drawer
         placement="right"
         size={800}
-        title={`Danh sách công việc - ${moment(selectedDateSchedule).format(
-          "DD-MM-YYYY"
-        )}`}
+        title={`Danh sách công việc - ${title}`}
         open={addNewTask}
         footer={false}
         onCancel={onCloseModal}
@@ -507,7 +505,9 @@ const NewTaskModal = ({
           </Form>
         </div>
         <Drawer
-          title={`Danh sách công việc - ${title}`}
+          title={`Danh sách công việc của nhân viên (${moment(
+            selectedDateSchedule
+          ).format("DD-MM-YYYY")}) `}
           width={550}
           closable={false}
           onClose={onChildrenDrawerClose}
