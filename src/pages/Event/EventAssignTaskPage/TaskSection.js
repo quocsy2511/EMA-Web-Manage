@@ -491,7 +491,7 @@ const TaskSection = ({ form, isSelectDate, eventId, updateDataDivision }) => {
                     Không thể lấy dữ liệu hãy thử lại sau !
                   </p>
                 ) : (
-                  divisions?.map((division) => (
+                  divisions?.map((division, index) => (
                     <Item
                       key={division?.id ?? index}
                       division={division}
