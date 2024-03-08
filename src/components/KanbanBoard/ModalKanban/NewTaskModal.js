@@ -28,20 +28,9 @@ import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
-import {
-  CaretDownOutlined,
-  ClockCircleOutlined,
-  FieldTimeOutlined,
-  HistoryOutlined,
-  StarFilled,
-  SwapRightOutlined,
-  UploadOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { StarFilled, UploadOutlined, UserOutlined } from "@ant-design/icons";
 import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
-import { MdEmojiEvents } from "react-icons/md";
-import avatarDefault from "../../../assets/images/empty_event.png";
-import clsx from "clsx";
+import DrawerTimeLine from "../Drawer/DrawerTimeLine";
 
 const NewTaskModal = ({
   addNewTask,
@@ -59,7 +48,9 @@ const NewTaskModal = ({
   const [endDate, setEndDate] = useState("");
   const [description, setDescription] = useState("");
   const [assignee, setAssignee] = useState([]);
+  // console.log("🚀 ~ assignee:", assignee);
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
+
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
   const staffId = useRouteLoaderData("staff").id;
@@ -67,12 +58,6 @@ const NewTaskModal = ({
   const [childrenDrawer, setChildrenDrawer] = useState(false);
   const [checkedDateData, setCheckedDateData] = useState([]);
   const [selectedDateSchedule, setSelectedDateSchedule] = useState("");
-  console.log("🚀 ~ selectedDateSchedule:", selectedDateSchedule);
-  // console.log("🚀 ~ checkedDateData:", checkedDateData);
-
-  const onChildrenDrawerClose = () => {
-    setChildrenDrawer(false);
-  };
 
   const {
     data: employees,
@@ -131,18 +116,11 @@ const NewTaskModal = ({
   const onClose = () => {
     setAddNewTask(false);
   };
-  const onSubmitData = () => {
-    setAddNewTask(false);
-  };
+
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
     useMutation(({ formData, task }) => uploadFile(formData), {
       onSuccess: (data, variables) => {
-        console.log(
-          "🚀 ~ file: NewTaskModal.js:104 ~ useMutation ~ data:",
-          data
-        );
         const task = variables.task;
-        console.log("🚀 ~ useMutation ~ variables.task:", variables.task);
         variables.task = {
           file: [
             {
@@ -152,6 +130,8 @@ const NewTaskModal = ({
           ],
           ...task,
         };
+
+        console.log("🚀 ~ useMutation ~ variables.task:", variables.task);
         submitFormTask(variables.task);
       },
       onError: () => {
@@ -164,11 +144,7 @@ const NewTaskModal = ({
 
   //chọn member
   const handleChangeSelectMember = (value) => {
-    let listMember = [];
-    if (value.length > 0) {
-      listMember = [...assignee, value];
-    }
-    setAssignee(listMember);
+    setAssignee(value);
   };
 
   const onChangeDate = (value, dateString) => {
@@ -192,22 +168,42 @@ const NewTaskModal = ({
     }
   };
   const tagRender = (props) => {
-    const { label, value, closable, onClose } = props;
-
+    // const { label, value, closable, onClose } = props;
+    const { closable, onClose } = props;
     const onPreventMouseDown = (event) => {
       event.preventDefault();
       event.stopPropagation();
     };
+
+    let matchedUsers;
+    if (!isLoadingEmployees) {
+      matchedUsers = assignee.map((id) => {
+        const user = employees.find((employee) => employee.id === id);
+        return user;
+      });
+    }
+    const label = matchedUsers?.find((item) => item.id === props.value)?.profile
+      ?.fullName;
+
+    const color =
+      matchedUsers?.findIndex((user) => user.id === props.value) === 0
+        ? "green"
+        : "gold";
+    const avatar = matchedUsers?.find((item) => item.id === props.value)
+      ?.profile?.avatar;
     return (
       <Tag
-        color="gold"
+        // color={isFirstAssignee ? "green" : "gold"}
+        color={color}
         onMouseDown={onPreventMouseDown}
         closable={closable}
         onClose={onClose}
         style={{
-          marginRight: 3,
+          marginRight: 8,
         }}
       >
+        {color === "green" && <StarFilled spin />}
+        <Avatar src={avatar} className="mr-2" size="small" />
         {label}
       </Tag>
     );
@@ -256,12 +252,6 @@ const NewTaskModal = ({
             form={form}
             onFinish={onFinish}
             size="large"
-            // labelCol={{
-            //   span: 4,
-            // }}
-            // wrapperCol={{
-            //   span: 20,
-            // }}
             layout="vertical"
             autoComplete="off"
             className="m-0 p-0 "
@@ -340,27 +330,24 @@ const NewTaskModal = ({
             <div className="flex w-full justify-between items-center my-2">
               {/* priority */}
               <Form.Item
-                // label="Độ ưu tiên"
+                label="Độ ưu tiên"
                 name="priority"
-                className="text-sm font-medium m-0 w-1/2 flex justify-start items-center gap-x-2"
+                className="text-sm font-medium m-0 w-1/2 justify-start items-center gap-x-2 flex"
                 initialValue={priority.value}
               >
-                <div>
-                  <span className="text-sm font-medium mr-2">Độ ưu tiên: </span>
-                  <Segmented
-                    options={[
-                      { label: "THẤP", value: "LOW" },
-                      { label: "TRUNG BÌNH", value: "MEDIUM" },
-                      { label: "CAO", value: "HIGH" },
-                    ]}
-                    value={priority.value}
-                    onChange={setPriority}
-                  />
-                </div>
+                <Segmented
+                  options={[
+                    { label: "THẤP", value: "LOW" },
+                    { label: "TRUNG BÌNH", value: "MEDIUM" },
+                    { label: "CAO", value: "HIGH" },
+                  ]}
+                  value={priority.value}
+                  onChange={setPriority}
+                />
               </Form.Item>
               {/* file */}
               <Form.Item
-                // label="Tài liệu"
+                label="Tài liệu"
                 className="text-sm font-medium m-0 w-1/2 flex justify-start items-center gap-x-2"
                 name="fileUrl"
                 valuePropName="fileList"
@@ -379,37 +366,37 @@ const NewTaskModal = ({
                   },
                 ]}
               >
-                <div>
-                  <span className="text-sm font-medium mr-2">Tài liệu : </span>
-                  <Upload
-                    className="upload-list-inline"
-                    maxCount={1}
-                    // listType="picture"
-                    action=""
-                    customRequest={({ file, onSuccess }) => {
-                      setTimeout(() => {
-                        onSuccess("ok");
-                      }, 0);
-                    }}
-                    showUploadList={{
-                      showPreviewIcon: false,
-                    }}
-                    beforeUpload={(file) => {
-                      return new Promise((resolve, reject) => {
-                        if (file && file?.size > 10 * 1024 * 1024) {
-                          reject("File quá lớn ( <10MB )");
-                          return false;
-                        } else {
-                          setFileList(file);
-                          resolve();
-                          return true;
-                        }
-                      });
-                    }}
-                  >
-                    <Button icon={<UploadOutlined />}>Tải tài liệu</Button>
-                  </Upload>
-                </div>
+                <Upload
+                  // className="upload-list-inline"
+                  maxCount={1}
+                  listType="text"
+                  action=""
+                  customRequest={({ file, onSuccess }) => {
+                    setTimeout(() => {
+                      onSuccess("ok");
+                    }, 0);
+                  }}
+                  showUploadList={{
+                    showPreviewIcon: false,
+                  }}
+                  beforeUpload={(file) => {
+                    return new Promise((resolve, reject) => {
+                      if (file && file?.size > 10 * 1024 * 1024) {
+                        reject("File quá lớn ( <10MB )");
+                        return false;
+                      } else {
+                        setFileList(file);
+                        resolve();
+                        return true;
+                      }
+                    });
+                  }}
+                >
+                  {/* <Button icon={<UploadOutlined />}>Tải tài liệu</Button> */}
+                  <p className="flex flex-row gap-x-3 justify-center items-center hover:text-blue-400">
+                    <UploadOutlined /> Thêm tài liệu
+                  </p>
+                </Upload>
               </Form.Item>
             </div>
 
@@ -427,13 +414,13 @@ const NewTaskModal = ({
                   message: "Hãy chọn nhân viên!",
                 },
               ]}
-              hasFeedback
             >
               <>
                 {!isLoadingEmployees ? (
                   !isErrorEmployees ? (
                     <>
                       <Select
+                        maxTagCount="responsive"
                         autoFocus
                         allowClear
                         mode="multiple"
@@ -449,7 +436,25 @@ const NewTaskModal = ({
                           return (
                             <Option
                               value={item?.id}
-                              label={item?.profile?.fullName}
+                              label={
+                                <span
+                                  role="img"
+                                  aria-label={item?.profile?.fullName}
+                                >
+                                  <Tooltip
+                                    key="avatar"
+                                    title={item?.profile?.fullName}
+                                    placement="top"
+                                  >
+                                    <Avatar
+                                      src={item?.profile?.avatar}
+                                      className="mr-2"
+                                      size="small"
+                                    />
+                                  </Tooltip>
+                                  {item?.profile?.fullName}
+                                </span>
+                              }
                               key={item?.id}
                             >
                               <Space>
@@ -504,134 +509,13 @@ const NewTaskModal = ({
             </Form.Item>
           </Form>
         </div>
-        <Drawer
-          title={`Danh sách công việc của nhân viên (${moment(
-            selectedDateSchedule
-          ).format("DD-MM-YYYY")}) `}
-          width={550}
-          closable={false}
-          onClose={onChildrenDrawerClose}
-          open={childrenDrawer}
-        >
-          {checkedDateData?.length > 0 && (
-            <div className="w-full py-1  h-full">
-              {/* info */}
-              <div className="flex flex-row justify-start items-center gap-x-3 mb-1">
-                <div className="flex flex-row justify-center items-start gap-x-2">
-                  <p className="font-semibold text-sm">Độ ưu tiên :</p>
-                </div>
-                <div className="flex flex-row justify-center items-start gap-x-2">
-                  <Badge
-                    count={
-                      <ClockCircleOutlined className="pt-1 text-red-500" />
-                    }
-                  />
-                  <p>Cao</p>
-                </div>
-                <div className="flex flex-row justify-center items-start gap-x-2">
-                  <Badge
-                    count={<FieldTimeOutlined className="pt-1 text-gray-500" />}
-                  />
-                  <p>Bình thường</p>
-                </div>
-                <div className="flex flex-row justify-center items-start gap-x-2">
-                  <Badge
-                    count={<HistoryOutlined className="pt-1 text-green-500" />}
-                  />
-                  <p>Thấp</p>
-                </div>
-              </div>
-              <div className="flex flex-row justify-start items-center gap-x-3 mb-4">
-                <div className="flex flex-row justify-center items-start gap-x-2">
-                  <p className="font-semibold text-sm">
-                    Trạng thái công việc :
-                  </p>
-                </div>
-                <div className="flex flex-row justify-center items-start gap-x-2">
-                  <Badge color="blue" text="Đang diễn ra" />
-                </div>
-                <div className="flex flex-row justify-center items-start gap-x-2">
-                  <Badge color="yellow" text="Đang chuẩn bị" />
-                </div>
-              </div>
 
-              {checkedDateData?.map((item) => (
-                <div
-                  className="w-full mb-5 border-b-2 border-b-slate-300 pt-3 "
-                  key={item?.id}
-                >
-                  {/* header */}
-                  <div className="flex justify-start items-center  mb-2 gap-x-3">
-                    <Avatar src={item?.profile?.avatar} size="large" />
-                    <Tooltip title="testing">
-                      <p className="w-auto max-w-xs text-center text-base font-medium truncate cursor-pointer">
-                        {item?.profile?.fullName}
-                      </p>
-                    </Tooltip>
-                  </div>
-                  {/* content */}
-                  <div>
-                    {item?.listEvent?.map((event) => (
-                      <div key={event?.eventID}>
-                        {/* listEvent */}
-                        <div className=" px-3 py-2 rounded-lg bg-blue-400 flex flex-row justify-start items-center gap-x-1 overflow-hidden mb-2">
-                          <CaretDownOutlined className="text-white" />
-                          <Tooltip title={event?.eventName}>
-                            <p className="text-base text-white pr-4 truncate cursor-pointer font-medium">
-                              {event?.eventName}
-                            </p>
-                          </Tooltip>
-                        </div>
-
-                        {/* List Task */}
-                        <div className="w-full pt-3 overflow-hidden pl-10">
-                          <Timeline
-                            items={event?.listTask
-                              ?.filter(
-                                (item) =>
-                                  item.status === "PENDING" ||
-                                  item.status === "PROCESSING"
-                              )
-                              ?.map((task) => {
-                                return {
-                                  children: (
-                                    <>
-                                      <p
-                                        className={clsx(
-                                          "text-base text-green-500",
-                                          {
-                                            "text-yellow-500":
-                                              task?.status === "PENDING",
-                                          }
-                                        )}
-                                      >
-                                        {task?.title}
-                                      </p>
-                                    </>
-                                  ),
-                                  dot: (
-                                    <>
-                                      {task?.priority === "HIGH" ? (
-                                        <ClockCircleOutlined className="text-lg timeline-clock-icon text-red-500" />
-                                      ) : task?.priority === "MEDIUM" ? (
-                                        <FieldTimeOutlined className="text-lg timeline-clock-icon text-gray-500" />
-                                      ) : (
-                                        <HistoryOutlined className="text-lg timeline-clock-icon text-green-500" />
-                                      )}
-                                    </>
-                                  ),
-                                };
-                              })}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Drawer>
+        <DrawerTimeLine
+          selectedDateSchedule={selectedDateSchedule}
+          checkedDateData={checkedDateData}
+          childrenDrawer={childrenDrawer}
+          setChildrenDrawer={setChildrenDrawer}
+        />
       </Drawer>
     </>
   );

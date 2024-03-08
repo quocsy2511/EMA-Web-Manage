@@ -367,7 +367,7 @@ const HeaderEvent = ({
                   </AnimatePresence>
                 </div>
 
-                <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer">
+                <div className=" hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer">
                   <Spin spinning={isLoadingUsers}>
                     <Avatar.Group
                       maxCount={3}

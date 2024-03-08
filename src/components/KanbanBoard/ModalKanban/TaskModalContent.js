@@ -23,6 +23,7 @@ const TaskModalContent = ({
   setIsOpenTaskModal,
   completed,
   disableDoneTaskParent,
+  onCloseModal,
 }) => {
   const {
     data: listComments,
@@ -62,7 +63,7 @@ const TaskModalContent = ({
   const [subTasks, setSubTasks] = useState(taskSelected?.subTask);
   let completionPercentage;
   if (taskParent) {
-    completionPercentage = (completed / subTasks?.length) * 100;
+    completionPercentage = ((completed / subTasks?.length) * 100).toFixed(2);
   }
 
   return (
@@ -88,6 +89,7 @@ const TaskModalContent = ({
             setIsOpenTaskModal={setIsOpenTaskModal}
             disableDoneTaskParent={disableDoneTaskParent}
             completionPercentage={completionPercentage}
+            onCloseModal={onCloseModal}
           />
         ) : (
           <AnErrorHasOccured />

@@ -107,26 +107,24 @@ const EventStaffPage = () => {
       select: (data) => {
         // console.log("🚀 ~ EventStaffPage ~ data:", data);
         if (data && Array.isArray(data)) {
-          const taskParents = data?.filter((task) => task?.parent === null);
-          const formatDate = taskParents?.map(({ ...item }) => {
-            item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
-            item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
+          // console.log("🚀 ~ EventStaffPage ~ data:", data);
 
-            if (item?.subTask && Array.isArray(item?.subTask)) {
-              item.subTask.sort((a, b) => {
+          const taskParents = data?.filter((task) => task?.parent === null);
+          const formatDate = taskParents?.map((item) => ({
+            ...item,
+            startDate: moment(item?.startDate).format("YYYY/MM/DD"),
+            endDate: moment(item?.endDate).format("YYYY/MM/DD"),
+            subTask: item?.subTask
+              .filter((task) => task.status !== "CANCEL")
+              .sort((a, b) => {
                 const sortByStatus =
                   listStatus.indexOf(a.status) - listStatus.indexOf(b.status);
                 if (sortByStatus === 0) {
                   return moment(b.createdAt).diff(moment(a.createdAt));
                 }
                 return sortByStatus;
-              });
-            }
-
-            return {
-              ...item,
-            };
-          });
+              }),
+          }));
 
           return formatDate;
         }
@@ -137,7 +135,7 @@ const EventStaffPage = () => {
       enabled: !!selectEvent?.id && !!staff?.id,
     }
   );
-
+  // console.log("🚀 ~ EventStaffPage ~ listTaskParents:", listTaskParents);
   const {
     data: listTaskFilter,
     refetch: refetchListTaskFilter,

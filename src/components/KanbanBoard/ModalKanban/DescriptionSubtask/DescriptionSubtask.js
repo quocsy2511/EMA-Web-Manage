@@ -12,6 +12,7 @@ import "react-quill/dist/quill.snow.css";
 import { getTasks, updateTask } from "../../../../apis/tasks";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
+import { useRouteLoaderData } from "react-router-dom";
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 const DescriptionSubtask = ({
   description,
@@ -22,6 +23,8 @@ const DescriptionSubtask = ({
 }) => {
   const [form] = Form.useForm();
   const taskID = taskSelected?.id;
+  const eventId = taskSelected?.eventDivision?.event?.id;
+  const staff = useRouteLoaderData("staff");
   const [descriptionQuill, setDescriptionQuill] = useState({
     ops: JSON.parse(
       description?.startsWith(`[{"insert":"`)
@@ -58,7 +61,7 @@ const DescriptionSubtask = ({
     (task) => updateTask(task),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["tasks"]);
+        queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
         message.open({
           type: "success",
@@ -164,18 +167,18 @@ const DescriptionSubtask = ({
                       <div className="flex flex-row">
                         <Button
                           type="link"
-                          className="flex items-center justify-center"
+                          className="flex items-center justify-center text-red-400"
                           onClick={() => seItsOpenQuill(false)}
                           loading={isLoading}
                         >
-                          <CloseOutlined className="text-red-400" />
+                          Huỷ
                         </Button>
                         <Button
                           htmlType="submit"
                           type="primary"
                           className="flex items-center justify-center"
                         >
-                          <SendOutlined />
+                          Lưu
                         </Button>
                       </div>
                     </Form>

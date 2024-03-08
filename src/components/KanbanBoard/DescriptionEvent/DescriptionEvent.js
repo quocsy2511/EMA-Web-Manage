@@ -7,6 +7,7 @@ import { BsCalendarHeart, BsFileEarmarkTextFill } from "react-icons/bs";
 import { FaMoneyBillWave, FaSearchLocation } from "react-icons/fa";
 import { SiFastapi } from "react-icons/si";
 import { motion } from "framer-motion";
+import moment from "moment";
 
 const DescriptionEvent = ({ selectEvent }) => {
   const getColorStatusPriority = (value) => {
@@ -17,10 +18,12 @@ const DescriptionEvent = ({ selectEvent }) => {
       CONFIRM: { color: "purple", title: "XÁC NHẬN" },
       PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
       OVERDUE: { color: "orange", title: "QUÁ HẠN" },
+      PREPARING: { color: "default", title: "CHUẨN BỊ" },
     };
     //colorMapping[status] ở đây để truy suất value bằng key
     return colorMapping[value];
   };
+
   const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
   return (
     <motion.div

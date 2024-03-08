@@ -48,7 +48,6 @@ const EventItem = memo(({ event, gotoEventPage }) => {
     default:
       break;
   }
-  console.log("event > ", event);
 
   return (
     <motion.div
@@ -193,8 +192,8 @@ const EventStaffHomePage = () => {
     select: (data) => {
       return data?.map((item) => ({
         ...item,
-        startDate: momenttz(item?.startDate).format("DD/MM/YYYY"),
-        endDate: momenttz(item?.endDate).format("DD/MM/YYYY"),
+        startDate: momenttz(item?.startDate).format("DD-MM-YYYY"),
+        endDate: momenttz(item?.endDate).format("DD-MM-YYYY"),
       }));
     },
     refetchOnWindowFocus: false,
@@ -256,7 +255,7 @@ const EventStaffHomePage = () => {
               <></>
             ) : (
               <Avatar.Group
-                maxCount={10}
+                maxCount={4}
                 maxPopoverTrigger="click"
                 size="large"
                 maxStyle={{

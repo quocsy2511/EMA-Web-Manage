@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
 import { getAllUser, getEmployee } from "../../../../apis/users";
 import { useRouteLoaderData } from "react-router-dom";
 import moment from "moment";
@@ -7,14 +7,19 @@ import { Avatar, Select, Space, Tag, Tooltip, message } from "antd";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
 import { assignMember } from "../../../../apis/tasks";
+import { StarFilled } from "@ant-design/icons";
 
 const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
   const taskID = taskSelected?.id;
   const queryClient = useQueryClient();
+  const [assignee, setAssignee] = useState(
+    assignTasks?.map((item) => item.user?.id)
+  );
   const membersInTask = assignTasks?.map((item) => item.user?.id);
   const { Option } = Select;
   const divisionId = useRouteLoaderData("staff").divisionID;
-
+  const eventId = taskSelected?.eventDivision?.event?.id;
+  const staff = useRouteLoaderData("staff");
   const {
     data: employees,
     isError: isErrorEmployees,
@@ -40,31 +45,50 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
     }
   );
   const tagRender = (props) => {
-    const { label, value, closable, onClose } = props;
+    const { closable, onClose } = props;
 
     const onPreventMouseDown = (event) => {
       event.preventDefault();
       event.stopPropagation();
     };
+    let matchedUsers;
+
+    if (!isLoadingEmployees) {
+      matchedUsers = assignee?.map((id) => {
+        const user = employees.find((employee) => employee.id === id);
+        return user;
+      });
+    }
+    const labelName = matchedUsers?.find((item) => item.id === props.value)
+      ?.profile?.fullName;
+    const avatar = matchedUsers?.find((item) => item.id === props.value)
+      ?.profile?.avatar;
+    const color =
+      matchedUsers?.findIndex((user) => user.id === props.value) === 0
+        ? "green"
+        : "gold";
+    console.log("🚀 ~ tagRender ~ matchedUsers:", matchedUsers);
     return (
       <Tag
-        color="gold"
+        color={color}
         onMouseDown={onPreventMouseDown}
         closable={closable}
         onClose={onClose}
         style={{
-          marginRight: 3,
+          marginRight: 8,
         }}
       >
-        {label}
+        {color === "green" && <StarFilled spin />}
+        <Avatar src={avatar} className="mr-2" size="small" />
+        {labelName}
       </Tag>
     );
   };
 
   const { mutate: UpdateMember } = useMutation((data) => assignMember(data), {
     onSuccess: () => {
-      queryClient.invalidateQueries(["tasks"]);
-      queryClient.invalidateQueries(["subtaskDetails"], taskID);
+      queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
+      queryClient.invalidateQueries(["subtaskDetails", taskID]);
       message.open({
         type: "success",
         content: "cập nhật nhân viên được giao công việc thành công",
@@ -85,6 +109,7 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
       taskID: taskID,
       leader: value?.length > 0 ? value[0] : "",
     };
+    setAssignee(value);
     UpdateMember(data);
   };
 
@@ -92,20 +117,20 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
     <>
       {!isLoadingEmployees ? (
         !isErrorEmployees ? (
-          <>
+          <div className="w-full h-[50px] ">
             <Select
+              maxTagCount="responsive"
               autoFocus
               mode="multiple"
               placeholder="Select Member "
-              //   bordered={false}
               style={{
                 width: "100%",
               }}
               defaultValue={membersInTask}
               onChange={(value) => handleChangeMember(value)}
               optionLabelProp="label"
-              className="h-fit"
               tagRender={tagRender}
+              size="large"
             >
               {employees?.map((item, index) => {
                 return (
@@ -118,7 +143,11 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
                           title={item?.profile?.fullName}
                           placement="top"
                         >
-                          <Avatar src={item?.profile?.avatar} />
+                          <Avatar
+                            src={item?.profile?.avatar}
+                            className="mr-2"
+                            size="small"
+                          />
                         </Tooltip>
                         {item?.profile?.fullName}
                       </span>
@@ -129,13 +158,13 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
                       <span role="img" aria-label={item?.profile?.fullName}>
                         <Avatar src={item?.profile?.avatar} />
                       </span>
-                      {item?.profile?.fullName}
+                      <span>{item?.profile?.fullName}</span>
                     </Space>
                   </Option>
                 );
               })}
             </Select>
-          </>
+          </div>
         ) : (
           <AnErrorHasOccured />
         )
