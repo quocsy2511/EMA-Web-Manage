@@ -1,6 +1,6 @@
-import { UserOutlined } from "@ant-design/icons";
+import { StarFilled, UserOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Tooltip } from "antd";
+import { Avatar, Badge, Tooltip } from "antd";
 import React from "react";
 import { getTasks } from "../../../../apis/tasks";
 import moment from "moment";
@@ -47,23 +47,37 @@ const InforEmployee = ({ taskSelected }) => {
         }}
       >
         {subtaskDetails?.[0].assignTasks?.length > 0 &&
-          subtaskDetails?.[0].assignTasks?.map((item) => (
-            <Tooltip
-              key="avatar"
-              title={item.user?.profile?.fullName}
-              placement="top"
-            >
-              {item.user.profile === null ? (
-                <Avatar
-                  icon={<UserOutlined />}
-                  size="default"
-                  className="bg-gray-500"
-                />
-              ) : (
-                <Avatar src={item.user?.profile?.avatar} size="default" />
-              )}
-            </Tooltip>
-          ))}
+          subtaskDetails?.[0].assignTasks
+            ?.filter((user) => user.status === "active")
+            ?.map((item) => (
+              <Tooltip
+                key="avatar"
+                title={
+                  item.isLeader
+                    ? `${item.user?.profile?.fullName} (Trưởng nhóm)`
+                    : item.user?.profile?.fullName
+                }
+                placement="top"
+              >
+                {item?.isLeader ? (
+                  <Badge
+                    count={
+                      <StarFilled className="text-yellow-400 text-sm" spin />
+                    }
+                    offset={[-7, 3]}
+                    className="mr-1"
+                  >
+                    <Avatar
+                      src={item.user?.profile?.avatar}
+                      size="default"
+                      className="border border-yellow-300"
+                    />
+                  </Badge>
+                ) : (
+                  <Avatar src={item.user?.profile?.avatar} size="default" />
+                )}
+              </Tooltip>
+            ))}
       </Avatar.Group>
     </>
   );

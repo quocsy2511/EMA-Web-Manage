@@ -19,7 +19,7 @@ const PriorityTag = ({ updatePriority, setIsOpenPriority }) => {
   };
 
   return (
-    <div className="px-3">
+    <div className="cursor-pointer">
       <Tag
         color={getColorStatusPriority(updatePriority)?.color}
         className="h-fit"

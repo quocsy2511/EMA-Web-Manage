@@ -1,9 +1,10 @@
+import { SwapRightOutlined } from "@ant-design/icons";
 import moment from "moment";
 import React from "react";
 
 const RangeDate = ({ taskSelected, updateEndDate, updateStartDate }) => {
   const formattedDate = (value) => {
-    const date = moment(value).format("DD/MM");
+    const date = moment(value).format("DD-MM-YYYY");
     return date;
   };
   return (
@@ -17,7 +18,8 @@ const RangeDate = ({ taskSelected, updateEndDate, updateStartDate }) => {
             : ""
         }`}
       >
-        {formattedDate(updateStartDate)} - {formattedDate(updateEndDate)}
+        {formattedDate(updateStartDate)} <SwapRightOutlined />{" "}
+        {formattedDate(updateEndDate)}
       </span>
     </div>
   );

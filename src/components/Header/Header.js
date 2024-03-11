@@ -43,7 +43,7 @@ const Header = ({ collapsed, setCollapsed }) => {
     // const targetDate = moment(item.createdAt);
 
     const currentDate = momenttz();
-    const targetDate = momenttz(item?.createdAt, "YYYY-MM-DD HH:mm:ss");
+    const targetDate = momenttz(item?.createdAt);
 
     if (currentDate.diff(targetDate, "minutes") < 5) {
       time = `bây giờ`;

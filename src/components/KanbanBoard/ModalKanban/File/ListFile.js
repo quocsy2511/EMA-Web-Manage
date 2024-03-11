@@ -4,13 +4,17 @@ import { Modal, message } from "antd";
 import React from "react";
 import { IoMdAttach } from "react-icons/io";
 import { deleteFileTask } from "../../../../apis/files";
+import { useRouteLoaderData } from "react-router-dom";
 
 const ListFile = ({
   file,
   updateFileList,
   setUpdateFileList,
   taskParent = false,
+  taskSelected,
 }) => {
+  const eventId = taskSelected?.eventDivision?.event?.id;
+  const staff = useRouteLoaderData("staff");
   const FileID = file.id;
   const taskID = file.taskID;
   const [modal, contextHolder] = Modal.useModal();
@@ -19,7 +23,7 @@ const ListFile = ({
     ({ taskId: taskID, data }) => deleteFileTask({ taskId: taskID, data }),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["tasks"]);
+        queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
         message.open({
           type: "success",

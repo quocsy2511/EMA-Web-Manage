@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { updateTask } from "../../../../apis/tasks";
 import moment from "moment";
 import dayjs from "dayjs";
+import { useRouteLoaderData } from "react-router-dom";
+import { SwapRightOutlined } from "@ant-design/icons";
 
 const RangeDateSelected = ({
   taskSelected,
@@ -14,6 +16,8 @@ const RangeDateSelected = ({
   updateEndDate,
   updateStartDate,
 }) => {
+  const eventId = taskSelected?.eventDivision?.event?.id;
+  const staff = useRouteLoaderData("staff");
   const [isOpenDate, setIsOpenDate] = useState(false);
   const [startDateUpdate, setStartDateUpdate] = useState("");
   const [endDateUpdate, setEndDateUpdate] = useState("");
@@ -45,7 +49,7 @@ const RangeDateSelected = ({
 
   ///////////////validate Date
   const formattedDate = (value) => {
-    const date = moment(value).format("DD/MM");
+    const date = moment(value).format("DD-MM-YYYY");
     return date;
   };
 
@@ -66,7 +70,7 @@ const RangeDateSelected = ({
       onSuccess: () => {
         setUpdateStartDate(startDateUpdate);
         setUpdateEndDate(endDateUpdate);
-        queryClient.invalidateQueries(["tasks"]);
+        queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
         setIsRangePickerFocused(false);
         setIsRangePickerCancel(false);
@@ -114,7 +118,7 @@ const RangeDateSelected = ({
   return (
     <>
       {taskSelected?.startDate && taskSelected?.endDate !== null ? (
-        <div className="flex justify-start items-center mt-4 px-3">
+        <div className="flex justify-start items-center mt-4 px-3 cursor-pointer">
           {isOpenDate ? (
             <Form onFinish={updateTimeFinish} name="date">
               <Form.Item
@@ -166,19 +170,14 @@ const RangeDateSelected = ({
               }`}
               onClick={() => setIsOpenDate(true)}
             >
-              {formattedDate(updateStartDate)} - {formattedDate(updateEndDate)}
+              {formattedDate(updateStartDate)} <SwapRightOutlined />{" "}
+              {formattedDate(updateEndDate)}
             </span>
           )}
         </div>
       ) : (
-        <div className="flex justify-start items-center mt-4 px-3">
-          <RangePicker
-            showTime={{
-              format: "HH:mm:ss",
-            }}
-            onChange={onChangeDate}
-            format="YYYY/MM/DD HH:mm:ss"
-          />
+        <div className="flex justify-start items-center mt-4 px-3 cursor-pointer">
+          <RangePicker onChange={onChangeDate} format="YYYY/MM/DD" />
         </div>
       )}
     </>

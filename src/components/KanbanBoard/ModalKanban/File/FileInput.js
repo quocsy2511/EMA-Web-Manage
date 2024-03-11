@@ -3,18 +3,20 @@ import { Button, Form, Upload, message } from "antd";
 import React, { useState } from "react";
 import { uploadFile, uploadFileTask } from "../../../../apis/files";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouteLoaderData } from "react-router-dom";
 
 const FileInput = ({ taskSelected, setUpdateFileList }) => {
   const taskID = taskSelected?.id;
   const [fileList, setFileList] = useState();
   const [disableSendButton, setDisableSendButton] = useState(true);
   const [form] = Form.useForm();
-
+  const eventId = taskSelected?.eventDivision?.event?.id;
+  const staff = useRouteLoaderData("staff");
   const queryClient = useQueryClient();
   const { mutate: uploadNewFileTask, isLoading: isLoadingPostFile } =
     useMutation((file) => uploadFileTask(file), {
       onSuccess: () => {
-        queryClient.invalidateQueries(["tasks"]);
+        queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
         queryClient.invalidateQueries(["parentTaskDetail"], taskID);
         form.resetFields("");

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Form, Segmented, message } from "antd";
 import React, { useState } from "react";
 import { updateTask } from "../../../../apis/tasks";
+import { useRouteLoaderData } from "react-router-dom";
 
 const PrioritySegmented = ({
   taskSelected,
@@ -9,6 +10,8 @@ const PrioritySegmented = ({
   setIsOpenPriority,
   updatePriority,
 }) => {
+  const eventId = taskSelected?.eventDivision?.event?.id;
+  const staff = useRouteLoaderData("staff");
   const queryClient = useQueryClient();
   const taskID = taskSelected?.id;
   const eventID = taskSelected?.eventDivision?.event?.id;
@@ -29,7 +32,7 @@ const PrioritySegmented = ({
     {
       onSuccess: () => {
         setUpdatePriority(prioritySelected);
-        queryClient.invalidateQueries(["tasks"]);
+        queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
         queryClient.invalidateQueries(["subtaskDetails"], taskID);
         message.open({
           type: "success",

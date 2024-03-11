@@ -26,6 +26,9 @@ module.exports = {
         bgColumn: "#F4F5F7",
         bgG: "#F3F4F8",
         success: "#20bcbb",
+        blueBudget: "#1f2c73",
+        blueSecondBudget: "#7184ad",
+        bgCardBudget: "#2F2CD8",
       },
     },
     fontFamily: {
