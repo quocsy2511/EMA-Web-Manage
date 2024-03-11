@@ -23,7 +23,7 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
   const divisionId = useRouteLoaderData("staff").divisionID;
   const eventId = taskSelected?.eventDivision?.event?.id;
   const staff = useRouteLoaderData("staff");
-  
+
   const {
     data: employees,
     isError: isErrorEmployees,
@@ -36,13 +36,15 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
       }),
     {
       select: (data) => {
-        const listEmployee = data?.users?.map(({ ...item }) => {
-          item.dob = moment(item?.dob).format("YYYY-MM-DD");
-          return {
-            key: item?.id,
-            ...item,
-          };
-        });
+        const listEmployee = data?.users
+          ?.filter((user) => user.role.roleName === "Nhân Viên")
+          ?.map(({ ...item }) => {
+            item.dob = moment(item?.dob).format("YYYY-MM-DD");
+            return {
+              key: item?.id,
+              ...item,
+            };
+          });
         return listEmployee;
       },
       refetchOnWindowFocus: false,
