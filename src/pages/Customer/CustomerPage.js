@@ -46,8 +46,8 @@ const ContactItem = memo(
         <div className="absolute top-2 right-2">
           {customer.status === "PENDING" ? (
             // <MdOutlinePending className={clsx("text-2xl text-orange-300")} />
-            <p className="text-xs text-orange-500 border border-orangtext-orange-500 rounded-lg px-2 py-1">
-              chờ duyệt
+            <p className="text-xs text-orange-500 border border-orange-500 rounded-lg px-2 py-1">
+              Chờ duyệt
             </p>
           ) : customer.status === "ACCEPTED" ? (
             // <MdCheckCircleOutline className={clsx("text-2xl text-green-400")} />

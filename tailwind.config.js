@@ -28,6 +28,9 @@ module.exports = {
         success: "#20bcbb",
       },
     },
+    fontFamily: {
+      'nunito': ["Nunito", "sans-serif"],
+    },
   },
   plugins: [require("tailwind-scrollbar-hide")],
 };

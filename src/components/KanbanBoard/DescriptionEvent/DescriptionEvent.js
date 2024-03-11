@@ -109,7 +109,7 @@ const DescriptionEvent = ({ selectEvent }) => {
                   dangerouslySetInnerHTML={{
                     __html: new QuillDeltaToHtmlConverter(
                       JSON.parse(
-                        selectEvent?.description?.startsWith(`[{"insert":"`)
+                        selectEvent?.description?.startsWith(`[{"`)
                           ? selectEvent?.description
                           : parseJson(selectEvent?.description)
                       )

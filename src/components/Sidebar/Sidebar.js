@@ -65,17 +65,17 @@ const Sidebar = ({ collapsed }) => {
     //     <BsJournalCheck className="text-[#333333]" size={24} />
     //   </p>
     // ),
+    // getItem(
+    //   <LabelText text="Yêu cầu" />,
+    //   "Yêu cầu",
+    //   "/manager/request",
+    //   <p>
+    //     <BsMailbox className="text-[#FF5722]" size={24} />
+    //   </p>
+    // ),
     getItem(
-      <LabelText text="Yêu cầu" />,
-      "Yêu cầu",
-      "/manager/request",
-      <p>
-        <BsMailbox className="text-[#FF5722]" size={24} />
-      </p>
-    ),
-    getItem(
-      <LabelText text="Chat" />,
-      "Chat",
+      <LabelText text="Tin nhắn" />,
+      "Tin nhắn",
       "/manager/chat",
       <p>
         <IoChatboxOutline className="text-[#FF5722]" size={24} />

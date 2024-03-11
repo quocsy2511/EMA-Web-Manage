@@ -1,0 +1,121 @@
+import React from "react";
+import { Modal, Timeline, Tooltip } from "antd";
+import momenttz from "moment-timezone";
+import { IoMdTime } from "react-icons/io";
+import { FaCrown } from "react-icons/fa6";
+import clsx from "clsx";
+
+const AssignmentHistoryModal = ({
+  isModalOpen,
+  setIsModalOpen,
+  assignTasks,
+}) => {
+  console.log("assignTasks > ", assignTasks);
+
+  // const renderTimeline = assignTasks?.reduce((result, item) => {
+  //   console.log("resultresult > ", result);
+  //   if (!result?.length) {
+  //     console.log("Add first", [
+  //       {
+  //         label: momenttz(item?.createdAt).format("DD-MM-YYYY"),
+  //         contentList: [item],
+  //       },
+  //     ]);
+  //     return [
+  //       {
+  //         label: momenttz(item?.createdAt).format("DD-MM-YYYY"),
+  //         contentList: [item],
+  //       },
+  //     ];
+  //   } else {
+  //     console.log("find last label  > ", result?.[result?.length - 1]?.label);
+  //     if (
+  //       momenttz(item?.createdAt).format("DD-MM-YYYY") ===
+  //       result?.[result?.length - 1]?.label
+  //     ) {
+  //       console.log("same > ", result);
+  //       return result?.map((subItem) => {
+  //         if (subItem?.label === item?.createdAt) {
+  //           return {
+  //             ...subItem,
+  //             contentList: [...subItem?.contentList, subItem],
+  //           };
+  //         }
+  //       });
+  //     } else {
+  //       console.log("diff > ", {
+  //         label: momenttz(item?.createdAt).format("DD-MM-YYYY"),
+  //         contentList: [item],
+  //       });
+  //       return result.push({
+  //         label: momenttz(item?.createdAt).format("DD-MM-YYYY"),
+  //         contentList: [item],
+  //       });
+  //     }
+  //   }
+  // }, []);
+  const renderTimeline = assignTasks;
+  console.log("renderTimeline > ", renderTimeline);
+
+  return (
+    <Modal
+      title={<p className="text-center text-3xl">Lịch sử giao việc</p>}
+      open={isModalOpen}
+      onCancel={() => setIsModalOpen(false)}
+      centered
+      //   width={"50%"}
+      footer={null}
+      //   className="flex justify-center items-center"
+    >
+      <div className=" h-full mt-8">
+        <Timeline
+          // mode="alternate"
+          // items={renderTimeline?.map((item) => ({
+          //   label: <p className="text-base mr-5">{item?.label}</p>,
+          //   children: item?.contentList?.map((subItem) => (
+          //     <div className="flex items-center space-x-3">
+          //       <p
+          //         className={clsx("text-base ml-3 font-medium", {
+          //           "line-through text-slate-300 font-normal":
+          //             !subItem?.status === "inactive",
+          //         })}
+          //       >
+          //         {subItem?.user?.profile?.fullName}
+          //       </p>
+          //       {subItem?.isLeader && subItem?.status === "active" && (
+          //         <Tooltip title="Leader">
+          //           <FaCrown className="text-base text-orange-400" />
+          //         </Tooltip>
+          //       )}
+          //     </div>
+          //   )),
+          //   dot: <IoMdTime className="text-xl" />,
+          // }))}
+          mode="left"
+          items={renderTimeline?.map((item) => ({
+            children: (
+              <div className="flex items-center space-x-3">
+                <p
+                  className={clsx("text-base ml-3 font-medium", {
+                    "line-through text-slate-400 font-normal":
+                      item?.status === "inactive",
+                  })}
+                >
+                  {item?.user?.profile?.fullName}
+                </p>
+                {item?.isLeader && item?.status === "active" && (
+                  <Tooltip title="Leader">
+                    <FaCrown className="text-base text-orange-400" />
+                  </Tooltip>
+                )}
+              </div>
+            ),
+            dot: <IoMdTime className="text-2xl" />,
+          }))}
+        />
+      </div>
+    </Modal>
+  );
+};
+
+export default AssignmentHistoryModal;

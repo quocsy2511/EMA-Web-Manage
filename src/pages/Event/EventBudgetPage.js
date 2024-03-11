@@ -1,7 +1,7 @@
-import React, { Fragment } from "react";
+import React, { Fragment, memo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Link, useParams } from "react-router-dom";
-import { Card, Progress, Statistic, Tabs } from "antd";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { Card, Progress, Statistic, Tabs, Tooltip } from "antd";
 import ConfirmedBudget from "../../components/Budget/ConfirmedBudget";
 import ConfirmingBudget from "../../components/Budget/ConfirmingBudget";
 import { FcMoneyTransfer } from "react-icons/fc";
@@ -9,66 +9,50 @@ import { useQuery } from "@tanstack/react-query";
 import { getDetailEvent } from "../../apis/events";
 import { getBudget } from "../../apis/budgets";
 
+const BudgetTableItem = memo(({}) => {
+  return (
+    <div className=" flex space-x-3 py-5 border-t">
+      <p className="w-[30%] text-base font-normal truncate">
+        Đi mua nướccccccccccccc c
+      </p>
+      <p className="w-[12%] text-base font-normal truncate">21-01-2024</p>
+      <p className="w-[20%] text-base font-normal truncate">1,000,000</p>
+      <div className="w-[20%] px-5">
+        <p className="text-base text-center font-normal truncate border py-1 rounded-md">
+          Chờ duyệt
+        </p>
+      </div>
+      <p className="flex-1 text-base font-normal truncate text-right">
+        Chức năng
+      </p>
+    </div>
+  );
+});
+
+const BudgetItem = memo(({}) => {
+  return (
+    <div className="flex items-center bg-white p-5 space-x-5 hover:scale-105 transition-transform cursor-pointer rounded-lg shadow-md">
+      <div className="min-w-[20%] flex justify-center items-center">
+        <Progress size="small" type="dashboard" percent={105} gapDegree={30} />
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <Tooltip title="Ten hang muc" placement="topLeft">
+          <p className="w-full text-xl font-semibold truncate">Tên hạng mục</p>
+        </Tooltip>
+        <p className="text-base">tiền</p>
+      </div>
+    </div>
+  );
+});
+
 const EventBudgetPage = () => {
   const eventId = useParams().eventId;
   console.log("eventId: ", eventId);
 
-  const {
-    data: event,
-    isLoading,
-    isError,
-  } = useQuery(["event-detail", eventId], () => getDetailEvent(eventId));
-  console.log("DATA : ", event);
+  const location = useLocation();
+  const { eventName } = location.state ?? {};
 
-  const {
-    data: confirmedBudgets,
-    isLoading: confirmedBudgetsIsLoading,
-    isError: confirmedBudgetsIsError,
-  } = useQuery(
-    ["confirmed-budgets", eventId],
-    () =>
-      getBudget({
-        eventID: eventId,
-        pageSize: 500,
-        currentPage: 1,
-        mode: 2,
-      }),
-    { select: (data) => data.data.filter((item) => item.status === "ACCEPT") }
-  );
-
-  let totalEstimateExpense = confirmedBudgets?.reduce((current, item) => {
-    return (current += item.estExpense);
-  }, 0);
-  console.log("totalEstimateExpense: ", totalEstimateExpense);
-
-  let totalRealExpense = confirmedBudgets?.reduce((current, item) => {
-    return (current += item.realExpense);
-  }, 0);
-  console.log("totalRealExpense: ", totalRealExpense);
-
-  const onChange = (key) => {
-    console.log(key);
-  };
-  const items = [
-    {
-      key: "1",
-      label: "Đã duyệt",
-      children: (
-        <AnimatePresence>
-          <ConfirmedBudget eventId={eventId} />,
-        </AnimatePresence>
-      ),
-    },
-    {
-      key: "2",
-      label: "Chờ duyệt",
-      children: (
-        <AnimatePresence>
-          <ConfirmingBudget eventId={eventId} />,
-        </AnimatePresence>
-      ),
-    },
-  ];
+  const [selectedBudget, setSelectedBudget] = useState();
 
   return (
     <Fragment>
@@ -83,107 +67,70 @@ const EventBudgetPage = () => {
           </Link>{" "}
           /{" "}
           <Link to=".." relative="path">
-            Khai giảng
+            {eventName ?? "Tên sự kiện"}
           </Link>{" "}
           / Ngân sách
         </p>
       </motion.div>
 
       <motion.div
-        initial={{ y: -75, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="flex gap-x-5 mt-8"
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        className="flex justify-between space-x-10 mt-10"
       >
-        <div className="inline-block">
-          <Card bordered={false} loading={isLoading}>
-            <Statistic
-              title="Ngân sách"
-              value={event?.estBudget.toLocaleString() ?? "--"}
-              // precision={10}
-              valueStyle={{
-                color: "#3f8600",
-                margin: 10,
-              }}
-              prefix={<FcMoneyTransfer className="mr-2" />}
-              suffix="VNĐ"
-            />
-          </Card>
+        <div className="w-1/4 space-y-5">
+          <BudgetItem />
+          <BudgetItem />
+          <BudgetItem />
         </div>
 
-        <div>
-          <Card bordered={false}>
-            <p className="text-sm text-slate-400 text-center">
-              Kế hoạch chi tiêu
-            </p>
-            <div className="h-5" />
-            <Progress
-              type="circle"
-              percent={(totalEstimateExpense / event?.estBudget) * 100}
-              strokeColor={
-                (totalEstimateExpense / event?.estBudget) * 100 >= 100
-                  ? "rgb(255 79 98)"
-                  : "#52c41a"
-              }
-              format={(percent) => (
-                <span
-                  className={`text-sm font-medium ${
-                    percent >= 100 && "text-red-500"
-                  } text-[#3f8600]`}
-                >
-                  {totalEstimateExpense?.toLocaleString()}
-                  <br />
-                  VNĐ
-                </span>
-              )}
-            />
-          </Card>
-        </div>
+        <div className="flex-1 overflow-hidden space-y-8">
+          <p className="w-full text-xl font-semibold truncate bg-white p-5  rounded-md">
+            Tên hạng mụcTên hạng mụcTên hạng mụcTên hạng mụcTên hạng mụcTên hạng
+            mụcTên hạng mụcTên hạng mụcTên hạng mụcTên hạng mục
+          </p>
 
-        <div>
-          <Card bordered={false}>
-            <p className="text-sm text-slate-400 text-center">Thực chi</p>
-            <div className="h-5" />
-            <Progress
-              type="circle"
-              percent={(totalRealExpense / totalEstimateExpense) * 100}
-              strokeColor={
-                (totalRealExpense / totalEstimateExpense) * 100 >= 100
-                  ? "rgb(255 79 98)"
-                  : "#52c41a"
-              }
-              format={(percent) => (
-                <span
-                  className={`text-sm font-medium ${
-                    percent >= 100 ? "text-red-500" : "text-[#3f8600]"
-                  }`}
-                >
-                  {totalRealExpense?.toLocaleString()}
-                  <br />
-                  VNĐ
-                </span>
-              )}
-            />
-          </Card>
-        </div>
-      </motion.div>
+          <div className="bg-white p-5 rounded-md space-y-2">
+            <div className="flex justify-between items-center">
+              <p className="text-base text-slate-400 font-normal">Đã sử dụng</p>
+              <p className="text-base text-slate-400 font-normal">Hạn mức</p>
+            </div>
 
-      <motion.div
-        initial={{ y: 150, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="min-h-[calc(100vh-300px)] bg-white mt-8 mb-20 pl-3 pr-8 py-8 rounded-2xl"
-      >
-        <AnimatePresence>
-          <Tabs
-            tabPosition="left"
-            defaultActiveKey="1"
-            items={items}
-            onChange={onChange}
-            // style={{ height: "100%" }}
-          />
-        </AnimatePresence>
+            <div className="flex justify-between items-center">
+              <p className="text-2xl text-black font-semibold">10000000 VNĐ</p>
+              <p className="text-2xl text-black font-semibold">50000000 VNĐ</p>
+            </div>
+
+            <Progress percent={90} type="line" />
+          </div>
+
+          <div className="p-5 pb-16 bg-white">
+            <p className="text-xl font-semibold">Khoản chi</p>
+
+            <div className="mt-5 flex space-x-3 py-3">
+              <p className="w-[30%] text-base font-bold truncate">Công việc</p>
+              <p className="w-[12%] text-base font-bold truncate">Ngày tạo</p>
+              <p className="w-[20%] text-base font-bold truncate">
+                Thành tiền (VNĐ)
+              </p>
+              <p className="w-[20%] text-base text-center bg-red-200 font-bold truncate">
+                Trạng thái
+              </p>
+              <p className="flex-1 text-base font-bold truncate text-right">
+                Chức năng
+              </p>
+            </div>
+
+            <div>
+              <BudgetTableItem />
+              <BudgetTableItem />
+              <BudgetTableItem />
+            </div>
+          </div>
+        </div>
       </motion.div>
     </Fragment>
   );
 };
 
-export default EventBudgetPage;
+export default memo(EventBudgetPage);

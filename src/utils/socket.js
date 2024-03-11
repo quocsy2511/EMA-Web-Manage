@@ -30,8 +30,10 @@ export const socketListener = (dispatch, notificationAPI) => {
 
   // Listen to get notification
   socket.on("notification", (data) => {
-    console.log("data:", data);
+    console.log("notification data:", data);
+
     // queryClient.invalidateQueries(["notifications", "10"]);
+    
     notificationAPI.open({
       message: <p className="text-base">Đã nhận 1 thông báo</p>,
       description: (
