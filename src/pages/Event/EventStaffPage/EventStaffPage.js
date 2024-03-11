@@ -29,15 +29,11 @@ const EventStaffPage = () => {
 
   const location = useLocation();
   const selectEvent = location.state?.event ?? {};
-  // console.log("selectEvent > ", selectEvent);
   const listEvent = location.state?.listEvent ?? [];
-
-  // const [isDashBoard, setIsDashBoard] = useState(false);
   const [isBoardTask, setIsBoardTask] = useState(true);
   const [searchText, setSearchText] = useState(null);
   const [sort, setSort] = useState("DESC");
   const [statusSelected, setStatusSelected] = useState("clear");
-  // const [selectEvent, setSelectEvent] = useState({});
   const staff = useRouteLoaderData("staff");
   const notification = useSelector((state) => state.notification);
   const [filterMember, setFilterMember] = useState(staff?.id);
@@ -85,7 +81,7 @@ const EventStaffPage = () => {
       enabled: !!selectEvent?.id && !!staff?.id,
     }
   );
-  // console.log("🚀 ~ EventStaffPage ~ listTaskParents:", listTaskParents);
+
   const {
     data: listTaskFilter,
     refetch: refetchListTaskFilter,
@@ -100,10 +96,13 @@ const EventStaffPage = () => {
         sort: sort,
         status: "",
       }),
+
     {
       select: (data) => {
         if (data && Array.isArray(data)) {
+          // console.log("🚀 ~ EventStaffPage ~ data:", data);
           const taskParents = data?.filter((task) => task?.parent !== null);
+          // console.log("🚀 ~ EventStaffPage ~ taskParents:", taskParents);
           const formatDate = taskParents?.map(({ ...item }) => {
             item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
             item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
@@ -126,6 +125,7 @@ const EventStaffPage = () => {
       enabled: !!staff?.id && !!selectEvent?.id,
     }
   );
+
   //handle search task ch va task con
   function filterSubTasks(task, searchText) {
     const subtaskTitles = task?.subTask?.filter((subtask) =>
@@ -136,13 +136,13 @@ const EventStaffPage = () => {
   }
   // Hàm để so sánh và cập nhật listTaskParents
   function updateListTaskParents(listTaskParents, listTaskFilter, searchText) {
-    //check điều kiện nếu có search thì search theo cái list hiện có
+    console.log("🚀 ~ updateListTaskParents ~ listTaskFilter:", listTaskFilter);
+    //check điều kiện nếu có search
     if (searchText) {
       const filteredTaskParents = listTaskParents
         ?.map((task) => {
           // const parentTitle = task?.title?.toLowerCase(); //check thằng cha
           const subTaskResults = filterSubTasks(task, searchText); // check thằng con
-
           if (
             // parentTitle.includes(searchText?.toLowerCase()) ||
             subTaskResults?.length > 0
@@ -156,14 +156,19 @@ const EventStaffPage = () => {
         })
         .filter((task) => task !== null);
 
-      // console.log(
-      //   "🚀 ~ file: EventStaffPage.js:187 ~ updateListTaskParents ~ filteredTaskParents:",
-      //   filteredTaskParents
-      // );
+      console.log(
+        "🚀 ~ updateListTaskParents ~ filteredTaskParents:",
+        filteredTaskParents
+      );
       return filteredTaskParents;
     }
 
-    // Lặp qua từng task trong listTaskParents
+    // check ng dùng chọn filter
+    if (listTaskFilter?.length === 0 && staff?.id === filterMember) {
+      refetch();
+      return listTaskParents;
+    }
+
     const updatedListTaskParents = listTaskParents?.map((task) => {
       // Kiểm tra xem task có subTask và có trong listTaskFilter không
       if (task?.subTask && Array.isArray(task?.subTask)) {
@@ -173,6 +178,7 @@ const EventStaffPage = () => {
             (filteredTask) => filteredTask?.id === subtask?.id
           )
         );
+
         return {
           ...task,
           subTask: updatedSubTasks,
@@ -181,13 +187,6 @@ const EventStaffPage = () => {
         return task;
       }
     });
-
-    // check ng dùng chọn filter
-    if (listTaskFilter?.length === 0 && staff?.id === filterMember) {
-      // Nếu listTaskFilter rỗng, refetch listTaskParents
-      refetch();
-      return listTaskParents;
-    }
 
     return updatedListTaskParents;
   }

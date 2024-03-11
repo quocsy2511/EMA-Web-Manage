@@ -22,7 +22,7 @@ import React, { memo, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRouteLoaderData } from "react-router-dom";
-import { getEmployee } from "../../../apis/users";
+import { getAllUser, getEmployee } from "../../../apis/users";
 import moment from "moment";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
@@ -63,7 +63,6 @@ const NewTaskModal = ({
     data: employees,
     isError: isErrorEmployees,
     isLoading: isLoadingEmployees,
-    // refetch: refetchEmployees,
   } = useQuery(
     ["employees"],
     () =>
@@ -72,15 +71,17 @@ const NewTaskModal = ({
       }),
     {
       select: (data) => {
-        // console.log("🚀 ~ data:", data?.users);
+        console.log("🚀 ~ data:", data?.users);
 
-        const listEmployee = data?.users?.map(({ ...item }) => {
-          item.dob = moment(item?.dob).format("YYYY-MM-DD");
-          return {
-            key: item?.id,
-            ...item,
-          };
-        });
+        const listEmployee = data?.users
+          ?.filter((user) => user.role.roleName === "Nhân Viên")
+          ?.map(({ ...item }) => {
+            item.dob = moment(item?.dob).format("YYYY-MM-DD");
+            return {
+              key: item?.id,
+              ...item,
+            };
+          });
         return listEmployee;
       },
       refetchOnWindowFocus: false,
