@@ -10,6 +10,7 @@ import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { addNotification } from "../../store/Slice/notificationsSlice.js";
 import TaskModal from "./ModalKanban/TaskModal.js";
+import { Empty } from "antd";
 
 const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
   // console.log("🚀 ~ KanbanBoard ~ listTaskParents:", listTaskParents);
@@ -75,15 +76,19 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
         <DescriptionEvent key={selectEvent?.id} selectEvent={selectEvent} />
 
         <div className="flex overflow-x-scroll px-10 pb-8 gap-x-3 min-h-[55vh]">
-          {listTaskParents?.map((taskParent, index) => (
-            <Column
-              taskTemplate={[]}
-              selectedStatus={selectedStatus}
-              TaskParent={taskParent}
-              idEvent={selectEvent?.id}
-              key={taskParent?.id}
-            />
-          ))}
+          {listTaskParents.length > 0 ? (
+            listTaskParents?.map((taskParent, index) => (
+              <Column
+                taskTemplate={[]}
+                selectedStatus={selectedStatus}
+                TaskParent={taskParent}
+                idEvent={selectEvent?.id}
+                key={taskParent?.id}
+              />
+            ))
+          ) : (
+            <Empty />
+          )}
         </div>
 
         {isOpenTaskModal && (
