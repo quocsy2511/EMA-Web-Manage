@@ -9,6 +9,7 @@ import {
   Form,
   Input,
   Select,
+  Upload,
   message,
   notification,
 } from "antd";
@@ -24,6 +25,8 @@ import { useMutation } from "@tanstack/react-query";
 import { assignMember, createTask, updateTask } from "../../../apis/tasks";
 import SubTaskSection from "./SubTaskSection";
 import dayjs from "dayjs";
+import { UploadOutlined } from "@ant-design/icons";
+import { uploadFile } from "../../../apis/files";
 
 const { RangePicker } = DatePicker;
 
@@ -56,12 +59,21 @@ const EventAssignTaskPage = () => {
   } = location.state;
 
   console.log("updateData > ", updateData);
+  console.log("dateRange > ", dateRange);
 
   const [isSelectDate, setIsSelectDate] = useState(false);
+  const [chosenFile, setChosenFile] = useState();
+  console.log("chosenFile > ", chosenFile);
 
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const { notification } = App.useApp();
+
+  useEffect(() => {
+    form.setFieldsValue({
+      fileHolder: chosenFile,
+    });
+  }, [chosenFile]);
 
   const { mutate: taskMutate, isLoading: taskIsLoading } = useMutation(
     (task) => createTask(task),
@@ -69,11 +81,9 @@ const EventAssignTaskPage = () => {
       onSuccess: (data) => {
         notification.success({
           message: <p className="font-medium">Tạo 1 hạng mục thành công</p>,
-          // description: "Hello, Ant Design!!",
           placement: "topRight",
           duration: 3,
         });
-
         navigate(-1);
       },
       onError: (error) => {
@@ -93,6 +103,7 @@ const EventAssignTaskPage = () => {
           placement: "topRight",
           duration: 3,
         });
+
         navigate(-1);
       },
       onError: (error) => {
@@ -122,40 +133,62 @@ const EventAssignTaskPage = () => {
       },
     });
 
+  const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
+    useMutation((formData) => uploadFile(formData), {
+      onSuccess: (data, variables) => {
+        // const task = variables.task;
+        // console.log("🚀 ~ useMutation ~ variables.task:", variables.task);
+        // variables.task = {
+        //   file: [
+        //     {
+        //       fileName: data?.fileName ? data?.fileName : "tài liệu công việc",
+        //       fileUrl: data?.downloadUrl,
+        //     },
+        //   ],
+        //   ...task,
+        // };
+        // submitFormTask(variables.task);
+        notification.success({
+          message: (
+            <p className="font-medium">
+              Đã tải tệp tin của hạng mục thành công
+            </p>
+          ),
+          placement: "topRight",
+          duration: 3,
+        });
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
+        });
+      },
+    });
+
+  const checkArrayDiff = (longArr, shortArr) =>
+    longArr.filter((item) => !shortArr.includes(item));
+
+  const handleAssignTask = (values) => {
+    updateAssignMutate({
+      taskID: updateData?.id,
+      assignee: values?.assignee ?? [],
+      leader: values?.leader,
+    });
+  };
+
   const onFinish = (values) => {
     console.log("Success:", values);
-    // values = {
-    //   ...values,
-    //   startDate: moment(values.date[0].$d).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
-    //   endDate: moment(values.date[1].$d).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
-    //   eventID: eventId,
-    //   estimationTime: +values.estimationTime,
-    //   desc: JSON.stringify(values.desc.ops),
-    // };
-    // if (parentTaskId) {
-    //   values = { ...values, parentTask: parentTaskId };
-    // } else
-    //   values = {
-    //     ...values,
-    //     assignee: [values.assignee],
-    //     leader: values.assignee,
-    //   };
-    // const { fileUrl, date, ...restValue } = values;
-    // if (!values.fileUrl || values.fileUrl?.length === 0) {
-    //   console.log("NOOO FILE");
-    //   console.log("Transform data: ", restValue);
-    //   // call api
-    //   mutate(restValue);
-    // } else {
-    //   console.log("HAS FILE");
-    //   const formData = new FormData();
-    //   formData.append("file", fileList);
-    //   formData.append("folderName", "task");
-    //   console.log("Transform data: ", restValue);
-    //   //call api
-    //   uploadFileMutate({ formData, task: restValue });
-    // }
 
+    if (values?.fileHolder) {
+      const formData = new FormData();
+      formData.append("file", values?.fileHolder);
+      formData.append("folderName", "task");
+
+      uploadFileMutate(formData);
+    }
+
+    // Create new task
     if (!updateData) {
       const taskPayload = {
         eventID: eventId,
@@ -179,12 +212,14 @@ const EventAssignTaskPage = () => {
 
       taskMutate(taskPayload);
     } else {
+      // Update task
       const updatedDesc = JSON.parse(
-        updateData?.desc?.startsWith(`[{"insert":"`)
+        updateData?.desc?.startsWith(`[{"`)
           ? updateData?.desc
           : parseJson(updateData?.desc)
       );
 
+      // Update Task Detail
       if (
         updateData?.title !== values?.title ||
         updateData?.date?.[0] !== values?.date?.[0] ||
@@ -214,6 +249,7 @@ const EventAssignTaskPage = () => {
         updateTaskMutate(updatedValue);
       }
 
+      // Update assign task
       if (!isSubTask) {
         if (updateData?.assignee?.[0] !== values?.assignee?.[0]) {
           console.log("assign task again");
@@ -227,6 +263,34 @@ const EventAssignTaskPage = () => {
         }
       } else {
         // check assign subtask
+        // updateData?.assignee
+        // values?.assignee
+        if (values?.leader !== updateData?.assignee?.[0]) {
+          console.log("change leader");
+          handleAssignTask(values);
+        } else if (updateData?.assignee?.length === values?.assignee?.length) {
+          console.log("same length");
+          if (!!checkArrayDiff(updateData?.assignee, values?.assignee).length) {
+            handleAssignTask(values);
+          }
+        } else {
+          console.log("diff length");
+          if (updateData?.assignee?.length > values?.assignee?.length) {
+            if (
+              !!checkArrayDiff(updateData?.assignee, values?.assignee).length
+            ) {
+              console.log("change less");
+              handleAssignTask(values);
+            }
+          } else {
+            if (
+              !!checkArrayDiff(values?.assignee, updateData?.assignee).length
+            ) {
+              console.log("change more");
+              handleAssignTask(values);
+            }
+          }
+        }
       }
     }
   };
@@ -252,7 +316,11 @@ const EventAssignTaskPage = () => {
           </Link>
           /{" "}
           {!isSubTask ? (
-            "Tạo hạng mục"
+            updateData ? (
+              "Cập nhật hạng mục"
+            ) : (
+              "Tạo hạng mục"
+            )
           ) : (
             <>
               Tạo công việc cho hạng mục [{" "}
@@ -296,7 +364,7 @@ const EventAssignTaskPage = () => {
             desc: updateData
               ? {
                   ops: JSON.parse(
-                    updateData?.desc?.startsWith(`[{"insert":"`)
+                    updateData?.desc?.startsWith(`[{"`)
                       ? updateData?.desc
                       : parseJson(updateData?.desc)
                   ),
@@ -339,6 +407,8 @@ const EventAssignTaskPage = () => {
                           dayjs(updateData?.date?.[0], "YYYY-MM-DD"),
                           dayjs(updateData?.date?.[1], "YYYY-MM-DD"),
                         ]
+                      : momenttz(dateRange?.[0]).isBefore(momenttz(), "days")
+                      ? [dayjs(), null]
                       : [dayjs(dateRange?.[0], "YYYY-MM-DD"), null]
                   }
                   onChange={(value) => {
@@ -350,13 +420,16 @@ const EventAssignTaskPage = () => {
                     } else setIsSelectDate();
                   }}
                   disabledDate={(current) => {
-                    const startDate = momenttz(dateRange[0], "YYYY-MM-DD");
-                    const endDate = momenttz(dateRange[1], "YYYY-MM-DD");
+                    const now = momenttz();
+                    const startDate = momenttz(dateRange?.[0], "YYYY-MM-DD");
+                    const endDate = momenttz(dateRange?.[1], "YYYY-MM-DD");
 
                     if (!isSubTask) return current && current < startDate;
                     else
                       return (
-                        (current && current < startDate) || current > endDate
+                        (current && current < startDate) ||
+                        current < now ||
+                        current > endDate
                       );
                   }}
                   format={"DD/MM/YYYY"}
@@ -414,6 +487,72 @@ const EventAssignTaskPage = () => {
                 form.setFieldsValue({ desc: editor.getContents() });
               }}
             />
+          </Form.Item>
+
+          <Form.Item
+            // className="text-sm font-medium m-0 w-1/2 flex justify-start items-center gap-x-2"
+            name="fileHolder"
+            // valuePropName="fileList"
+            // getValueFromEvent={(e) => e?.fileList}
+            rules={[
+              {
+                validator(_, fileList) {
+                  return new Promise((resolve, reject) => {
+                    if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( dung lượng < 10MB )");
+                    } else {
+                      resolve();
+                    }
+                  });
+                },
+              },
+            ]}
+          >
+            <div className="flex items-center space-x-5">
+              <Title title="Tài liệu : " />
+              <Upload
+                className="flex items-center space-x-3"
+                maxCount={1}
+                // listType="picture"
+                action=""
+                customRequest={({ file, onSuccess }) => {
+                  setTimeout(() => {
+                    onSuccess("ok");
+                  }, 0);
+                }}
+                showUploadList={{
+                  showPreviewIcon: false,
+                }}
+                beforeUpload={(file) => {
+                  console.log("file > ", file);
+                  return new Promise((resolve, reject) => {
+                    console.log("inside");
+                    if (file && file?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( <10MB )");
+                      return false;
+                    } else {
+                      console.log("ok");
+                      // setFileList(file);
+                      setChosenFile(file);
+                      // form.setFieldsValue({
+                      //   fileHolder: file,
+                      // });
+                      resolve();
+                      return true;
+                    }
+                  });
+                }}
+                onChange={(info) => {
+                  console.log("info > ", info);
+                  if (info?.file?.status === "removed") {
+                    // File has been removed
+                    setChosenFile(); // Reset the chosen file state
+                  }
+                }}
+              >
+                <Button icon={<UploadOutlined />}>Tải tài liệu</Button>
+              </Upload>
+            </div>
           </Form.Item>
 
           {isSubTask ? (

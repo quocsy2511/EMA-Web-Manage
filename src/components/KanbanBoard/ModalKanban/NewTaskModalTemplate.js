@@ -293,7 +293,6 @@ const NewTaskModalTemplate = ({
             ]}
           >
             <Upload
-              // className="upload-list-inline"
               maxCount={1}
               listType="picture"
               action=""

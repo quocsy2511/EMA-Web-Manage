@@ -15,7 +15,16 @@ import {
 import { BsHourglassBottom, BsHourglassSplit, BsPlus } from "react-icons/bs";
 import { BiRightArrowAlt } from "react-icons/bi";
 import { LuSettings } from "react-icons/lu";
-import { Avatar, Card, FloatButton, message, Popover, Progress } from "antd";
+import { AiOutlineHistory } from "react-icons/ai";
+import {
+  Avatar,
+  Card,
+  FloatButton,
+  message,
+  Popover,
+  Progress,
+  Tooltip,
+} from "antd";
 import TaskItem from "../../components/Task/TaskItem";
 import CommentInTask from "../../components/Comment/CommentInTask";
 import SubTaskModal from "../../components/Modal/SubTaskModal";
@@ -25,11 +34,11 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import { getComment } from "../../apis/comments";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
-import TaskUpdateModal from "../../components/Modal/TaskUpdateModal";
 import { useDispatch, useSelector } from "react-redux";
 import { redirectionActions } from "../../store/redirection";
 import moment from "moment";
 import momenttz from "moment-timezone";
+import AssignmentHistoryModal from "../../components/Modal/AssignmentHistoryModal";
 
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
@@ -46,11 +55,8 @@ const EventSubTaskPage = () => {
   const { redirect } = useSelector((state) => state.redirection);
 
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [isOpenCreateTaskModal, setIsOpenCreateTaskModal] = useState(false);
   const [selectedSubTask, setSelectedSubTask] = useState();
-  const [isOpenUpdateTaskModal, setIsOpenUpdateTaskModal] = useState(false);
-  const [isOpenUpdateSubTaskModal, setIsOpenUpdateSubTaskModal] =
-    useState(false);
+  const [isOpenHistoryModal, setIsOpenHistoryModal] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -73,12 +79,44 @@ const EventSubTaskPage = () => {
       }),
     {
       select: (data) => {
-        return data[0];
+        // sort history based on createdAt of task
+        if (data?.[0]) {
+          if (data?.[0]?.assignTasks && data?.[0]?.assignTasks?.length > 1) {
+            data?.[0]?.assignTasks?.sort((a, b) => {
+              const formatStartDateA = momenttz(a?.createdAt).format(
+                "YYYY-MM-DD"
+              );
+              const formatStartDateB = momenttz(b?.createdAt).format(
+                "YYYY-MM-DD"
+              );
+              return formatStartDateA.localeCompare(formatStartDateB);
+            });
+          }
+
+          // sort history based on createdAt of subtask
+          if (data?.[0]?.subTask && data?.[0]?.subTask?.length > 1) {
+            data?.[0]?.subTask?.map((subtask) => {
+              if (subtask?.assignTasks && subtask?.assignTasks?.length > 1)
+                subtask.assignTasks = subtask?.assignTasks?.sort((a, b) => {
+                  const formatStartDateA = momenttz(a?.createdAt).format(
+                    "YYYY-MM-DD"
+                  );
+                  const formatStartDateB = momenttz(b?.createdAt).format(
+                    "YYYY-MM-DD"
+                  );
+                  return formatStartDateA.localeCompare(formatStartDateB);
+                });
+              return subtask;
+            });
+          }
+        }
+
+        return data?.[0];
       },
       refetchOnWindowFocus: false,
     }
   );
-  console.log("tasks: ", tasks);
+  console.log("big task: ", tasks);
 
   const {
     data: comments,
@@ -87,9 +125,9 @@ const EventSubTaskPage = () => {
   } = useQuery(["comment", taskId], () => getComment(taskId), {
     refetchOnWindowFocus: false,
   });
+  console.log("comments > ", comments);
 
   const queryClient = useQueryClient();
-
   const {
     mutate: updateEventStatusMutate,
     isLoading: updateEventStatusIsLoading,
@@ -114,31 +152,6 @@ const EventSubTaskPage = () => {
       },
     }
   );
-
-  // useEffect(() => {
-  //   console.log("inside useEffect: ", tasks?.subTask);
-  //   if (redirect.task && redirect.task.parentTaskId) {
-  //     const openSubtask = tasks?.subTask.find(
-  //       (subtask) => subtask.id === redirect.task.commonId
-  //     );
-  //     console.log("find to open subtask: ", openSubtask);
-  //     if (openSubtask) {
-  //       setSelectedSubTask(openSubtask);
-  //       setIsOpenModal(true);
-  //     }
-  //   }
-  // }, [redirect.task, tasks]);
-
-  const handleOpenUpdateModal = () => {
-    setIsOpenUpdateTaskModal((prev) => !prev);
-  };
-
-  const handleUpdateStatusTask = (status) => {
-    updateEventStatusMutate({
-      taskID: taskId,
-      status,
-    });
-  };
 
   const goToCreateSubTask = () => {
     navigate(`/manager/event/${eventId}/task`, {
@@ -167,7 +180,6 @@ const EventSubTaskPage = () => {
       desc: tasks?.description,
       assignee: tasks?.assignTasks?.map((user) => user?.user?.id),
     };
-    console.log("hello > ", updateData);
 
     navigate(`/manager/event/${eventId}/task`, {
       state: {
@@ -297,13 +309,11 @@ const EventSubTaskPage = () => {
         tooltip={<p>Tạo công việc</p>}
       />
 
-      {/* <TaskUpdateModal
-        isModalOpen={isOpenUpdateTaskModal}
-        setIsModalOpen={setIsOpenUpdateTaskModal}
-        eventID={eventId}
-        task={tasks}
-        isSubTask={false}
-      /> */}
+      <AssignmentHistoryModal
+        isModalOpen={isOpenHistoryModal}
+        setIsModalOpen={setIsOpenHistoryModal}
+        assignTasks={tasks?.assignTasks}
+      />
 
       <motion.div
         initial={{ y: -75, opacity: 0 }}
@@ -320,74 +330,6 @@ const EventSubTaskPage = () => {
           </Link>{" "}
           / {tasks?.title}
         </p>
-
-        <div className="flex items-end">
-          {/* <AnimatePresence>
-            {tasks.subTask?.length !== 0 &&
-              tasks.subTask?.filter((task) => task.status === "CONFIRM")
-                .length === tasks.subTask?.length &&
-              tasks.status === "DONE" && (
-                <motion.div
-                  initial={{ x: 50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: 50, opacity: 0 }}
-                >
-                  <Button
-                    isLoading={updateEventStatusIsLoading}
-                    // size="large"
-                    icon={<BiCheck size={15} />}
-                    type="primary"
-                    onClick={() => handleUpdateStatusTask("CONFIRM")}
-                    className="font-medium"
-                  >
-                    Xác thực hạng mục
-                  </Button>
-                </motion.div>
-              )}
-          </AnimatePresence> */}
-
-          {/* <AnimatePresence>
-            {tasks.status === "PENDING" && (
-              <motion.div
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: 50, opacity: 0 }}
-              >
-                <Button
-                  isLoading={updateEventStatusIsLoading}
-                  // size="large"
-                  type="primary"
-                  icon={<VscDebugStart size={15} />}
-                  onClick={() => handleUpdateStatusTask("PROCESSING")}
-                >
-                  Bắt đầu hạng mục
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence> */}
-
-          {/* <AnimatePresence>
-            {tasks.subTask?.length !== 0 &&
-              tasks.subTask?.filter((task) => task.status === "CONFIRM")
-                .length === tasks.subTask?.length && (
-                <motion.div
-                  initial={{ x: 50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: 50, opacity: 0 }}
-                >
-                  <Button
-                    isLoading={updateEventStatusIsLoading}
-                    // size="large"
-                    type="primary"
-                    icon={<VscDebugStart size={15} />}
-                    onClick={() => handleUpdateStatusTask("DONE")}
-                  >
-                    Hoàn thành hạng mục
-                  </Button>
-                </motion.div>
-              )}
-          </AnimatePresence> */}
-        </div>
       </motion.div>
 
       <motion.div
@@ -401,12 +343,25 @@ const EventSubTaskPage = () => {
 
           <div className="space-y-1">
             <p className="text-2xl font-semibold">{tasks?.title}</p>
-            <p className="text-sm">
-              Chịu trách nhiệm bởi{" "}
-              <span className="font-semibold">
-                {tasks?.assignTasks?.[0]?.user?.profile?.fullName}
-              </span>
-            </p>
+            <div className="flex items-center space-x-4">
+              <p className="text-sm">
+                Chịu trách nhiệm bởi{" "}
+                <span className="font-semibold">
+                  {/* {tasks?.assignTasks?.[0]?.user?.profile?.fullName} */}
+                  {
+                    tasks?.assignTasks?.find(
+                      (user) => user?.isLeader && user?.status === "active"
+                    )?.user?.profile?.fullName
+                  }
+                </span>
+              </p>
+              <Tooltip title="Xem lịch sử giao việc">
+                <AiOutlineHistory
+                  onClick={() => setIsOpenHistoryModal(true)}
+                  className="text-lg cursor-pointer hover:text-blue-500 hover:scale-110 transition-colors"
+                />
+              </Tooltip>
+            </div>
           </div>
 
           <div className="flex-1 flex justify-end space-x-8">
@@ -444,9 +399,12 @@ const EventSubTaskPage = () => {
                   <BsHourglassSplit size={15} />
                   <p className="text-base font-medium">
                     {tasks?.startDate
-                      ? moment(tasks?.startDate)
-                          .utc()
-                          .format("dddd, D [tháng] M")
+                      ? new Date(tasks?.startDate).toLocaleDateString("vi-VN", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
                       : "-- : --"}
                   </p>
                 </motion.div>
@@ -460,7 +418,12 @@ const EventSubTaskPage = () => {
                   <BsHourglassBottom size={15} />
                   <p className="text-base font-medium">
                     {tasks?.endDate
-                      ? moment(tasks?.endDate).utc().format("dddd, D [tháng] M")
+                      ? new Date(tasks?.endDate).toLocaleDateString("vi-VN", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
                       : "-- : --"}
                   </p>
                 </motion.div>
@@ -490,33 +453,19 @@ const EventSubTaskPage = () => {
 
         {/* Desc */}
         <div className="mt-12 mb-20 flex gap-x-10">
-          {/* <div className="space-y-5">
-            <Card>
-              <p className="text-base font-medium">
-                Thời gian ước lượng:{" "}
-                {tasks.estimationTime ? (
-                  <span className="underline">{tasks.estimationTime} giờ</span>
-                ) : (
-                  "Chưa có"
-                )}
-              </p>
-            </Card>
-            <Card>
-              <p className="text-base font-medium">
-                Công số:{" "}
-                {tasks.effort ? (
-                  <span className="underline">{tasks.effort} giờ</span>
-                ) : (
-                  "Chưa có"
-                )}
-              </p>
-            </Card>
-          </div> */}
           <Progress
             type="dashboard"
             percent={
-              tasks?.subTask?.filter((subtask) => subtask.status === "CONFIRM")
-                .length / tasks?.subTask?.length
+              tasks?.subTask?.length !== 0
+                ? (
+                    (tasks?.subTask?.filter(
+                      (subtask) => subtask.status === "CONFIRM"
+                    ).length /
+                      tasks?.subTask?.filter(
+                        (subtask) => subtask?.status !== "CANCEL"
+                      ).length ?? 1) * 100
+                  ).toFixed(1)
+                : 0
             }
             gapDegree={30}
           />
@@ -526,7 +475,7 @@ const EventSubTaskPage = () => {
               dangerouslySetInnerHTML={{
                 __html: new QuillDeltaToHtmlConverter(
                   JSON.parse(
-                    tasks?.description?.startsWith(`[{"insert":"`)
+                    tasks?.description?.startsWith(`[{"`)
                       ? tasks?.description
                       : parseJson(tasks?.description)
                   )
@@ -574,7 +523,6 @@ const EventSubTaskPage = () => {
                       task={subtask}
                       isSubtask={true}
                       setSelectedSubTask={setSelectedSubTask}
-                      setIsOpenUpdateSubTaskModal={setIsOpenUpdateSubTaskModal}
                       setIsOpenModal={setIsOpenModal}
                       // Go to update subtask
                       goToUpdateSubtask={() => goToUpdateSubtask(subtask)}

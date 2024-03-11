@@ -79,13 +79,12 @@ const EventItem = ({ event }) => {
       <div className="w-full bg-slate-200 mt-3 mb-5" style={{ height: 1 }} />
 
       {/* 1 line = 1rem = +4  */}
-
       <p
         className="text-sm text-slate-500 line-clamp-3 h-16"
         dangerouslySetInnerHTML={{
           __html: new QuillDeltaToHtmlConverter(
             JSON.parse(
-              event?.description?.startsWith(`[{"insert":"`)
+              event?.description?.startsWith(`[{"`)
                 ? event?.description
                 : parseJson(event?.description)
             )

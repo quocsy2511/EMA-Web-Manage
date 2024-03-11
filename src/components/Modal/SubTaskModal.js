@@ -24,7 +24,8 @@ import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
 const ItemLayout = ({ children }) => (
   <div className="flex items-center gap-x-5">{children}</div>
 );
-const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
+
 const SubTaskModal = ({
   isOpenModal,
   setIsOpenModal,
@@ -158,7 +159,7 @@ const SubTaskModal = ({
               <HiOutlineUserGroup size={22} />
               <p className="text-base text-slate-400">Tham gia</p>
             </div>
-            <Avatar.Group>
+            <Avatar.Group maxCount={5} maxPopoverTrigger="hover">
               {selectedSubTask.assignTasks?.length > 0 ? (
                 selectedSubTask.assignTasks?.map((item) => (
                   <div key={item.userId}>
@@ -182,9 +183,9 @@ const SubTaskModal = ({
             </div>
 
             {selectedSubTask.assignTasks?.length > 0 &&
-              selectedSubTask.assignTasks?.find(
-                (item) => item.isLeader === true
-              ) ? (
+            selectedSubTask.assignTasks?.find(
+              (item) => item.isLeader === true
+            ) ? (
               <>
                 <Avatar
                   size={35}
@@ -218,16 +219,16 @@ const SubTaskModal = ({
               <span className="font-medium">
                 {selectedSubTask.startDate
                   ? moment(selectedSubTask.startDate)
-                    .utc()
-                    .format("DD-MM-YYYY HH:mm")
+                      .utc()
+                      .format("DD-MM-YYYY HH:mm")
                   : "-- : --"}
               </span>{" "}
               <HiMiniArrowLongRight />
               <span className="font-medium">
                 {selectedSubTask.endDate
                   ? moment(selectedSubTask.endDate)
-                    .utc()
-                    .format("DD-MM-YYYY HH:mm")
+                      .utc()
+                      .format("DD-MM-YYYY HH:mm")
                   : "-- : --"}
               </span>{" "}
             </p>
@@ -269,7 +270,11 @@ const SubTaskModal = ({
               className="text-base"
               dangerouslySetInnerHTML={{
                 __html: new QuillDeltaToHtmlConverter(
-                  JSON.parse(selectedSubTask.description?.startsWith(`[{"insert":"`) ? selectedSubTask.description : parseJson(selectedSubTask.description))
+                  JSON.parse(
+                    selectedSubTask.description?.startsWith(`[{"`)
+                      ? selectedSubTask.description
+                      : parseJson(selectedSubTask.description)
+                  )
                 ).convert(),
               }}
             />

@@ -521,7 +521,7 @@ const SubTaskSection = ({
         userChecking={userChecking}
       />
 
-      <Form.Item name="leader" />
+      <Form.Item name="leader" className="h-0" />
 
       <div className="flex space-x-10">
         <p className="w-1/4 text-lg font-medium">Nhân viên thực hiện</p>
