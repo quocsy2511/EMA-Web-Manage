@@ -23,11 +23,9 @@ import { defaultAvatar } from "../../constants/global";
 const HeaderEvent = ({
   sort,
   setSort,
-  events,
   isBoardTask,
   setIsBoardTask,
   setSearchText,
-  searchText,
   setFilterMember,
   filterMember,
   setStatusSelected,
@@ -54,11 +52,9 @@ const HeaderEvent = ({
         pageSize: 10,
         currentPage: 1,
         role: "Nhân Viên",
-        // role: "Nh%C3%A2n%20Vi%C3%AAn",
       }),
     {
       select: (data) => {
-        // console.log("🚀 ~ data:", data);
         const listUsers = data?.data?.map(({ ...item }) => {
           item.dob = moment(item.dob).format("DD-MM-YYYY");
           return {
@@ -75,23 +71,6 @@ const HeaderEvent = ({
       refetchOnWindowFocus: false,
     }
   );
-
-  useEffect(() => {
-    if (notification?.eventId && events && events.length > 0 && users) {
-      const findEvent = events.find(
-        (item) => item.id === notification?.eventId
-      );
-      const parseEvent = JSON.stringify(findEvent);
-
-      handleChangeEvent(parseEvent);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notification?.id, events, users]);
-
-  const handleChangeEvent = (value) => {
-    const event = JSON.parse(value);
-    // setSelectEvent(event);
-  };
 
   const debouncedSearch = debounce((value) => {
     setSearchText(value);
@@ -233,7 +212,7 @@ const HeaderEvent = ({
     // setFilterMember(key);
   };
 
-  //tắt dropdown khi nó click ra ngoài vùng menu
+  // tắt dropdown khi nó click ra ngoài vùng menu
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setVisible(false);

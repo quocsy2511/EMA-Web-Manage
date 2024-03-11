@@ -32,6 +32,7 @@ const TaskModalContent = ({
   disableDoneTaskParent,
   onCloseModal,
 }) => {
+  console.log("🚀 ~ taskParent:", taskParent);
   const {
     data: listComments,
     isError: isErrorListComments,
@@ -71,7 +72,7 @@ const TaskModalContent = ({
   const [isHistoryAssignee, setIsHistoryAssignee] = useState(false);
   let completionPercentage;
   if (taskParent) {
-    completionPercentage = ((completed / subTasks?.length) * 100).toFixed(2);
+    completionPercentage = ((completed / subTasks?.length) * 100).toFixed(0);
   }
 
   return (
@@ -84,25 +85,31 @@ const TaskModalContent = ({
           taskParent={taskParent}
           taskSelected={taskSelected}
         />
-        {isHistoryAssignee ? (
-          <p
-            className="w-auto mb-2 px-6 flex flex-row gap-x-2 items-center hover:text-blue-700 cursor-pointer font-medium -mt-2"
-            onClick={() => setIsHistoryAssignee(false)}
-          >
-            Chi tiết công việc <BookOutlined />
-          </p>
-        ) : (
-          <p
-            className="w-auto mb-2 px-6 flex flex-row gap-x-2 items-center hover:text-blue-700 cursor-pointer font-medium -mt-2"
-            onClick={() => setIsHistoryAssignee(true)}
-          >
-            Lịch sử phân công <SearchOutlined />
-          </p>
+
+        {/* check ko phaỉ task cha mới cho xem */}
+        {!taskParent && (
+          <>
+            {isHistoryAssignee ? (
+              <p
+                className="w-auto mb-2 px-6 flex flex-row gap-x-2 items-center hover:text-blue-700 cursor-pointer font-medium -mt-2"
+                onClick={() => setIsHistoryAssignee(false)}
+              >
+                Chi tiết công việc <BookOutlined />
+              </p>
+            ) : (
+              <p
+                className="w-auto mb-2 px-6 flex flex-row gap-x-2 items-center hover:text-blue-700 cursor-pointer font-medium -mt-2"
+                onClick={() => setIsHistoryAssignee(true)}
+              >
+                Lịch sử phân công <SearchOutlined />
+              </p>
+            )}
+          </>
         )}
       </div>
 
       {isHistoryAssignee ? (
-        <HistoryAssignee taskSelected={taskSelected}/>
+        <HistoryAssignee taskSelected={taskSelected} />
       ) : (
         <>
           {/* field */}

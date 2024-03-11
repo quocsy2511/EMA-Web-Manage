@@ -8,7 +8,7 @@ import moment from "moment";
 import { Tooltip } from "antd";
 import { SwapRightOutlined } from "@ant-design/icons";
 
-const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
+const Column = ({ TaskParent, selectedStatus}) => {
   const colors = [
     "bg-red-500",
     "bg-orange-500",
