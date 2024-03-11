@@ -10,16 +10,20 @@ import { assignMember } from "../../../../apis/tasks";
 import { StarFilled } from "@ant-design/icons";
 
 const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
+  console.log("🚀 ~ EmployeeSelected ~ assignTasks:", assignTasks);
   const taskID = taskSelected?.id;
   const queryClient = useQueryClient();
   const [assignee, setAssignee] = useState(
     assignTasks?.map((item) => item.user?.id)
   );
-  const membersInTask = assignTasks?.map((item) => item.user?.id);
+  const membersInTask = assignTasks
+    ?.filter((user) => user.status === "active")
+    ?.map((item) => item.user?.id);
   const { Option } = Select;
   const divisionId = useRouteLoaderData("staff").divisionID;
   const eventId = taskSelected?.eventDivision?.event?.id;
   const staff = useRouteLoaderData("staff");
+  
   const {
     data: employees,
     isError: isErrorEmployees,
@@ -67,7 +71,7 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
       matchedUsers?.findIndex((user) => user.id === props.value) === 0
         ? "green"
         : "gold";
-    console.log("🚀 ~ tagRender ~ matchedUsers:", matchedUsers);
+    // console.log("🚀 ~ tagRender ~ matchedUsers:", matchedUsers);
     return (
       <Tag
         color={color}

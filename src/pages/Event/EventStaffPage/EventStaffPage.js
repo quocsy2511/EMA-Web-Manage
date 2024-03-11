@@ -41,53 +41,6 @@ const EventStaffPage = () => {
   const staff = useRouteLoaderData("staff");
   const notification = useSelector((state) => state.notification);
   const [filterMember, setFilterMember] = useState(staff?.id);
-
-  // const {
-  //   data: listBudgetConfirming,
-  //   isError: isErrorListBudgetConfirming,
-  //   isLoading: isLoadingListBudgetConfirming,
-  //   refetch: refetchListBudgetConfirming,
-  // } = useQuery(
-  //   ["listBudgetConfirming"],
-  //   () =>
-  //     getBudget({
-  //       eventID: selectEvent?.id,
-  //       pageSize: 50,
-  //       currentPage: 1,
-  //       mode: 1,
-  //       userID: staff.id,
-  //     }),
-  //   {
-  //     select: (data) => {
-  //       return data.data;
-  //     },
-
-  //     refetchOnWindowFocus: false,
-  //     enabled: !!selectEvent?.id,
-  //   }
-  // );
-
-  // const { data: listBudgetConfirmed, refetch: refetchListBudgetConfirmed } =
-  //   useQuery(
-  //     ["listBudgetConfirmed"],
-  //     () =>
-  //       getBudget({
-  //         eventID: selectEvent?.id,
-  //         pageSize: 50,
-  //         currentPage: 1,
-  //         mode: 2,
-  //         userID: staff.id,
-  //       }),
-  //     {
-  //       select: (data) => {
-  //         return data.data;
-  //       },
-
-  //       refetchOnWindowFocus: false,
-  //       enabled: !!selectEvent?.id,
-  //     }
-  //   );
-
   const {
     data: listTaskParents,
     isError: isErrorListTask,
@@ -105,10 +58,7 @@ const EventStaffPage = () => {
       }),
     {
       select: (data) => {
-        // console.log("🚀 ~ EventStaffPage ~ data:", data);
         if (data && Array.isArray(data)) {
-          // console.log("🚀 ~ EventStaffPage ~ data:", data);
-
           const taskParents = data?.filter((task) => task?.parent === null);
           const formatDate = taskParents?.map((item) => ({
             ...item,
@@ -176,8 +126,6 @@ const EventStaffPage = () => {
       enabled: !!staff?.id && !!selectEvent?.id,
     }
   );
-
-  // console.log("🚀 ~ EventStaffPage ~ listTaskFilter:", listTaskFilter);
   //handle search task ch va task con
   function filterSubTasks(task, searchText) {
     const subtaskTitles = task?.subTask?.filter((subtask) =>
@@ -252,12 +200,6 @@ const EventStaffPage = () => {
       searchText
     );
   }
-  // useEffect(() => {
-  //   if (listEvent && listEvent?.length > 0 && !!notification === false) {
-  //     setSelectEvent(listEvent?.[0]);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [listEvent]);
 
   useEffect(() => {
     if (staff?.id) {
@@ -315,21 +257,11 @@ const EventStaffPage = () => {
         )
       ) : (
         <div>
-          {/* !isLoadingListBudgetConfirming ? (
-                !isErrorListBudgetConfirming ? (
-                  
-                    <BudgetStaff
-                    listBudgetConfirmed={listBudgetConfirmed}
-                    listBudgetConfirming={listBudgetConfirming}
-                    selectEvent={selectEvent}
-                  />
-                  
-                ) : (
-                  <AnErrorHasOccured />
-                )
-              ) : (
-                <LoadingComponentIndicator />
-              ) */}
+          <BudgetStaff
+            selectEvent={selectEvent}
+            listTaskParents={listTaskParents}
+            setIsBoardTask={setIsBoardTask}
+          />
         </div>
       )}
     </div>

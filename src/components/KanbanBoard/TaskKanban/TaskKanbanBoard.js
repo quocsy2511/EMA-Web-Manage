@@ -107,6 +107,7 @@ const TaskKanbanBoard = ({
     return colorMapping[value];
   };
 
+  console.log("subtaskDetails: ", subtaskDetails);
   return (
     <motion.div
       key={`subtask-${task?.id}`}
@@ -256,52 +257,54 @@ const TaskKanbanBoard = ({
                   !isErrorSubtaskDetails ? (
                     <>
                       {subtaskDetails?.[0].assignTasks?.length > 0 &&
-                        subtaskDetails?.[0].assignTasks?.map((item, index) => (
-                          <Tooltip
-                            key={index}
-                            title={
-                              item.isLeader
-                                ? `${item.user?.profile?.fullName} (Trưởng nhóm)`
-                                : item.user?.profile?.fullName
-                            }
-                            placement="top"
-                          >
-                            {item?.user?.profile === null ? (
-                              <Avatar
-                                icon={<UserOutlined />}
-                                size="small"
-                                className="bg-gray-500"
-                              />
-                            ) : (
-                              <>
-                                {item.isLeader ? (
-                                  <Badge
-                                    count={
-                                      <StarFilled
-                                        className="text-yellow-400 text-[9px]"
-                                        spin
+                        subtaskDetails?.[0].assignTasks
+                          ?.filter((user) => user.status === "active")
+                          ?.map((item, index) => (
+                            <Tooltip
+                              key={index}
+                              title={
+                                item.isLeader
+                                  ? `${item.user?.profile?.fullName} (Trưởng nhóm)`
+                                  : item.user?.profile?.fullName
+                              }
+                              placement="top"
+                            >
+                              {item?.user?.profile === null ? (
+                                <Avatar
+                                  icon={<UserOutlined />}
+                                  size="small"
+                                  className="bg-gray-500"
+                                />
+                              ) : (
+                                <>
+                                  {item.isLeader ? (
+                                    <Badge
+                                      count={
+                                        <StarFilled
+                                          className="text-yellow-400 text-[9px]"
+                                          spin
+                                        />
+                                      }
+                                      offset={[-7, 3]}
+                                      className="mr-1"
+                                    >
+                                      <Avatar
+                                        // shape="square"
+                                        src={item.user?.profile?.avatar}
+                                        size="small"
+                                        className="border border-yellow-300"
                                       />
-                                    }
-                                    offset={[-7, 3]}
-                                    className="mr-1"
-                                  >
+                                    </Badge>
+                                  ) : (
                                     <Avatar
-                                      // shape="square"
                                       src={item.user?.profile?.avatar}
                                       size="small"
-                                      className="border border-yellow-300"
                                     />
-                                  </Badge>
-                                ) : (
-                                  <Avatar
-                                    src={item.user?.profile?.avatar}
-                                    size="small"
-                                  />
-                                )}
-                              </>
-                            )}
-                          </Tooltip>
-                        ))}
+                                  )}
+                                </>
+                              )}
+                            </Tooltip>
+                          ))}
                     </>
                   ) : (
                     <AnErrorHasOccured />

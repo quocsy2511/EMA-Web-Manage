@@ -40,7 +40,7 @@ const FieldSubtask = ({
   disableDoneTaskParent,
   completionPercentage,
 }) => {
-  // console.log("🚀 ~ file: FieldSubtask.js:42 ~ completed:", completed);
+  console.log("🚀 ~ file: FieldSubtask.js:42 ~ taskSelected:", taskSelected);
   const [updateFileList, setUpdateFileList] = useState(taskSelected?.taskFiles);
   const [updatePriority, setUpdatePriority] = useState(taskSelected?.priority);
   const [assignTasks, setAssignTasks] = useState(taskSelected?.assignTasks);

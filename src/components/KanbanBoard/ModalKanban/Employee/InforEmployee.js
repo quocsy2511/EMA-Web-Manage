@@ -47,35 +47,37 @@ const InforEmployee = ({ taskSelected }) => {
         }}
       >
         {subtaskDetails?.[0].assignTasks?.length > 0 &&
-          subtaskDetails?.[0].assignTasks?.map((item) => (
-            <Tooltip
-              key="avatar"
-              title={
-                item.isLeader
-                  ? `${item.user?.profile?.fullName} (Trưởng nhóm)`
-                  : item.user?.profile?.fullName
-              }
-              placement="top"
-            >
-              {item?.isLeader ? (
-                <Badge
-                  count={
-                    <StarFilled className="text-yellow-400 text-sm" spin />
-                  }
-                  offset={[-7, 3]}
-                  className="mr-1"
-                >
-                  <Avatar
-                    src={item.user?.profile?.avatar}
-                    size="default"
-                    className="border border-yellow-300"
-                  />
-                </Badge>
-              ) : (
-                <Avatar src={item.user?.profile?.avatar} size="default" />
-              )}
-            </Tooltip>
-          ))}
+          subtaskDetails?.[0].assignTasks
+            ?.filter((user) => user.status === "active")
+            ?.map((item) => (
+              <Tooltip
+                key="avatar"
+                title={
+                  item.isLeader
+                    ? `${item.user?.profile?.fullName} (Trưởng nhóm)`
+                    : item.user?.profile?.fullName
+                }
+                placement="top"
+              >
+                {item?.isLeader ? (
+                  <Badge
+                    count={
+                      <StarFilled className="text-yellow-400 text-sm" spin />
+                    }
+                    offset={[-7, 3]}
+                    className="mr-1"
+                  >
+                    <Avatar
+                      src={item.user?.profile?.avatar}
+                      size="default"
+                      className="border border-yellow-300"
+                    />
+                  </Badge>
+                ) : (
+                  <Avatar src={item.user?.profile?.avatar} size="default" />
+                )}
+              </Tooltip>
+            ))}
       </Avatar.Group>
     </>
   );

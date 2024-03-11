@@ -105,7 +105,7 @@ const TitleSubtask = ({
   };
 
   return (
-    <div className="mt-2 flex flex-row gap-x-2 justify-center items-center mb-4  rounded-lg">
+    <div className="mt-2 flex flex-row gap-x-2 justify-center items-center  rounded-lg w-full">
       <div className="flex justify-center items-center">
         <label
           htmlFor="board-name-input" //lấy id :D
