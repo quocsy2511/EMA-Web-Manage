@@ -1,23 +1,18 @@
 import React, { Fragment } from "react";
-import videoBg from "../../assets/videos/video-login.mp4";
-import { Button, Form, Input } from "antd";
+import { App, Button, Form, Input } from "antd";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../../apis/auths";
 import { useNavigate } from "react-router-dom";
 import jwt from "jwt-decode";
-import { io } from "socket.io-client";
-import { URL_SOCKET } from "../../constants/api";
-import { useDispatch } from "react-redux";
-import { socketActions } from "../../store/socket";
 import TEXT from "../../constants/string";
 import loginBg from "../../assets/images/login-Bg-svg.svg";
-import { CarryOutOutlined } from "@ant-design/icons";
 import { setSocketToken } from "../../utils/socket";
 import logo from "../../assets/images/logo.png";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+
+  const { notification } = App.useApp();
 
   const { mutate, isLoading } = useMutation(login, {
     onSuccess: (data) => {
@@ -38,6 +33,15 @@ const LoginPage = () => {
       else if (role === TEXT.STAFF) navigate("/staff", { replace: true });
       else if (role === TEXT.ADMINISTRATOR)
         navigate("/administrator", { replace: true });
+    },
+    onError: (error) => {
+      notification.error({
+        message: (
+          <p>{error?.response?.data?.message ?? "Đăng nhập thất bại"}</p>
+        ),
+        placement: "topRight",
+        duration: 2,
+      });
     },
   });
 

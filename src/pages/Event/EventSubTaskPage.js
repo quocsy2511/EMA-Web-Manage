@@ -12,15 +12,23 @@ import {
   FcLowPriority,
   FcMediumPriority,
 } from "react-icons/fc";
-import { BsHourglassBottom, BsHourglassSplit, BsPlus } from "react-icons/bs";
+import {
+  BsHourglassBottom,
+  BsHourglassSplit,
+  BsPlus,
+  BsExclamationOctagonFill,
+} from "react-icons/bs";
 import { BiRightArrowAlt } from "react-icons/bi";
 import { LuSettings } from "react-icons/lu";
 import { AiOutlineHistory } from "react-icons/ai";
+import { CiFileOn } from "react-icons/ci";
 import {
   Avatar,
   Card,
+  Dropdown,
   FloatButton,
   message,
+  Popconfirm,
   Popover,
   Progress,
   Tooltip,
@@ -57,6 +65,8 @@ const EventSubTaskPage = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedSubTask, setSelectedSubTask] = useState();
   const [isOpenHistoryModal, setIsOpenHistoryModal] = useState(false);
+  const [openPopConfirm, setOpenPopConfirm] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState();
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -124,6 +134,15 @@ const EventSubTaskPage = () => {
     isError: commentsIsError,
   } = useQuery(["comment", taskId], () => getComment(taskId), {
     refetchOnWindowFocus: false,
+    select: (data) => {
+      return data.sort((a, b) => {
+        if (a?.createdAt < b?.createdAt) {
+          return 1;
+        } else {
+          return -1;
+        }
+      });
+    },
   });
   console.log("comments > ", comments);
 
@@ -135,13 +154,15 @@ const EventSubTaskPage = () => {
     ({ taskID, status }) => updateTaskStatus({ taskID, status }),
     {
       onSuccess: (data, variables) => {
+        setOpenPopConfirm(false);
+        queryClient.invalidateQueries(["tasks", eventId, taskId]);
         if (variables.status === "PROCESSING") {
-          queryClient.invalidateQueries(["tasks", eventId, taskId]);
           messageApi.open({
             type: "success",
             content: "Cập nhật trạng thái hạng mục thành bắt đầu.",
           });
         }
+
         if (variables.status === "CONFIRM") {
           messageApi.open({
             type: "success",
@@ -195,6 +216,17 @@ const EventSubTaskPage = () => {
   };
 
   const goToUpdateSubtask = (task) => {
+    const sortLeader = task?.assignTasks
+      ?.sort((a, b) => {
+        if (a?.isLeader === b?.isLeader) {
+          return 0;
+        } else {
+          if (a?.isLeader) return -1;
+          else return 1;
+        }
+      })
+      .filter((item) => item?.status === "active");
+
     const updateData = {
       id: task?.id,
       title: task?.title,
@@ -204,7 +236,7 @@ const EventSubTaskPage = () => {
       ],
       priority: task?.priority,
       desc: task?.description,
-      assignee: task?.assignTasks?.map((user) => user?.user?.id),
+      assignee: sortLeader?.map((user) => user?.user?.id),
     };
 
     navigate(`/manager/event/${eventId}/task`, {
@@ -223,6 +255,30 @@ const EventSubTaskPage = () => {
         updateData,
       },
     });
+  };
+
+  const handleCheckUpdateStatus = (status) => {
+    setSelectedStatus(status);
+    if (!tasks?.subTask?.length) {
+      messageApi.open({
+        type: "warning",
+        content: "Chưa có công việc.",
+      });
+    } else if (
+      status === "CONFIRM" &&
+      !tasks?.subTask?.every((task) => task?.status === "CONFIRM")
+    ) {
+      messageApi.open({
+        type: "warning",
+        content: "Chưa xác thực toàn bộ công việc.",
+      });
+    } else {
+      setOpenPopConfirm(true);
+    }
+  };
+
+  const handleUpdateStatus = () => {
+    updateEventStatusMutate({ taskID: tasks?.id, status: selectedStatus });
   };
 
   if (taskIsLoading) {
@@ -309,6 +365,13 @@ const EventSubTaskPage = () => {
         tooltip={<p>Tạo công việc</p>}
       />
 
+      <SubTaskModal
+        isOpenModal={isOpenModal}
+        setIsOpenModal={setIsOpenModal}
+        selectedSubTask={selectedSubTask}
+        resetTaskRedirect={resetTaskRedirect}
+      />
+
       <AssignmentHistoryModal
         isModalOpen={isOpenHistoryModal}
         setIsModalOpen={setIsOpenHistoryModal}
@@ -366,10 +429,116 @@ const EventSubTaskPage = () => {
 
           <div className="flex-1 flex justify-end space-x-8">
             <motion.div
-              whileHover={{ y: -5 }}
-              className={`flex items-center px-3 ${statusColor} border ${statusBorder} rounded-full truncate cursor-pointer`}
+              // whileHover={{ y: -2 }}
+              className={`flex items-center px-3 ${statusColor} border-2 ${statusBorder} rounded-full truncate cursor-pointer`}
             >
-              <p className="text-base font-medium">{status}</p>
+              <Dropdown
+                placement="bottomCenter"
+                arrow
+                trigger={["click"]}
+                menu={{
+                  items: [
+                    {
+                      key: "1",
+                      type: "group",
+                      label: "Cập Nhật Trạng Thái",
+                      children: [
+                        {
+                          key: "PENDING",
+                          label: (
+                            <p
+                              className="text-gray-400"
+                              onClick={() => handleCheckUpdateStatus("PENDING")}
+                            >
+                              Đang chuẩn bị
+                            </p>
+                          ),
+                          disabled: tasks?.status === "PENDING",
+                        },
+                        {
+                          key: "PROCESSING",
+                          label: (
+                            <p
+                              className="text-blue-400"
+                              onClick={() =>
+                                handleCheckUpdateStatus("PROCESSING")
+                              }
+                            >
+                              Đang thực hiện
+                            </p>
+                          ),
+                          disabled: tasks?.status === "PROCESSING",
+                        },
+                        {
+                          key: "DONE",
+                          label: (
+                            <p
+                              className="text-green-500"
+                              onClick={() => handleCheckUpdateStatus("DONE")}
+                            >
+                              Hoàn thành
+                            </p>
+                          ),
+                          disabled: tasks?.status === "DONE",
+                        },
+                        {
+                          key: "CONFIRM",
+                          label: (
+                            <p
+                              className="text-purple-500"
+                              onClick={() => handleCheckUpdateStatus("CONFIRM")}
+                            >
+                              Đã xác thực
+                            </p>
+                          ),
+                          disabled: tasks?.status === "CONFIRM",
+                        },
+                        {
+                          key: "CANCEL",
+                          label: (
+                            <p
+                              className="text-red-500"
+                              onClick={() => handleCheckUpdateStatus("CANCEL")}
+                            >
+                              Hủy bỏ
+                            </p>
+                          ),
+                          disabled: tasks?.status === "CANCEL",
+                        },
+                        {
+                          key: "OVERDUE",
+                          label: (
+                            <p
+                              className="text-orange-500"
+                              onClick={() => handleCheckUpdateStatus("OVERDUE")}
+                            >
+                              Quá hạn
+                            </p>
+                          ),
+                          disabled: tasks?.status === "OVERDUE",
+                        },
+                      ],
+                    },
+                  ],
+                }}
+              >
+                <Popconfirm
+                  title={<p>Bạn đang cập nhật trạng thái của 1 hạng mục ?</p>}
+                  open={openPopConfirm}
+                  onConfirm={handleUpdateStatus}
+                  onCancel={() => setOpenPopConfirm(false)}
+                  okText="Xác nhận"
+                  cancelText="Hủy bỏ"
+                  icon={
+                    <BsExclamationOctagonFill className="text-xl text-orange-400 mr-3" />
+                  }
+                >
+                  <Tooltip title="Cập nhật sự kiện" placement="topLeft">
+                    <p className="text-base font-medium">{status}</p>
+                  </Tooltip>
+                </Popconfirm>
+              </Dropdown>
+              {/* <p className="text-base font-medium">{status}</p> */}
             </motion.div>
 
             {moment(tasks?.startDate).isSame(moment(tasks?.endDate), "day") ? (
@@ -485,17 +654,26 @@ const EventSubTaskPage = () => {
           </Card>
           <Card title="Tệp đính kèm" className="w-[20%]">
             {tasks?.taskFiles?.length > 0 ? (
-              <div className="flex gap-x-3 items-center max-h-fit overflow-y-scroll">
+              <div className="flex flex-col max-h-20 overflow-y-scroll scrollbar-hide space-y-1">
                 {tasks?.taskFiles?.map((file, index) => (
-                  <a
-                    key={index}
-                    href={file.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500"
+                  <Tooltip
+                    title={
+                      <p className="text-center">Tên tệp : {file?.fileName}</p>
+                    }
                   >
-                    {file?.fileName}
-                  </a>
+                    <div className="flex items-center space-x-2">
+                      <CiFileOn className="text-blue-500 text-2xl" />
+                      <a
+                        key={index}
+                        href={file.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 truncate"
+                      >
+                        {file?.fileName}
+                      </a>
+                    </div>
+                  </Tooltip>
                 ))}
               </div>
             ) : (
@@ -533,17 +711,6 @@ const EventSubTaskPage = () => {
               <p className="text-lg text-center font-medium">
                 Chưa có công việc
               </p>
-            )}
-
-            {selectedSubTask && (
-              <>
-                <SubTaskModal
-                  isOpenModal={isOpenModal}
-                  setIsOpenModal={setIsOpenModal}
-                  selectedSubTask={selectedSubTask}
-                  resetTaskRedirect={resetTaskRedirect}
-                />
-              </>
             )}
           </AnimatePresence>
         </div>

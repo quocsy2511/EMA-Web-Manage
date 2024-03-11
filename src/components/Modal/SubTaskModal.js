@@ -32,16 +32,27 @@ const SubTaskModal = ({
   selectedSubTask,
   resetTaskRedirect,
 }) => {
+  console.log("selectedSubTask > ", selectedSubTask);
+
+  const assignUser = selectedSubTask?.assignTasks?.filter(
+    (user) => user?.status === "active"
+  );
+  console.log("assignUser > ", assignUser);
+
   const {
     data: comments,
     isLoading: commentsIsLoading,
     isError: commentsIsError,
-  } = useQuery(["comment", selectedSubTask.id], () =>
-    getComment(selectedSubTask.id)
+  } = useQuery(
+    ["comment", selectedSubTask?.id],
+    () => getComment(selectedSubTask?.id),
+    { enabled: !!selectedSubTask?.id }
   );
 
-  const { data: assigner } = useQuery(["user", selectedSubTask.createdBy], () =>
-    getUserById(selectedSubTask.createdBy)
+  const { data: assigner } = useQuery(
+    ["user", selectedSubTask?.createdBy],
+    () => getUserById(selectedSubTask?.createdBy),
+    { enabled: !!selectedSubTask?.createdBy }
   );
 
   const handleCancel = () => {
@@ -50,7 +61,7 @@ const SubTaskModal = ({
   };
 
   let priority, bgPriority;
-  switch (selectedSubTask.priority) {
+  switch (selectedSubTask?.priority) {
     case "LOW":
       priority = "Thấp";
       bgPriority = "green";
@@ -70,7 +81,7 @@ const SubTaskModal = ({
   }
 
   let status, bgStatus;
-  switch (selectedSubTask.status) {
+  switch (selectedSubTask?.status) {
     case "PENDING":
       status = "Đang chuẩn bị";
       bgStatus = "bg-gray-400";
@@ -81,11 +92,11 @@ const SubTaskModal = ({
       break;
     case "DONE":
       status = "Hoàn thành";
-      bgStatus = "bg-green-400";
+      bgStatus = "bg-green-500";
       break;
     case "CONFIRM":
       status = "Đã xác thực";
-      bgStatus = "bg-pink-500";
+      bgStatus = "bg-purple-500";
       break;
     case "CANCEL":
       status = "Hủy bỏ";
@@ -97,6 +108,8 @@ const SubTaskModal = ({
       break;
 
     default:
+      status = "Đang chuẩn bị";
+      bgStatus = "bg-gray-400";
       break;
   }
 
@@ -111,7 +124,7 @@ const SubTaskModal = ({
     >
       <div className="max-h-full overflow-y-scroll no-scrollbar px-4">
         <div className="fixed w-[40%] h-[8%] bg-white flex items-center z-10 border-b border-slate-100">
-          <p className="text-3xl font-semibold">{selectedSubTask.title}</p>
+          <p className="text-3xl font-semibold">{selectedSubTask?.title}</p>
         </div>
 
         <div className="mt-[12%]">
@@ -121,7 +134,7 @@ const SubTaskModal = ({
               <p className="text-base text-slate-400">Độ ưu tiên</p>
             </div>
             <div
-              className={`text-sm text-white text-center w-28 py-2 bg-${bgPriority}-400 rounded-full`}
+              className={`text-sm text-white text-center w-28 py-2 bg-${bgPriority}-500 rounded-full font-medium`}
             >
               {priority}
             </div>
@@ -135,7 +148,7 @@ const SubTaskModal = ({
               <p className="text-base text-slate-400">Trạng thái</p>
             </div>
             <div
-              className={`text-sm text-white text-center px-5 py-2 ${bgStatus} rounded-full`}
+              className={`text-sm text-white text-center px-5 py-2 ${bgStatus} rounded-full font-medium`}
             >
               {status}
             </div>
@@ -160,11 +173,14 @@ const SubTaskModal = ({
               <p className="text-base text-slate-400">Tham gia</p>
             </div>
             <Avatar.Group maxCount={5} maxPopoverTrigger="hover">
-              {selectedSubTask.assignTasks?.length > 0 ? (
-                selectedSubTask.assignTasks?.map((item) => (
-                  <div key={item.userId}>
-                    <Tooltip title={item.user.profile.fullName} placement="top">
-                      <Avatar size={35} src={item.user.profile.avatar} />
+              {assignUser?.length > 0 ? (
+                assignUser?.map((item) => (
+                  <div key={item?.userId}>
+                    <Tooltip
+                      title={item?.user?.profile?.fullName}
+                      placement="top"
+                    >
+                      <Avatar size={35} src={item?.user?.profile?.avatar} />
                     </Tooltip>
                   </div>
                 ))
@@ -182,24 +198,20 @@ const SubTaskModal = ({
               <p className="text-base text-slate-400">Chịu trách nhiệm</p>
             </div>
 
-            {selectedSubTask.assignTasks?.length > 0 &&
-            selectedSubTask.assignTasks?.find(
-              (item) => item.isLeader === true
-            ) ? (
+            {assignUser?.length > 0 &&
+            assignUser?.find((item) => item.isLeader) ? (
               <>
                 <Avatar
                   size={35}
                   src={
-                    selectedSubTask.assignTasks?.find(
-                      (item) => item.isLeader === true
-                    )?.user?.profile.avatar
+                    assignUser?.find((item) => item.isLeader)?.user?.profile
+                      ?.avatar
                   }
                 />
                 <p className="text-sm font-medium">
                   {
-                    selectedSubTask.assignTasks?.find(
-                      (item) => item.isLeader === true
-                    )?.user?.profile.fullName
+                    assignUser?.find((item) => item.isLeader)?.user?.profile
+                      ?.fullName
                   }
                 </p>
               </>
@@ -215,20 +227,16 @@ const SubTaskModal = ({
               <AiOutlineCalendar size={22} />
               <p className="text-base text-slate-400">Thời gian</p>
             </div>
-            <p className="text-base flex items-center gap-x-3">
+            <p className="text-lg flex items-center gap-x-3">
               <span className="font-medium">
-                {selectedSubTask.startDate
-                  ? moment(selectedSubTask.startDate)
-                      .utc()
-                      .format("DD-MM-YYYY HH:mm")
+                {selectedSubTask?.startDate
+                  ? moment(selectedSubTask?.startDate).format("DD-MM-YYYY")
                   : "-- : --"}
               </span>{" "}
-              <HiMiniArrowLongRight />
+              <HiMiniArrowLongRight className="text-lg" />
               <span className="font-medium">
-                {selectedSubTask.endDate
-                  ? moment(selectedSubTask.endDate)
-                      .utc()
-                      .format("DD-MM-YYYY HH:mm")
+                {selectedSubTask?.endDate
+                  ? moment(selectedSubTask?.endDate).format("DD-MM-YYYY")
                   : "-- : --"}
               </span>{" "}
             </p>
@@ -240,24 +248,24 @@ const SubTaskModal = ({
         <div className="space-y-5 text-black">
           <p className="text-lg font-medium">Tài liệu đính kèm</p>
 
-          {selectedSubTask.taskFiles.length > 0 ? (
-            selectedSubTask.taskFiles.map((file) => (
+          {selectedSubTask?.taskFiles.length > 0 ? (
+            selectedSubTask?.taskFiles?.map((file) => (
               <div className="cursor-pointer group">
                 <a
                   className="flex gap-x-3"
-                  href={file.fileUrl}
+                  href={file?.fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <IoMdAttach size={25} className="group-hover:text-blue-400" />
                   <p className="group-hover:text-blue-400 text-base">
-                    {file.fileName}
+                    {file?.fileName}
                   </p>
                 </a>
               </div>
             ))
           ) : (
-            <p>Không có tệp tin</p>
+            <p className="text-base">Không có tệp tin</p>
           )}
         </div>
 
@@ -265,15 +273,15 @@ const SubTaskModal = ({
 
         <div className="space-y-5 text-black">
           <p className="text-lg font-medium">Mô tả</p>
-          {selectedSubTask.description ? (
+          {selectedSubTask?.description ? (
             <div
               className="text-base"
               dangerouslySetInnerHTML={{
                 __html: new QuillDeltaToHtmlConverter(
                   JSON.parse(
-                    selectedSubTask.description?.startsWith(`[{"`)
-                      ? selectedSubTask.description
-                      : parseJson(selectedSubTask.description)
+                    selectedSubTask?.description?.startsWith(`[{"`)
+                      ? selectedSubTask?.description
+                      : parseJson(selectedSubTask?.description)
                   )
                 ).convert(),
               }}
@@ -292,7 +300,7 @@ const SubTaskModal = ({
                 <div key="comments" className="mt-14">
                   <CommentInTask
                     comments={comments}
-                    taskId={selectedSubTask.id}
+                    taskId={selectedSubTask?.id}
                   />
                 </div>
               ) : (
