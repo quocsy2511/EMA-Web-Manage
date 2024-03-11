@@ -31,6 +31,9 @@ module.exports = {
         bgCardBudget: "#2F2CD8",
       },
     },
+    fontFamily: {
+      'nunito': ["Nunito", "sans-serif"],
+    },
   },
   plugins: [require("tailwind-scrollbar-hide")],
 };

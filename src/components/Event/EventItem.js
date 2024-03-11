@@ -79,13 +79,12 @@ const EventItem = ({ event }) => {
       <div className="w-full bg-slate-200 mt-3 mb-5" style={{ height: 1 }} />
 
       {/* 1 line = 1rem = +4  */}
-
       <p
         className="text-sm text-slate-500 line-clamp-3 h-16"
         dangerouslySetInnerHTML={{
           __html: new QuillDeltaToHtmlConverter(
             JSON.parse(
-              event?.description?.startsWith(`[{"insert":"`)
+              event?.description?.startsWith(`[{"`)
                 ? event?.description
                 : parseJson(event?.description)
             )
@@ -121,15 +120,19 @@ const EventItem = ({ event }) => {
             maxPopoverTrigger="hover"
             maxStyle={{ color: "#D25B68", backgroundColor: "#F4D7DA" }}
           >
-            {event?.listDivision?.map((item, index) => (
-              <Tooltip
-                key={item?.divisionId ?? index}
-                title={`${item?.fullName} - ${item?.divisionName}`}
-                placement="top"
-              >
-                <Avatar src={item?.avatar} key={item?.avatar} />
-              </Tooltip>
-            ))}
+            {!event?.listDivision?.length ? (
+              <p className="text-sm text-red-400 font-medium">Chưa có</p>
+            ) : (
+              event?.listDivision?.map((item, index) => (
+                <Tooltip
+                  key={item?.divisionId ?? index}
+                  title={`${item?.fullName} - ${item?.divisionName}`}
+                  placement="top"
+                >
+                  <Avatar src={item?.avatar} key={item?.avatar} />
+                </Tooltip>
+              ))
+            )}
           </Avatar.Group>
         </div>
         <div className="flex justify-between items-center text-black">

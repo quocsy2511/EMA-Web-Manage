@@ -125,7 +125,7 @@ const TaskAdditionModal = ({
     if (selectedTemplateTask) {
       form.setFieldsValue({
         title: selectedTemplateTask.title,
-        desc: { ops: JSON.parse(selectedTemplateTask.description?.startsWith(`[{"insert":"`) ? selectedTemplateTask.description : parseJson(selectedTemplateTask.description)) },
+        desc: { ops: JSON.parse(selectedTemplateTask.description?.startsWith(`[{"`) ? selectedTemplateTask.description : parseJson(selectedTemplateTask.description)) },
       });
     } else {
       form.resetFields();

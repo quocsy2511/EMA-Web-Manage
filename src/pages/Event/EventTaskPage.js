@@ -76,7 +76,6 @@ import {
   getContractEvidence,
   postContractEvidence,
 } from "../../apis/contract";
-import DocReviewerModal from "../../components/Modal/DocReviewerModal";
 import ContractCreatePage from "../../components/Modal/ContractCreatePage";
 import clsx from "clsx";
 import defaultBanner from "../../assets/images/default_banner_images.png";
@@ -167,7 +166,34 @@ const EventTaskPage = () => {
       }),
     {
       select: (data) => {
-        return data.filter((item) => !item.parent);
+        const mapPriory = {
+          HIGH: 1,
+          MEDIUM: 2,
+          LOW: 3,
+        };
+        // return data.filter((item) => !item.parent)?.map(task => ({}))
+        return data?.reduce((result, item) => {
+          if (!item?.parent) {
+            item?.subTask?.sort((a, b) => {
+              const formatStartDateA = momenttz(a?.startDate).format(
+                "YYYY-MM-DD"
+              );
+              const formatStartDateB = momenttz(b?.startDate).format(
+                "YYYY-MM-DD"
+              );
+
+              if (formatStartDateA === formatStartDateB) {
+                return mapPriory[a?.priority] - mapPriory[b?.priority];
+              }
+
+              return formatStartDateA.localeCompare(formatStartDateB);
+            });
+
+            result.push(item);
+          }
+
+          return result;
+        }, []);
       },
       refetchOnWindowFocus: false,
     }
@@ -178,7 +204,6 @@ const EventTaskPage = () => {
   const { mutate: updateStatusMutate, isLoading: updateStatusIsLoading } =
     useMutation((status) => updateStatusEvent(eventId, status), {
       onSuccess: (data, variables) => {
-        console.log("ddddd > ", data, variables);
         let status;
         switch (variables?.status) {
           case "PENDING":
@@ -252,7 +277,9 @@ const EventTaskPage = () => {
   };
 
   const goToCreateTask = () => {
-    if (eventDetail?.listDivision?.length !== 0) {
+    if (!eventDetail?.listDivision?.length) {
+      goToAssignDivision();
+    } else if (eventDetail?.listDivision?.length !== 0) {
       navigate("task", {
         state: {
           eventId,
@@ -266,6 +293,7 @@ const EventTaskPage = () => {
 
   const goToUpdateTask = (task) => {
     const updateData = {
+      id: task?.id,
       title: task?.title,
       date: [
         momenttz(task?.startDate).format("YYYY-MM-DD"),
@@ -298,6 +326,15 @@ const EventTaskPage = () => {
     });
   };
 
+  const goToBudget = () => {
+    navigate("budget", {
+      state: {
+        eventId: eventDetail?.id,
+        eventName: eventDetail?.eventName,
+      },
+    });
+  };
+
   if (isLoading)
     return (
       <div className="h-[calc(100vh-128px)] w-full">
@@ -320,7 +357,7 @@ const EventTaskPage = () => {
         onClick={goToCreateTask}
         type="primary"
         icon={<RiAddFill />}
-        disabled={eventDetail?.listDivision?.length === 0}
+        // disabled={eventDetail?.listDivision?.length === 0}
         tooltip={
           eventDetail?.listDivision?.length !== 0
             ? "Tạo đề mục"
@@ -658,16 +695,16 @@ const EventTaskPage = () => {
                 <BsMicrosoftTeams className="text-lg" />
               </motion.div>
             </Popover>
-            <Link to="budget">
-              <Popover content={<p className="text-base">Ngân sách</p>}>
-                <motion.div
-                  whileHover={{ y: -4 }}
-                  className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
-                >
-                  <PiPiggyBankFill className="text-lg" />
-                </motion.div>
-              </Popover>
-            </Link>
+
+            <Popover content={<p className="text-base">Ngân sách</p>}>
+              <motion.div
+                whileHover={{ y: -4 }}
+                className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
+                onClick={goToBudget}
+              >
+                <PiPiggyBankFill className="text-lg" />
+              </motion.div>
+            </Popover>
           </div>
 
           <p
@@ -675,7 +712,7 @@ const EventTaskPage = () => {
             dangerouslySetInnerHTML={{
               __html: new QuillDeltaToHtmlConverter(
                 JSON.parse(
-                  eventDetail?.description?.startsWith(`[{"insert":"`)
+                  eventDetail?.description?.startsWith(`[{"`)
                     ? eventDetail?.description
                     : parseJson(eventDetail?.description)
                 )
@@ -801,9 +838,9 @@ const EventTaskPage = () => {
                 >
                   <Progress
                     percent={(
-                      (filterTasks?.filter((task) => task.status === "CONFIRM")
+                      (filterTasks?.filter((task) => task?.status === "CONFIRM")
                         .length / filterTasks?.length ?? 1) * 100
-                    )?.toFixed(2)}
+                    )?.toFixed(1)}
                   />
                 </Tooltip>
               ) : (

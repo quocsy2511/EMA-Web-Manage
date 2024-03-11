@@ -54,7 +54,11 @@ const EventCreationPage = () => {
     () => getCustomerContactDetail(location.state?.contactId),
     {
       select: (data) => {
-        return data;
+        return {
+          ...data,
+          startDate: momenttz(data?.startDate).format("YYYY-MM-DD"),
+          endDate: momenttz(data?.endDate).format("YYYY-MM-DD"),
+        };
       },
       refetchOnWindowFocus: false,
     }
@@ -877,13 +881,16 @@ const EventCreationPage = () => {
                   description: contactInfo?.note
                     ? {
                         ops: JSON.parse(
-                          contactInfo?.note?.startsWith(`[{"insert":"`)
+                          contactInfo?.note?.startsWith(`[{"`)
                             ? contactInfo?.note
                             : parseJson(contactInfo?.note)
                         ),
                       }
                     : null,
-                  date: [contactInfo?.startDate, contactInfo?.endDate],
+                  date: [
+                    momenttz(contactInfo?.startDate).format("YYYY-MM-DD"),
+                    momenttz(contactInfo?.endDate).format("YYYY-MM-DD"),
+                  ],
                   eventTypeId: location.state?.eventType,
                   estBudget: contactInfo?.budget ?? 0,
                   contract: {

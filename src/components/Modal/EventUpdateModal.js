@@ -30,18 +30,6 @@ const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
 const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
   console.log("UPDATE MODAL: ", event);
-  const { data: staffs, isLoading: staffsIsLoading } = useQuery(
-    ["staffs"],
-    () => getAllUser({ role: TEXT.STAFF, pageSize: 100, currentPage: 1 }),
-    {
-      select: (data) => {
-        return data.data.map((staff) => ({
-          label: `${staff.fullName} - ${staff.divisionName}`,
-          value: staff.divisionId,
-        }));
-      },
-    }
-  );
 
   const queryClient = useQueryClient();
   const { mutate: updateEventMutate, isLoading: updateEventIsLoading } =
@@ -85,43 +73,48 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
-  const [fileList, setFileList] = useState();
-
   const onFinish = (values) => {
     console.log("Success:", values);
 
-    values = {
-      ...values,
+    const payload = {
       eventId: event?.id,
-      description: JSON.stringify(values.description.ops),
-      divisionId: values.divisions,
-      startDate: values.date[0],
-      endDate: values.date[1],
-      estBudget: +values.estBudget,
-      // eventTypeId: event.eventType.typeId,
+      eventName: values?.eventName,
+      description: JSON.stringify(values?.description?.ops),
+      startDate: values?.date[0],
+      processingDate: values?.processingDate,
+      endDate: values?.date[1],
+      location: values?.location,
+      // coverUrl:
+      //   "https://img.freepik.com/free-psd/saturday-party-social-media-template_505751-2935.jpg?w=740&t=st=1696662680~exp=1696663280~hmac=30be138e6333ca7cbd4ea46fc39296aed44c5b3247173cab7bd45c230b65bfec",
+      estBudget: +values?.estBudget,
+      eventTypeId: event?.eventTypeID,
+      divisionId: event?.listDivision?.map((item) => item?.divisionId),
     };
 
-    console.log("TRANSFORM: ", values);
+    console.log("PAYLOAD: ", payload);
 
-    if (fileList && fileList?.length !== 0) {
+    if (values?.fileChosen) {
       console.log("HAS FILE");
 
       const formData = new FormData();
-      formData.append("file", fileList);
+      formData.append("file", values?.fileChosen);
       formData.append("folderName", "event");
 
-      const { date, divisions, ...eventInfo } = values;
-      console.log(eventInfo);
+      // const { date, divisions, ...eventInfo } = values;
+      // console.log(eventInfo);
 
-      uploadFileMutate({ formData, event: eventInfo });
+      // uploadFileMutate({ formData, event: eventInfo });
+      uploadFileMutate({ formData, event: payload });
     } else {
       console.log("NO FILE");
-      values = { ...values, coverUrl: event.coverUrl };
-      const { date, divisions, ...eventInfo } = values;
-      console.log(eventInfo);
-      updateEventMutate(eventInfo);
+      // values = { ...values, coverUrl: event.coverUrl };
+      // const { date, divisions, ...eventInfo } = values;
+      payload.coverUrl = event?.coverUrl;
+      console.log(payload);
+      updateEventMutate(payload);
     }
   };
+
   const onFinishFailed = (errorInfo) => {
     console.log("errorInfo:", errorInfo);
   };
@@ -164,16 +157,17 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           eventName: event?.eventName,
           date: [event?.startDate, event?.endDate],
           location: event?.location,
-          estBudget: event?.estBudget,
+          processingDate: event?.processingDate,
+
           description: {
             ops: JSON.parse(
-              event?.description?.startsWith(`[{"insert":"`)
+              event?.description?.startsWith(`[{"`)
                 ? event?.description
                 : parseJson(event?.description)
             ),
           },
-          divisions: event?.listDivision.map((item) => item.divisionId),
-          processingDate: event?.processingDate,
+
+          estBudget: event?.estBudget,
         }}
       >
         <div className="flex justify-between gap-x-5">
@@ -188,7 +182,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
               },
             ]}
           >
-            <Input placeholder="Nhập tên sự kiện" />
+            <Input placeholder="Nhập tên sự kiện" size="large" />
           </Form.Item>
 
           <Form.Item
@@ -208,11 +202,13 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           >
             <ConfigProvider locale={viVN}>
               <RangePicker
+                className="w-full"
+                size="large"
                 onChange={(value) => {
                   if (value)
                     form.setFieldsValue({
                       date: value.map((item) =>
-                        moment(item.$d).format("YYYY-MM-DD")
+                        moment(item?.$d).format("YYYY-MM-DD")
                       ),
                     });
                 }}
@@ -221,13 +217,14 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
                   dayjs(event?.endDate, "YYYY-MM-DD"),
                 ]}
                 format={"DD/MM/YYYY"}
-                // disabledDate={(current) => {
-                //   return current && current < moment().startOf("day");
-                // }}
+                disabledDate={(current) => {
+                  return current && current < moment().startOf("day");
+                }}
               />
             </ConfigProvider>
           </Form.Item>
         </div>
+
         <div className="flex justify-between gap-x-5">
           <Form.Item
             className="w-[60%]"
@@ -240,8 +237,9 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
               },
             ]}
           >
-            <Input placeholder="Nhập địa điểm" />
+            <Input placeholder="Nhập địa điểm" size="large" />
           </Form.Item>
+
           <Form.Item
             className="w-[40%]"
             label={<Title title="Thời gian bắt đầu" />}
@@ -256,6 +254,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
             <ConfigProvider locale={viVN}>
               <DatePicker
                 className="w-full"
+                size="large"
                 onChange={(value) => {
                   form.setFieldsValue({
                     processingDate: moment(value?.$d).format("YYYY-MM-DD"),
@@ -284,7 +283,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           ]}
         >
           <ReactQuill
-            className="h-24 mb-10"
+            className="h-40 mb-10"
             theme="snow"
             placeholder="Nhập mô tả"
             onChange={(content, delta, source, editor) => {
@@ -293,23 +292,6 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           />
         </Form.Item>
 
-        <Form.Item
-          label={<Title title="Bộ phận tham gia" />}
-          name="divisions"
-          rules={[
-            {
-              required: true,
-              message: "Chưa chọn bộ phận tham gia",
-            },
-          ]}
-        >
-          <Select
-            mode="multiple"
-            // defaultValue={event.listDivision.map((item) => item.divisionId)}
-            options={staffs ?? []}
-            loading={staffsIsLoading}
-          />
-        </Form.Item>
         <div className="flex items-center gap-x-10">
           <Form.Item
             className="w-[40%]"
@@ -344,12 +326,13 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
               <p>VNĐ</p>
             </div>
           </Form.Item>
+
           <Form.Item
             className="flex items-center justify-center"
-            name="coverUrl"
+            name="fileChosen"
             // label={<Title title="Ảnh về sự kiện" />}
-            valuePropName="fileList"
-            getValueFromEvent={(e) => e?.fileList}
+            // valuePropName="fileList"
+            // getValueFromEvent={(e) => e?.fileList}
           >
             <Upload.Dragger
               // className="h-40 text-center"
@@ -374,11 +357,12 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
               }}
               beforeUpload={(file) => {
                 return new Promise((resolve, reject) => {
-                  if (file && file.size > 10 * 1024 * 1024) {
+                  if (file && file?.size > 10 * 1024 * 1024) {
                     reject("File quá lớn ( <10MB )");
                     return false;
                   } else {
-                    setFileList(file);
+                    form.setFieldsValue({ fileChosen: file });
+
                     resolve();
                     return true;
                   }

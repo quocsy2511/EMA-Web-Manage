@@ -27,7 +27,7 @@ const DescriptionSubtask = ({
   const staff = useRouteLoaderData("staff");
   const [descriptionQuill, setDescriptionQuill] = useState({
     ops: JSON.parse(
-      description?.startsWith(`[{"insert":"`)
+      description?.startsWith(`[{"`)
         ? description
         : parseJson(description)
     ),
@@ -130,7 +130,7 @@ const DescriptionSubtask = ({
                   dangerouslySetInnerHTML={{
                     __html: new QuillDeltaToHtmlConverter(
                       JSON.parse(
-                        description?.startsWith(`[{"insert":"`)
+                        description?.startsWith(`[{"`)
                           ? description
                           : parseJson(description)
                       )
@@ -202,7 +202,7 @@ const DescriptionSubtask = ({
                       __html: new QuillDeltaToHtmlConverter(
                         JSON.parse(
                           subtaskDetails?.[0].description?.startsWith(
-                            `[{"insert":"`
+                            `[{"`
                           )
                             ? subtaskDetails?.[0].description
                             : parseJson(subtaskDetails?.[0].description)

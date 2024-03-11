@@ -62,7 +62,7 @@ const TaskUpdateModal = ({
       date:
         task.startDate && task.endDate ? [task.startDate, task.endDate] : null,
       description: task.description
-        ? { ops: JSON.parse(task?.description?.startsWith(`[{"insert":"`) ? task?.description : parseJson(task?.description)) }
+        ? { ops: JSON.parse(task?.description?.startsWith(`[{"`) ? task?.description : parseJson(task?.description)) }
         : null,
       priority: task.priority ?? null,
       estimationTime: task.estimationTime ?? null,
@@ -398,7 +398,7 @@ const TaskUpdateModal = ({
               ? [task.startDate, task.endDate]
               : null,
           description: task.description
-            ? { ops: JSON.parse(task.description?.startsWith(`[{"insert":"`) ? task.description : parseJson(task.description)) }
+            ? { ops: JSON.parse(task.description?.startsWith(`[{"`) ? task.description : parseJson(task.description)) }
             : null,
           priority: task.priority ?? null,
           estimationTime: task.estimationTime ?? null,

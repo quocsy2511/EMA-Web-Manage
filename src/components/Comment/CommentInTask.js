@@ -6,7 +6,8 @@ import { BsSendFill, BsCheckCircle } from "react-icons/bs";
 import { AnimatePresence, motion } from "framer-motion";
 import EmptyComment from "../Error/EmptyComment";
 import moment from "moment";
-import { useRouteLoaderData,useLoaderData } from "react-router-dom";
+import momenttz from "moment-timezone";
+import { useRouteLoaderData, useLoaderData } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadFile } from "../../apis/files";
 import {
@@ -45,7 +46,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
       onSuccess: (data, variables) => {
         const comment = variables.comment;
         variables.comment = {
-          file: [{ fileName: data.fileName, fileUrl: data.downloadUrl }],
+          file: [{ fileName: data?.fileName, fileUrl: data?.downloadUrl }],
           ...comment,
         };
         mutate(variables.comment);
@@ -123,7 +124,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
     {
       onSuccess: (data, variables) => {
         const newFileList = [
-          { fileName: data.fileName, fileUrl: data.downloadUrl },
+          { fileName: data?.fileName, fileUrl: data?.downloadUrl },
           ...variables.newComment.file,
         ];
 
@@ -184,7 +185,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
 
     const newComment = {
       content: value.content,
-      file: listSelectedCommentFiles.map((item) => {
+      file: listSelectedCommentFiles?.map((item) => {
         const { id, ...restItem } = item;
         return restItem;
       }),
@@ -212,9 +213,9 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
   };
 
   const modifyFileList = (file) => {
-    if (listSelectedCommentFiles.some((item) => item.id === file.id)) {
+    if (listSelectedCommentFiles?.some((item) => item?.id === file?.id)) {
       setListSelectedCommentFiles((prev) =>
-        prev.filter((item) => item.id !== file.id)
+        prev.filter((item) => item?.id !== file?.id)
       );
     } else {
       setListSelectedCommentFiles((prev) => [...prev, file]);
@@ -330,27 +331,32 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
             <AnimatePresence>
               {comments?.map((comment) => {
                 let time;
-                const currentDate = moment().subtract(7, "hours");
-                const targetDate = moment(comment?.createdAt);
-                const duration = moment.duration(currentDate.diff(targetDate));
+                const currentDate = momenttz();
+                const targetDate = momenttz(
+                  comment?.createdAt,
+                  "YYYY-MM-DD HH:mm:ss"
+                );
 
-                if (duration.asMinutes() < 1) {
-                  // Less than 1 minute
+                if (currentDate.diff(targetDate, "minutes") < 5) {
                   time = `bây giờ`;
-                } else if (duration.asHours() < 1) {
-                  time = `${Math.floor(duration.asMinutes())} phút trước`;
-                } else if (duration.asDays() < 1) {
-                  // Less than 1 day
-                  time = `${Math.floor(duration.asHours())} giờ trước`;
-                } else if (duration.asDays() < 7) {
-                  // Less than 1 week
-                  time = `${Math.floor(duration.asDays())} ngày trước`;
-                } else if (duration.asMonths() < 1) {
-                  // Less than 1 month
-                  time = `${Math.floor(duration.asDays() / 7)} tuần trước`;
-                } else {
-                  // More than 1 month
-                  time = `${Math.floor(duration.asMonths())} tháng trước`;
+                } else if (currentDate.diff(targetDate, "hours") < 1) {
+                  time = `${currentDate.diff(
+                    targetDate,
+                    "minutes"
+                  )} phút trước`;
+                } else if (currentDate.diff(targetDate, "days") < 1) {
+                  time = `${currentDate.diff(targetDate, "hours")} giờ trước`;
+                } else if (currentDate.diff(targetDate, "weeks") < 1) {
+                  time = `${currentDate.diff(targetDate, "days")} ngày trước`;
+                } else if (currentDate.diff(targetDate, "months") < 1) {
+                  time = `${currentDate.diff(targetDate, "weeks")} tuần trước`;
+                } else if (currentDate.diff(targetDate, "years") < 1) {
+                  time = `${currentDate.diff(
+                    targetDate,
+                    "months"
+                  )} tháng trước`;
+                } else if (currentDate.diff(targetDate, "years") >= 1) {
+                  time = `${currentDate.diff(targetDate, "years")} năm trước`;
                 }
 
                 return (
@@ -366,7 +372,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                       <Avatar size={25} src={comment?.user?.profile?.avatar} />
                       <p className="text-base">
                         <span className="font-bold">
-                          {comment?.user.profile.fullName}
+                          {comment?.user?.profile?.fullName}
                         </span>{" "}
                         đã bình luận vào{" "}
                         <span className="font-bold">{time}</span>
@@ -441,13 +447,13 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                             ></Form.Item>
 
                             <div className="ml-8 mt-3 flex flex-wrap gap-x-3">
-                              {comment?.commentFiles.length > 0 &&
-                                comment?.commentFiles.map((file) => (
+                              {comment?.commentFiles?.length > 0 &&
+                                comment?.commentFiles?.map((file) => (
                                   <div
                                     key={file?.id}
                                     className={`flex items-center gap-x-3 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg ${
-                                      !listSelectedCommentFiles.some(
-                                        (item) => item.id === file?.id
+                                      !listSelectedCommentFiles?.some(
+                                        (item) => item?.id === file?.id
                                       ) && "opacity-50"
                                     }`}
                                     onClick={() => modifyFileList(file)}
@@ -461,8 +467,8 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                                     >
                                       {file?.fileName}
                                     </a>
-                                    {listSelectedCommentFiles.some(
-                                      (item) => item.id === file?.id
+                                    {listSelectedCommentFiles?.some(
+                                      (item) => item?.id === file?.id
                                     ) ? (
                                       <GiCancel className="text-blue-400" />
                                     ) : (
@@ -484,7 +490,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                                       return new Promise((resolve, reject) => {
                                         if (
                                           updatedFileList &&
-                                          updatedFileList[0]?.size >
+                                          updatedFileList?.[0]?.size >
                                             10 * 1024 * 1024
                                         ) {
                                           reject(
