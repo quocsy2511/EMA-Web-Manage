@@ -12,6 +12,7 @@ import { addNotification } from "../../store/Slice/notificationsSlice.js";
 import TaskModal from "./ModalKanban/TaskModal.js";
 
 const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
+  // console.log("🚀 ~ KanbanBoard ~ listTaskParents:", listTaskParents);
   const dispatch = useDispatch();
 
   const notification = useSelector((state) => state.notification);

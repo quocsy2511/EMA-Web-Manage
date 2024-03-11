@@ -31,6 +31,7 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
 
   let completed = 0;
   let subTask = TaskParent?.subTask;
+
   subTask?.forEach((task) => {
     if (task.status === "CONFIRM") {
       completed++;
