@@ -5,13 +5,20 @@ import DescriptionSubtask from "./DescriptionSubtask/DescriptionSubtask";
 import Subtasks from "./Subtask/Subtasks";
 import CommentInput from "./Comment/CommentInput";
 import Comments from "./Comment/Comments";
-import { OrderedListOutlined, SnippetsOutlined } from "@ant-design/icons";
+import {
+  BookOutlined,
+  OrderedListOutlined,
+  SearchOutlined,
+  SnippetsOutlined,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { getComment } from "../../../apis/comments";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 import { getProfile } from "../../../apis/users";
 import moment from "moment";
+import { Button } from "antd";
+import HistoryAssignee from "./HistoryAssignee";
 
 const TaskModalContent = ({
   disableEndDate,
@@ -23,6 +30,7 @@ const TaskModalContent = ({
   setIsOpenTaskModal,
   completed,
   disableDoneTaskParent,
+  onCloseModal,
 }) => {
   const {
     data: listComments,
@@ -60,106 +68,150 @@ const TaskModalContent = ({
   const [title, setTitle] = useState(taskSelected?.title);
   const [description, setDescription] = useState(taskSelected?.description);
   const [subTasks, setSubTasks] = useState(taskSelected?.subTask);
+  const [isHistoryAssignee, setIsHistoryAssignee] = useState(false);
   let completionPercentage;
   if (taskParent) {
-    completionPercentage = (completed / subTasks?.length) * 100;
+    completionPercentage = ((completed / subTasks?.length) * 100).toFixed(2);
   }
 
   return (
     <div>
-      <TitleSubtask
-        setTitle={setTitle}
-        title={title}
-        disableUpdate={disableUpdate}
-        taskParent={taskParent}
-        taskSelected={taskSelected}
-      />
-
-      {/* field */}
-      {!isLoadingStaff ? (
-        !isErrorStaff ? (
-          <FieldSubtask
-            disableEndDate={disableEndDate}
-            disableStartDate={disableStartDate}
-            disableUpdate={disableUpdate}
-            taskSelected={taskSelected}
-            taskParent={taskParent}
-            staff={staff}
-            setIsOpenTaskModal={setIsOpenTaskModal}
-            disableDoneTaskParent={disableDoneTaskParent}
-            completionPercentage={completionPercentage}
-          />
+      <div className="w-full flex flex-col  items-start mb-4">
+        <TitleSubtask
+          setTitle={setTitle}
+          title={title}
+          disableUpdate={disableUpdate}
+          taskParent={taskParent}
+          taskSelected={taskSelected}
+        />
+        {isHistoryAssignee ? (
+          <p
+            className="w-auto mb-2 px-6 flex flex-row gap-x-2 items-center hover:text-blue-700 cursor-pointer font-medium -mt-2"
+            onClick={() => setIsHistoryAssignee(false)}
+          >
+            Chi tiết công việc <BookOutlined />
+          </p>
         ) : (
-          <AnErrorHasOccured />
-        )
+          <p
+            className="w-auto mb-2 px-6 flex flex-row gap-x-2 items-center hover:text-blue-700 cursor-pointer font-medium -mt-2"
+            onClick={() => setIsHistoryAssignee(true)}
+          >
+            Lịch sử phân công <SearchOutlined />
+          </p>
+        )}
+      </div>
+
+      {isHistoryAssignee ? (
+        <HistoryAssignee taskSelected={taskSelected}/>
       ) : (
-        <LoadingComponentIndicator />
-      )}
+        <>
+          {/* field */}
+          {!isLoadingStaff ? (
+            !isErrorStaff ? (
+              <FieldSubtask
+                disableEndDate={disableEndDate}
+                disableStartDate={disableStartDate}
+                disableUpdate={disableUpdate}
+                taskSelected={taskSelected}
+                taskParent={taskParent}
+                staff={staff}
+                setIsOpenTaskModal={setIsOpenTaskModal}
+                disableDoneTaskParent={disableDoneTaskParent}
+                completionPercentage={completionPercentage}
+                onCloseModal={onCloseModal}
+              />
+            ) : (
+              <AnErrorHasOccured />
+            )
+          ) : (
+            <LoadingComponentIndicator />
+          )}
 
-      {/* task description */}
-      <DescriptionSubtask
-        taskSelected={taskSelected}
-        disableUpdate={disableUpdate}
-        description={description}
-        setDescription={setDescription}
-        taskParent={taskParent}
-      />
+          {/* task description */}
+          <DescriptionSubtask
+            taskSelected={taskSelected}
+            disableUpdate={disableUpdate}
+            description={description}
+            setDescription={setDescription}
+            taskParent={taskParent}
+          />
 
-      {/* task subTask */}
-      {taskParent && (
-        <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
-          <div className="flex justify-center items-center">
-            <label
-              htmlFor="board-subTask-input" //lấy id :D
-              className="text-sm  text-gray-500 cursor-pointer"
-            >
-              <OrderedListOutlined style={{ fontSize: 24 }} />
-            </label>
-          </div>
-          <div className="w-full flex flex-col">
-            <h3 className="text-lg font-bold">
-              Công việc ({completed}/{subTasks.length})
-            </h3>
-            <div
-              className={
-                subTasks.length > 3
-                  ? `overflow-y-scroll max-h-[250px] pr-4`
-                  : `min-h-fit`
-              }
-            >
-              {subTasks.map((subTask) => (
-                <Subtasks
-                  disableUpdate={disableUpdate}
-                  key={subTask.id}
-                  Subtask={subTask}
-                  setSelectedSubTask={setSelectedSubTask}
-                />
-              ))}
+          {/* task subTask */}
+          {taskParent && (
+            <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
+              <div className="flex justify-center items-center">
+                <label
+                  htmlFor="board-subTask-input" //lấy id :D
+                  className="text-sm  text-gray-500 cursor-pointer"
+                >
+                  <OrderedListOutlined style={{ fontSize: 24 }} />
+                </label>
+              </div>
+              <div className="w-full flex flex-col">
+                <h3 className="text-lg font-bold">
+                  Công việc ({completed}/{subTasks.length})
+                </h3>
+                <div
+                  className={
+                    subTasks.length > 3
+                      ? `overflow-y-scroll max-h-[250px] pr-4`
+                      : `min-h-fit`
+                  }
+                >
+                  {subTasks.map((subTask) => (
+                    <Subtasks
+                      disableUpdate={disableUpdate}
+                      key={subTask.id}
+                      Subtask={subTask}
+                      setSelectedSubTask={setSelectedSubTask}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      <>
-        <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
-          <div className="flex justify-center items-center">
-            <label
-              htmlFor="board-description-input" //lấy id :D
-              className="text-sm dark:text-white text-gray-500 cursor-pointer"
-            >
-              <SnippetsOutlined style={{ fontSize: 24, color: "black" }} />
-            </label>
-          </div>
-          <div className="w-full flex flex-col">
-            <h3 className="text-lg font-bold">Hoạt động</h3>
-          </div>
-        </div>
-        {/* comment */}
-        {!disableUpdate && (
           <>
-            {!isLoadingStaff ? (
-              !isErrorStaff ? (
-                <CommentInput staff={staff} taskSelected={taskSelected} />
+            <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
+              <div className="flex justify-center items-center">
+                <label
+                  htmlFor="board-description-input" //lấy id :D
+                  className="text-sm dark:text-white text-gray-500 cursor-pointer"
+                >
+                  <SnippetsOutlined style={{ fontSize: 24, color: "black" }} />
+                </label>
+              </div>
+              <div className="w-full flex flex-col">
+                <h3 className="text-lg font-bold">Hoạt động</h3>
+              </div>
+            </div>
+            {/* comment */}
+            {!disableUpdate && (
+              <>
+                {!isLoadingStaff ? (
+                  !isErrorStaff ? (
+                    <CommentInput staff={staff} taskSelected={taskSelected} />
+                  ) : (
+                    <AnErrorHasOccured />
+                  )
+                ) : (
+                  <LoadingComponentIndicator />
+                )}
+              </>
+            )}
+            {/* comment of task */}
+            {!isLoadingListComments ? (
+              !isErrorListComments ? (
+                listComments?.map((comment) => {
+                  return (
+                    <Comments
+                      disableUpdate={disableUpdate}
+                      key={comment.id}
+                      comment={comment}
+                      taskSelected={taskSelected}
+                    />
+                  );
+                })
               ) : (
                 <AnErrorHasOccured />
               )
@@ -167,27 +219,8 @@ const TaskModalContent = ({
               <LoadingComponentIndicator />
             )}
           </>
-        )}
-        {/* comment of task */}
-        {!isLoadingListComments ? (
-          !isErrorListComments ? (
-            listComments?.map((comment) => {
-              return (
-                <Comments
-                  disableUpdate={disableUpdate}
-                  key={comment.id}
-                  comment={comment}
-                  taskSelected={taskSelected}
-                />
-              );
-            })
-          ) : (
-            <AnErrorHasOccured />
-          )
-        ) : (
-          <LoadingComponentIndicator />
-        )}
-      </>
+        </>
+      )}
     </div>
   );
 };

@@ -60,6 +60,7 @@ const TaskModal = ({
               disableEndDate={disableEndDate}
               disableStartDate={disableStartDate}
               completed={completed}
+              onCloseModal={onCloseModal}
             />
           </>
         )}

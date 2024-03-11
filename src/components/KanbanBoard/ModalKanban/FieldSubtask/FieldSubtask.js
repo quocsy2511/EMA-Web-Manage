@@ -8,7 +8,7 @@ import {
   UsergroupAddOutlined,
   VerticalAlignTopOutlined,
 } from "@ant-design/icons";
-import { Avatar, Popover, Progress, Tooltip } from "antd";
+import { Avatar, Modal, Popover, Progress, Tooltip } from "antd";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import utc from "dayjs/plugin/utc";
@@ -24,6 +24,7 @@ import PriorityTag from "../Priority/PriorityTag";
 import RangeDate from "../DateTime/RangeDate";
 import RangeDateSelected from "../DateTime/RangeDateSelected";
 import EstimateTime from "../EstimateTime/EstimateTime";
+import EmployeeModalSchedule from "../Employee/EmployeeModalSchedule";
 dayjs.locale("vi");
 dayjs.extend(utc);
 dayjs.utc();
@@ -39,7 +40,7 @@ const FieldSubtask = ({
   disableDoneTaskParent,
   completionPercentage,
 }) => {
-  // console.log("🚀 ~ file: FieldSubtask.js:42 ~ completed:", completed);
+  console.log("🚀 ~ file: FieldSubtask.js:42 ~ taskSelected:", taskSelected);
   const [updateFileList, setUpdateFileList] = useState(taskSelected?.taskFiles);
   const [updatePriority, setUpdatePriority] = useState(taskSelected?.priority);
   const [assignTasks, setAssignTasks] = useState(taskSelected?.assignTasks);
@@ -53,9 +54,11 @@ const FieldSubtask = ({
     taskSelected?.estimationTime
   );
   const [updateProgress, setUpdateProgress] = useState(taskSelected?.progress);
+  const [isModalAssigneeOpen, setIsModalAssigneeOpen] = useState(false);
 
   return (
     <div className="flex flex-col ">
+      {/* member */}
       <div className=" flex flex-row gap-x-6">
         <div className="flex flex-col w-1/2">
           {/* task member */}
@@ -79,26 +82,34 @@ const FieldSubtask = ({
               <div className="flex justify-start items-center mt-4 h-fit px-3">
                 <InforEmployee taskSelected={taskSelected} />
                 {!disableUpdate && (
-                  <Popover
-                    placement="right"
-                    title="Danh sách nhân viên"
-                    content={
-                      <div className="flex justify-start items-center mt-4 h-fit">
-                        <EmployeeSelected
-                          setAssignTasks={setAssignTasks}
-                          assignTasks={assignTasks}
-                          taskSelected={taskSelected}
-                        />
-                      </div>
-                    }
-                    trigger="click"
-                  >
+                  <>
+                    {/* <Popover
+                      placement="right"
+                      title="Danh sách nhân viên"
+                      content={
+                        <div className="flex justify-start items-center mt-4 h-fit ">
+                          <EmployeeSelected
+                            setAssignTasks={setAssignTasks}
+                            assignTasks={assignTasks}
+                            taskSelected={taskSelected}
+                          />
+                        </div>
+                      }
+                      trigger="click"
+                    >
+                      <Avatar
+                        icon={<UsergroupAddOutlined />}
+                        size="default"
+                        className="cursor-pointer bg-lite hover:text-blue-600 hover:bg-blue-200 text-black"
+                      />
+                    </Popover> */}
                     <Avatar
-                      icon={<UsergroupAddOutlined className="text-black" />}
+                      icon={<UsergroupAddOutlined />}
                       size="default"
-                      className="cursor-pointer bg-lite"
+                      className="cursor-pointer bg-lite hover:text-blue-600 hover:bg-blue-200 text-black"
+                      onClick={() => setIsModalAssigneeOpen(true)}
                     />
-                  </Popover>
+                  </>
                 )}
               </div>
             )}
@@ -120,6 +131,7 @@ const FieldSubtask = ({
                   updateFileList={updateFileList}
                   setUpdateFileList={setUpdateFileList}
                   taskParent={taskParent}
+                  taskSelected={taskSelected}
                 />
               ))}
             {!taskParent && !disableUpdate && (
@@ -211,6 +223,7 @@ const FieldSubtask = ({
                         taskSelected={taskSelected}
                         taskParent={taskParent}
                         classNameStyle="w-[190px] mt-2"
+                        setIsOpenTaskModal={setIsOpenTaskModal}
                       />
                     ) : (
                       <StatusTag
@@ -221,12 +234,12 @@ const FieldSubtask = ({
                   </>
                 ) : (
                   <StatusSelected
-                    // disableDoneTaskParent={disableDoneTaskParent}
                     updateStatus={updateStatus}
                     setUpdateStatus={setUpdateStatus}
                     taskSelected={taskSelected}
                     taskParent={taskParent}
                     classNameStyle="w-[190px] mt-2"
+                    setIsOpenTaskModal={setIsOpenTaskModal}
                   />
                 )}
               </>
@@ -235,18 +248,18 @@ const FieldSubtask = ({
         </div>
       </div>
       {/* process */}
-      <div className=" flex flex-row gap-x-6">
-        <div className="flex flex-col w-1/2 mt-2">
-          <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden ">
+      <div className=" flex flex-row gap-x-6 ">
+        <div className="flex flex-col w-1/2 mt-2 ">
+          <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden pr-3">
             <h4 className="text-sm font-semibold flex flex-row gap-x-2">
               <PercentageOutlined />
-              Tiến độ công việc
+              Tiến độ công việc {taskParent ? "của bộ phận" : "của nhân viên"}
             </h4>
             {taskParent && completionPercentage !== undefined ? (
               <Progress
                 percent={completionPercentage}
                 size="small"
-                className="mt-2"
+                className="mt-2  pr-4"
               />
             ) : (
               <Progress
@@ -295,6 +308,14 @@ const FieldSubtask = ({
           )}
         </div>
       </div>
+
+      <EmployeeModalSchedule
+        isModalAssigneeOpen={isModalAssigneeOpen}
+        setIsModalAssigneeOpen={setIsModalAssigneeOpen}
+        setAssignTasks={setAssignTasks}
+        assignTasks={assignTasks}
+        taskSelected={taskSelected}
+      />
     </div>
   );
 };

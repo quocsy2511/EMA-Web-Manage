@@ -32,10 +32,8 @@ const Subtasks = ({
       select: (data) => {
         if (data.startDate && data.endDate) {
           const formatDate = data.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format(
-              "YYYY/MM/DD HH:mm:ss"
-            );
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD HH:mm:ss");
+            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
+            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
             return {
               ...item,
             };
@@ -92,7 +90,7 @@ const Subtasks = ({
             type="text"
             disabled
           />
-          {disableUpdate ? (
+          {/* {disableUpdate ? (
             <Tag color={getColorStatus(updateStatus).color} className="h-fit">
               {getColorStatus(updateStatus).status}
             </Tag>
@@ -100,11 +98,20 @@ const Subtasks = ({
             <StatusSelected
               updateStatus={updateStatus}
               setUpdateStatus={setUpdateStatus}
-              taskSelected={Subtask}
+              // taskSelected={Subtask}
+              taskSelected={subtaskDetails?.[0]}
               taskParent={false}
               classNameStyle="ml-6"
+              isChangeStatusByDad={isChangeStatusByDad}
             />
-          )}
+          )} */}
+
+          <Tag
+            color={getColorStatus(updateStatus).color}
+            className="h-fit mr-5"
+          >
+            {getColorStatus(updateStatus).status}
+          </Tag>
 
           <EyeOutlined
             className="text-blue-500"
@@ -126,7 +133,9 @@ const Subtasks = ({
                 maxStyle={{
                   color: "#D25B68",
                   backgroundColor: "#F4D7DA",
+                  fontSize: "12px",
                 }}
+                size="small"
               >
                 {!isLoadingSubtaskDetails ? (
                   !isErrorSubtaskDetails ? (

@@ -12,11 +12,9 @@ import { addNotification } from "../../store/Slice/notificationsSlice.js";
 import TaskModal from "./ModalKanban/TaskModal.js";
 
 const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
-  // console.log("🚀 ~ KanbanBoard ~ listTaskParents:", listTaskParents);
   const dispatch = useDispatch();
 
   const notification = useSelector((state) => state.notification);
-  // console.log("🚀 ~ KanbanBoard ~ notification:", notification);
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
@@ -37,8 +35,8 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
     {
       select: (data) => {
         const taskParent = data.map(({ ...item }) => {
-          item.startDate = moment(item.startDate).format("YYYY/MM/DD HH:mm:ss");
-          item.endDate = moment(item.endDate).format("YYYY/MM/DD HH:mm:ss");
+          item.startDate = moment(item.startDate).format("YYYY/MM/DD");
+          item.endDate = moment(item.endDate).format("YYYY/MM/DD");
           return {
             ...item,
           };
@@ -75,7 +73,7 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
       <div className="bg-bgG h-[calc(100vh-64px-4rem)]">
         <DescriptionEvent key={selectEvent?.id} selectEvent={selectEvent} />
 
-        <div className="flex overflow-x-scroll px-10 pb-8 gap-x-3">
+        <div className="flex overflow-x-scroll px-10 pb-8 gap-x-3 min-h-[55vh]">
           {listTaskParents?.map((taskParent, index) => (
             <Column
               taskTemplate={[]}

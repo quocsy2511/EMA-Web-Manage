@@ -10,15 +10,11 @@ import { useRouteLoaderData } from "react-router-dom";
 import { Calendar, ConfigProvider, Drawer, Spin, Tooltip, message } from "antd";
 
 const ScheduleEmloyees = ({
-  childrenDrawer,
   setChildrenDrawer,
   setSelectedDateSchedule,
   setCheckedDateData,
 }) => {
-  const [selectedDate, setSelectedDate] = useState([
-    "03-03-2024",
-    "06-03-2024",
-  ]);
+  const [selectedDate, setSelectedDate] = useState([]);
   const now = momenttz();
   const staff = useRouteLoaderData("staff");
   const [messageApi, contextHolder] = message.useMessage();
@@ -53,7 +49,7 @@ const ScheduleEmloyees = ({
           })),
         }));
 
-        console.log("🚀 ~ updatedListEvent:", filteredEmployees);
+        // console.log("🚀 ~ updatedListEvent:", filteredEmployees);
         return filteredEmployees;
       },
       refetchOnWindowFocus: false,
@@ -94,7 +90,7 @@ const ScheduleEmloyees = ({
         <Calendar
           className="rounded-lg border border-gray-300 overflow-hidden px-2"
           onPanelChange={(value, mode) => {
-            console.log("onPanelChange > ", value, mode);
+            // console.log("onPanelChange > ", value, mode);
             const numOfDaysInCurrentMonth = value
               .clone()
               .month(value.clone().month() + 1)

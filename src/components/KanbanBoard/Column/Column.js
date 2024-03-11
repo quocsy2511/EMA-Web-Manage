@@ -6,6 +6,7 @@ import { shuffle } from "lodash";
 import { AnimatePresence } from "framer-motion";
 import moment from "moment";
 import { Tooltip } from "antd";
+import { SwapRightOutlined } from "@ant-design/icons";
 
 const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
   const colors = [
@@ -67,8 +68,8 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startDate = moment(TaskParent?.startDate).format("DD/MM/YYYY");
-  const endDate = moment(TaskParent?.endDate).format("DD/MM/YYYY");
+  const startDate = moment(TaskParent?.startDate).format("DD-MM-YYYY");
+  const endDate = moment(TaskParent?.endDate).format("DD-MM-YYYY");
 
   return (
     <>
@@ -99,7 +100,9 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
                   </div>
 
                   <p className="text-xs font-semibold text-white underline underline-offset-2">
-                    {startDate} - {endDate}
+                    {startDate}{" "}
+                    <SwapRightOutlined className="underline underline-offset-2" />{" "}
+                    {endDate}
                   </p>
                 </div>
               </div>

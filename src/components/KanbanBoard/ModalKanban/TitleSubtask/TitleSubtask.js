@@ -6,6 +6,7 @@ import React, { useRef } from "react";
 import { getTasks, updateTask } from "../../../../apis/tasks";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
+import { useRouteLoaderData } from "react-router-dom";
 
 const TitleSubtask = ({
   disableUpdate,
@@ -14,9 +15,10 @@ const TitleSubtask = ({
   title,
   setTitle,
 }) => {
-  console.log("🚀 ~ taskSelected:", taskSelected);
   const inputRef = useRef(null);
   const taskID = taskSelected?.id;
+  const eventId = taskSelected?.eventDivision?.event?.id;
+  const staff = useRouteLoaderData("staff");
 
   const titleDebounced = debounce((value) => {
     setTitle(value);
@@ -55,7 +57,7 @@ const TitleSubtask = ({
   const queryClient = useQueryClient();
   const { mutate: updateTitle } = useMutation((task) => updateTask(task), {
     onSuccess: (data) => {
-      queryClient.invalidateQueries(["tasks"]);
+      queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
       queryClient.invalidateQueries(["subtaskDetails"], taskID);
       inputRef.current.blur(); //bỏ forcus vô input
       message.open({
@@ -103,13 +105,13 @@ const TitleSubtask = ({
   };
 
   return (
-    <div className="mt-2 flex flex-row gap-x-2 justify-start items-center mb-4">
+    <div className="mt-2 flex flex-row gap-x-2 justify-center items-center  rounded-lg w-full">
       <div className="flex justify-center items-center">
         <label
           htmlFor="board-name-input" //lấy id :D
           className="text-sm dark:text-white text-gray-500 cursor-pointer"
         >
-          <ThunderboltOutlined style={{ fontSize: 24, color: "black" }} />
+          {/* <ThunderboltOutlined style={{ fontSize: 24, color: "black" }} /> */}
         </label>
       </div>
       {taskParent ? (
@@ -135,7 +137,7 @@ const TitleSubtask = ({
                     onPressEnter={onPressEnter}
                     autoComplete="false"
                     ref={inputRef}
-                    className="truncate bg-transparent px-4 py-2 rounded-md text-3xl font-bold border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer h-fit"
+                    className=" hover:bg-slate-200 truncate bg-transparent px-4 py-2 rounded-md text-3xl font-bold border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full cursor-pointer h-fit"
                     placeholder="Tên công việc ...."
                     value={subtaskDetails?.[0].title}
                     onChange={(e) => titleDebounced(e.target.value)}

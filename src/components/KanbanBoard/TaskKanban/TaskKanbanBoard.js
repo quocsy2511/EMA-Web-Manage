@@ -1,9 +1,10 @@
 import {
   BulbOutlined,
   CheckSquareOutlined,
+  StarFilled,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Tag, Tooltip } from "antd";
+import { Avatar, Badge, Tag, Tooltip } from "antd";
 import React, { memo } from "react";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
@@ -37,10 +38,8 @@ const TaskKanbanBoard = ({
       select: (data) => {
         if (data?.startDate && data?.endDate) {
           const formatDate = data.map(({ ...item }) => {
-            item.startDate = moment(item?.startDate).format(
-              "YYYY/MM/DD HH:mm:ss"
-            );
-            item.endDate = moment(item?.endDate).format("YYYY/MM/DD HH:mm:ss");
+            item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
+            item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
             return {
               ...item,
             };
@@ -69,7 +68,7 @@ const TaskKanbanBoard = ({
   } = useQuery(["comments", id], () => getComment(id), {
     select: (data) => {
       const formatDate = data.map(({ ...item }) => {
-        item.createdAt = moment(item?.createdAt).format("MM/DD HH:mm");
+        item.createdAt = moment(item?.createdAt).format("MM/DD ");
         return {
           ...item,
         };
@@ -89,7 +88,7 @@ const TaskKanbanBoard = ({
   });
 
   const formattedDate = (value) => {
-    const date = moment(value).format("DD/MM");
+    const date = moment(value).format("DD-MM-YYYY");
     return date;
   };
   const getColorStatusPriority = (value) => {
@@ -108,6 +107,7 @@ const TaskKanbanBoard = ({
     return colorMapping[value];
   };
 
+  console.log("subtaskDetails: ", subtaskDetails);
   return (
     <motion.div
       key={`subtask-${task?.id}`}
@@ -122,7 +122,7 @@ const TaskKanbanBoard = ({
         <Tooltip title={task?.title}>
           <p
             className={
-              task.status === "CANCEL" || task.status === "OVERDUE"
+              task.status === "CONFIRM" || task.status === "OVERDUE"
                 ? "font-normal text-sm tracking-wide hover:text-secondary truncate line-through decoration-red-700 decoration-2 opacity-30"
                 : "font-normal text-sm tracking-wide hover:text-secondary truncate"
             }
@@ -237,61 +237,92 @@ const TaskKanbanBoard = ({
             {getColorStatusPriority(status)?.title}
           </Tag>
         </div>
-        <div className="flex justify-end items-center mt-4">
-          <Avatar.Group
-            maxCount={3}
-            maxStyle={{
-              color: "#D25B68",
-              backgroundColor: "#F4D7DA",
-            }}
-          >
-            <AnimatePresence>
-              {!isLoadingSubtaskDetails ? (
-                !isErrorSubtaskDetails ? (
-                  <motion.div
-                    key={`cmt-subtask-${task?.id}`}
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 20, opacity: 0 }}
-                  >
-                    {subtaskDetails?.[0].assignTasks?.length > 0 &&
-                      subtaskDetails?.[0].assignTasks?.map((item, index) => (
-                        <Tooltip
-                          key={index}
-                          title={item.user?.profile?.fullName}
-                          placement="top"
-                        >
-                          {item?.user?.profile === null ? (
-                            <Avatar
-                              icon={<UserOutlined />}
-                              size="small"
-                              className="bg-gray-500"
-                            />
-                          ) : (
-                            <Avatar
-                              src={item.user?.profile?.avatar}
-                              size="small"
-                            />
-                          )}
-                        </Tooltip>
-                      ))}
-                  </motion.div>
+        <div className="flex justify-end items-center mt-4  w-full overflow-hidden">
+          <AnimatePresence>
+            <motion.div
+              key={`cmt-subtask-${task?.id}`}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 20, opacity: 0 }}
+            >
+              <Avatar.Group
+                maxCount={3}
+                maxStyle={{
+                  color: "#D25B68",
+                  backgroundColor: "#F4D7DA",
+                }}
+                size="small"
+              >
+                {!isLoadingSubtaskDetails ? (
+                  !isErrorSubtaskDetails ? (
+                    <>
+                      {subtaskDetails?.[0].assignTasks?.length > 0 &&
+                        subtaskDetails?.[0].assignTasks
+                          ?.filter((user) => user.status === "active")
+                          ?.map((item, index) => (
+                            <Tooltip
+                              key={index}
+                              title={
+                                item.isLeader
+                                  ? `${item.user?.profile?.fullName} (Trưởng nhóm)`
+                                  : item.user?.profile?.fullName
+                              }
+                              placement="top"
+                            >
+                              {item?.user?.profile === null ? (
+                                <Avatar
+                                  icon={<UserOutlined />}
+                                  size="small"
+                                  className="bg-gray-500"
+                                />
+                              ) : (
+                                <>
+                                  {item.isLeader ? (
+                                    <Badge
+                                      count={
+                                        <StarFilled
+                                          className="text-yellow-400 text-[9px]"
+                                          spin
+                                        />
+                                      }
+                                      offset={[-7, 3]}
+                                      className="mr-1"
+                                    >
+                                      <Avatar
+                                        // shape="square"
+                                        src={item.user?.profile?.avatar}
+                                        size="small"
+                                        className="border border-yellow-300"
+                                      />
+                                    </Badge>
+                                  ) : (
+                                    <Avatar
+                                      src={item.user?.profile?.avatar}
+                                      size="small"
+                                    />
+                                  )}
+                                </>
+                              )}
+                            </Tooltip>
+                          ))}
+                    </>
+                  ) : (
+                    <AnErrorHasOccured />
+                  )
                 ) : (
-                  <AnErrorHasOccured />
-                )
-              ) : (
-                <motion.div
-                  key={`loading-cmt-subtask-${task.id}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  {/* <LoadingComponentIndicator /> */}
-                  <MoonLoader color="#36d7b7" size={20} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </Avatar.Group>
+                  <motion.div
+                    key={`loading-cmt-subtask-${task.id}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    {/* <LoadingComponentIndicator /> */}
+                    <MoonLoader color="#36d7b7" size={20} />
+                  </motion.div>
+                )}
+              </Avatar.Group>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </motion.div>

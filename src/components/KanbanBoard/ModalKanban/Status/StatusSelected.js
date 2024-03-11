@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Select, Tag, message } from "antd";
+import { Button, Modal, Popconfirm, Select, Tag, message } from "antd";
 import React, { useState } from "react";
 import { updateTaskStatus } from "../../../../apis/tasks";
+import { useRouteLoaderData } from "react-router-dom";
 
 const StatusSelected = ({
   taskSelected,
@@ -9,8 +10,14 @@ const StatusSelected = ({
   updateStatus,
   setUpdateStatus,
   classNameStyle,
-  // disableDoneTaskParent,
+  setIsOpenTaskModal,
 }) => {
+  // console.log("🚀 ~ taskSelected:", taskSelected);
+
+  const eventId = taskSelected?.eventDivision?.event?.id;
+  // console.log("🚀 ~ eventId:", eventId)
+  const staff = useRouteLoaderData("staff");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const statusTask = [
     {
       value: "PENDING",
@@ -34,7 +41,7 @@ const StatusSelected = ({
     },
     {
       value: "CANCEL",
-      label: "ĐÃ HUỶ",
+      label: "HUỶ",
       color: "red",
     },
     {
@@ -43,26 +50,25 @@ const StatusSelected = ({
       color: "orange",
     },
   ];
-  // Sửa giá trị của CONFIRM trong statusTask
-  // const updatedStatusTask = statusTask.map((task) =>
-  //   task.value === "CONFIRM"
-  //     ? { ...task, disabled: true } // Thêm thuộc tính disabled và gán giá trị true
-  //     : task
-  // );
+
   const StatusParentTask = statusTask.filter(
-    (task) => task.value !== "CONFIRM"
+    (task) =>
+      task.value !== "CONFIRM" &&
+      task.value !== "CANCEL" &&
+      task.value !== "OVERDUE"
   );
   const [uploadStatus, setUploadStatus] = useState("");
+  const [isCancel, setIsCancel] = useState(false);
   const taskID = taskSelected?.id;
   const queryClient = useQueryClient();
-  const { mutate: UpdateStatusMutate } = useMutation(
+  const { mutate: UpdateStatusMutate, isSuccess } = useMutation(
     ({ taskID, status }) => updateTaskStatus({ taskID, status }),
     {
       onSuccess: () => {
         setUpdateStatus(uploadStatus);
-        queryClient.invalidateQueries(["tasks"]);
-        queryClient.invalidateQueries(["subtaskDetails"], taskID);
-        queryClient.invalidateQueries(["parentTaskDetail"], taskID);
+        queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
+        queryClient.invalidateQueries(["subtaskDetails", taskID]);
+        queryClient.invalidateQueries(["parentTaskDetail", taskID]);
         message.open({
           type: "success",
           content: "Cập nhật trạng thái thành công",
@@ -76,14 +82,34 @@ const StatusSelected = ({
       },
     }
   );
+
+  if (isSuccess && isCancel) {
+    setIsCancel(false);
+    setIsOpenTaskModal(false);
+  }
+
   const handleChangeStatus = (value) => {
     setUploadStatus(value);
-    const data = { status: value, taskID: taskID };
+    if (value === "CANCEL") {
+      setIsCancel(true);
+      setIsModalOpen(true);
+    } else {
+      const data = { status: value, taskID: taskID };
+      UpdateStatusMutate(data);
+    }
+  };
+
+  const handleOk = () => {
+    const data = { status: "CANCEL", taskID: taskID };
     UpdateStatusMutate(data);
+    setIsModalOpen(false);
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
   };
 
   return (
-    <>
+    <div>
       <Select
         autoFocus={true}
         suffixIcon={false}
@@ -94,7 +120,6 @@ const StatusSelected = ({
         className={classNameStyle}
         onChange={(value) => handleChangeStatus(value)}
         popupMatchSelectWidth={false}
-        // disabled={taskParent ? true : false}
       >
         {taskParent
           ? StatusParentTask?.map((status) => (
@@ -108,7 +133,30 @@ const StatusSelected = ({
               </Select.Option>
             ))}
       </Select>
-    </>
+      <Modal
+        title="Xác nhận huỷ công việc"
+        open={isModalOpen}
+        onCancel={handleCancel}
+        footer={[
+          <Button key="back" onClick={handleCancel}>
+            Không
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            // loading={loading}
+            onClick={handleOk}
+          >
+            Đồng ý
+          </Button>,
+        ]}
+      >
+        <p>Bạn không thể khôi phục lại công việc sau khi đã huỷ </p>
+        <p>
+          Bạn có muốn tiếp tục huỷ công việc <b>{taskSelected?.title} </b> ?
+        </p>
+      </Modal>
+    </div>
   );
 };
 
