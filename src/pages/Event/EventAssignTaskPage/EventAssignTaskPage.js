@@ -63,7 +63,6 @@ const EventAssignTaskPage = () => {
 
   const [isSelectDate, setIsSelectDate] = useState(false);
   const [chosenFile, setChosenFile] = useState();
-  console.log("chosenFile > ", chosenFile);
 
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
