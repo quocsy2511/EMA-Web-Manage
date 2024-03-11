@@ -1,8 +1,9 @@
-import { Avatar, Button, Form, Input, Upload, message } from "antd";
+import { Avatar, Button, Form, Input, Spin, Upload, message } from "antd";
 import React, { useState } from "react";
 import { IoMdAttach } from "react-icons/io";
 import { GiCancel } from "react-icons/gi";
 import { BsSendFill, BsCheckCircle } from "react-icons/bs";
+import { FaFile } from "react-icons/fa6";
 import { AnimatePresence, motion } from "framer-motion";
 import EmptyComment from "../Error/EmptyComment";
 import moment from "moment";
@@ -27,7 +28,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
   const [listSelectedCommentFiles, setListSelectedCommentFiles] = useState();
 
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((comment) => postComment(comment), {
+  const { mutate, isLoading } = useMutation((comment) => postComment(comment), {
     onSuccess: () => {
       queryClient.invalidateQueries(["comment", taskId]);
       form.resetFields();
@@ -125,15 +126,15 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
       onSuccess: (data, variables) => {
         const newFileList = [
           { fileName: data?.fileName, fileUrl: data?.downloadUrl },
-          ...variables.newComment.file,
+          ...variables?.newComment?.file,
         ];
 
         variables.newComment.file = newFileList;
 
         createCommentFileMutate({
-          commentId: variables.commentId,
+          commentId: variables?.commentId,
           files: newFileList,
-          newComment: variables.newComment,
+          newComment: variables?.newComment,
         });
       },
       onError: (error) => {
@@ -232,7 +233,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
           autoComplete="off"
           requiredMark={false}
         >
-          <div className={`flex items-center gap-x-3 ${!isSubtask && "mr-12"}`}>
+          <div className={`flex items-center gap-x-3 ${!isSubtask && "mr-8"}`}>
             <Avatar size={40} src={manager?.avatar} />
 
             <Form.Item
@@ -248,11 +249,13 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
               <Input placeholder="Nhập bình luận" size="large" allowClear />
             </Form.Item>
 
-            <BsSendFill
-              className="cursor-pointer"
-              size={20}
-              onClick={handleOnClick}
-            />
+            <Spin spinning={isLoading}>
+              <BsSendFill
+                className="cursor-pointer text-blue-500"
+                size={20}
+                onClick={handleOnClick}
+              />
+            </Spin>
           </div>
           <div className="flex items-center gap-x-3 mt-3 ml-14">
             <Form.Item
@@ -264,7 +267,7 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                 {
                   validator(_, fileList) {
                     return new Promise((resolve, reject) => {
-                      if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                      if (fileList && fileList?.[0]?.size > 10 * 1024 * 1024) {
                         reject("File quá lớn ( dung lượng < 10MB )");
                       } else {
                         resolve();
@@ -567,8 +570,9 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                                     href={file?.fileUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-500"
+                                    className="text-blue-500 flex items-center gap-x-2"
                                   >
+                                    <FaFile />
                                     {file?.fileName}
                                   </a>
                                 </div>

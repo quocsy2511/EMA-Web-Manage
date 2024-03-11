@@ -358,6 +358,9 @@ const SubTaskSection = ({
   isSelectDate,
   taskResponsorId,
   updateDataUser,
+
+  hasBusyUser,
+  setHasBusyUser,
 }) => {
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [userChecking, setUserChecking] = useState();
@@ -404,8 +407,6 @@ const SubTaskSection = ({
     if (!selectedEmployees.includes(leader)) {
       setLeader(selectedEmployees?.[0]);
     }
-
-    console.log("update form > ", form.getFieldsValue());
   }, [selectedEmployees]);
 
   // Update leader in form
@@ -437,7 +438,6 @@ const SubTaskSection = ({
       enabled: !!selectedDate,
     }
   );
-
   console.log("users > ", users);
 
   const handleSelectUser = (employee) => {
@@ -446,10 +446,22 @@ const SubTaskSection = ({
     }
 
     if (selectedEmployees?.includes(employee?.id)) {
+      // update busy user
+      const index = hasBusyUser?.indexOf(!employee?.isFree);
+      if (index !== -1) {
+        const clone = [...hasBusyUser];
+        clone.splice(index, 1);
+        setHasBusyUser(clone);
+      }
+
       setSelectedEmployees(
         (prev) => prev?.filter((item) => item !== employee?.id) ?? []
       );
     } else {
+      // update busy user
+      if (!employee?.isFree) setHasBusyUser((prev) => [...prev, true]);
+      else setHasBusyUser((prev) => [...prev, false]);
+
       setSelectedEmployees((prev) => [...prev, employee?.id]);
     }
   };

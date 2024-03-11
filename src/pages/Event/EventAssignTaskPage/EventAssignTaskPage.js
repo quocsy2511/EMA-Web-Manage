@@ -1,5 +1,4 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
-import LockLoadingModal from "../../../components/Modal/LockLoadingModal";
 import { motion } from "framer-motion";
 import {
   App,
@@ -8,15 +7,14 @@ import {
   DatePicker,
   Form,
   Input,
+  Popconfirm,
   Select,
   Upload,
   message,
-  notification,
 } from "antd";
 import viVN from "antd/locale/vi_VN";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import clsx from "clsx";
-import moment from "moment";
 import momenttz from "moment-timezone";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -26,7 +24,9 @@ import { assignMember, createTask, updateTask } from "../../../apis/tasks";
 import SubTaskSection from "./SubTaskSection";
 import dayjs from "dayjs";
 import { UploadOutlined } from "@ant-design/icons";
-import { uploadFile } from "../../../apis/files";
+import { uploadFile, uploadFileTask } from "../../../apis/files";
+import { BsExclamationOctagon } from "react-icons/bs";
+import { FaRegCircleCheck } from "react-icons/fa6";
 
 const { RangePicker } = DatePicker;
 
@@ -63,6 +63,7 @@ const EventAssignTaskPage = () => {
 
   const [isSelectDate, setIsSelectDate] = useState(false);
   const [chosenFile, setChosenFile] = useState();
+  const [hasBusyUser, setHasBusyUser] = useState([]);
 
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
@@ -79,7 +80,7 @@ const EventAssignTaskPage = () => {
     {
       onSuccess: (data) => {
         notification.success({
-          message: <p className="font-medium">Tạo 1 hạng mục thành công</p>,
+          message: <p className="font-medium">Tạo 1 {isSubTask? "công việc":"hạng mục"} thành công</p>,
           placement: "topRight",
           duration: 3,
         });
@@ -95,15 +96,18 @@ const EventAssignTaskPage = () => {
   );
 
   const { mutate: updateTaskMutate, isLoading: updateTaskIsLoading } =
-    useMutation((updatedTask) => updateTask(updatedTask), {
-      onSuccess: (data) => {
-        notification.success({
-          message: <p className="font-medium">Cập nhật hạng mục thành công</p>,
-          placement: "topRight",
-          duration: 3,
-        });
-
-        navigate(-1);
+    useMutation(({ updatedTask, totalTrue }) => updateTask(updatedTask), {
+      onSuccess: (data, variables) => {
+        if (variables?.totalTrue === 1) {
+          notification.success({
+            message: (
+              <p className="font-medium">Cập nhật {isSubTask? "công việc":"hạng mục"} thành công</p>
+            ),
+            placement: "topRight",
+            duration: 3,
+          });
+          navigate(-1);
+        }
       },
       onError: (error) => {
         messageApi.open({
@@ -115,14 +119,20 @@ const EventAssignTaskPage = () => {
 
   const { mutate: updateAssignMutate, isLoading: updateAssignIsLoading } =
     useMutation((data) => assignMember(data), {
-      onSuccess: (data) => {
-        notification.success({
-          message: <p className="font-medium">Cập nhật hạng mục thành công</p>,
-          placement: "topRight",
-          duration: 3,
-        });
-
-        navigate(-1);
+      onSuccess: (data, variables) => {
+        if (
+          variables?.totalTrue === 1 ||
+          (variables?.totalTrue > 1 && variables?.totalTrue === 2)
+        ) {
+          notification.success({
+            message: (
+              <p className="font-medium">Cập nhật {isSubTask? "công việc":"hạng mục"} thành công</p>
+            ),
+            placement: "topRight",
+            duration: 3,
+          });
+          navigate(-1);
+        }
       },
       onError: (error) => {
         messageApi.open({
@@ -133,29 +143,31 @@ const EventAssignTaskPage = () => {
     });
 
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
-    useMutation((formData) => uploadFile(formData), {
+    useMutation(({ formData, task, totalTrue }) => uploadFile(formData), {
       onSuccess: (data, variables) => {
-        // const task = variables.task;
-        // console.log("🚀 ~ useMutation ~ variables.task:", variables.task);
-        // variables.task = {
-        //   file: [
-        //     {
-        //       fileName: data?.fileName ? data?.fileName : "tài liệu công việc",
-        //       fileUrl: data?.downloadUrl,
-        //     },
-        //   ],
-        //   ...task,
-        // };
-        // submitFormTask(variables.task);
-        notification.success({
-          message: (
-            <p className="font-medium">
-              Đã tải tệp tin của hạng mục thành công
-            </p>
-          ),
-          placement: "topRight",
-          duration: 3,
-        });
+        console.log("file > ", data);
+        if (!variables?.totalTrue) {
+          const taskPayload = {
+            ...variables.task,
+            file: [
+              {
+                fileName: data?.fileName
+                  ? data?.fileName
+                  : "tài liệu công việc",
+                fileUrl: data?.downloadUrl,
+              },
+            ],
+          };
+          taskMutate(taskPayload);
+        } else {
+          if (variables?.totalTrue === 1 || variables?.totalTrue > 1) {
+            assignFileToTaskMutate({
+              taskID: updateData?.id,
+              fileName: data?.fileName,
+              fileUrl: data?.downloadUrl,
+            });
+          }
+        }
       },
       onError: () => {
         message.open({
@@ -165,27 +177,31 @@ const EventAssignTaskPage = () => {
       },
     });
 
-  const checkArrayDiff = (longArr, shortArr) =>
-    longArr.filter((item) => !shortArr.includes(item));
+  const {
+    mutate: assignFileToTaskMutate,
+    isLoading: assignFileToTaskIsLoading,
+  } = useMutation((data) => uploadFileTask(data), {
+    onSuccess: (data) => {
+      notification.success({
+        message: <p className="font-medium">Cập nhật {isSubTask? "công việc":"hạng mục"} thành công</p>,
+        placement: "topRight",
+        duration: 3,
+      });
+      navigate(-1);
+    },
+    onError: () => {
+      message.open({
+        type: "error",
+        content: "1 lỗi bất ngờ xảy ra! Hãy thử lại sau",
+      });
+    },
+  });
 
-  const handleAssignTask = (values) => {
-    updateAssignMutate({
-      taskID: updateData?.id,
-      assignee: values?.assignee ?? [],
-      leader: values?.leader,
-    });
-  };
+  const checkArrayDiff = (longArr, shortArr) =>
+    longArr?.filter((item) => !shortArr?.includes(item));
 
   const onFinish = (values) => {
     console.log("Success:", values);
-
-    if (values?.fileHolder) {
-      const formData = new FormData();
-      formData.append("file", values?.fileHolder);
-      formData.append("folderName", "task");
-
-      uploadFileMutate(formData);
-    }
 
     // Create new task
     if (!updateData) {
@@ -209,8 +225,21 @@ const EventAssignTaskPage = () => {
         estimationTime: 1,
       };
 
-      taskMutate(taskPayload);
+      if (values?.fileHolder) {
+        const formData = new FormData();
+        formData.append("file", values?.fileHolder);
+        formData.append("folderName", "task");
+
+        uploadFileMutate({ formData, task: taskPayload });
+      } else {
+        taskMutate(taskPayload);
+      }
     } else {
+      const listUpdateRequest = [];
+      let checkUpdateTask = false;
+      let checkAssignTask = false;
+      let checkUploadFile = false;
+
       // Update task
       const updatedDesc = JSON.parse(
         updateData?.desc?.startsWith(`[{"`)
@@ -226,6 +255,71 @@ const EventAssignTaskPage = () => {
         updateData?.priority !== values?.priority ||
         JSON.stringify(values?.desc?.ops) !== JSON.stringify(updatedDesc)
       ) {
+        checkUpdateTask = true;
+        listUpdateRequest.push(checkUpdateTask);
+      }
+
+      // Update assign task
+      if (!isSubTask) {
+        if (updateData?.assignee?.[0] !== values?.assignee?.[0]) {
+          console.log("assign task again");
+
+          checkAssignTask = true;
+          listUpdateRequest.push(checkAssignTask);
+        }
+      } else {
+        // check assign subtask
+        if (values?.leader !== updateData?.assignee?.[0]) {
+          console.log("change leader");
+
+          checkAssignTask = true;
+          listUpdateRequest.push(checkAssignTask);
+        } else if (updateData?.assignee?.length === values?.assignee?.length) {
+          console.log("same length");
+          if (!!checkArrayDiff(updateData?.assignee, values?.assignee).length) {
+            checkAssignTask = true;
+            listUpdateRequest.push(checkAssignTask);
+          }
+        } else {
+          console.log("diff length");
+          if (updateData?.assignee?.length > values?.assignee?.length) {
+            if (
+              !!checkArrayDiff(updateData?.assignee, values?.assignee).length
+            ) {
+              console.log("change less");
+
+              checkAssignTask = true;
+              listUpdateRequest.push(checkAssignTask);
+            }
+          } else {
+            if (
+              !!checkArrayDiff(values?.assignee, updateData?.assignee).length
+            ) {
+              console.log("change more");
+
+              checkAssignTask = true;
+              listUpdateRequest.push(checkAssignTask);
+            }
+          }
+        }
+      }
+
+      const formData = new FormData();
+      if (values?.fileHolder) {
+        formData.append("file", values?.fileHolder);
+        formData.append("folderName", "task");
+
+        checkUploadFile = true;
+        listUpdateRequest.push(checkUploadFile);
+      }
+
+      const totalTrue = listUpdateRequest?.reduce(
+        (result, item) => (item ? result + 1 : result),
+        0
+      );
+      console.log("totalTrue > ", totalTrue);
+
+      if (checkUpdateTask) {
         // update task
         const updatedValue = {
           title: values?.title,
@@ -245,56 +339,32 @@ const EventAssignTaskPage = () => {
           taskID: updateData?.id,
         };
         console.log("change > ", updatedValue);
-        updateTaskMutate(updatedValue);
+        updateTaskMutate({
+          updatedTask: updatedValue,
+          totalTrue,
+        });
       }
-
-      // Update assign task
-      if (!isSubTask) {
-        if (updateData?.assignee?.[0] !== values?.assignee?.[0]) {
-          console.log("assign task again");
-
-          // assign task again
-          updateAssignMutate({
-            taskID: updateData?.id,
-            assignee: values?.assignee ?? [],
-            leader: values?.assignee?.[0],
-          });
-        }
-      } else {
-        // check assign subtask
-        // updateData?.assignee
-        // values?.assignee
-        if (values?.leader !== updateData?.assignee?.[0]) {
-          console.log("change leader");
-          handleAssignTask(values);
-        } else if (updateData?.assignee?.length === values?.assignee?.length) {
-          console.log("same length");
-          if (!!checkArrayDiff(updateData?.assignee, values?.assignee).length) {
-            handleAssignTask(values);
-          }
-        } else {
-          console.log("diff length");
-          if (updateData?.assignee?.length > values?.assignee?.length) {
-            if (
-              !!checkArrayDiff(updateData?.assignee, values?.assignee).length
-            ) {
-              console.log("change less");
-              handleAssignTask(values);
-            }
-          } else {
-            if (
-              !!checkArrayDiff(values?.assignee, updateData?.assignee).length
-            ) {
-              console.log("change more");
-              handleAssignTask(values);
-            }
-          }
-        }
+      if (checkAssignTask) {
+        updateAssignMutate({
+          taskID: updateData?.id,
+          assignee: values?.assignee ?? [],
+          leader: values?.assignee?.[0],
+          totalTrue,
+        });
+      }
+      if (checkUploadFile) {
+        uploadFileMutate({
+          formData,
+          totalTrue,
+        });
       }
     }
   };
 
-  const onFinishFailed = (errorInfo) => {};
+  const onFinishFailed = (errorInfo) => {
+    console.log(errorInfo);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <Fragment>
@@ -523,26 +593,19 @@ const EventAssignTaskPage = () => {
                   showPreviewIcon: false,
                 }}
                 beforeUpload={(file) => {
-                  console.log("file > ", file);
                   return new Promise((resolve, reject) => {
-                    console.log("inside");
                     if (file && file?.size > 10 * 1024 * 1024) {
                       reject("File quá lớn ( <10MB )");
                       return false;
                     } else {
-                      console.log("ok");
-                      // setFileList(file);
                       setChosenFile(file);
-                      // form.setFieldsValue({
-                      //   fileHolder: file,
-                      // });
+
                       resolve();
                       return true;
                     }
                   });
                 }}
                 onChange={(info) => {
-                  console.log("info > ", info);
                   if (info?.file?.status === "removed") {
                     // File has been removed
                     setChosenFile(); // Reset the chosen file state
@@ -560,6 +623,8 @@ const EventAssignTaskPage = () => {
               isSelectDate={isSelectDate}
               taskResponsorId={taskResponsorId}
               updateDataUser={updateData ? updateData?.assignee ?? [] : null}
+              hasBusyUser={hasBusyUser}
+              setHasBusyUser={setHasBusyUser}
             />
           ) : (
             <TaskSection
@@ -570,32 +635,108 @@ const EventAssignTaskPage = () => {
               updateDataDivision={
                 updateData ? updateData?.assignee ?? [] : null
               }
+              setHasBusyUser={setHasBusyUser}
             />
           )}
 
           <div className="flex justify-center items-center mt-10">
             {!!updateData ? (
-              <Button
-                size="large"
-                type="primary"
-                onClick={() => {
+              <Popconfirm
+                title={
+                  !!hasBusyUser?.length && hasBusyUser?.includes(true)
+                    ? `${
+                        isSubTask ? "Có 1 nhân viên" : "Bộ phận được chọn"
+                      } đang tham gia nhiều ${
+                        isSubTask ? "công việc" : "hạng mục"
+                      }`
+                    : `Bạn đang tạo 1 ${isSubTask ? "công việc" : "hạng mục"} `
+                }
+                description={
+                  !!hasBusyUser?.length && hasBusyUser?.includes(true)
+                    ? `Bạn có chắc chắn muốn tạo ${
+                        isSubTask ? "công việc" : "hạng mục"
+                      } này ?`
+                    : "Bạn có chắc chắn với các thông tin trên ?"
+                }
+                icon={
+                  !!hasBusyUser?.length && hasBusyUser?.includes(true) ? (
+                    <BsExclamationOctagon
+                      className="mr-5 text-xl"
+                      style={{
+                        color: "red",
+                      }}
+                    />
+                  ) : (
+                    <FaRegCircleCheck className="text-green-500 mr-5 text-xl" />
+                  )
+                }
+                okText="Chấp Nhận"
+                cancelText="Hủy"
+                onConfirm={() => {
                   form.submit();
                 }}
-                // loading={taskIsLoading}
               >
-                Cập nhật
-              </Button>
+                <Button
+                  size="large"
+                  type="primary"
+                  loading={
+                    updateTaskIsLoading ||
+                    updateAssignIsLoading ||
+                    isLoadingUploadFile ||
+                    assignFileToTaskIsLoading
+                  }
+                >
+                  Cập nhật
+                </Button>
+              </Popconfirm>
             ) : (
-              <Button
-                size="large"
-                type="primary"
-                onClick={() => {
+              <Popconfirm
+                title={
+                  !!hasBusyUser?.length && hasBusyUser?.includes(true)
+                    ? `${
+                        isSubTask ? "Có 1 nhân viên" : "Bộ phận được chọn"
+                      } đang tham gia nhiều ${
+                        isSubTask ? "công việc" : "hạng mục"
+                      }`
+                    : `Bạn đang tạo 1 ${isSubTask ? "công việc" : "hạng mục"} `
+                }
+                description={
+                  !!hasBusyUser?.length && hasBusyUser?.includes(true)
+                    ? `Bạn có chắc chắn muốn tạo ${
+                        isSubTask ? "công việc" : "hạng mục"
+                      } này ?`
+                    : "Bạn có chắc chắn với các thông tin trên ?"
+                }
+                icon={
+                  !!hasBusyUser?.length && hasBusyUser?.includes(true) ? (
+                    <BsExclamationOctagon
+                      className="mr-5 text-xl"
+                      style={{
+                        color: "red",
+                      }}
+                    />
+                  ) : (
+                    <FaRegCircleCheck className="text-green-500 mr-5 text-xl" />
+                  )
+                }
+                okText="Chấp Nhận"
+                cancelText="Hủy"
+                onConfirm={() => {
                   form.submit();
                 }}
-                loading={taskIsLoading}
               >
-                Hoàn Thành
-              </Button>
+                <Button
+                  size="large"
+                  type="primary"
+                  loading={
+                    taskIsLoading ||
+                    updateAssignIsLoading ||
+                    isLoadingUploadFile
+                  }
+                >
+                  Hoàn Thành
+                </Button>
+              </Popconfirm>
             )}
           </div>
         </Form>
