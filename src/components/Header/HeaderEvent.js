@@ -1,4 +1,5 @@
 import {
+  ArrowLeftOutlined,
   CheckOutlined,
   ClearOutlined,
   DollarOutlined,
@@ -7,9 +8,18 @@ import {
   StarFilled,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Dropdown, Input, Select, Spin, Tag, Tooltip } from "antd";
+import {
+  Avatar,
+  Button,
+  Dropdown,
+  Input,
+  Select,
+  Spin,
+  Tag,
+  Tooltip,
+} from "antd";
 import React, { useEffect, useRef, useState } from "react";
-import { useRouteLoaderData } from "react-router-dom";
+import { useNavigate, useRouteLoaderData } from "react-router-dom";
 import { getAllUser } from "../../apis/users";
 import moment from "moment";
 import AnErrorHasOccured from "../Error/AnErrorHasOccured";
@@ -39,7 +49,7 @@ const HeaderEvent = ({
   const listRole = ["STAFF", "EMPLOYEE"];
   const notification = useSelector((state) => state.notification);
   // console.log("🚀 ~ notification:", notification);
-
+  const navigate = useNavigate();
   const {
     data: users,
     isError: isErrorUsers,
@@ -270,6 +280,13 @@ const HeaderEvent = ({
                         className="flex-1 flex justify-between items-center gap-x-3"
                       >
                         <div className="w-1/2 flex justify-start">
+                          <Button
+                            type="link"
+                            onClick={() => navigate(-1)}
+                            className="text-sm font-semibold "
+                          >
+                            <ArrowLeftOutlined className="text-lg font-bold" />
+                          </Button>
                           <Input
                             size="large"
                             className="w-full"
