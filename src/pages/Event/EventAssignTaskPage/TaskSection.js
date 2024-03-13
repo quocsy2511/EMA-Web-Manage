@@ -320,7 +320,13 @@ const Item = memo(({ division, selectedId, handleSelectDivision }) => {
   );
 });
 
-const TaskSection = ({ form, isSelectDate, eventId, updateDataDivision }) => {
+const TaskSection = ({
+  form,
+  isSelectDate,
+  eventId,
+  updateDataDivision,
+  setHasBusyUser,
+}) => {
   console.log("updateDataDivision > ", updateDataDivision);
   console.log("isSelectDate > ", isSelectDate);
   const [selectedId, setSelectedId] = useState();
@@ -372,6 +378,9 @@ const TaskSection = ({ form, isSelectDate, eventId, updateDataDivision }) => {
   console.log("divisions > ", divisions);
 
   const handleSelectDivision = (division) => {
+    if (division?.assignEvents > 0) {
+      setHasBusyUser([true]);
+    }
     setSelectedId(division?.users?.[0]?.id);
     form.setFieldsValue({ assignee: [division?.users?.[0]?.id] });
   };
@@ -539,8 +548,6 @@ const TaskSection = ({ form, isSelectDate, eventId, updateDataDivision }) => {
                   //   setIsDrawerOpen(true);
                   // }}
                   onPanelChange={(value, mode) => {
-                    console.log("onPanelChange > ", value, mode);
-
                     const numOfDaysInCurrentMonth = value
                       .clone()
                       .month(value.clone().month() + 1)
