@@ -238,9 +238,9 @@ const DrawerContainer = memo(
                         return task;
                       }
                     })
-                    ?.sort((a, b) => {
-                      mapPriory[a?.priority] - mapPriory[b?.priority];
-                    });
+                    ?.sort(
+                      (a, b) => mapPriory[a?.priority] - mapPriory[b?.priority]
+                    );
 
                   if (!!listTasks?.length)
                     return (

@@ -114,9 +114,7 @@ const DrawerContainer = memo(
                       userChecking?.date >= task?.startDate &&
                       userChecking?.date <= task?.endDate
                   )
-                  ?.sort((a, b) => {
-                    mapPriory[a?.priority] - mapPriory[b?.priority];
-                  });
+                  ?.sort((a, b) => mapPriory[a?.priority] - mapPriory[b?.priority]);
 
                 if (!!listTasks?.length)
                   return (
