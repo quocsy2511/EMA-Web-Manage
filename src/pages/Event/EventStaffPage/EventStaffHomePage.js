@@ -26,7 +26,11 @@ const EventItem = memo(({ event, gotoEventPage }) => {
       </motion.div>
     </Tooltip>
   ));
-
+  const percentage = (
+    (event?.tasks?.filter((item) => item?.status === "DONE").length /
+      (event?.tasks?.length ?? 1)) *
+    100
+  ).toFixed(0);
   let status;
   switch (event?.status) {
     case "PENDING":
@@ -142,13 +146,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
             </p>
           </div>
 
-          <Progress
-            percent={
-              event?.tasks?.filter((item) => item?.status === "DONE").length /
-              (event?.tasks?.length ?? 1)
-            }
-            type="line"
-          />
+          <Progress percent={percentage} type="line" />
         </div>
       </div>
 
@@ -176,19 +174,6 @@ const EventStaffHomePage = () => {
     isLoading: listEventIsLoading,
     isError: listEventIsError,
   } = useQuery(["events"], () => getEventDivisions(), {
-    // select: (data) => {
-    //   const filteredEvents = data?.filter(
-    //     (item) => item?.status !== "DONE" && item?.status !== "CANCEL"
-    //   );
-    //   const event = filteredEvents?.map(({ ...item }) => {
-    //     item.startDate = moment(item?.startDate).format("DD/MM/YYYY");
-    //     item.endDate = moment(item?.endDate).format("DD/MM/YYYY");
-    //     return {
-    //       ...item,
-    //     };
-    //   });
-    //   return event;
-    // },
     select: (data) => {
       return data?.map((item) => ({
         ...item,

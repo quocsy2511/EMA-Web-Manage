@@ -8,7 +8,7 @@ import moment from "moment";
 import { Tooltip } from "antd";
 import { SwapRightOutlined } from "@ant-design/icons";
 
-const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
+const Column = ({ TaskParent, selectedStatus }) => {
   const colors = [
     "bg-red-500",
     "bg-orange-500",
@@ -26,6 +26,7 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
 
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
+  console.log("🚀 ~ Column ~ taskSelected:", taskSelected);
   const [disableUpdate, setDisableUpdate] = useState(false);
   const [disableDoneTaskParent, setDisableDoneTaskParent] = useState(true);
 
@@ -39,6 +40,8 @@ const Column = ({ TaskParent, selectedStatus, taskTemplate }) => {
   });
 
   const filteredSubTask = subTask?.filter((task) => {
+    // console.log("🚀 ~ filteredSubTask ~ subTask:", subTask);
+
     if (selectedStatus === "clear") {
       return true;
     } else {

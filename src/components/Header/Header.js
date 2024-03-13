@@ -37,7 +37,7 @@ const Header = ({ collapsed, setCollapsed }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const NotiLabel = ({ item }) => {
-    console.log("🚀 ~ NotiLabel ~ item:", item);
+    // console.log("🚀 ~ NotiLabel ~ item:", item);
     let time;
     // const currentDate = moment().subtract(7, "hours");
     // const targetDate = moment(item.createdAt);
@@ -62,34 +62,99 @@ const Header = ({ collapsed, setCollapsed }) => {
     }
 
     const handleNavigate = () => {
-      if (item?.type === "TASK") {
-        console.log("task");
-        dispatch(
-          redirectionActions.taskChange({
-            commonId: item?.commonId,
-            parentTaskId: item?.parentTaskId,
-          })
-        );
-        if (item?.parentTaskId) {
-          if (
-            location.pathname !==
-            `/manager/event/${item?.eventID}/${item?.paentTaskId}`
-          ) {
-            navigate(`/manager/event/${item?.eventID}/${item?.parentTaskId}`);
+      if (staff) {
+        if (item?.type === "TASK") {
+          console.log("task");
+          dispatch(
+            redirectionActions.taskChange({
+              commonId: item?.commonId,
+              parentTaskId: item?.parentTaskId,
+            })
+          );
+
+          if (item?.parentTaskId) {
+            if (location.pathname !== `/staff/event/${item?.eventID}`) {
+              navigate(`/staff/event/${item?.eventID}`);
+            }
+          } else {
+            if (location.pathname !== `/staff/event/${item?.eventID}`) {
+              navigate(`/staff/event/${item?.eventID}`);
+            }
           }
-        } else {
-          if (
-            location.pathname !==
-            `/manager/event/${item?.eventID}/${item?.commonId}`
-          ) {
-            navigate(`/manager/event/${item?.eventID}/${item?.commonId}`);
+        } else if (item?.type === "COMMENT") {
+          console.log("comment");
+          dispatch(redirectionActions.commentChange(item?.commonId));
+          dispatch(
+            redirectionActions.taskChange({
+              commonId: item?.commonId,
+              parentTaskId: item?.parentTaskId,
+            })
+          );
+          if (location.pathname !== "/staff/request") {
+            navigate(`/staff/event/${item?.eventID}`);
           }
         }
-      } else if (item?.type === "COMMENT") {
-        console.log("comment");
-        dispatch(redirectionActions.commentChange(item?.commonId));
-        if (location.pathname !== "/manager/request") {
-          navigate(`/manager/event/${item?.eventID}/${item?.commenId}`);
+      } else if (manager) {
+        if (item?.type === "TASK") {
+          console.log("task");
+          dispatch(
+            redirectionActions.taskChange({
+              commonId: item?.commonId,
+              parentTaskId: item?.parentTaskId,
+            })
+          );
+          if (item?.parentTaskId) {
+            if (
+              location.pathname !==
+              `/manager/event/${item?.eventID}/${item?.paentTaskId}`
+            ) {
+              navigate(`/manager/event/${item?.eventID}/${item?.parentTaskId}`);
+            }
+          } else {
+            if (
+              location.pathname !==
+              `/manager/event/${item?.eventID}/${item?.commonId}`
+            ) {
+              navigate(`/manager/event/${item?.eventID}/${item?.commonId}`);
+            }
+          }
+        } else if (item?.type === "COMMENT") {
+          console.log("comment");
+          dispatch(redirectionActions.commentChange(item?.commonId));
+          if (location.pathname !== "/manager/request") {
+            navigate(`/manager/event/${item?.eventID}/${item?.commenId}`);
+          }
+        }
+      } else {
+        if (item?.type === "TASK") {
+          console.log("task");
+          dispatch(
+            redirectionActions.taskChange({
+              commonId: item?.commonId,
+              parentTaskId: item?.parentTaskId,
+            })
+          );
+          if (item?.parentTaskId) {
+            if (
+              location.pathname !==
+              `/manager/event/${item?.eventID}/${item?.paentTaskId}`
+            ) {
+              navigate(`/manager/event/${item?.eventID}/${item?.parentTaskId}`);
+            }
+          } else {
+            if (
+              location.pathname !==
+              `/manager/event/${item?.eventID}/${item?.commonId}`
+            ) {
+              navigate(`/manager/event/${item?.eventID}/${item?.commonId}`);
+            }
+          }
+        } else if (item?.type === "COMMENT") {
+          console.log("comment");
+          dispatch(redirectionActions.commentChange(item?.commonId));
+          if (location.pathname !== "/manager/request") {
+            navigate(`/manager/event/${item?.eventID}/${item?.commenId}`);
+          }
         }
       }
     };

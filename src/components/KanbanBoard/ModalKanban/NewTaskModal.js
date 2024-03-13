@@ -58,7 +58,15 @@ const NewTaskModal = ({
   const [childrenDrawer, setChildrenDrawer] = useState(false);
   const [checkedDateData, setCheckedDateData] = useState([]);
   const [selectedDateSchedule, setSelectedDateSchedule] = useState("");
+  //search Employee
+  const filterOption = (input, option) =>
+    (option?.label?.props?.label ?? "")
+      .toLowerCase()
+      .includes(input.toLowerCase());
 
+  const onSearch = (value) => {
+    console.log("search:", value);
+  };
   const {
     data: employees,
     isError: isErrorEmployees,
@@ -429,55 +437,32 @@ const NewTaskModal = ({
                         style={{
                           width: "100%",
                         }}
+                        onSearch={onSearch}
                         onChange={(value) => handleChangeSelectMember(value)}
                         optionLabelProp="label"
                         tagRender={tagRender}
-                      >
-                        {employees?.map((item, index) => {
-                          return (
-                            <Option
-                              value={item?.id}
-                              label={
-                                <span
-                                  role="img"
-                                  aria-label={item?.profile?.fullName}
-                                >
-                                  <Tooltip
-                                    key="avatar"
-                                    title={item?.profile?.fullName}
-                                    placement="top"
-                                  >
-                                    <Avatar
-                                      src={item?.profile?.avatar}
-                                      className="mr-2"
-                                      size="small"
-                                    />
-                                  </Tooltip>
-                                  {item?.profile?.fullName}
-                                </span>
-                              }
-                              key={item?.id}
-                            >
-                              <Space>
-                                <span
-                                  role="img"
-                                  aria-label={item?.profile?.fullName}
-                                >
-                                  {item?.profile?.avatar ? (
-                                    <Avatar src={item?.profile?.avatar} />
-                                  ) : (
-                                    <Avatar
-                                      icon={<UserOutlined />}
-                                      size="small"
-                                    />
-                                  )}
-                                </span>
-                                <span>{item?.profile?.fullName}</span>
-                              </Space>
-                            </Option>
-                          );
+                        showSearch
+                        optionFilterProp="children"
+                        filterOption={filterOption}
+                        options={employees?.map((item) => {
+                          return {
+                            label: (
+                              <span
+                                key={item?.id}
+                                label={item?.profile?.fullName}
+                              >
+                                <Avatar
+                                  src={item?.profile?.avatar}
+                                  className="mr-2"
+                                  size="small"
+                                />
+                                {item?.profile?.fullName}
+                              </span>
+                            ),
+                            value: item?.id,
+                          };
                         })}
-                      </Select>
+                      />
                     </>
                   ) : (
                     <AnErrorHasOccured />

@@ -107,7 +107,8 @@ const TaskKanbanBoard = ({
     return colorMapping[value];
   };
 
-  // console.log("subtaskDetails: ", subtaskDetails);
+  // console.log("🚀 ~ subtaskDetails:", subtaskDetails);
+
   return (
     <motion.div
       key={`subtask-${task?.id}`}
@@ -261,7 +262,7 @@ const TaskKanbanBoard = ({
                           ?.filter((user) => user.status === "active")
                           ?.map((item, index) => (
                             <Tooltip
-                              key={index}
+                              key={item.id}
                               title={
                                 item.isLeader
                                   ? `${item.user?.profile?.fullName} (Trưởng nhóm)`
