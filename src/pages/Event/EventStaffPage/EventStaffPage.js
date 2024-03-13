@@ -2,17 +2,17 @@ import React, { memo, useEffect, useState } from "react";
 import HeaderEvent from "../../../components/Header/HeaderEvent";
 import KanbanBoard from "../../../components/KanbanBoard/KanbanBoard";
 import { useQuery } from "@tanstack/react-query";
-import { getEventDivisions } from "../../../apis/events";
+import { getEventDetail, getEventDivisions } from "../../../apis/events";
 import AnErrorHasOccured from "../../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
-import { Empty, message } from "antd";
+import { Empty, Spin, message } from "antd";
 import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
 import { filterTask } from "../../../apis/tasks";
 import BudgetStaff from "../../../components/KanbanBoard/BudgetStaff/BudgetStaff";
 import { getProfile } from "../../../apis/users";
 import { getBudget } from "../../../apis/budgets";
-import { useLocation, useRouteLoaderData } from "react-router-dom";
+import { useLocation, useParams, useRouteLoaderData } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 moment.suppressDeprecationWarnings = true;
@@ -28,30 +28,37 @@ const EventStaffPage = () => {
   ];
 
   const location = useLocation();
-  const selectEvent = location.state?.event ?? {};
-  // console.log("selectEvent > ", selectEvent);
-  const listEvent = location.state?.listEvent ?? [];
-
-  // const [isDashBoard, setIsDashBoard] = useState(false);
+  // const selectEvent = location.state?.event ?? {};
+  // const listEvent = location.state?.listEvent ?? [];
   const [isBoardTask, setIsBoardTask] = useState(true);
   const [searchText, setSearchText] = useState(null);
   const [sort, setSort] = useState("DESC");
   const [statusSelected, setStatusSelected] = useState("clear");
-  // const [selectEvent, setSelectEvent] = useState({});
   const staff = useRouteLoaderData("staff");
-  const notification = useSelector((state) => state.notification);
   const [filterMember, setFilterMember] = useState(staff?.id);
+  const { eventId } = useParams();
+
+  const {
+    data: selectEvent,
+    isLoading: selectEventIsLoading,
+    isError: selectEventIsError,
+  } = useQuery(["eventDetail", eventId], () => getEventDetail({ eventId }), {
+    refetchOnWindowFocus: false,
+    enabled: !!eventId,
+  });
+  // console.log("🚀 ~ EventStaffPage ~ selectEvent:", selectEvent);
+
   const {
     data: listTaskParents,
     isError: isErrorListTask,
     isLoading: isLoadingListTask,
     refetch,
   } = useQuery(
-    ["tasks", staff?.id, selectEvent?.id],
+    ["tasks", staff?.id, eventId],
     () =>
       filterTask({
         assignee: staff?.id,
-        eventID: selectEvent?.id,
+        eventID: eventId,
         priority: "",
         sort: sort,
         status: "",
@@ -82,10 +89,10 @@ const EventStaffPage = () => {
       },
 
       refetchOnWindowFocus: false,
-      enabled: !!selectEvent?.id && !!staff?.id,
+      enabled: !!eventId && !!staff?.id,
     }
   );
-  // console.log("🚀 ~ EventStaffPage ~ listTaskParents:", listTaskParents);
+
   const {
     data: listTaskFilter,
     refetch: refetchListTaskFilter,
@@ -95,15 +102,18 @@ const EventStaffPage = () => {
     () =>
       filterTask({
         assignee: filterMember,
-        eventID: selectEvent?.id,
+        eventID: eventId,
         priority: "",
         sort: sort,
         status: "",
       }),
+
     {
       select: (data) => {
         if (data && Array.isArray(data)) {
+          // console.log("🚀 ~ EventStaffPage ~ data:", data);
           const taskParents = data?.filter((task) => task?.parent !== null);
+          // console.log("🚀 ~ EventStaffPage ~ taskParents:", taskParents);
           const formatDate = taskParents?.map(({ ...item }) => {
             item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
             item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
@@ -123,9 +133,10 @@ const EventStaffPage = () => {
         return data;
       },
       refetchOnWindowFocus: false,
-      enabled: !!staff?.id && !!selectEvent?.id,
+      enabled: !!staff?.id && !!eventId,
     }
   );
+
   //handle search task ch va task con
   function filterSubTasks(task, searchText) {
     const subtaskTitles = task?.subTask?.filter((subtask) =>
@@ -136,13 +147,12 @@ const EventStaffPage = () => {
   }
   // Hàm để so sánh và cập nhật listTaskParents
   function updateListTaskParents(listTaskParents, listTaskFilter, searchText) {
-    //check điều kiện nếu có search thì search theo cái list hiện có
+    //check điều kiện nếu có search
     if (searchText) {
       const filteredTaskParents = listTaskParents
         ?.map((task) => {
           // const parentTitle = task?.title?.toLowerCase(); //check thằng cha
           const subTaskResults = filterSubTasks(task, searchText); // check thằng con
-
           if (
             // parentTitle.includes(searchText?.toLowerCase()) ||
             subTaskResults?.length > 0
@@ -156,14 +166,19 @@ const EventStaffPage = () => {
         })
         .filter((task) => task !== null);
 
-      // console.log(
-      //   "🚀 ~ file: EventStaffPage.js:187 ~ updateListTaskParents ~ filteredTaskParents:",
-      //   filteredTaskParents
-      // );
+      console.log(
+        "🚀 ~ updateListTaskParents ~ filteredTaskParents:",
+        filteredTaskParents
+      );
       return filteredTaskParents;
     }
 
-    // Lặp qua từng task trong listTaskParents
+    // check ng dùng chọn filter
+    if (listTaskFilter?.length === 0 && staff?.id === filterMember) {
+      refetch();
+      return listTaskParents;
+    }
+
     const updatedListTaskParents = listTaskParents?.map((task) => {
       // Kiểm tra xem task có subTask và có trong listTaskFilter không
       if (task?.subTask && Array.isArray(task?.subTask)) {
@@ -173,6 +188,7 @@ const EventStaffPage = () => {
             (filteredTask) => filteredTask?.id === subtask?.id
           )
         );
+
         return {
           ...task,
           subTask: updatedSubTasks,
@@ -181,13 +197,6 @@ const EventStaffPage = () => {
         return task;
       }
     });
-
-    // check ng dùng chọn filter
-    if (listTaskFilter?.length === 0 && staff?.id === filterMember) {
-      // Nếu listTaskFilter rỗng, refetch listTaskParents
-      refetch();
-      return listTaskParents;
-    }
 
     return updatedListTaskParents;
   }
@@ -200,6 +209,13 @@ const EventStaffPage = () => {
       searchText
     );
   }
+
+  useEffect(() => {
+    if (eventId) {
+      refetch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventId, sort]);
 
   useEffect(() => {
     if (staff?.id) {
@@ -215,15 +231,6 @@ const EventStaffPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterMember]);
 
-  useEffect(() => {
-    if (selectEvent?.id) {
-      // refetchListBudgetConfirming();
-      // refetchListBudgetConfirmed();
-      refetch();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectEvent?.id, refetch, sort]);
-
   return (
     <div className="flex flex-col">
       <HeaderEvent
@@ -232,38 +239,37 @@ const EventStaffPage = () => {
         filterMember={filterMember}
         setSort={setSort}
         sort={sort}
-        events={listEvent}
         selectEvent={selectEvent}
         setIsBoardTask={setIsBoardTask}
         isBoardTask={isBoardTask}
         setSearchText={setSearchText}
-        searchText={searchText}
         setFilterMember={setFilterMember}
       />
-
-      {isBoardTask ? (
-        !isLoadingListTask ? (
-          !isErrorListTask ? (
-            <KanbanBoard
-              selectedStatus={statusSelected}
-              selectEvent={selectEvent}
-              listTaskParents={searchFilterTask}
-            />
+      <Spin spinning={selectEventIsLoading}>
+        {isBoardTask ? (
+          !isLoadingListTask ? (
+            !isErrorListTask ? (
+              <KanbanBoard
+                selectedStatus={statusSelected}
+                selectEvent={selectEvent}
+                listTaskParents={searchFilterTask}
+              />
+            ) : (
+              <AnErrorHasOccured />
+            )
           ) : (
-            <AnErrorHasOccured />
+            <LoadingComponentIndicator />
           )
         ) : (
-          <LoadingComponentIndicator />
-        )
-      ) : (
-        <div>
-          <BudgetStaff
-            selectEvent={selectEvent}
-            listTaskParents={listTaskParents}
-            setIsBoardTask={setIsBoardTask}
-          />
-        </div>
-      )}
+          <div>
+            <BudgetStaff
+              selectEvent={selectEvent}
+              listTaskParents={listTaskParents}
+              setIsBoardTask={setIsBoardTask}
+            />
+          </div>
+        )}
+      </Spin>
     </div>
   );
 };

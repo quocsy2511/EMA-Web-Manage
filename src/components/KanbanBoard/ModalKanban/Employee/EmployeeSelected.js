@@ -3,27 +3,41 @@ import React, { useState } from "react";
 import { getAllUser, getEmployee } from "../../../../apis/users";
 import { useRouteLoaderData } from "react-router-dom";
 import moment from "moment";
-import { Avatar, Select, Space, Tag, Tooltip, message } from "antd";
+import { Avatar, Button, Select, Space, Tag, Tooltip, message } from "antd";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
 import { assignMember } from "../../../../apis/tasks";
 import { StarFilled } from "@ant-design/icons";
 
-const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
-  console.log("🚀 ~ EmployeeSelected ~ assignTasks:", assignTasks);
+const EmployeeSelected = ({
+  assignTasks,
+  taskSelected,
+  setIsModalAssigneeOpen,
+}) => {
+  // console.log("🚀 ~ EmployeeSelected ~ assignTasks:", assignTasks);
   const taskID = taskSelected?.id;
+  // console.log("🚀 ~ taskID:", taskID);
   const queryClient = useQueryClient();
   const [assignee, setAssignee] = useState(
     assignTasks?.map((item) => item.user?.id)
   );
+  // console.log("🚀 ~ EmployeeSelected ~ assignee:", assignee);
   const membersInTask = assignTasks
     ?.filter((user) => user.status === "active")
     ?.map((item) => item.user?.id);
-  const { Option } = Select;
+
   const divisionId = useRouteLoaderData("staff").divisionID;
   const eventId = taskSelected?.eventDivision?.event?.id;
   const staff = useRouteLoaderData("staff");
-  
+  //search Employee
+  const filterOption = (input, option) =>
+    (option?.label?.props?.label ?? "")
+      .toLowerCase()
+      .includes(input.toLowerCase());
+  const onSearch = (value) => {
+    console.log("search:", value);
+  };
+
   const {
     data: employees,
     isError: isErrorEmployees,
@@ -36,13 +50,15 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
       }),
     {
       select: (data) => {
-        const listEmployee = data?.users?.map(({ ...item }) => {
-          item.dob = moment(item?.dob).format("YYYY-MM-DD");
-          return {
-            key: item?.id,
-            ...item,
-          };
-        });
+        const listEmployee = data?.users
+          ?.filter((user) => user.role.roleName === "Nhân Viên")
+          ?.map(({ ...item }) => {
+            item.dob = moment(item?.dob).format("YYYY-MM-DD");
+            return {
+              key: item?.id,
+              ...item,
+            };
+          });
         return listEmployee;
       },
       refetchOnWindowFocus: false,
@@ -93,6 +109,7 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
     onSuccess: () => {
       queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
       queryClient.invalidateQueries(["subtaskDetails", taskID]);
+      setIsModalAssigneeOpen(false);
       message.open({
         type: "success",
         content: "cập nhật nhân viên được giao công việc thành công",
@@ -108,12 +125,16 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
   });
 
   const handleChangeMember = (value) => {
-    const data = {
-      assignee: value,
-      taskID: taskID,
-      leader: value?.length > 0 ? value[0] : "",
-    };
+    // console.log("🚀 ~ handleChangeMember ~ value:", value);
     setAssignee(value);
+  };
+
+  const handleUpdateMember = () => {
+    const data = {
+      assignee: assignee,
+      taskID: taskID,
+      leader: assignee?.length > 0 ? assignee[0] : "",
+    };
     UpdateMember(data);
   };
 
@@ -121,7 +142,7 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
     <>
       {!isLoadingEmployees ? (
         !isErrorEmployees ? (
-          <div className="w-full h-[50px] ">
+          <div className="w-full h-[50px] flex flex-row justify-center items-center gap-x-2">
             <Select
               maxTagCount="responsive"
               autoFocus
@@ -135,39 +156,31 @@ const EmployeeSelected = ({ assignTasks, taskSelected, setAssignTasks }) => {
               optionLabelProp="label"
               tagRender={tagRender}
               size="large"
-            >
-              {employees?.map((item, index) => {
-                return (
-                  <Option
-                    value={item?.id}
-                    label={
-                      <span role="img" aria-label={item?.profile?.fullName}>
-                        <Tooltip
-                          key="avatar"
-                          title={item?.profile?.fullName}
-                          placement="top"
-                        >
-                          <Avatar
-                            src={item?.profile?.avatar}
-                            className="mr-2"
-                            size="small"
-                          />
-                        </Tooltip>
-                        {item?.profile?.fullName}
-                      </span>
-                    }
-                    key={item?.id}
-                  >
-                    <Space>
-                      <span role="img" aria-label={item?.profile?.fullName}>
-                        <Avatar src={item?.profile?.avatar} />
-                      </span>
-                      <span>{item?.profile?.fullName}</span>
-                    </Space>
-                  </Option>
-                );
+              showSearch
+              optionFilterProp="children"
+              filterOption={filterOption}
+              options={employees?.map((item) => {
+                return {
+                  label: (
+                    <span key={item?.id} label={item?.profile?.fullName}>
+                      <Avatar
+                        src={item?.profile?.avatar}
+                        className="mr-2"
+                        size="small"
+                      />
+                      {item?.profile?.fullName}
+                    </span>
+                  ),
+                  value: item?.id,
+                };
               })}
-            </Select>
+            />
+            <div className="flex flex-row justify-center items-center gap-x-1">
+              {/* <Button type="dashed">Huỷ</Button> */}
+              <Button type="primary" onClick={handleUpdateMember}>
+                Lưu
+              </Button>
+            </div>
           </div>
         ) : (
           <AnErrorHasOccured />

@@ -22,7 +22,7 @@ import React, { memo, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRouteLoaderData } from "react-router-dom";
-import { getEmployee } from "../../../apis/users";
+import { getAllUser, getEmployee } from "../../../apis/users";
 import moment from "moment";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
@@ -58,12 +58,19 @@ const NewTaskModal = ({
   const [childrenDrawer, setChildrenDrawer] = useState(false);
   const [checkedDateData, setCheckedDateData] = useState([]);
   const [selectedDateSchedule, setSelectedDateSchedule] = useState("");
+  //search Employee
+  const filterOption = (input, option) =>
+    (option?.label?.props?.label ?? "")
+      .toLowerCase()
+      .includes(input.toLowerCase());
 
+  const onSearch = (value) => {
+    console.log("search:", value);
+  };
   const {
     data: employees,
     isError: isErrorEmployees,
     isLoading: isLoadingEmployees,
-    // refetch: refetchEmployees,
   } = useQuery(
     ["employees"],
     () =>
@@ -72,15 +79,17 @@ const NewTaskModal = ({
       }),
     {
       select: (data) => {
-        // console.log("🚀 ~ data:", data?.users);
+        console.log("🚀 ~ data:", data?.users);
 
-        const listEmployee = data?.users?.map(({ ...item }) => {
-          item.dob = moment(item?.dob).format("YYYY-MM-DD");
-          return {
-            key: item?.id,
-            ...item,
-          };
-        });
+        const listEmployee = data?.users
+          ?.filter((user) => user.role.roleName === "Nhân Viên")
+          ?.map(({ ...item }) => {
+            item.dob = moment(item?.dob).format("YYYY-MM-DD");
+            return {
+              key: item?.id,
+              ...item,
+            };
+          });
         return listEmployee;
       },
       refetchOnWindowFocus: false,
@@ -428,55 +437,32 @@ const NewTaskModal = ({
                         style={{
                           width: "100%",
                         }}
+                        onSearch={onSearch}
                         onChange={(value) => handleChangeSelectMember(value)}
                         optionLabelProp="label"
                         tagRender={tagRender}
-                      >
-                        {employees?.map((item, index) => {
-                          return (
-                            <Option
-                              value={item?.id}
-                              label={
-                                <span
-                                  role="img"
-                                  aria-label={item?.profile?.fullName}
-                                >
-                                  <Tooltip
-                                    key="avatar"
-                                    title={item?.profile?.fullName}
-                                    placement="top"
-                                  >
-                                    <Avatar
-                                      src={item?.profile?.avatar}
-                                      className="mr-2"
-                                      size="small"
-                                    />
-                                  </Tooltip>
-                                  {item?.profile?.fullName}
-                                </span>
-                              }
-                              key={item?.id}
-                            >
-                              <Space>
-                                <span
-                                  role="img"
-                                  aria-label={item?.profile?.fullName}
-                                >
-                                  {item?.profile?.avatar ? (
-                                    <Avatar src={item?.profile?.avatar} />
-                                  ) : (
-                                    <Avatar
-                                      icon={<UserOutlined />}
-                                      size="small"
-                                    />
-                                  )}
-                                </span>
-                                <span>{item?.profile?.fullName}</span>
-                              </Space>
-                            </Option>
-                          );
+                        showSearch
+                        optionFilterProp="children"
+                        filterOption={filterOption}
+                        options={employees?.map((item) => {
+                          return {
+                            label: (
+                              <span
+                                key={item?.id}
+                                label={item?.profile?.fullName}
+                              >
+                                <Avatar
+                                  src={item?.profile?.avatar}
+                                  className="mr-2"
+                                  size="small"
+                                />
+                                {item?.profile?.fullName}
+                              </span>
+                            ),
+                            value: item?.id,
+                          };
                         })}
-                      </Select>
+                      />
                     </>
                   ) : (
                     <AnErrorHasOccured />

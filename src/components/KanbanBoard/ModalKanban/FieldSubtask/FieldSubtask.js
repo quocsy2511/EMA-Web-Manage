@@ -40,7 +40,7 @@ const FieldSubtask = ({
   disableDoneTaskParent,
   completionPercentage,
 }) => {
-  console.log("🚀 ~ file: FieldSubtask.js:42 ~ taskSelected:", taskSelected);
+  // console.log("🚀 ~ file: FieldSubtask.js:42 ~ taskSelected:", taskSelected);
   const [updateFileList, setUpdateFileList] = useState(taskSelected?.taskFiles);
   const [updatePriority, setUpdatePriority] = useState(taskSelected?.priority);
   const [assignTasks, setAssignTasks] = useState(taskSelected?.assignTasks);
@@ -83,26 +83,6 @@ const FieldSubtask = ({
                 <InforEmployee taskSelected={taskSelected} />
                 {!disableUpdate && (
                   <>
-                    {/* <Popover
-                      placement="right"
-                      title="Danh sách nhân viên"
-                      content={
-                        <div className="flex justify-start items-center mt-4 h-fit ">
-                          <EmployeeSelected
-                            setAssignTasks={setAssignTasks}
-                            assignTasks={assignTasks}
-                            taskSelected={taskSelected}
-                          />
-                        </div>
-                      }
-                      trigger="click"
-                    >
-                      <Avatar
-                        icon={<UsergroupAddOutlined />}
-                        size="default"
-                        className="cursor-pointer bg-lite hover:text-blue-600 hover:bg-blue-200 text-black"
-                      />
-                    </Popover> */}
                     <Avatar
                       icon={<UsergroupAddOutlined />}
                       size="default"

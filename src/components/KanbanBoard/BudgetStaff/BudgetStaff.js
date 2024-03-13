@@ -174,7 +174,7 @@ const BudgetStaff = ({ selectEvent, listTaskParents, setIsBoardTask }) => {
   return (
     <>
       <div className="bg-bgG w-full h-[calc(100vh-76px-4rem)] ">
-        <div className="w-full px-16 mt-3  overflow-y-scroll scrollbar-hide">
+        <div className="w-full px-16 mt-3  overflow-y-scroll scrollbar-hide min-h-full ">
           {/* header */}
           <div className="flex flex-row w-full  py-2">
             <div className="flex flex-row w-full justify-between items-center mb-2 ">
@@ -217,11 +217,11 @@ const BudgetStaff = ({ selectEvent, listTaskParents, setIsBoardTask }) => {
           </div>
 
           {/* content */}
-          <div className="outline-none w-full py-2 overflow-hidden">
-            <div className="flex flex-row w-full">
+          <div className="outline-none w-full py-2 min-h-full ">
+            <div className="flex flex-row w-full min-h-full ">
               {/* leftSide */}
-              <div className="w-[25%] overflow-hidden">
-                <div className="w-full h-[265px]">
+              <div className="w-[25%] overflow-hidden min-h-fit">
+                <div className="w-full min-h-fit ">
                   <div className="w-full px-3 space-y-3">
                     {/* cardParentTask */}
                     {listTaskParents?.length > 0 ? (
@@ -295,7 +295,7 @@ const BudgetStaff = ({ selectEvent, listTaskParents, setIsBoardTask }) => {
               </div>
 
               {/* RightSize */}
-              <div className="w-[75%] overflow-hidden  mx-2">
+              <div className="w-[75%] overflow-hidden mx-2 min-h-fit">
                 <div className=" w-full h-fit">
                   {/* progess */}
                   <div className="w-full h-fit overflow-hidden rounded-lg border-[#e5eaef] border bg-white mb-2">
@@ -340,7 +340,7 @@ const BudgetStaff = ({ selectEvent, listTaskParents, setIsBoardTask }) => {
                   <div className="w-full flex flex-wrap h-fit  gap-x-5 py-2 ">
                     {/* CardSubtask */}
 
-                    {taskDetails?.[0]?.subTask?.length > 0 ? (
+                    {taskDetails?.[0]?.subTask?.length > 0 &&
                       taskDetails?.[0]?.subTask?.map((subTask) => (
                         <div className="mb-3 w-[32%] h-[265px overflow-hidden flex flex-col cursor-pointer">
                           <div className=" bg-white rounded-lg   w-full h-full flex flex-col">
@@ -436,10 +436,7 @@ const BudgetStaff = ({ selectEvent, listTaskParents, setIsBoardTask }) => {
                             </div>
                           </div>
                         </div>
-                      ))
-                    ) : (
-                      <Empty />
-                    )}
+                      ))}
 
                     {/* CreateBudget */}
                     <div

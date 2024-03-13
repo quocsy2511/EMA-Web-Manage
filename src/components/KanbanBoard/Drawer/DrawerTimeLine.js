@@ -109,13 +109,10 @@ const DrawerTimeLine = ({
                               children: (
                                 <>
                                   <p
-                                    className={clsx(
-                                      "text-base text-green-500",
-                                      {
-                                        "text-yellow-500":
-                                          task?.status === "PENDING",
-                                      }
-                                    )}
+                                    className={clsx("text-base text-blue-500", {
+                                      "text-yellow-500":
+                                        task?.status === "PENDING",
+                                    })}
                                   >
                                     {task?.title}
                                   </p>

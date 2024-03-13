@@ -1,4 +1,5 @@
 import {
+  ArrowLeftOutlined,
   CheckOutlined,
   ClearOutlined,
   DollarOutlined,
@@ -7,9 +8,18 @@ import {
   StarFilled,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Dropdown, Input, Select, Spin, Tag, Tooltip } from "antd";
+import {
+  Avatar,
+  Button,
+  Dropdown,
+  Input,
+  Select,
+  Spin,
+  Tag,
+  Tooltip,
+} from "antd";
 import React, { useEffect, useRef, useState } from "react";
-import { useRouteLoaderData } from "react-router-dom";
+import { useNavigate, useRouteLoaderData } from "react-router-dom";
 import { getAllUser } from "../../apis/users";
 import moment from "moment";
 import AnErrorHasOccured from "../Error/AnErrorHasOccured";
@@ -23,11 +33,9 @@ import { defaultAvatar } from "../../constants/global";
 const HeaderEvent = ({
   sort,
   setSort,
-  events,
   isBoardTask,
   setIsBoardTask,
   setSearchText,
-  searchText,
   setFilterMember,
   filterMember,
   setStatusSelected,
@@ -41,7 +49,7 @@ const HeaderEvent = ({
   const listRole = ["STAFF", "EMPLOYEE"];
   const notification = useSelector((state) => state.notification);
   // console.log("🚀 ~ notification:", notification);
-
+  const navigate = useNavigate();
   const {
     data: users,
     isError: isErrorUsers,
@@ -54,11 +62,9 @@ const HeaderEvent = ({
         pageSize: 10,
         currentPage: 1,
         role: "Nhân Viên",
-        // role: "Nh%C3%A2n%20Vi%C3%AAn",
       }),
     {
       select: (data) => {
-        // console.log("🚀 ~ data:", data);
         const listUsers = data?.data?.map(({ ...item }) => {
           item.dob = moment(item.dob).format("DD-MM-YYYY");
           return {
@@ -75,23 +81,6 @@ const HeaderEvent = ({
       refetchOnWindowFocus: false,
     }
   );
-
-  useEffect(() => {
-    if (notification?.eventId && events && events.length > 0 && users) {
-      const findEvent = events.find(
-        (item) => item.id === notification?.eventId
-      );
-      const parseEvent = JSON.stringify(findEvent);
-
-      handleChangeEvent(parseEvent);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notification?.id, events, users]);
-
-  const handleChangeEvent = (value) => {
-    const event = JSON.parse(value);
-    // setSelectEvent(event);
-  };
 
   const debouncedSearch = debounce((value) => {
     setSearchText(value);
@@ -233,7 +222,7 @@ const HeaderEvent = ({
     // setFilterMember(key);
   };
 
-  //tắt dropdown khi nó click ra ngoài vùng menu
+  // tắt dropdown khi nó click ra ngoài vùng menu
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setVisible(false);
@@ -291,6 +280,13 @@ const HeaderEvent = ({
                         className="flex-1 flex justify-between items-center gap-x-3"
                       >
                         <div className="w-1/2 flex justify-start">
+                          <Button
+                            type="link"
+                            onClick={() => navigate(-1)}
+                            className="text-sm font-semibold "
+                          >
+                            <ArrowLeftOutlined className="text-lg font-bold" />
+                          </Button>
                           <Input
                             size="large"
                             className="w-full"

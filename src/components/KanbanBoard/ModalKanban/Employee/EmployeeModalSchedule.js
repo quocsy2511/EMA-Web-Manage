@@ -41,6 +41,7 @@ const EmployeeModalSchedule = ({
             setAssignTasks={setAssignTasks}
             assignTasks={assignTasks}
             taskSelected={taskSelected}
+            setIsModalAssigneeOpen={setIsModalAssigneeOpen}
           />
         </div>
         <div className="w-full overflow-hidden">

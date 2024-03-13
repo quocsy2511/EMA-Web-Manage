@@ -10,11 +10,13 @@ import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { addNotification } from "../../store/Slice/notificationsSlice.js";
 import TaskModal from "./ModalKanban/TaskModal.js";
+import { Empty } from "antd";
+import { redirectionActions } from "../../store/redirection.js";
 
 const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
   const dispatch = useDispatch();
 
-  const notification = useSelector((state) => state.notification);
+  const notification = useSelector((state) => state.redirection);
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
@@ -24,11 +26,11 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
     isError: isErrorParentTaskDetail,
     isLoading: isLoadingParentTaskDetail,
   } = useQuery(
-    ["parentTaskDetail", notification?.commonId],
+    ["parentTaskDetail", notification?.redirect?.comment],
     () =>
       getTasks({
         fieldName: "id",
-        conValue: notification?.commonId,
+        conValue: notification?.redirect?.comment,
         pageSize: 10,
         currentPage: 1,
       }),
@@ -45,21 +47,26 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
       },
 
       refetchOnWindowFocus: false,
-      enabled: !!notification?.commonId && notification?.type === "TASK",
+      enabled: !!notification?.redirect?.comment,
     }
   );
+  // console.log("🚀 ~ KanbanBoard ~ parentTaskDetail:", parentTaskDetail);
 
   useEffect(() => {
-    if (notification?.commonId && notification?.type === "TASK") {
+    if (notification?.redirect?.comment) {
       if (!isErrorParentTaskDetail && !isLoadingParentTaskDetail) {
         setIsOpenTaskModal(true);
         setIsTaskParent(true);
         setTaskSelected(parentTaskDetail?.[0]);
-        dispatch(addNotification(null));
+        dispatch(redirectionActions.commentChange(""));
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notification?.id, isErrorParentTaskDetail, isLoadingParentTaskDetail]);
+  }, [
+    notification?.redirect?.comment,
+    isErrorParentTaskDetail,
+    isLoadingParentTaskDetail,
+  ]);
 
   let completed = 0;
   let subTask = taskSelected?.subTask;
@@ -74,15 +81,19 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
         <DescriptionEvent key={selectEvent?.id} selectEvent={selectEvent} />
 
         <div className="flex overflow-x-scroll px-10 pb-8 gap-x-3 min-h-[55vh]">
-          {listTaskParents?.map((taskParent, index) => (
-            <Column
-              taskTemplate={[]}
-              selectedStatus={selectedStatus}
-              TaskParent={taskParent}
-              idEvent={selectEvent?.id}
-              key={taskParent?.id}
-            />
-          ))}
+          {listTaskParents.length > 0 ? (
+            listTaskParents?.map((taskParent, index) => (
+              <Column
+                taskTemplate={[]}
+                selectedStatus={selectedStatus}
+                TaskParent={taskParent}
+                idEvent={selectEvent?.id}
+                key={taskParent?.id}
+              />
+            ))
+          ) : (
+            <Empty />
+          )}
         </div>
 
         {isOpenTaskModal && (
