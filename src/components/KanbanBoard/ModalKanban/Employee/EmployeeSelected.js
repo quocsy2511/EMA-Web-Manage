@@ -16,15 +16,16 @@ const EmployeeSelected = ({
 }) => {
   // console.log("🚀 ~ EmployeeSelected ~ assignTasks:", assignTasks);
   const taskID = taskSelected?.id;
+  // console.log("🚀 ~ taskID:", taskID);
   const queryClient = useQueryClient();
   const [assignee, setAssignee] = useState(
     assignTasks?.map((item) => item.user?.id)
   );
-  console.log("🚀 ~ EmployeeSelected ~ assignee:", assignee);
+  // console.log("🚀 ~ EmployeeSelected ~ assignee:", assignee);
   const membersInTask = assignTasks
     ?.filter((user) => user.status === "active")
     ?.map((item) => item.user?.id);
-  const { Option } = Select;
+
   const divisionId = useRouteLoaderData("staff").divisionID;
   const eventId = taskSelected?.eventDivision?.event?.id;
   const staff = useRouteLoaderData("staff");
@@ -124,7 +125,7 @@ const EmployeeSelected = ({
   });
 
   const handleChangeMember = (value) => {
-    console.log("🚀 ~ handleChangeMember ~ value:", value);
+    // console.log("🚀 ~ handleChangeMember ~ value:", value);
     setAssignee(value);
   };
 

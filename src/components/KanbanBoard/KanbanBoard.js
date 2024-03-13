@@ -50,7 +50,7 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
       enabled: !!notification?.redirect?.comment,
     }
   );
-  console.log("🚀 ~ KanbanBoard ~ parentTaskDetail:", parentTaskDetail);
+  // console.log("🚀 ~ KanbanBoard ~ parentTaskDetail:", parentTaskDetail);
 
   useEffect(() => {
     if (notification?.redirect?.comment) {

@@ -46,7 +46,7 @@ const EventStaffPage = () => {
     refetchOnWindowFocus: false,
     enabled: !!eventId,
   });
-  console.log("🚀 ~ EventStaffPage ~ selectEvent:", selectEvent);
+  // console.log("🚀 ~ EventStaffPage ~ selectEvent:", selectEvent);
 
   const {
     data: listTaskParents,
