@@ -54,6 +54,12 @@ const DrawerContainer = memo(
   ({ isDrawerOpen, setIsDrawerOpen, getColor, userChecking }) => {
     console.log("userChecking> ", userChecking);
 
+    const mapPriory = {
+      HIGH: 1,
+      MEDIUM: 2,
+      LOW: 3,
+    };
+
     return (
       <Drawer
         title={
@@ -68,109 +74,6 @@ const DrawerContainer = memo(
                 {userChecking?.user?.profile?.fullName}
               </span>
             </p>
-
-            <div className="border-2 border-black rounded-md p-1 cursor-pointer">
-              <Dropdown
-                placement="bottomLeft"
-                menu={{
-                  items: [
-                    {
-                      key: "status",
-                      label: "Trạng thái",
-                      type: "group",
-                      children: [
-                        {
-                          key: 1,
-                          label: (
-                            <StatusRender
-                              bg="bg-gray-400"
-                              text="Đang chuẩn bị"
-                            />
-                          ),
-                        },
-                        {
-                          key: 2,
-                          label: (
-                            <StatusRender
-                              bg="bg-blue-400"
-                              text="Đang thực hiện"
-                            />
-                          ),
-                        },
-                        {
-                          key: 3,
-                          label: (
-                            <StatusRender bg="bg-green-500" text="Hoàn thành" />
-                          ),
-                        },
-                        {
-                          key: 4,
-                          label: (
-                            <StatusRender
-                              bg="bg-purple-500"
-                              text="Đã xác thực"
-                            />
-                          ),
-                        },
-                        {
-                          key: 5,
-                          label: <StatusRender bg="bg-red-500" text="Hủy bỏ" />,
-                        },
-                        {
-                          key: 6,
-                          label: (
-                            <StatusRender bg="bg-orange-500" text="Quá hạn" />
-                          ),
-                        },
-                      ],
-                    },
-                    {
-                      key: "priority",
-                      label: "Độ ưu tiên",
-                      type: "group",
-                      children: [
-                        {
-                          key: 1,
-                          label: (
-                            <PriorityRender
-                              icon={
-                                <FaCircleArrowDown className="text-lg text-green-500" />
-                              }
-                              text="Thấp"
-                            />
-                          ),
-                        },
-                        {
-                          key: 1,
-                          label: (
-                            <PriorityRender
-                              icon={
-                                <PiDotsThreeCircleVerticalFill className="text-xl text-orange-400 rotate-90" />
-                              }
-                              text="Trung bình"
-                            />
-                          ),
-                        },
-                        {
-                          key: 1,
-                          label: (
-                            <PriorityRender
-                              icon={
-                                <FaCircleExclamation className="text-lg text-red-500" />
-                              }
-                              text="Cao"
-                            />
-                          ),
-                        },
-                      ],
-                    },
-                  ],
-                }}
-                arrow
-              >
-                <MdCategory className="text-lg" />
-              </Dropdown>
-            </div>
           </div>
         }
         placement={"right"}
@@ -180,70 +83,92 @@ const DrawerContainer = memo(
         width={"30%"}
       >
         {/* Content */}
-        <div className="space-y-10">
-          {!userChecking?.user?.listEvent?.length ? (
-            <div>
-              <p className="text-lg text-center">Không có công việc nào !</p>
+        <div className="space-y-2">
+          <div className="flex space-x-5">
+            <p className="text-base font-medium">Trạng thái :</p>
+            <div className="flex items-center space-x-4">
+              <StatusRender bg="bg-gray-400" text="Đang chuẩn bị" />
+              <StatusRender bg="bg-blue-500" text="Đang thực hiện" />
             </div>
-          ) : (
-            userChecking?.user?.listEvent?.map((event) => {
-              // filter task list
-              const listTasks = event?.listTask?.filter(
-                (task) =>
-                  userChecking?.date >= task?.startDate &&
-                  userChecking?.date <= task?.endDate
-              );
+          </div>
 
-              if (!!listTasks?.length)
-                return (
-                  <div key={event?.eventID} className="w-full space-y-3">
-                    <div className="flex items-center bg-gray-50 rounded-full">
-                      <div className="border-2 border-blue-500 rounded-full p-2">
-                        <MdEmojiEvents className="text-xl text-blue-500" />
-                      </div>
+          <div className="flex space-x-5">
+            <p className="text-base font-medium">Độ ưu tiên :</p>
+            <div className="flex items-center space-x-4">
+              <StatusRender bg="bg-gray-400" text="Đang chuẩn bị" />
+              <StatusRender bg="bg-blue-500" text="Đang thực hiện" />
+            </div>
+          </div>
 
-                      <div className="flex-1 flex items-center space-x-2">
-                        <div className="bg-blue-500 h-0.5 flex-1" />
-                        <Tooltip title={event?.eventName}>
-                          <p className="w-auto max-w-xs text-center text-base font-medium truncate cursor-pointer">
-                            {event?.eventName}
-                          </p>
-                        </Tooltip>
-                        <div className="bg-blue-500 h-0.5 flex-1" />
-                      </div>
-                    </div>
+          <div className="space-y-10 pt-6">
+            {!userChecking?.user?.listEvent?.length ? (
+              <div>
+                <p className="text-lg text-center">Không có công việc nào !</p>
+              </div>
+            ) : (
+              userChecking?.user?.listEvent?.map((event) => {
+                // filter task list
+                const listTasks = event?.listTask
+                  ?.filter(
+                    (task) =>
+                      userChecking?.date >= task?.startDate &&
+                      userChecking?.date <= task?.endDate
+                  )
+                  ?.sort((a, b) => {
+                    mapPriory[a?.priority] - mapPriory[b?.priority];
+                  });
 
-                    <div className="ml-5 space-y-1">
-                      {listTasks?.map((task) => {
-                        const { textColor } = getColor(task?.status);
+                if (!!listTasks?.length)
+                  return (
+                    <div key={event?.eventID} className="w-full space-y-3">
+                      <div className="flex items-center bg-gray-50 rounded-full">
+                        <div className="border-2 border-blue-500 rounded-full p-2">
+                          <MdEmojiEvents className="text-xl text-blue-500" />
+                        </div>
 
-                        return (
-                          <div
-                            key={task?.id}
-                            className="flex items-center space-x-3 bg-red-20"
-                          >
-                            {/* {icon} */}
-                            <GoDotFill className={`${textColor}`} />
-                            <p
-                              className={`text-sm font-medium w-auto truncate`}
-                            >
-                              {task?.title}
+                        <div className="flex-1 flex items-center space-x-2">
+                          <div className="bg-blue-500 h-0.5 flex-1" />
+                          <Tooltip title={event?.eventName}>
+                            <p className="w-auto max-w-xs text-center text-base font-medium truncate cursor-pointer">
+                              {event?.eventName}
                             </p>
-                            {task?.priority === "LOW" ? (
-                              <FaCircleArrowDown className="text-lg text-green-500" />
-                            ) : task?.priority === "MEDIUM" ? (
-                              <PiDotsThreeCircleVerticalFill className="text-2xl text-orange-400 rotate-90" />
-                            ) : (
-                              <FaCircleExclamation className="text-lg text-red-500" />
-                            )}
-                          </div>
-                        );
-                      })}
+                          </Tooltip>
+                          <div className="bg-blue-500 h-0.5 flex-1" />
+                        </div>
+                      </div>
+
+                      <div className="ml-5 space-y-1">
+                        {listTasks?.map((task) => {
+                          const { textColor } = getColor(task?.status);
+
+                          return (
+                            <div
+                              key={task?.id}
+                              className="flex items-center space-x-3 bg-red-20"
+                            >
+                              {/* {icon} */}
+                              <GoDotFill className={`${textColor}`} />
+                              <p
+                                className={`text-sm font-medium w-auto truncate`}
+                              >
+                                {task?.title}
+                              </p>
+                              {task?.priority === "LOW" ? (
+                                <FaCircleArrowDown className="text-lg text-green-500" />
+                              ) : task?.priority === "MEDIUM" ? (
+                                <PiDotsThreeCircleVerticalFill className="text-2xl text-orange-400 rotate-90" />
+                              ) : (
+                                <FaCircleExclamation className="text-lg text-red-500" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-            })
-          )}
+                  );
+              })
+            )}
+          </div>
         </div>
       </Drawer>
     );
@@ -266,31 +191,29 @@ const Item = memo(
           whileTap={{ scale: 0.95 }}
           transition={{ duration: 0.3, type: "tween" }}
           className={clsx(
-            "flex space-x-2 items-center rounded-xl pl-1 border-2 cursor-pointer group relative",
+            "flex space-x-5 items-center rounded-xl p-3 pr-4 border-2 cursor-pointer group relative",
             { "border-blue-400": selectedEmployees?.includes(user?.id) },
             { "border-orange-400": leader === user?.id },
             { "hover:border-blue-500": leader !== user?.id },
             { "hover:border-orange-400": !leader }
           )}
         >
-          <div className="min-w-[10%] py-3 p-3">
-            <div
-              className={clsx(
-                "flex items-center justify-center w-10 h-10 border transition-colors rounded-full",
-                { "border-blue-500": selectedEmployees?.includes(user?.id) },
-                { "border-orange-400": leader === user?.id },
-                { "group-hover:border-blue-500": leader !== user?.id },
-                { "group-hover:border-orange-400": !leader }
-              )}
-            >
-              {selectedEmployees?.includes(user?.id) && (
-                <FaCheck
-                  className={clsx("text-blue-500 text-base", {
-                    "text-orange-400": leader === user?.id,
-                  })}
-                />
-              )}
-            </div>
+          <div
+            className={clsx(
+              "flex items-center justify-center w-10 h-10 border transition-colors rounded-full",
+              { "border-blue-500": selectedEmployees?.includes(user?.id) },
+              { "border-orange-400": leader === user?.id },
+              { "group-hover:border-blue-500": leader !== user?.id },
+              { "group-hover:border-orange-400": !leader }
+            )}
+          >
+            {selectedEmployees?.includes(user?.id) && (
+              <FaCheck
+                className={clsx("text-blue-500 text-base", {
+                  "text-orange-400": leader === user?.id,
+                })}
+              />
+            )}
           </div>
 
           <div className="flex-1">
@@ -322,7 +245,7 @@ const Item = memo(
 
           {selectedEmployees?.includes(user?.id) && (
             <div className="absolute -top-4 right-5">
-              <Tooltip title={leader !== user?.id && "Đổi leader"}>
+              <Tooltip title={leader !== user?.id && "Đổi trưởng nhóm"}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
@@ -367,6 +290,9 @@ const SubTaskSection = ({
   const [leader, setLeader] = useState();
   const [selectedDate, setSelectedDate] = useState();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const [filterUser, setFilterUser] = useState();
+  console.log("filterUser > ", filterUser);
 
   useEffect(() => {
     // Update subtask
@@ -441,6 +367,8 @@ const SubTaskSection = ({
   console.log("users > ", users);
 
   const handleSelectUser = (employee) => {
+    console.log("employee > ", employee);
+    setFilterUser(employee?.id);
     if (selectedEmployees?.length === 0) {
       setLeader(employee?.id);
     }
@@ -535,23 +463,13 @@ const SubTaskSection = ({
 
       <Form.Item name="leader" className="h-0" />
 
-      <div className="flex space-x-10">
-        <p className="w-1/4 text-lg font-medium">Nhân viên thực hiện</p>
-        <p className="flex-1 text-black text-lg font-medium">
-          {isSelectDate
-            ? `Lịch trình bắt đầu từ ngày ${isSelectDate?.[0].format(
-                "DD-MM-YYYY"
-              )}`
-            : "Lịch trình"}
-        </p>
-      </div>
-
       <Spin spinning={usersIsloading} className="my-[15%]">
-        <div className="flex space-x-10 h-screen">
+        <div className="">
           {/* Employee list */}
-          <div className="w-1/4 h-full overflow-scroll scrollbar-hide">
+          <div className="h-full overflow-scroll scrollbar-hide">
+            <p className="text-lg font-medium">Nhân viên thực hiện</p>
             <Form.Item name="assignee">
-              <div className="space-y-5 mt-5 px-3">
+              <div className="flex overflow-x-scroll space-x-5 px-3 py-5">
                 {usersIsError ? (
                   <p className="mt-10 text-lg font-medium text-center">
                     Không thể lấy dữ liệu hãy thử lại sau !
@@ -573,7 +491,14 @@ const SubTaskSection = ({
           </div>
 
           {/* Calendar */}
-          <div className="flex-1 border">
+          <div className="flex-1">
+            <p className="flex-1 text-black text-lg font-medium">
+              {isSelectDate
+                ? `Lịch trình bắt đầu từ ngày ${isSelectDate?.[0].format(
+                    "DD-MM-YYYY"
+                  )}`
+                : "Lịch trình"}
+            </p>
             <ConfigProvider locale={vi_VN}>
               <Calendar
                 // fullscreen={true}
@@ -636,10 +561,16 @@ const SubTaskSection = ({
                     }
                   });
 
+                  // console.log("renderList > ", renderList);
+                  if (filterUser)
+                    renderList = renderList?.filter(
+                      (item) => item?.id === filterUser
+                    );
+
                   // return info.originNode;
                   if (!!renderList?.length) {
                     return (
-                      <div className="gap-y-5 mb-3 mt-2 space-y-2">
+                      <div className="space-y-1 mb-3 mt-2">
                         {renderList?.map((user, index) => (
                           <motion.div
                             key={currentMoment + user?.id}
@@ -651,9 +582,15 @@ const SubTaskSection = ({
                             }
                           >
                             {/* <Tooltip title="Xem chi tiết"> */}
-                            <p className="text-sm text-center font-medium truncate border border-black/30 rounded-full py-1 px-3 hover:border-black transition-colors">
+                            {/* <p className="text-sm text-center font-medium truncate border border-black/30 rounded-full py-1 px-3 hover:border-black transition-colors">
                               {user?.profile?.fullName}
-                            </p>
+                            </p> */}
+                            <div className="flex items-center space-x-3 mx-3">
+                              <div className="h-[1px] w-3 bg-black" />
+                              <p className="flex-1 text-base truncate">
+                                {user?.profile?.fullName}
+                              </p>
+                            </div>
                             {/* </Tooltip> */}
                           </motion.div>
                         ))}
