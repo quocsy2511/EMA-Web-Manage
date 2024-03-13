@@ -30,8 +30,11 @@ import { FaRegCircleCheck } from "react-icons/fa6";
 
 const { RangePicker } = DatePicker;
 
-const Title = memo(({ title }) => (
-  <p className="text-lg font-medium">{title}</p>
+const Title = memo(({ title, required }) => (
+  <p className="text-lg font-medium">
+    {title}{" "}
+    {required && <span className="text-red-500 text-base font-bold">*</span>}
+  </p>
 ));
 
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
@@ -64,10 +67,15 @@ const EventAssignTaskPage = () => {
   const [isSelectDate, setIsSelectDate] = useState(false);
   const [chosenFile, setChosenFile] = useState();
   const [hasBusyUser, setHasBusyUser] = useState([]);
+  console.log("hasBusyUser > ", hasBusyUser);
 
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const { notification } = App.useApp();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, []);
 
   useEffect(() => {
     form.setFieldsValue({
@@ -80,7 +88,11 @@ const EventAssignTaskPage = () => {
     {
       onSuccess: (data) => {
         notification.success({
-          message: <p className="font-medium">Tạo 1 {isSubTask? "công việc":"hạng mục"} thành công</p>,
+          message: (
+            <p className="font-medium">
+              Tạo 1 {isSubTask ? "công việc" : "hạng mục"} thành công
+            </p>
+          ),
           placement: "topRight",
           duration: 3,
         });
@@ -101,7 +113,9 @@ const EventAssignTaskPage = () => {
         if (variables?.totalTrue === 1) {
           notification.success({
             message: (
-              <p className="font-medium">Cập nhật {isSubTask? "công việc":"hạng mục"} thành công</p>
+              <p className="font-medium">
+                Cập nhật {isSubTask ? "công việc" : "hạng mục"} thành công
+              </p>
             ),
             placement: "topRight",
             duration: 3,
@@ -126,7 +140,9 @@ const EventAssignTaskPage = () => {
         ) {
           notification.success({
             message: (
-              <p className="font-medium">Cập nhật {isSubTask? "công việc":"hạng mục"} thành công</p>
+              <p className="font-medium">
+                Cập nhật {isSubTask ? "công việc" : "hạng mục"} thành công
+              </p>
             ),
             placement: "topRight",
             duration: 3,
@@ -183,7 +199,11 @@ const EventAssignTaskPage = () => {
   } = useMutation((data) => uploadFileTask(data), {
     onSuccess: (data) => {
       notification.success({
-        message: <p className="font-medium">Cập nhật {isSubTask? "công việc":"hạng mục"} thành công</p>,
+        message: (
+          <p className="font-medium">
+            Cập nhật {isSubTask ? "công việc" : "hạng mục"} thành công
+          </p>
+        ),
         placement: "topRight",
         duration: 3,
       });
@@ -445,7 +465,7 @@ const EventAssignTaskPage = () => {
           <div className="flex gap-x-10">
             <Form.Item
               className="w-[40%]"
-              label={<Title title="Tiêu đề" />}
+              label={<Title title="Tiêu đề" required />}
               name="title"
               rules={[
                 {
@@ -458,7 +478,7 @@ const EventAssignTaskPage = () => {
             </Form.Item>
             <Form.Item
               className="w-[40%]"
-              label={<Title title="Thời gian" />}
+              label={<Title title="Thời gian" required />}
               name="date"
               rules={[
                 {
@@ -508,7 +528,7 @@ const EventAssignTaskPage = () => {
             </Form.Item>
             <Form.Item
               className="w-[20%]"
-              label={<Title title="Độ ưu tiên" />}
+              label={<Title title="Độ ưu tiên" required />}
               name="priority"
               rules={[
                 {
@@ -539,7 +559,7 @@ const EventAssignTaskPage = () => {
           </div>
 
           <Form.Item
-            label={<Title title="Mô tả" />}
+            label={<Title title="Mô tả" required />}
             name="desc"
             rules={[
               {
