@@ -1,9 +1,11 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
 import {
+  Button,
   Empty,
   FloatButton,
   Popconfirm,
   Popover,
+  Segmented,
   Select,
   Space,
   Spin,
@@ -42,7 +44,10 @@ import moment from "moment/moment";
 import {
   DeleteOutlined,
   EyeOutlined,
+  SortAscendingOutlined,
+  SortDescendingOutlined,
   SwapRightOutlined,
+  VerticalAlignTopOutlined,
 } from "@ant-design/icons";
 import ContactModal from "../../components/Modal/ContactModal";
 
@@ -55,6 +60,7 @@ const CustomerPage = () => {
   const [contactStatus, setContactStatus] = useState("ALL");
   const [selectedContact, setSelectedContact] = useState();
   const [isOpenContactModal, setIsOpenContactModal] = useState(false);
+  const [isSortASC, setIsSortASC] = useState(false);
 
   const {
     data: contacts,
@@ -72,11 +78,8 @@ const CustomerPage = () => {
       }),
     {
       select: (data) => {
-        const filterContacts = data?.data?.filter(
-          (contact) => contact.status !== "DELETED"
-        );
-        console.log("🚀 ~ CustomerPage ~ filterContacts:", filterContacts);
-        return filterContacts;
+        const listContact = data?.data;
+        return listContact;
       },
       refetchOnWindowFocus: false,
     }
@@ -93,6 +96,16 @@ const CustomerPage = () => {
     console.log(e);
   };
 
+  const handleChangeStatus = (value) => {
+    console.log("🚀 ~ handleChangeStatus ~ value:", value);
+    setContactStatus(value);
+  };
+
+  const handleSort = (value) => {
+    console.log("🚀 ~ handleSort ~ value:", value);
+    setSort(value);
+  };
+
   const columns = [
     {
       title: "#No",
@@ -106,6 +119,7 @@ const CustomerPage = () => {
       title: "Loại sự kiện",
       dataIndex: "eventType",
       key: "eventType",
+      width: "20%",
       render: (_, record) => (
         <span className="text-blue-400">{record?.eventType?.typeName}</span>
       ),
@@ -114,17 +128,19 @@ const CustomerPage = () => {
       title: "Khách hàng",
       dataIndex: "fullName",
       key: "fullName",
+      width: "12%",
     },
     {
       title: "Địa điểm",
       dataIndex: "address",
       key: "address",
+      width: "20%",
       render: (text) => <span className="text-blue-400">{text}</span>,
     },
     {
       title: "Thời gian",
       key: "timeRange",
-      width: 220,
+      width: "18%",
       render: (_, record) => (
         <p>
           {moment(record.startDate).format("DD-MM-YYYY")} <SwapRightOutlined />{" "}
@@ -136,6 +152,8 @@ const CustomerPage = () => {
       title: "Ngân sách",
       dataIndex: "budget",
       key: "budget",
+      width: "15%",
+      sorter: (a, b) => a.budget - b.budget,
       render: (text) => <p>{`${text?.toLocaleString()} VND`}</p>,
     },
     {
@@ -143,7 +161,6 @@ const CustomerPage = () => {
       key: "status",
       dataIndex: "status",
       align: "center",
-      width: 150,
       render: (_, record) => (
         <Tag
           className="ml-2"
@@ -156,7 +173,7 @@ const CustomerPage = () => {
               ? "red"
               : record.status === "SUCCESS"
               ? "blue"
-              : ""
+              : "red"
           }
           key={record.id}
         >
@@ -176,13 +193,14 @@ const CustomerPage = () => {
       title: "Hoạt động",
       key: "action",
       align: "center",
+      width: "10%",
       render: (_, record) => (
         <Space size="middle">
           <EyeOutlined
             className="hover:text-blue-600 text-blue-300"
             onClick={() => handleOpenContactModal(record)}
           />
-          <Popconfirm
+          {/* <Popconfirm
             placement="topLeft"
             title="Xác nhận xoá liên lạc "
             description="Bạn có chắc chắn muốn xoá liên lạc này ?"
@@ -192,7 +210,7 @@ const CustomerPage = () => {
             cancelText="Không"
           >
             <DeleteOutlined className="text-red-300 hover:text-red-600" />
-          </Popconfirm>
+          </Popconfirm> */}
         </Space>
       ),
     },
@@ -200,8 +218,55 @@ const CustomerPage = () => {
 
   return (
     <Fragment>
-      <div className="w-full h-full">
-        <div className="mt-20">
+      <div className="w-full h-full ">
+        <div className=" mt-6 w-full flex justify-between items-center">
+          <div>
+            {sort !== "DESC" ? (
+              <Button
+                icon={<SortAscendingOutlined />}
+                onClick={() => handleSort("DESC")}
+                type="primary"
+              >
+                Liên hệ mới nhất
+              </Button>
+            ) : (
+              <Button
+                type="primary"
+                icon={<SortDescendingOutlined />}
+                onClick={() => handleSort("ASC")}
+              >
+                Liên hệ sớm nhất
+              </Button>
+            )}
+          </div>
+          <Segmented
+            options={[
+              {
+                label: "TẤT CẢ",
+                value: "ALL",
+              },
+              {
+                label: "ĐANG CHỜ",
+                value: "PENDING",
+              },
+              {
+                label: "CHẤP NHẬN",
+                value: "ACCEPTED",
+              },
+              {
+                label: "TỪ CHỐI",
+                value: "REJECTED",
+              },
+              {
+                label: "THÀNH CÔNG",
+                value: "SUCCESS",
+              },
+            ]}
+            onChange={(value) => handleChangeStatus(value)}
+            className="bg-slate-200"
+          />
+        </div>
+        <div className="mt-2">
           {isLoading ? (
             <Spin spinning={isLoading} />
           ) : (

@@ -10,23 +10,18 @@ import { Button, ConfigProvider, Modal, Popconfirm, Tag } from "antd";
 import moment from "moment";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import React from "react";
+import { Input } from "antd";
 
 const ContactModal = ({
   isOpenContactModal,
   setIsOpenContactModal,
   contact,
 }) => {
-  console.log("🚀 ~ ContactModal ~ contact:", contact);
+  const { TextArea } = Input;
   const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
   const onCloseModal = () => {
     console.log("Click");
     setIsOpenContactModal(false);
-  };
-  const confirmReject = (e) => {
-    console.log(e);
-  };
-  const cancelReject = (e) => {
-    console.log(e);
   };
 
   const confirmAccepted = (e) => {
@@ -90,7 +85,7 @@ const ContactModal = ({
                       ? "#f50"
                       : contact?.status === "SUCCESS"
                       ? "#108ee9"
-                      : ""
+                      : "red"
                   }
                 >
                   {contact?.status === "PENDING"
@@ -152,13 +147,13 @@ const ContactModal = ({
                 </div>
 
                 {/* note */}
-                <div className="w-full flex flex-col justify-start items-center font-semibold text-[#103f6e] mb-2 gap-y-1 max-h-[40%] overflow-hidden ">
+                <div className="w-full flex flex-col justify-start items-center font-semibold text-[#103f6e] mb-2 gap-y-1 h-[28%] overflow-hidden ">
                   <div className=" flex flex-row justify-start items-center gap-x-2 text-start w-full">
                     <span className="text-slate-400">Ghi chú sự kiện</span>
                   </div>
                   <div className="w-full h-full overflow-y-scroll scrollbar-hide">
                     <p
-                      className="text-base w-full italic text-[#103f6e]  line-clamp-4"
+                      className="text-base w-full italic text-[#103f6e] "
                       dangerouslySetInnerHTML={{
                         __html: new QuillDeltaToHtmlConverter(
                           JSON.parse(
@@ -174,18 +169,9 @@ const ContactModal = ({
 
                 <div className="w-full flex flex-row justify-end items-center font-semibold text-[#103f6e] mb-2 gap-x-3">
                   <div className="w-full bg-gray-200 h-[1px]"></div>
-                  <Popconfirm
-                    title="Xác nhân từ chối liên hệ "
-                    description="Bạn có chắc chắn từ chối liên hệ này?"
-                    onConfirm={confirmReject}
-                    onCancel={cancelReject}
-                    okText="Đồng ý"
-                    cancelText="Không"
-                  >
-                    <Button type="dashed" icon={<CloseOutlined />}>
-                      Từ chối
-                    </Button>
-                  </Popconfirm>
+                  <Button type="dashed" icon={<CloseOutlined />}>
+                    Từ chối
+                  </Button>
 
                   <Popconfirm
                     title="Xác nhận chấp nhận liên hệ"
