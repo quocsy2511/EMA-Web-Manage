@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, memo } from "react";
 
 const dummy = [
   {
@@ -162,4 +162,4 @@ const PlanningPage = () => {
   return <Fragment></Fragment>;
 };
 
-export default PlanningPage;
+export default memo(PlanningPage);

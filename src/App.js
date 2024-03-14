@@ -8,7 +8,6 @@ import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
-import SettingPage from "./pages/Setting/SettingPage";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -39,6 +38,7 @@ const EventAssignDivisionPage = lazy(() =>
 const EventAssignTaskPage = lazy(() =>
   import("./pages/Event/EventAssignTaskPage/EventAssignTaskPage.js")
 );
+const PlanningPage = lazy(() => import("./pages/Planning/PlanningPage.js"));
 
 // Staff pages
 const StaffLayout = lazy(() => import("./pages/StaffLayout"));
@@ -64,6 +64,7 @@ const TaskPageStaff = lazy(() => import("./pages/Task/MyTaskPageStaff"));
 
 // Admin pages
 const AdminLayout = lazy(() => import("./pages/AdminLayout.js"));
+const SettingPage = lazy(() => import("./pages/Setting/SettingPage"));
 
 const router = createBrowserRouter([
   {
@@ -231,6 +232,16 @@ const router = createBrowserRouter([
                 }
               >
                 <EventCreationPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "planning",
+            element: (
+              <Suspense
+                fallback={<LoadingPageIndicator title="trang lên kế hoạch" />}
+              >
+                <PlanningPage />
               </Suspense>
             ),
           },

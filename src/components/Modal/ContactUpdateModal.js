@@ -35,13 +35,13 @@ const ContactUpdateModal = ({
       onCancel={handleCancel}
       confirmLoading={updateIsLoading}
       centered
-      width={"30%"}
+      width={"25%"}
       okText="Ok"
       cancelText="Hủy"
     >
       <p className="text-lg mb-2">Chọn lý do</p>
       <Select
-        className="w-[80%]"
+        className="w-full"
         // defaultValue
         placeholder="Chọn lý do"
         onChange={(value) => setSelectReason(value)}
