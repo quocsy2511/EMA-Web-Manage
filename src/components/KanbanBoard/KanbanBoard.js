@@ -92,7 +92,11 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
               />
             ))
           ) : (
-            <Empty />
+            <div className="w-full flex justify-center items-center">
+              <Empty
+                description={<span>hiện tại bạn chưa có công việc nào</span>}
+              />
+            </div>
           )}
         </div>
 

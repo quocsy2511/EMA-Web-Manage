@@ -1,20 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
-  Badge,
   Button,
   DatePicker,
-  Drawer,
   Form,
   Input,
-  InputNumber,
-  Modal,
   Segmented,
   Select,
-  Space,
   Tag,
-  Timeline,
-  Tooltip,
   Upload,
   message,
 } from "antd";
@@ -22,13 +15,13 @@ import React, { memo, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRouteLoaderData } from "react-router-dom";
-import { getAllUser, getEmployee } from "../../../apis/users";
+import { getEmployee } from "../../../apis/users";
 import moment from "moment";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
-import { StarFilled, UploadOutlined, UserOutlined } from "@ant-design/icons";
+import { StarFilled, SwapOutlined, UploadOutlined } from "@ant-design/icons";
 import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
 import DrawerTimeLine from "../Drawer/DrawerTimeLine";
 
@@ -42,15 +35,13 @@ const NewTaskModal = ({
   // console.log("🚀 ~ TaskParent:", TaskParent);
   const eventID = TaskParent?.eventDivision?.event?.id;
   const { RangePicker } = DatePicker;
-  const { Option } = Select;
-  const { id, title } = TaskParent ?? {};
+  const { id } = TaskParent ?? {};
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [description, setDescription] = useState("");
   const [assignee, setAssignee] = useState([]);
   // console.log("🚀 ~ assignee:", assignee);
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
-
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
   const staffId = useRouteLoaderData("staff").id;
@@ -117,14 +108,6 @@ const NewTaskModal = ({
       },
     }
   );
-
-  const onCloseModal = () => {
-    console.log("Close");
-    setAddNewTask(false);
-  };
-  const onClose = () => {
-    setAddNewTask(false);
-  };
 
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
     useMutation(({ formData, task }) => uploadFile(formData), {
@@ -245,18 +228,17 @@ const NewTaskModal = ({
 
   return (
     <>
-      <Drawer
-        placement="right"
-        size={800}
-        title={`Danh sách công việc - ${title}`}
-        open={addNewTask}
-        footer={false}
-        onCancel={onCloseModal}
-        onClose={onClose}
-        width={900}
-        className="text-lg font-bold overflow-hidden"
-      >
-        <div className="px-4 pb-4">
+      <div className="w-full h-full px-4 mt-5">
+        <div className="w-full justify-start items-center flex gap-x-2">
+          <SwapOutlined
+            className="text-blue-500 hover:text-red-500"
+            onClick={() => setAddNewTask(false)}
+          />
+          <h2 className="text-lg font-bold text-black">
+            Thêm công việc cho <b>{TaskParent?.title}</b>{" "}
+          </h2>
+        </div>
+        <div className="px-4 pb-4 w-full flex justify-center flex-row">
           <Form
             form={form}
             onFinish={onFinish}
@@ -502,7 +484,7 @@ const NewTaskModal = ({
           childrenDrawer={childrenDrawer}
           setChildrenDrawer={setChildrenDrawer}
         />
-      </Drawer>
+      </div>
     </>
   );
 };
