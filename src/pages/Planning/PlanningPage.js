@@ -1,4 +1,12 @@
-import React, { Fragment, memo } from "react";
+import React, { Fragment, memo, useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Link, useLocation } from "react-router-dom";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getPlanByContact, importCSV } from "../../apis/planning";
+import { Spin, Table, Upload, message } from "antd";
+import axios from "axios";
+import { URL } from "../../constants/api";
+import { FiPlus } from "react-icons/fi";
 
 const dummy = [
   {
@@ -159,7 +167,220 @@ const dummy = [
 ];
 
 const PlanningPage = () => {
-  return <Fragment></Fragment>;
+  const location = useLocation();
+  console.log("location > ", location); //contactId
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  // const [importFileIsLoading, setImportFileIsLoading] = useState(false);
+
+  useEffect(() => {
+    mergeValue.clear();
+  }, []);
+
+  const {
+    data: planningData,
+    isLoading: planningIsLoading,
+    isError: planningIsError,
+  } = useQuery(
+    ["planning", location.state?.contactId],
+    () => getPlanByContact(location.state?.contactId),
+    {
+      select: (data) => {
+        return data;
+      },
+    }
+  );
+  console.log("planningData > ", planningData);
+
+  const { mutate: importFileMutate, isLoading: importFileIsLoading } =
+    useMutation((formData) => importCSV(formData), {
+      onSuccess: (data) => {
+        console.log("import success > ", data);
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    });
+
+  const transformDataToTable = (data) =>
+    data
+      ?.map((category) =>
+        category?.items?.map((item) => ({
+          key: category?.categoryId + item?.id,
+          categoryId: category?.categoryId,
+          categoryName: category?.categoryName,
+          itemId: item?.id,
+          itemName: item?.itemName,
+          itemDescription: item?.description,
+          itemPriority: item?.priority,
+          itemPlannedUnit: item?.plannedUnit,
+          itemPlannedAmount: item?.plannedAmount,
+          itemPlannedPrice: item?.plannedPrice,
+        }))
+      )
+      .flat();
+
+  console.log("transform > ", transformDataToTable(dummy));
+
+  const clickButton = async () => {
+    try {
+      const response = await axios.get(`${URL}/items/download-template`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        responseType: "blob",
+      });
+      console.log("response > ", response);
+
+      const url = window.URL.createObjectURL(response.data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "template.csv";
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading template:", error);
+    } finally {
+      console.log("Finissh");
+    }
+  };
+
+  const mergeValue = new Set();
+
+  const columns = [
+    {
+      title: "Loại hạng mục",
+      dataIndex: "categoryName",
+      onCell: (record, index) => {
+        if (mergeValue.has(record?.categoryId)) {
+          return { rowSpan: 0 };
+        } else {
+          const rowCount = transformDataToTable(dummy).filter(
+            (data) => data.categoryId === record?.categoryId
+          ).length;
+          mergeValue.add(record?.categoryId);
+          return { rowSpan: rowCount };
+        }
+        return {};
+      },
+    },
+    {
+      title: "Hạng mục",
+      dataIndex: "itemName",
+    },
+    {
+      title: "Diễn giải",
+      dataIndex: "itemDescription",
+    },
+    {
+      title: "Độ ưu tiên",
+      dataIndex: "itemPriority",
+    },
+    {
+      title: "Đơn vị tính",
+      dataIndex: "itemPlannedUnit",
+    },
+    {
+      title: "Số lượng",
+      dataIndex: "itemPlannedAmount",
+    },
+    {
+      title: "Đơn giá",
+      dataIndex: "itemPlannedPrice",
+    },
+  ];
+
+  return (
+    <Fragment>
+      {contextHolder}
+
+      <motion.div
+        initial={{ x: -75 }}
+        animate={{ x: 0 }}
+        className="flex justify-between items-center"
+      >
+        <p className="text-base font-medium text-slate-400">
+          <Link to=".." relative="path">
+            Thông tin khách hàng{" "}
+          </Link>
+          / Lên kế hoạch
+        </p>
+      </motion.div>
+
+      <motion.div initial={{ x: -75 }} animate={{ x: 0 }} className="mt-10">
+        <h1 className="text-3xl font-medium">
+          Lên kế hoạch cho hợp đồng (Tải file CSV và đưa lên hệ thống)
+        </h1>
+
+        <div className="flex items-center space-x-10 mt-12">
+          <p className="w-[15%] text-lg font-medium">Tải tệp CSV: </p>
+
+          <p
+            // onClick={refetch}
+            onClick={clickButton}
+            className="text-lg font-medium bg-blue-500 text-white px-7 py-3 rounded-md cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-black/30"
+          >
+            Nhấn để tải bản mẫu
+          </p>
+        </div>
+
+        <div className="flex items-center space-x-10 mt-12">
+          <p className="w-[15%] text-lg font-medium">Tệp đã cập nhật: </p>
+
+          <a className="text-lg font-medium cursor-pointer text-slate-400 hover:text-blue-500 transition-colors">
+            bản kế hoạch của sự kiện.pdf
+          </a>
+        </div>
+
+        <div className="mt-10">
+          <Spin spinning={importFileIsLoading}>
+            <Upload
+              className="flex items-center justify-center space-x-3 mt-[5%]"
+              maxCount={1}
+              customRequest={({ file, onSuccess }) => {
+                setTimeout(() => {
+                  onSuccess("ok");
+                }, 0);
+              }}
+              showUploadList={false}
+              beforeUpload={(file) => {
+                console.log("beforeUpload > ", file);
+              }}
+              accept=".csv"
+              onChange={(info) => {
+                console.log("TODO", info);
+                console.log("TODO", info?.file);
+                console.log("TODO", info?.file?.originFileObj);
+                const formData = new FormData();
+                formData.append("file", info?.file?.originFileObj);
+                // formData.append("folderName", "task");
+                console.log("formData > ", formData);
+                // importFileMutate(formData);
+              }}
+            >
+              <div className="flex items-center space-x-3 border-dashed border-2 border-slate-400 rounded-lg px-10 py-5 group hover:border-black transition-colors">
+                <FiPlus className="text-2xl text-slate-400 group-hover:text-black transition-colors" />
+                <p className="text-xl text-slate-400 group-hover:text-black transition-colors">
+                  Kéo tệp CSV vào đây
+                </p>
+              </div>
+            </Upload>
+          </Spin>
+          {/* <Table
+            columns={columns}
+            dataSource={transformDataToTable(dummy)}
+            bordered
+          /> */}
+        </div>
+      </motion.div>
+    </Fragment>
+  );
 };
 
 export default memo(PlanningPage);

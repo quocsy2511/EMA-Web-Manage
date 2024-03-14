@@ -1,51 +1,17 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
-import {
-  Empty,
-  FloatButton,
-  Popconfirm,
-  Popover,
-  Select,
-  Space,
-  Spin,
-  Table,
-  Tag,
-  Tooltip,
-  message,
-} from "antd";
+import { Empty, Spin, Table, Tag, Tooltip, message } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getCustomerContacts,
   updateCustomerContacts,
 } from "../../apis/contact";
 import momenttz from "moment-timezone";
-import { AnimatePresence, motion } from "framer-motion";
-import { GrAscend, GrDescend } from "react-icons/gr";
-import { GoPerson, GoMail, GoCalendar, GoLocation } from "react-icons/go";
-import { LuSmartphone } from "react-icons/lu";
-import {
-  LiaCalendarDaySolid,
-  LiaCalendarCheckSolid,
-  LiaMoneyBillSolid,
-} from "react-icons/lia";
-import { TbCategory } from "react-icons/tb";
-import { IoCheckmarkCircle, IoCloseCircleSharp } from "react-icons/io5";
-import {
-  MdOutlineNewLabel,
-  MdOutlinePending,
-  MdCheckCircleOutline,
-} from "react-icons/md";
-import { IoMdCloseCircleOutline } from "react-icons/io";
-import LoadingItemIndicator from "../../components/Indicator/LoadingItemIndicator";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import ContactUpdateModal from "../../components/Modal/ContactUpdateModal";
 import { useNavigate } from "react-router-dom";
 import moment from "moment/moment";
-import {
-  DeleteOutlined,
-  EyeOutlined,
-  SwapRightOutlined,
-} from "@ant-design/icons";
+import { EyeOutlined, SwapRightOutlined } from "@ant-design/icons";
 import ContactModal from "../../components/Modal/ContactModal";
+import { motion } from "framer-motion";
 
 const CustomerPage = () => {
   const navigate = useNavigate();
@@ -253,7 +219,11 @@ const CustomerPage = () => {
         updateContactStatusIsLoading={updateContactStatusIsLoading}
       />
 
-      <div className="w-full h-full">
+      <motion.div
+        initial={{ x: 75 }}
+        animate={{ x: 0 }}
+        className="w-full h-full"
+      >
         <div className="mt-20">
           {isLoading ? (
             <div className="w-full min-h-[calc(100vh/2)] flex items-center">
@@ -281,7 +251,7 @@ const CustomerPage = () => {
             </>
           )}
         </div>
-      </div>
+      </motion.div>
     </Fragment>
   );
 };

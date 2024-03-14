@@ -1,18 +1,13 @@
 import http from "../utils/axios-utils";
 
-export const downloadTemplate = () =>
-  http({
-    url: "/items/download-template",
-  });
-
 export const exportPlan = (eventId) =>
   http({
     url: `/items/export-plan?eventId=${eventId}`,
   });
 
-export const getPlanByEvent = (eventId) =>
+export const getPlanByContact = (customerContactId) =>
   http({
-    url: `/items/${eventId}`,
+    url: `/items/${customerContactId}`,
   });
 
 // data = [
