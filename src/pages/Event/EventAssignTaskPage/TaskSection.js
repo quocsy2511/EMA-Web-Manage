@@ -64,16 +64,6 @@ const DrawerContainer = memo(
       LOW: 3,
     };
 
-    // const sortedDivision = { ...divisionChecking?.division };
-    // sortedDivision.users[0].listEvent = sortedDivision.users[0].listEvent.map(
-    //   (event) => ({
-    //     ...event,
-    //     listTask: event?.listTask?.sort((a, b) => {
-    //       mapPriory[a?.priority] - mapPriory[b?.priority];
-    //     }),
-    //   })
-    // );
-
     return (
       <Drawer
         title={

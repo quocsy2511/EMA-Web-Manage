@@ -11,6 +11,7 @@ import {
   Spin,
   Table,
   Tag,
+  Tooltip,
   message,
 } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -59,8 +60,12 @@ const CustomerPage = () => {
   const [sizePage, setSizePage] = useState(50);
   const [contactStatus, setContactStatus] = useState("ALL");
   const [selectedContact, setSelectedContact] = useState();
+
+  const [isOpenRejectConfirm, setisOpenRejectConfirm] = useState(false);
   const [isOpenContactModal, setIsOpenContactModal] = useState(false);
   const [isSortASC, setIsSortASC] = useState(false);
+
+  const [messageApi, contextHolder] = message.useMessage();
 
   const {
     data: contacts,
@@ -68,7 +73,7 @@ const CustomerPage = () => {
     isError,
     refetch,
   } = useQuery(
-    ["contact", currentPage, sort, contactStatus],
+    ["contact", currentPage, sort, contactStatus, sizePage],
     () =>
       getCustomerContacts({
         currentPage,
@@ -85,15 +90,55 @@ const CustomerPage = () => {
     }
   );
 
+  const queryClient = useQueryClient();
+  const {
+    mutate: updateContactStatusMutate,
+    isLoading: updateContactStatusIsLoading,
+  } = useMutation(
+    ({ contactId, status, rejectNote }) =>
+      updateCustomerContacts({ contactId, status, rejectNote }),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries([
+          "contact",
+          currentPage,
+          sort,
+          contactStatus,
+          sizePage,
+        ]);
+
+        messageApi.open({
+          type: "success",
+          content:
+            variables.status === "ACCEPTED"
+              ? "Chấp nhận 1 sự kiện từ khách hàng thành công"
+              : "Đã từ chối 1 sự kiện từ khách hàng",
+        });
+
+        if (variables.status === "ACCEPTED") setIsOpenContactModal(false);
+
+        if (variables.status === "REJECTED") setisOpenRejectConfirm(false);
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
+  const handleUpdateContact = (contactId, status, rejectNote) => {
+    updateContactStatusMutate({
+      contactId,
+      status,
+      rejectNote: rejectNote ? rejectNote : undefined,
+    });
+  };
+
   const handleOpenContactModal = (value) => {
-    setIsOpenContactModal(true);
     setSelectedContact(value);
-  };
-  const confirm = (e) => {
-    console.log(e);
-  };
-  const cancel = (e) => {
-    console.log(e);
+    setIsOpenContactModal(true);
   };
 
   const handleChangeStatus = (value) => {
@@ -108,7 +153,7 @@ const CustomerPage = () => {
 
   const columns = [
     {
-      title: "#No",
+      title: "STT",
       dataIndex: "index",
       key: "index",
       render: (text, record, index) => index + 1,
@@ -143,8 +188,8 @@ const CustomerPage = () => {
       width: "18%",
       render: (_, record) => (
         <p>
-          {moment(record.startDate).format("DD-MM-YYYY")} <SwapRightOutlined />{" "}
-          {moment(record.endDate).format("DD-MM-YYYY")}
+          {moment(record?.startDate).format("DD-MM-YYYY")} <SwapRightOutlined />{" "}
+          {moment(record?.endDate).format("DD-MM-YYYY")}
         </p>
       ),
     },
@@ -190,28 +235,17 @@ const CustomerPage = () => {
       ),
     },
     {
-      title: "Hoạt động",
+      title: "Hành động",
       key: "action",
       align: "center",
       width: "10%",
       render: (_, record) => (
-        <Space size="middle">
+        <Tooltip title="Xem chi tiết">
           <EyeOutlined
-            className="hover:text-blue-600 text-blue-300"
+            className="hover:scale-125 transition-transform text-blue-400 text-xl"
             onClick={() => handleOpenContactModal(record)}
           />
-          {/* <Popconfirm
-            placement="topLeft"
-            title="Xác nhận xoá liên lạc "
-            description="Bạn có chắc chắn muốn xoá liên lạc này ?"
-            onConfirm={confirm}
-            onCancel={cancel}
-            okText="Đồng ý"
-            cancelText="Không"
-          >
-            <DeleteOutlined className="text-red-300 hover:text-red-600" />
-          </Popconfirm> */}
-        </Space>
+        </Tooltip>
       ),
     },
   ];
@@ -219,7 +253,7 @@ const CustomerPage = () => {
   return (
     <Fragment>
       <div className="w-full h-full ">
-        <div className=" mt-6 w-full flex justify-between items-center">
+        <div className=" mt-6 w-full flex justify-between items-center bg-white px-2 py-4 rounded-lg">
           <div>
             {sort !== "DESC" ? (
               <Button
@@ -266,13 +300,20 @@ const CustomerPage = () => {
             className="bg-slate-200"
           />
         </div>
+
         <div className="mt-2">
           {isLoading ? (
-            <Spin spinning={isLoading} />
+            <div className="w-full min-h-[calc(100vh/2)] flex items-center">
+              <Spin spinning={isLoading} className="w-full" />
+            </div>
           ) : (
             <>
               {isError ? (
-                <Empty />
+                <Empty
+                  description={
+                    <span>Đang xảy ra lỗi bạn vui lòng chờ trong giây lát</span>
+                  }
+                />
               ) : (
                 <>
                   {contacts?.length > 0 ? (
@@ -284,7 +325,10 @@ const CustomerPage = () => {
                       pagination={{ pageSize: 10 }}
                     />
                   ) : (
-                    <Empty />
+                    <Empty
+                      description={<span>không có dữ liệu</span>}
+                      className=" mt-3"
+                    />
                   )}
                 </>
               )}
