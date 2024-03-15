@@ -20,6 +20,7 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
+  const [hideDescription, setHideDescription] = useState(false);
 
   const {
     data: parentTaskDetail,
@@ -78,17 +79,19 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
   return (
     <Fragment>
       <div className="bg-bgG h-[calc(100vh-64px-4rem)]">
-        <DescriptionEvent key={selectEvent?.id} selectEvent={selectEvent} />
+        {!hideDescription && (
+          <DescriptionEvent key={selectEvent?.id} selectEvent={selectEvent} />
+        )}
 
         <div className="flex overflow-x-scroll px-10 pb-8 gap-x-3 min-h-[55vh]">
           {listTaskParents.length > 0 ? (
             listTaskParents?.map((taskParent, index) => (
               <Column
-                taskTemplate={[]}
                 selectedStatus={selectedStatus}
                 TaskParent={taskParent}
                 idEvent={selectEvent?.id}
                 key={taskParent?.id}
+                setHideDescription={setHideDescription}
               />
             ))
           ) : (

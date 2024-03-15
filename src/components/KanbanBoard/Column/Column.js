@@ -5,10 +5,13 @@ import NewTaskModal from "../ModalKanban/NewTaskModal";
 import { shuffle } from "lodash";
 import { AnimatePresence } from "framer-motion";
 import moment from "moment";
-import { Tooltip } from "antd";
+import { Dropdown, Spin, Tooltip } from "antd";
 import { SwapRightOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import { getTemplateEvent } from "../../../apis/events";
+import { getTasks } from "../../../apis/tasks";
 
-const Column = ({ TaskParent, selectedStatus }) => {
+const Column = ({ TaskParent, selectedStatus, setHideDescription }) => {
   const colors = [
     "bg-red-500",
     "bg-orange-500",
@@ -23,12 +26,57 @@ const Column = ({ TaskParent, selectedStatus }) => {
   const [color, setColor] = useState(null);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [addNewTask, setAddNewTask] = useState(false);
-
+  const [addNewTaskTemplate, setAddNewTaskTemplate] = useState(false);
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
-  console.log("🚀 ~ Column ~ taskSelected:", taskSelected);
   const [disableUpdate, setDisableUpdate] = useState(false);
   const [disableDoneTaskParent, setDisableDoneTaskParent] = useState(true);
+
+  const {
+    data: templateTask,
+    isError: isErrorTemplateTask,
+    isLoading: isLoadingTemplateTask,
+    refetch: refetchTemplateTask,
+  } = useQuery(
+    ["template-task"],
+    () =>
+      getTasks({
+        fieldName: "isTemplate",
+        conValue: "true",
+        pageSize: 50,
+        currentPage: 1,
+      }),
+    {
+      select: (data) => {
+        return data;
+      },
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const TypeNewTask = [
+    {
+      label: <p>Tạo công việc thủ công</p>,
+      key: "newTask",
+    },
+    {
+      label: <p>Tạo công việc nhanh</p>,
+      key: "templateTask",
+    },
+  ];
+
+  const handleSelectTypeNewTask = ({ key }) => {
+    // console.log("🚀 ~ handleSelectTypeNewTask ~ key:", key);
+    if (key === "newTask") {
+      setHideDescription(true);
+      setAddNewTask(true);
+      setAddNewTaskTemplate(false);
+    } else {
+      setAddNewTaskTemplate(true);
+      setHideDescription(true);
+      setAddNewTask(true);
+    }
+  };
 
   let completed = 0;
   let subTask = TaskParent?.subTask;
@@ -41,7 +89,6 @@ const Column = ({ TaskParent, selectedStatus }) => {
 
   const filteredSubTask = subTask?.filter((task) => {
     // console.log("🚀 ~ filteredSubTask ~ subTask:", subTask);
-
     if (selectedStatus === "clear") {
       return true;
     } else {
@@ -78,13 +125,18 @@ const Column = ({ TaskParent, selectedStatus }) => {
   return (
     <>
       {addNewTask ? (
-        <NewTaskModal
-          disableStartDate={TaskParent?.startDate}
-          disableEndDate={TaskParent?.endDate}
-          addNewTask={addNewTask}
-          setAddNewTask={setAddNewTask}
-          TaskParent={TaskParent}
-        />
+        <Spin spinning={isLoadingTemplateTask}>
+          <NewTaskModal
+            disableStartDate={TaskParent?.startDate}
+            disableEndDate={TaskParent?.endDate}
+            templateTask={templateTask}
+            setAddNewTask={setAddNewTask}
+            TaskParent={TaskParent}
+            setHideDescription={setHideDescription}
+            addNewTaskTemplate={addNewTaskTemplate}
+            setAddNewTaskTemplate={setAddNewTaskTemplate}
+          />
+        </Spin>
       ) : (
         <div className="scrollbar-hide mt-5 min-w-[280px]">
           <div className=" bg-bgSubtask py-4 scrollbar-hide rounded-xl w-full shadow-xl">
@@ -137,14 +189,21 @@ const Column = ({ TaskParent, selectedStatus }) => {
             </AnimatePresence>
 
             {!disableUpdate && (
-              <div
-                className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow"
-                onClick={() => setAddNewTask(true)}
+              <Dropdown
+                menu={{
+                  items: TypeNewTask,
+                  onClick: handleSelectTypeNewTask,
+                }}
+                // trigger={["click"]}
+                placement="bottomLeft"
+                arrow
               >
-                <p className="text-sm font-semibold tracking-tighter">
-                  + Thêm công việc mới
-                </p>
-              </div>
+                <div className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow">
+                  <p className="text-sm font-semibold tracking-tighter">
+                    + Thêm công việc mới
+                  </p>
+                </div>
+              </Dropdown>
             )}
           </div>
 

@@ -8,6 +8,7 @@ import {
   Segmented,
   Select,
   Tag,
+  Tooltip,
   Upload,
   message,
 } from "antd";
@@ -21,16 +22,24 @@ import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
-import { StarFilled, SwapOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  DoubleRightOutlined,
+  StarFilled,
+  SwapOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
 import DrawerTimeLine from "../Drawer/DrawerTimeLine";
 
 const NewTaskModal = ({
-  addNewTask,
   setAddNewTask,
   TaskParent,
   disableEndDate,
   disableStartDate,
+  setHideDescription,
+  templateTask,
+  addNewTaskTemplate,
+  setAddNewTaskTemplate,
 }) => {
   // console.log("🚀 ~ TaskParent:", TaskParent);
   const eventID = TaskParent?.eventDivision?.event?.id;
@@ -49,15 +58,40 @@ const NewTaskModal = ({
   const [childrenDrawer, setChildrenDrawer] = useState(false);
   const [checkedDateData, setCheckedDateData] = useState([]);
   const [selectedDateSchedule, setSelectedDateSchedule] = useState("");
+  const [selectedTaskTemplate, setSelectedTaskTemplate] = useState("");
+  const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
+
+  const handleChangeTaskTemplate = (value) => {
+    console.log("🚀 ~ handleChangeTaskTemplate ~ value:", value);
+    if (value) {
+      const TaskTemplateFind = templateTask.find((item) => item.id === value);
+      setSelectedTaskTemplate(TaskTemplateFind?.title);
+      const descriptionTemplate = {
+        ops: JSON.parse(
+          TaskTemplateFind?.description?.startsWith(`[{"`)
+            ? TaskTemplateFind?.description
+            : parseJson(TaskTemplateFind?.description)
+        ),
+      };
+      const parseDes = descriptionTemplate?.ops?.[0].insert.replace(".\n", "");
+      form.setFieldsValue({
+        title: `${TaskTemplateFind?.title}`,
+        desc: `${parseDes}`,
+        priority: `${TaskTemplateFind.priority}`,
+      });
+    } else {
+      form.resetFields();
+    }
+  };
+  //search templateTask
+  const filterOptionTaskTemplate = (input, option) =>
+    (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
   //search Employee
   const filterOption = (input, option) =>
     (option?.label?.props?.label ?? "")
       .toLowerCase()
       .includes(input.toLowerCase());
 
-  const onSearch = (value) => {
-    console.log("search:", value);
-  };
   const {
     data: employees,
     isError: isErrorEmployees,
@@ -70,8 +104,6 @@ const NewTaskModal = ({
       }),
     {
       select: (data) => {
-        console.log("🚀 ~ data:", data?.users);
-
         const listEmployee = data?.users
           ?.filter((user) => user.role.roleName === "Nhân Viên")
           ?.map(({ ...item }) => {
@@ -98,7 +130,9 @@ const NewTaskModal = ({
           type: "success",
           content: "Tạo một công việc mới thành công",
         });
+        setHideDescription(false);
         setAddNewTask(false);
+        setAddNewTaskTemplate(false);
       },
       onError: () => {
         message.open({
@@ -145,6 +179,12 @@ const NewTaskModal = ({
     const isoEndDate = moment(dateString?.[1]).toISOString();
     setStartDate(isoStartDate);
     setEndDate(isoEndDate);
+  };
+
+  const handleCloseNewTask = () => {
+    setHideDescription(false);
+    setAddNewTask(false);
+    setAddNewTaskTemplate(false);
   };
 
   //validate pick date
@@ -228,17 +268,73 @@ const NewTaskModal = ({
 
   return (
     <>
-      <div className="w-full h-full px-4 mt-5">
-        <div className="w-full justify-start items-center flex gap-x-2">
-          <SwapOutlined
-            className="text-blue-500 hover:text-red-500"
-            onClick={() => setAddNewTask(false)}
-          />
-          <h2 className="text-lg font-bold text-black">
-            Thêm công việc cho <b>{TaskParent?.title}</b>{" "}
-          </h2>
+      <div className="px-16 mt-1  py-8 rounded-lg ">
+        {/* header */}
+        <div className="flex flex-row w-full  py-2">
+          <div className="flex flex-row w-full justify-between items-center mb-2 ">
+            <div className="w-[50%] flex flex-col justify-center items-start  py-2">
+              <h3 className="font-bold text-3xl text-blueBudget mb-2">
+                Thêm mới công việc
+              </h3>
+              <p className="mb-2 text-blueSecondBudget inline-block">
+                Thêm công việc cho đề mục -{" "}
+                <b className="text-base text-blueBudget">{TaskParent?.title}</b>{" "}
+              </p>
+            </div>
+            <div className="w-[50%] flex justify-end text-end">
+              <ul className="pl-0 list-none inline-block mt-6">
+                <li className="relative float-left mr-[10px] text-blueSecondBudget space-x-2">
+                  <span
+                    className="cursor-pointer hover:text-blue-500 text-blueBudget"
+                    onClick={handleCloseNewTask}
+                  >
+                    <span className="font-bold">Bảng công việc</span>
+                  </span>
+                  <DoubleRightOutlined />
+                </li>
+                <li className="relative float-left mr-[10px] text-blueSecondBudget space-x-2">
+                  <span className="cursor-pointer hover:text-blueBudget">
+                    <span className="font-bold">Thêm mới</span>
+                  </span>
+                </li>
+                {selectedTaskTemplate && (
+                  <li className="relative float-left mr-0 text-blueSecondBudget">
+                    <DoubleRightOutlined className="mr-1" />
+                    <span>{selectedTaskTemplate}</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
         </div>
-        <div className="px-4 pb-4 w-full flex justify-center flex-row">
+        {/* content */}
+        <div className="px-14 py-8 rounded-lg w-full flex justify-center flex-col bg-white">
+          {addNewTaskTemplate && (
+            <div className="w-full flex flex-col justify-start items-start gap-y-3 mb-4">
+              <h3 className="font-bold">
+                <StarFilled className="text-yellow-400 mr-2" /> Chọn nhanh các
+                công việc có sẵn
+              </h3>
+              <Select
+                allowClear
+                showSearch
+                autoFocus={addNewTaskTemplate}
+                size="large"
+                optionFilterProp="children"
+                filterOption={filterOptionTaskTemplate}
+                options={
+                  templateTask?.map((item) => ({
+                    value: item?.id,
+                    label: item?.title,
+                  })) ?? []
+                }
+                placeholder="Chọn công mẫu"
+                className="w-full"
+                onChange={handleChangeTaskTemplate}
+              />
+            </div>
+          )}
+
           <Form
             form={form}
             onFinish={onFinish}
@@ -251,7 +347,7 @@ const NewTaskModal = ({
             <Form.Item
               label="Tên công việc"
               labelCol={{
-                style: { padding: 0 },
+                style: { padding: 0, fontWeight: 700 },
               }}
               name="title"
               className="text-sm font-medium "
@@ -272,7 +368,10 @@ const NewTaskModal = ({
               ]}
               hasFeedback
             >
-              <Input placeholder="Tên công việc  ..." />
+              <Input
+                placeholder="Tên công việc  ..."
+                autoFocus={!addNewTaskTemplate}
+              />
             </Form.Item>
             {/* date */}
             <Form.Item
@@ -280,7 +379,7 @@ const NewTaskModal = ({
               label="Thời hạn"
               className="text-sm font-medium "
               labelCol={{
-                style: { padding: 0 },
+                style: { padding: 0, fontWeight: 700 },
               }}
               rules={[
                 {
@@ -301,17 +400,17 @@ const NewTaskModal = ({
             </Form.Item>
             {/* description */}
             <Form.Item
-              initialValue={description}
+              // initialValue={description}
               label="Mô tả"
               className="text-sm font-medium "
               name="desc"
               labelCol={{
-                style: { padding: 0 },
+                style: { padding: 0, fontWeight: 700 },
               }}
             >
               <ReactQuill
                 theme="snow"
-                value={description}
+                // value={description}
                 onChange={(content, delta, source, editor) => {
                   form.setFieldsValue({ desc: editor.getContents() });
                 }}
@@ -325,6 +424,9 @@ const NewTaskModal = ({
                 name="priority"
                 className="text-sm font-medium m-0 w-1/2 justify-start items-center gap-x-2 flex"
                 initialValue={priority.value}
+                labelCol={{
+                  style: { padding: 0, fontWeight: 700 },
+                }}
               >
                 <Segmented
                   options={[
@@ -356,6 +458,9 @@ const NewTaskModal = ({
                     },
                   },
                 ]}
+                labelCol={{
+                  style: { padding: 0, fontWeight: 700 },
+                }}
               >
                 <Upload
                   // className="upload-list-inline"
@@ -397,7 +502,7 @@ const NewTaskModal = ({
               name="assignee"
               className="text-sm font-medium mt-4"
               labelCol={{
-                style: { padding: 0 },
+                style: { padding: 0, fontWeight: 700 },
               }}
               rules={[
                 {
@@ -412,14 +517,12 @@ const NewTaskModal = ({
                     <>
                       <Select
                         maxTagCount="responsive"
-                        autoFocus
                         allowClear
                         mode="multiple"
                         placeholder="Người được chọn đầu tiên là nhóm trưởng"
                         style={{
                           width: "100%",
                         }}
-                        onSearch={onSearch}
                         onChange={(value) => handleChangeSelectMember(value)}
                         optionLabelProp="label"
                         tagRender={tagRender}
@@ -477,7 +580,7 @@ const NewTaskModal = ({
             </Form.Item>
           </Form>
         </div>
-
+        {/* Drawer */}
         <DrawerTimeLine
           selectedDateSchedule={selectedDateSchedule}
           checkedDateData={checkedDateData}

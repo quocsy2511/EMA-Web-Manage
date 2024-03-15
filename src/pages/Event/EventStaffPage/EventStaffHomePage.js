@@ -26,11 +26,15 @@ const EventItem = memo(({ event, gotoEventPage }) => {
       </motion.div>
     </Tooltip>
   ));
-  const percentage = (
-    (event?.tasks?.filter((item) => item?.status === "DONE").length /
-      (event?.tasks?.length ?? 1)) *
-    100
-  ).toFixed(0);
+  let percentage = 0;
+  if (event?.tasks?.length > 0) {
+    percentage = (
+      (event?.tasks?.filter((item) => item?.status === "DONE").length /
+        (event?.tasks?.length ?? 1)) *
+      100
+    ).toFixed(0);
+  }
+
   let status;
   switch (event?.status) {
     case "PENDING":
@@ -48,7 +52,6 @@ const EventItem = memo(({ event, gotoEventPage }) => {
     case "CANCEL":
       status = "Hủy bỏ";
       break;
-
     default:
       break;
   }
