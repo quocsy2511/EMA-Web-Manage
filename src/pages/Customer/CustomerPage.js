@@ -42,13 +42,7 @@ const CustomerPage = () => {
         sizePage,
       }),
     {
-      select: (data) => {
-        const filterContacts = data?.data?.filter(
-          (contact) => contact.status !== "DELETED"
-        );
-        console.log("🚀 ~ CustomerPage ~ filterContacts:", filterContacts);
-        return filterContacts;
-      },
+      select: (data) => data?.data,
       refetchOnWindowFocus: false,
     }
   );

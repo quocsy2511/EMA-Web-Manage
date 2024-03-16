@@ -39,6 +39,7 @@ const EventAssignTaskPage = lazy(() =>
   import("./pages/Event/EventAssignTaskPage/EventAssignTaskPage.js")
 );
 const PlanningPage = lazy(() => import("./pages/Planning/PlanningPage.js"));
+const ContractPage = lazy(() => import("./pages/Contract/ContractPage.js"));
 
 // Staff pages
 const StaffLayout = lazy(() => import("./pages/StaffLayout"));
@@ -242,6 +243,16 @@ const router = createBrowserRouter([
                 fallback={<LoadingPageIndicator title="trang lên kế hoạch" />}
               >
                 <PlanningPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "planning/contract",
+            element: (
+              <Suspense
+                fallback={<LoadingPageIndicator title="trang lên kế hoạch" />}
+              >
+                <ContractPage />
               </Suspense>
             ),
           },

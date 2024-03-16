@@ -25,9 +25,9 @@ export const getPlanByContact = (customerContactId) =>
 //     ],
 //   },
 // ];
-export const postPlan = (eventId, data) =>
+export const postPlan = (customerContactId, data) =>
   http({
-    url: `/items/${eventId}`,
+    url: `/items?customerContactId=${customerContactId}`,
     method: "post",
     data,
   });
@@ -59,4 +59,11 @@ export const deletePlanItem = (itemId) =>
   http({
     url: `/items/${itemId}`,
     method: "delete",
+  });
+
+export const replacePlan = (customerContactId, data) =>
+  http({
+    url: `/items/${customerContactId}/update-plan`,
+    method: "put",
+    data,
   });

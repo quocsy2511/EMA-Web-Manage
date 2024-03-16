@@ -24,7 +24,7 @@ const ManagerLayout = () => {
 
   useEffect(() => {
     // create socket connection
-    socketListener(dispatch, notificationAPI);
+    // socketListener(dispatch, notificationAPI);
 
     // get online user
     getOnlineGroupUsersSocket();

@@ -18,3 +18,10 @@ export const postContractEvidence = (contractId, formData) =>
     method: "post",
     data: formData,
   });
+
+export const createContractToCustomer = ({customerContactId, contract}) =>
+  http({
+    url: `/contracts/${customerContactId}/new`,
+    method: "post",
+    data: contract,
+  });

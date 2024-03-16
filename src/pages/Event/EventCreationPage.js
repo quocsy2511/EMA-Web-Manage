@@ -316,99 +316,99 @@ const EventCreationPage = () => {
   };
 
   const steps = [
-    // {
-    //   key: 1,
-    //   title: "Thông tin cơ bản",
-    //   content: (
-    //     <div className="">
-    //       <div className="flex space-x-10">
-    //         <Form.Item
-    //           className="w-[30%]"
-    //           label={<Title title="Tên sự kiện" />}
-    //           name="eventName"
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập tên sự kiện!",
-    //             },
-    //           ]}
-    //           onChange={(value) => {
-    //             // Update to specific field
-    //             form.setFieldsValue({ eventName: value.target.value });
-    //           }}
-    //         >
-    //           <Input placeholder="Nhập tên sự kiện" size="large" />
-    //         </Form.Item>
-    //         <Form.Item
-    //           className="w-[70%]"
-    //           label={<Title title="Địa điểm" />}
-    //           name="location"
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập địa điểm!",
-    //             },
-    //           ]}
-    //           onChange={(value) => {
-    //             // Update to specific field
-    //             form.setFieldsValue({ location: value.target.value });
-    //           }}
-    //         >
-    //           <Input placeholder="Nhập địa điểm" size="large" />
-    //         </Form.Item>
-    //       </div>
+    {
+      key: 1,
+      title: "Thông tin cơ bản",
+      content: (
+        <div className="">
+          <div className="flex space-x-10">
+            <Form.Item
+              className="w-[30%]"
+              label={<Title title="Tên sự kiện" />}
+              name="eventName"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa nhập tên sự kiện!",
+                },
+              ]}
+              onChange={(value) => {
+                // Update to specific field
+                form.setFieldsValue({ eventName: value.target.value });
+              }}
+            >
+              <Input placeholder="Nhập tên sự kiện" size="large" />
+            </Form.Item>
+            <Form.Item
+              className="w-[70%]"
+              label={<Title title="Địa điểm" />}
+              name="location"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa nhập địa điểm!",
+                },
+              ]}
+              onChange={(value) => {
+                // Update to specific field
+                form.setFieldsValue({ location: value.target.value });
+              }}
+            >
+              <Input placeholder="Nhập địa điểm" size="large" />
+            </Form.Item>
+          </div>
 
-    //       <Form.Item
-    //         label={<Title title="Mô tả" />}
-    //         name="description"
-    //         rules={[
-    //           {
-    //             required: true,
-    //             message: "Chưa nhập mô tả!",
-    //           },
-    //         ]}
-    //       >
-    //         <ReactQuill
-    //           className="h-36 mb-10"
-    //           theme="snow"
-    //           placeholder="Nhập mô tả"
-    //           onChange={(content, delta, source, editor) => {
-    //             // Update to specific field
-    //             form.setFieldsValue({ description: editor.getContents() });
-    //           }}
-    //         />
-    //       </Form.Item>
+          <Form.Item
+            label={<Title title="Mô tả" />}
+            name="description"
+            rules={[
+              {
+                required: true,
+                message: "Chưa nhập mô tả!",
+              },
+            ]}
+          >
+            <ReactQuill
+              className="h-36 mb-10"
+              theme="snow"
+              placeholder="Nhập mô tả"
+              onChange={(content, delta, source, editor) => {
+                // Update to specific field
+                form.setFieldsValue({ description: editor.getContents() });
+              }}
+            />
+          </Form.Item>
 
-    //       <div className="flex justify-end mt-5">
-    //         <Button
-    //           className=""
-    //           onClick={() => {
-    //             form
-    //               .validateFields()
-    //               .then((values) => {
-    //                 setCurrent((prev) => prev + 1);
-    //               })
-    //               .catch((errorInfo) => {
-    //                 console.log("Validation Fields:", errorInfo);
-    //                 const values = errorInfo.values;
-    //                 if (
-    //                   !!values.eventName &&
-    //                   !!values.location &&
-    //                   !!values.description
-    //                 ) {
-    //                   setCurrent((prev) => prev + 1);
-    //                 }
-    //               });
-    //           }}
-    //           size="large"
-    //           type="primary"
-    //         >
-    //           Tiếp tục
-    //         </Button>
-    //       </div>
-    //     </div>
-    //   ),
-    // },
+          <div className="flex justify-end mt-5">
+            <Button
+              className=""
+              onClick={() => {
+                form
+                  .validateFields()
+                  .then((values) => {
+                    setCurrent((prev) => prev + 1);
+                  })
+                  .catch((errorInfo) => {
+                    console.log("Validation Fields:", errorInfo);
+                    const values = errorInfo.values;
+                    if (
+                      !!values.eventName &&
+                      !!values.location &&
+                      !!values.description
+                    ) {
+                      setCurrent((prev) => prev + 1);
+                    }
+                  });
+              }}
+              size="large"
+              type="primary"
+            >
+              Tiếp tục
+            </Button>
+          </div>
+        </div>
+      ),
+    },
     // {
     //   key: 2,
     //   title: "Thông tin chi tiết",
@@ -993,11 +993,7 @@ const EventCreationPage = () => {
   return (
     <Fragment>
       <LockLoadingModal
-        isModalOpen={
-          uploadIsLoading || createEventIsLoading
-          // createContractIsLoading ||
-          // createContractIsLoading
-        }
+        isModalOpen={uploadIsLoading || createEventIsLoading}
         label="Đang khởi tạo sự kiện ..."
       />
 
