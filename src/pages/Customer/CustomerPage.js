@@ -36,7 +36,6 @@ import { motion } from "framer-motion";
 
 const CustomerPage = () => {
   const navigate = useNavigate();
-
   const [currentPage, setCurrentPage] = useState(1);
   const [sort, setSort] = useState("DESC");
   const [sizePage, setSizePage] = useState(50);
