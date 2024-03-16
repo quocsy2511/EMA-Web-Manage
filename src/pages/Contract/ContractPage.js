@@ -14,6 +14,7 @@ import {
   Image,
   Input,
   InputNumber,
+  Popconfirm,
   Select,
   Spin,
   Upload,
@@ -745,24 +746,24 @@ const ContractPage = () => {
           </>
 
           <div className="text-center mb-5">
-            <Button size="large" type="primary" onClick={() => form.submit()}>
-              Tạo hợp đồng
-            </Button>
+            <Popconfirm
+              title="Bạn đã chắc chắn với các thông tin trên ?"
+              description={
+                <p>
+                  Các thông tin trên sẽ được đưa vào hợp đồng <br /> và gửi cho
+                  khách hàng
+                </p>
+              }
+              onConfirm={() => form.submit()}
+              okText="Có"
+              cancelText="Không"
+              placement="top"
+            >
+              <Button size="large" type="primary">
+                Tạo hợp đồng
+              </Button>
+            </Popconfirm>
           </div>
-
-          {/* <div className="flex justify-between mt-5">
-              <Button
-                onClick={() => setCurrent((prev) => prev - 1)}
-                size="large"
-                type="default"
-              >
-                Quay lại
-              </Button>
-
-              <Button size="large" type="primary" onClick={() => form.submit()}>
-                Tạo sự kiện
-              </Button>
-            </div> */}
         </Form>
       </motion.div>
 

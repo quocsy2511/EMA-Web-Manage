@@ -71,8 +71,8 @@ const ContactModal = ({
         </div>
 
         {/* leftSize */}
-        <div className="w-[30%] flex flex-col justify-center items-center p-10 text-start bg-[#103f6e] rounded-lg">
-          <h2 className="text-white font-semibold mb-12 text-3xl text-start w-full">
+        <div className="w-[30%] flex flex-col justify-start items-start p-10 text-start bg-[#103f6e] rounded-lg">
+          <h2 className="text-white font-semibold mb-12 text-[28px] text-start w-full">
             Thông tin khách hàng
           </h2>
           <div className="w-full flex flex-col justify-start gap-y-2">
@@ -253,7 +253,12 @@ const ContactModal = ({
             )}
 
             {contact?.status === "ACCEPTED" && (
-              <Button onClick={goToPlanningPage} type="primary" size="large" icon={<CheckOutlined />}>
+              <Button
+                onClick={goToPlanningPage}
+                type="primary"
+                size="large"
+                icon={<CheckOutlined />}
+              >
                 Lên kế hoạch
               </Button>
             )}
