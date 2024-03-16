@@ -1,18 +1,13 @@
 import http from "../utils/axios-utils";
 
-export const downloadTemplate = () =>
-  http({
-    url: "/items/download-template",
-  });
-
 export const exportPlan = (eventId) =>
   http({
     url: `/items/export-plan?eventId=${eventId}`,
   });
 
-export const getPlanByEvent = (eventId) =>
+export const getPlanByContact = (customerContactId) =>
   http({
-    url: `/items/${eventId}`,
+    url: `/items/${customerContactId}`,
   });
 
 // data = [
@@ -30,9 +25,9 @@ export const getPlanByEvent = (eventId) =>
 //     ],
 //   },
 // ];
-export const postPlan = (eventId, data) =>
+export const postPlan = (customerContactId, data) =>
   http({
-    url: `/items/${eventId}`,
+    url: `/items?customerContactId=${customerContactId}`,
     method: "post",
     data,
   });
@@ -64,4 +59,11 @@ export const deletePlanItem = (itemId) =>
   http({
     url: `/items/${itemId}`,
     method: "delete",
+  });
+
+export const replacePlan = (customerContactId, data) =>
+  http({
+    url: `/items/${customerContactId}/update-plan`,
+    method: "put",
+    data,
   });

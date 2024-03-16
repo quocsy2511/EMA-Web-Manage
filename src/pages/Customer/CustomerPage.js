@@ -1,9 +1,11 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
 import {
+  Button,
   Empty,
   FloatButton,
   Popconfirm,
   Popover,
+  Segmented,
   Select,
   Space,
   Spin,
@@ -18,34 +20,19 @@ import {
   updateCustomerContacts,
 } from "../../apis/contact";
 import momenttz from "moment-timezone";
-import { AnimatePresence, motion } from "framer-motion";
-import { GrAscend, GrDescend } from "react-icons/gr";
-import { GoPerson, GoMail, GoCalendar, GoLocation } from "react-icons/go";
-import { LuSmartphone } from "react-icons/lu";
-import {
-  LiaCalendarDaySolid,
-  LiaCalendarCheckSolid,
-  LiaMoneyBillSolid,
-} from "react-icons/lia";
-import { TbCategory } from "react-icons/tb";
-import { IoCheckmarkCircle, IoCloseCircleSharp } from "react-icons/io5";
-import {
-  MdOutlineNewLabel,
-  MdOutlinePending,
-  MdCheckCircleOutline,
-} from "react-icons/md";
-import { IoMdCloseCircleOutline } from "react-icons/io";
-import LoadingItemIndicator from "../../components/Indicator/LoadingItemIndicator";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import ContactUpdateModal from "../../components/Modal/ContactUpdateModal";
 import { useNavigate } from "react-router-dom";
 import moment from "moment/moment";
 import {
   DeleteOutlined,
   EyeOutlined,
+  SortAscendingOutlined,
+  SortDescendingOutlined,
   SwapRightOutlined,
+  VerticalAlignTopOutlined,
 } from "@ant-design/icons";
 import ContactModal from "../../components/Modal/ContactModal";
+import { motion } from "framer-motion";
 
 const CustomerPage = () => {
   const navigate = useNavigate();
@@ -58,6 +45,7 @@ const CustomerPage = () => {
 
   const [isOpenRejectConfirm, setisOpenRejectConfirm] = useState(false);
   const [isOpenContactModal, setIsOpenContactModal] = useState(false);
+  const [isSortASC, setIsSortASC] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -65,7 +53,6 @@ const CustomerPage = () => {
     data: contacts,
     isLoading,
     isError,
-    refetch,
   } = useQuery(
     ["contact", currentPage, sort, contactStatus, sizePage],
     () =>
@@ -76,13 +63,7 @@ const CustomerPage = () => {
         sizePage,
       }),
     {
-      select: (data) => {
-        const filterContacts = data?.data?.filter(
-          (contact) => contact.status !== "DELETED"
-        );
-        console.log("🚀 ~ CustomerPage ~ filterContacts:", filterContacts);
-        return filterContacts;
-      },
+      select: (data) => data?.data,
       refetchOnWindowFocus: false,
     }
   );
@@ -138,6 +119,16 @@ const CustomerPage = () => {
     setIsOpenContactModal(true);
   };
 
+  const handleChangeStatus = (value) => {
+    console.log("🚀 ~ handleChangeStatus ~ value:", value);
+    setContactStatus(value);
+  };
+
+  const handleSort = (value) => {
+    console.log("🚀 ~ handleSort ~ value:", value);
+    setSort(value);
+  };
+
   const columns = [
     {
       title: "STT",
@@ -148,28 +139,31 @@ const CustomerPage = () => {
       align: "center",
     },
     {
-      title: "Khách hàng",
-      dataIndex: "fullName",
-      key: "fullName",
-    },
-    {
       title: "Loại sự kiện",
       dataIndex: "eventType",
       key: "eventType",
+      width: "20%",
       render: (_, record) => (
         <span className="text-blue-400">{record?.eventType?.typeName}</span>
       ),
     },
     {
+      title: "Khách hàng",
+      dataIndex: "fullName",
+      key: "fullName",
+      width: "12%",
+    },
+    {
       title: "Địa điểm",
       dataIndex: "address",
       key: "address",
+      width: "20%",
       render: (text) => <span className="text-blue-400">{text}</span>,
     },
     {
       title: "Thời gian",
       key: "timeRange",
-      width: 220,
+      width: "18%",
       render: (_, record) => (
         <p>
           {moment(record?.startDate).format("DD-MM-YYYY")} <SwapRightOutlined />{" "}
@@ -181,6 +175,8 @@ const CustomerPage = () => {
       title: "Ngân sách",
       dataIndex: "budget",
       key: "budget",
+      width: "15%",
+      sorter: (a, b) => a.budget - b.budget,
       render: (text) => <p>{`${text?.toLocaleString()} VND`}</p>,
     },
     {
@@ -188,7 +184,6 @@ const CustomerPage = () => {
       key: "status",
       dataIndex: "status",
       align: "center",
-      width: 150,
       render: (_, record) => (
         <Tag
           className="ml-2"
@@ -201,7 +196,7 @@ const CustomerPage = () => {
               ? "red"
               : record.status === "SUCCESS"
               ? "blue"
-              : ""
+              : "red"
           }
           key={record.id}
         >
@@ -221,6 +216,7 @@ const CustomerPage = () => {
       title: "Hành động",
       key: "action",
       align: "center",
+      width: "10%",
       render: (_, record) => (
         <Tooltip title="Xem chi tiết">
           <EyeOutlined
@@ -236,14 +232,6 @@ const CustomerPage = () => {
     <Fragment>
       {contextHolder}
 
-      <ContactUpdateModal
-        isModalOpen={isOpenRejectConfirm}
-        setIsModalOpen={setisOpenRejectConfirm}
-        handleUpdateContact={handleUpdateContact}
-        selectedContactId={selectedContact?.id}
-        updateIsLoading={updateContactStatusIsLoading}
-      />
-
       <ContactModal
         contact={selectedContact}
         isOpenContactModal={isOpenContactModal}
@@ -253,7 +241,69 @@ const CustomerPage = () => {
         updateContactStatusIsLoading={updateContactStatusIsLoading}
       />
 
-      <div className="w-full h-full">
+      <ContactUpdateModal
+        isModalOpen={isOpenRejectConfirm}
+        setIsModalOpen={setisOpenRejectConfirm}
+        handleUpdateContact={handleUpdateContact}
+        selectedContactId={selectedContact?.id}
+        updateIsLoading={updateContactStatusIsLoading}
+      />
+
+      <div className="w-full h-full ">
+        <div className=" mt-6 w-full flex justify-between items-center bg-white px-2 py-4 rounded-lg">
+          <div>
+            {sort !== "DESC" ? (
+              <Button
+                icon={<SortAscendingOutlined />}
+                onClick={() => handleSort("DESC")}
+                type="primary"
+              >
+                Liên hệ mới nhất
+              </Button>
+            ) : (
+              <Button
+                type="primary"
+                icon={<SortDescendingOutlined />}
+                onClick={() => handleSort("ASC")}
+              >
+                Liên hệ sớm nhất
+              </Button>
+            )}
+          </div>
+          <Segmented
+            options={[
+              {
+                label: "TẤT CẢ",
+                value: "ALL",
+              },
+              {
+                label: "ĐANG CHỜ",
+                value: "PENDING",
+              },
+              {
+                label: "CHẤP NHẬN",
+                value: "ACCEPTED",
+              },
+              {
+                label: "TỪ CHỐI",
+                value: "REJECTED",
+              },
+              {
+                label: "THÀNH CÔNG",
+                value: "SUCCESS",
+              },
+            ]}
+            onChange={(value) => handleChangeStatus(value)}
+            className="bg-slate-200"
+          />
+        </div>
+      </div>
+
+      <motion.div
+        initial={{ x: 75 }}
+        animate={{ x: 0 }}
+        className="w-full h-full"
+      >
         <div className="mt-20">
           {isLoading ? (
             <div className="w-full min-h-[calc(100vh/2)] flex items-center">
@@ -262,7 +312,11 @@ const CustomerPage = () => {
           ) : (
             <>
               {isError ? (
-                <Empty />
+                <Empty
+                  description={
+                    <span>Đang xảy ra lỗi bạn vui lòng chờ trong giây lát</span>
+                  }
+                />
               ) : (
                 <>
                   {contacts?.length > 0 ? (
@@ -274,14 +328,17 @@ const CustomerPage = () => {
                       pagination={{ pageSize: 10 }}
                     />
                   ) : (
-                    <Empty />
+                    <Empty
+                      description={<span>không có dữ liệu</span>}
+                      className=" mt-3"
+                    />
                   )}
                 </>
               )}
             </>
           )}
         </div>
-      </div>
+      </motion.div>
     </Fragment>
   );
 };

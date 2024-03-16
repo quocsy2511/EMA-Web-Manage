@@ -357,7 +357,6 @@ const EventTaskPage = () => {
         onClick={goToCreateTask}
         type="primary"
         icon={<RiAddFill />}
-        // disabled={eventDetail?.listDivision?.length === 0}
         tooltip={
           eventDetail?.listDivision?.length !== 0
             ? "Tạo đề mục"

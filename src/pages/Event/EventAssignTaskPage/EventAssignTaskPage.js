@@ -513,8 +513,11 @@ const EventAssignTaskPage = () => {
                     const startDate = momenttz(dateRange?.[0], "YYYY-MM-DD");
                     const endDate = momenttz(dateRange?.[1], "YYYY-MM-DD");
 
-                    if (!isSubTask) return current && current < startDate;
-                    else
+                    if (!isSubTask) {
+                      if (now.isBefore(startDate, "days"))
+                        return current && current < startDate;
+                      else return current && current < now;
+                    } else
                       return (
                         (current && current < startDate) ||
                         current < now ||
