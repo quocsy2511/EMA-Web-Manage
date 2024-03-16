@@ -41,7 +41,6 @@ const CustomerPage = () => {
   const [sizePage, setSizePage] = useState(50);
   const [contactStatus, setContactStatus] = useState("ALL");
   const [selectedContact, setSelectedContact] = useState();
-
   const [isOpenRejectConfirm, setisOpenRejectConfirm] = useState(false);
   const [isOpenContactModal, setIsOpenContactModal] = useState(false);
   const [isSortASC, setIsSortASC] = useState(false);
