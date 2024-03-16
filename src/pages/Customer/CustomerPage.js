@@ -247,7 +247,7 @@ const CustomerPage = () => {
         updateIsLoading={updateContactStatusIsLoading}
       />
 
-      <div className="w-full h-full ">
+      <div className="w-full h-full">
         <div className=" mt-6 w-full flex justify-between items-center bg-white px-2 py-4 rounded-lg">
           <div>
             {sort !== "DESC" ? (
@@ -302,7 +302,7 @@ const CustomerPage = () => {
         animate={{ x: 0 }}
         className="w-full h-full"
       >
-        <div className="mt-20">
+        <div className="mt-4">
           {isLoading ? (
             <div className="w-full min-h-[calc(100vh/2)] flex items-center">
               <Spin spinning={isLoading} className="w-full" />
