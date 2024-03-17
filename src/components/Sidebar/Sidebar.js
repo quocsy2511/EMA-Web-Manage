@@ -8,6 +8,7 @@ import { HiOutlineHome, HiOutlineCalendarDays } from "react-icons/hi2";
 import { BsPersonVcard, BsJournalCheck, BsMailbox } from "react-icons/bs";
 import { IoMailOutline } from "react-icons/io5";
 import { IoChatboxOutline } from "react-icons/io5";
+import { LiaFileContractSolid } from "react-icons/lia";
 import logo from "../../assets/images/logo.png";
 import logo_domain from "../../assets/images/logo_domain.png";
 
@@ -87,6 +88,14 @@ const Sidebar = ({ collapsed }) => {
       "/manager/customer",
       <p>
         <IoMailOutline className="text-[#795548]" size={24} />
+      </p>
+    ),
+    getItem(
+      <LabelText text="Hợp đồng" />,
+      "Hợp đồng",
+      "contract",
+      <p>
+        <LiaFileContractSolid className="text-[#52673b]" size={24} />
       </p>
     ),
   ];

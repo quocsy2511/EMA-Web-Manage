@@ -8,6 +8,7 @@ import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
+import ContractHomePage from "./pages/Contract/ContractHomePage";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -253,6 +254,32 @@ const router = createBrowserRouter([
                 fallback={<LoadingPageIndicator title="trang lên kế hoạch" />}
               >
                 <ContractPage />
+              </Suspense>
+            ),
+          },
+        ],
+      },
+      {
+        path: "contract",
+        element: (
+          <Suspense
+            fallback={
+              <LoadingPageIndicator title="Trang hợp đồng  khách hàng" />
+            }
+          >
+            <CustomerLayout />
+          </Suspense>
+        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense
+                fallback={
+                  <LoadingPageIndicator title="Trang hợp đồng khách hàng" />
+                }
+              >
+                <ContractHomePage />
               </Suspense>
             ),
           },

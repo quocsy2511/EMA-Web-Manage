@@ -24,7 +24,15 @@ import ContactUpdateModal from "../../components/Modal/ContactUpdateModal";
 import { useNavigate } from "react-router-dom";
 import moment from "moment/moment";
 import {
+  BarsOutlined,
+  BookOutlined,
+  CarryOutOutlined,
+  CheckSquareOutlined,
+  CloseSquareOutlined,
+  CopyOutlined,
   DeleteOutlined,
+  DoubleRightOutlined,
+  ExclamationCircleOutlined,
   EyeOutlined,
   SortAscendingOutlined,
   SortDescendingOutlined,
@@ -43,8 +51,7 @@ const CustomerPage = () => {
   const [selectedContact, setSelectedContact] = useState();
   const [isOpenRejectConfirm, setisOpenRejectConfirm] = useState(false);
   const [isOpenContactModal, setIsOpenContactModal] = useState(false);
-  const [isSortASC, setIsSortASC] = useState(false);
-
+  const [isContract, setIsContract] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
   const {
@@ -247,56 +254,114 @@ const CustomerPage = () => {
         updateIsLoading={updateContactStatusIsLoading}
       />
 
-      <div className="w-full h-full">
-        <div className=" mt-6 w-full flex justify-between items-center bg-white px-2 py-4 rounded-lg">
+      {/* header */}
+      <div className="flex flex-row w-full  py-2">
+        <div className="flex flex-row w-full justify-between items-center mb-2 ">
+          <div className="w-full flex flex-col justify-center items-start  py-2">
+            <h3 className="font-bold text-3xl text-blueBudget mb-2">
+              Danh sách liên hệ
+            </h3>
+            <p className="text-blueSecondBudget font-semibold">
+              Quản lí thông tin liên hệ khách hàng
+            </p>
+          </div>
+          <div className="w-[50%] flex justify-end text-end items-end h-full">
+            <ul className="pl-0 list-none inline-block mt-2">
+              <li className="relative float-left mr-[10px] text-blueSecondBudget space-x-2">
+                <span
+                  className="cursor-pointer hover:text-blue-500 text-blueBudget font-bold"
+                  onClick={() => navigate("/manager")}
+                >
+                  Trang chủ
+                </span>
+                <DoubleRightOutlined />
+              </li>
+              <li className="relative float-left mr-[10px] text-blueSecondBudget space-x-2">
+                <span className="cursor-pointer hover:text-blueBudget">
+                  <span className="font-bold">Khách hàng</span>
+                </span>
+                <DoubleRightOutlined />
+              </li>
+              <li className="relative float-left mr-[10px] text-blueSecondBudget space-x-2">
+                <span className="cursor-pointer hover:text-blueBudget">
+                  <span className="font-bold">Danh Sách liên hệ</span>
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* filterContact */}
+      <div className="w-full  flex flex-row gap-x-4  items-center">
+        <div className="w-[25%] bg-[#fb3e7a] rounded-lg px-2 py-2">
+          <div className="w-full h-full flex flex-row justify-center items-start gap-x-2">
+            <BookOutlined className="mt-[2px] text-white text-base" />
+            <Spin spinning={isLoading}>
+              <p className="flex flex-col text-white ">
+                <span className="font-medium text-sm">Tổng số liên hệ</span>
+                <b className="font-bold text-lg">{contacts?.length} liên hệ</b>
+              </p>
+            </Spin>
+          </div>
+        </div>
+        <div className="w-[75%] flex justify-between items-center bg-white px-2 py-2 rounded-lg">
           <div>
             {sort !== "DESC" ? (
               <Button
                 icon={<SortAscendingOutlined />}
                 onClick={() => handleSort("DESC")}
-                type="primary"
+                // type="primary"
+                className="w-fit h-fit py-4 px-6 font-semibold border-green-700 text-green-700"
               >
                 Liên hệ mới nhất
               </Button>
             ) : (
               <Button
-                type="primary"
+                // type="default"
                 icon={<SortDescendingOutlined />}
                 onClick={() => handleSort("ASC")}
+                className="w-fit h-fit py-4 px-6 font-semibold border-green-700 text-green-700"
               >
                 Liên hệ sớm nhất
               </Button>
             )}
           </div>
           <Segmented
+            size="large"
             options={[
               {
                 label: "TẤT CẢ",
                 value: "ALL",
+                icon: <BarsOutlined />,
               },
               {
                 label: "ĐANG CHỜ",
                 value: "PENDING",
+                icon: <ExclamationCircleOutlined className="text-yellow-500" />,
               },
               {
                 label: "CHẤP NHẬN",
                 value: "ACCEPTED",
+                icon: <CheckSquareOutlined className="text-green-500" />,
               },
               {
                 label: "TỪ CHỐI",
                 value: "REJECTED",
+                icon: <CloseSquareOutlined className="text-red-500" />,
               },
               {
                 label: "THÀNH CÔNG",
                 value: "SUCCESS",
+                icon: <CarryOutOutlined className="text-blue-500" />,
               },
             ]}
             onChange={(value) => handleChangeStatus(value)}
-            className="bg-slate-200"
+            className="bg-slate-200 font-semibold py-2 p-2"
           />
         </div>
       </div>
-
+      {/* tableContact */}
       <motion.div
         initial={{ x: 75 }}
         animate={{ x: 0 }}
