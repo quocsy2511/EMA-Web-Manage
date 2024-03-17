@@ -61,8 +61,8 @@ const PlanningPage = () => {
       return data?.plan
         ?.map((category) =>
           category?.items?.map((item, index) => ({
-            key: category?.categoryId + index,
-            categoryId: category?.categoryId,
+            key: category?.categoryName + index,
+
             categoryName: category?.categoryName, //
             itemName: item?.itemName,
             itemDescription: item?.description,
@@ -84,8 +84,8 @@ const PlanningPage = () => {
         const tableData = {
           success: data?.Success?.map((category) =>
             category?.items?.map((item, index) => ({
-              key: category?.categoryId + index,
-              categoryId: category?.categoryId,
+              key: category?.categoryName + index,
+
               categoryName: category?.categoryName, //
               itemName: item?.itemName,
               itemDescription: item?.description,
@@ -336,13 +336,13 @@ const PlanningPage = () => {
                     title: "Loại hạng mục",
                     dataIndex: "categoryName",
                     onCell: (record, index) => {
-                      if (mergeValue.has(record?.categoryId)) {
+                      if (mergeValue.has(record?.categoryName)) {
                         return { rowSpan: 0 };
                       } else {
                         const rowCount = planningData?.filter(
-                          (data) => data?.categoryId === record?.categoryId
+                          (data) => data?.categoryName === record?.categoryName
                         ).length;
-                        mergeValue.add(record?.categoryId);
+                        mergeValue.add(record?.categoryName);
                         return { rowSpan: rowCount };
                       }
                     },
@@ -461,13 +461,13 @@ const PlanningPage = () => {
                     title: "Loại hạng mục",
                     dataIndex: "categoryName",
                     onCell: (record, index) => {
-                      if (mergeImportValue.has(record?.categoryId)) {
+                      if (mergeImportValue.has(record?.categoryName)) {
                         return { rowSpan: 0 };
                       } else {
                         const rowCount = tableData?.success?.filter(
-                          (data) => data?.categoryId === record?.categoryId
+                          (data) => data?.categoryName === record?.categoryName
                         ).length;
-                        mergeImportValue.add(record?.categoryId);
+                        mergeImportValue.add(record?.categoryName);
                         return { rowSpan: rowCount };
                       }
                     },

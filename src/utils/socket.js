@@ -25,7 +25,7 @@ export const socketListener = (dispatch, notificationAPI) => {
 
   // disconnect
   socket.on("disconnect", () => {
-    console.log("Successfully connect with socket.io server : ", socket.id);
+    console.log("Disconnect with socket.io server : ", socket.id);
   });
 
   // Listen to get notification
@@ -33,7 +33,7 @@ export const socketListener = (dispatch, notificationAPI) => {
     console.log("notification data:", data);
 
     // queryClient.invalidateQueries(["notifications", "10"]);
-    
+
     notificationAPI.open({
       message: <p className="text-base">Đã nhận 1 thông báo</p>,
       description: (
