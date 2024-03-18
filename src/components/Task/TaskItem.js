@@ -195,7 +195,7 @@ const TaskItem = ({
       </div>
 
       <div className="flex-1 flex justify-end space-x-8">
-        <div className="w-1/5 flex flex-col gap-y-1 justify-center">
+        <div className="w-40 flex flex-col gap-y-1 justify-center">
           <div
             className={`text-center flex justify-center items-center px-3 py-1 ${statusColor} border-2  ${statusBorder} rounded-full truncate`}
           >

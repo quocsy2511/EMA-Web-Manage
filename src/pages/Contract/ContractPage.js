@@ -1,11 +1,12 @@
-import React, { Fragment, memo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { Fragment, memo, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import momenttz from "moment-timezone";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getCustomerContactDetail } from "../../apis/contact";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import {
+  App,
   Button,
   ConfigProvider,
   DatePicker,
@@ -13,21 +14,15 @@ import {
   Form,
   Image,
   Input,
-  InputNumber,
   Popconfirm,
   Select,
   Spin,
-  Upload,
   message,
 } from "antd";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 import dayjs from "dayjs";
 import viVN from "antd/locale/vi_VN";
-import clsx from "clsx";
 import { getEventType } from "../../apis/events";
 import { createContractToCustomer } from "../../apis/contract";
-import { uploadFile } from "../../apis/files";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 
 const { RangePicker } = DatePicker;
@@ -42,10 +37,15 @@ const ContractPage = () => {
   const location = useLocation();
   const contactId = location.state?.contactId;
 
-  const [fileList, setFileList] = useState();
+  const navigate = useNavigate();
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const { message: messageApp } = App.useApp();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const { data: contactInfo, isLoading: contactInfoIsLoading } = useQuery(
     ["contact", contactId],
@@ -74,53 +74,32 @@ const ContractPage = () => {
         createContractToCustomer({ customerContactId, contract }),
       {
         onSuccess: (data) => {
-          messageApi.open({
+          messageApp.open({
             type: "success",
             content: "Đã tạo hợp đồng thành công",
           });
+
+          navigate("/manager/customer", { replace: true });
         },
         onError: (err) => {
           console.log("erorr > ", err);
+          messageApi.open({
+            type: "error",
+            content: "Không thể tạo hợp đồng lúc này! Hãy thử lại sau",
+          })
         },
       }
     );
 
-  const { mutate: uploadFileMutate, isLoading: uploadIsLoading } = useMutation(
-    ({ formData, event, contract }) => uploadFile(formData),
-    {
-      onSuccess: (data, variables) => {
-        console.log("variables upload > ", variables);
-        variables.event = {
-          coverUrl: data.downloadUrl,
-          ...variables.event,
-          ...variables.contract,
-          contactId: location.state?.contactId,
-        };
-        createContractMutate({
-          customerContactId: contactId,
-          contract: variables.event,
-        });
-      },
-      onError: () => {
-        messageApi.open({
-          type: "error",
-          content: "Ko thể tải ảnh lên! Hãy thử lại sau",
-        });
-      },
-    }
-  );
-
   const setupEventValues = (values) => {
     return {
       eventName: values?.eventName,
-      description: JSON.stringify(values?.description.ops),
       // ===========================================
       startDate: values?.processingDate,
       processingDate: values?.date?.[0],
       endDate: values?.date?.[1],
       // ===========================================
       location: values?.location,
-      estBudget: +values?.estBudget, //
       eventTypeId: values?.eventTypeId,
     };
   };
@@ -128,21 +107,17 @@ const ContractPage = () => {
   const onFinish = (values) => {
     console.log("Success:", values);
 
-    const formData = new FormData();
-    formData.append("file", values?.coverUrl?.[0]?.originFileObj);
-    formData.append("folderName", "event");
-
     const eventValues = setupEventValues(values);
 
     const contractValues = {
       ...values.contract,
-      //   contractValue: `${values.contract.contractValue}`,
+      ...eventValues,
       paymentDate: momenttz().format("YYYY-MM-DD"),
     };
+    console.log("contractValues > ", contractValues);
 
-    uploadFileMutate({
-      formData,
-      event: eventValues,
+    createContractMutate({
+      customerContactId: contactId,
       contract: contractValues,
     });
   };
@@ -174,7 +149,7 @@ const ContractPage = () => {
       {contextHolder}
 
       <LockLoadingModal
-        isModalOpen={uploadIsLoading || createContractIsLoading}
+        isModalOpen={createContractIsLoading}
         label="Đang tạo hợp đồng và gửi cho khách hàng ..."
       />
 
@@ -228,7 +203,6 @@ const ContractPage = () => {
               momenttz(contactInfo?.endDate).format("YYYY-MM-DD"),
             ],
             eventTypeId: contactInfo?.eventType,
-            estBudget: contactInfo?.budget ?? 0,
             contract: {
               customerName: contactInfo?.customerInfo?.fullName,
               customerEmail: contactInfo?.customerInfo?.email,
@@ -264,11 +238,7 @@ const ContractPage = () => {
                   });
                 }}
               >
-                <Input
-                  disabled
-                  placeholder="Nhập tên khách hàng"
-                  size="large"
-                />
+                <Input placeholder="Nhập tên khách hàng" size="large" />
               </Form.Item>
 
               <Form.Item
@@ -488,264 +458,148 @@ const ContractPage = () => {
                 </Form.Item>
               </div>
 
-              <Form.Item
-                label={<Title title="Mô tả" />}
-                name="description"
-                rules={[
-                  {
-                    required: true,
-                    message: "Chưa nhập mô tả!",
-                  },
-                ]}
-              >
-                <ReactQuill
-                  className="h-36 mb-10"
-                  theme="snow"
-                  placeholder="Nhập mô tả"
-                  onChange={(content, delta, source, editor) => {
-                    // Update to specific field
-                    form.setFieldsValue({ description: editor.getContents() });
-                  }}
-                />
-              </Form.Item>
-
-              <>
-                <div className="flex space-x-10">
-                  <Form.Item
-                    className="w-[40%]"
-                    label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
-                    name="date"
-                    rules={[
-                      {
-                        validator: (rule, value) => {
-                          if (value && value?.[0] && value?.[1]) {
-                            return Promise.resolve();
-                          }
-                          return Promise.reject("Chưa chọn thời gian tổ chức");
-                        },
-                      },
-                    ]}
-                  >
-                    <ConfigProvider locale={viVN}>
-                      <RangePicker
-                        size="large"
-                        className="w-full"
-                        defaultValue={[
-                          dayjs(contactInfo?.startDate, "YYYY-MM-DD"),
-                          dayjs(contactInfo?.endDate, "YYYY-MM-DD"),
-                        ]}
-                        onChange={(value) => {
-                          // Update to specific field
-                          form.setFieldsValue({
-                            date: value?.map((item) =>
-                              momenttz(item?.$d).format("YYYY-MM-DD")
-                            ),
-                          });
-
-                          // Get date in range
-                          const startDate = momenttz(value?.[0]?.$d);
-                          const endDate = momenttz(value?.[1]?.$d);
-
-                          // Get processing date in range
-                          const selectedDate = momenttz(
-                            form.getFieldValue("processingDate")?.$d
-                          );
-
-                          // Check if processing date is not in range  => reset processing date
-                          if (
-                            !selectedDate.isBetween(
-                              startDate,
-                              endDate,
-                              null,
-                              "[]"
-                            ) ||
-                            !value
-                          ) {
-                            form.resetFields(["processingDate"]);
-                          }
-                        }}
-                        disabledDate={(current) => {
-                          return current && current < momenttz().startOf("day");
-                        }}
-                        format={"DD/MM/YYYY"}
-                      />
-                    </ConfigProvider>
-                  </Form.Item>
-
-                  <Form.Item
-                    className="flex-1"
-                    label={<Title title="Ngày bắt đầu dự án" />}
-                    name="processingDate"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa chọn ngày bắt đầu!",
-                      },
-                    ]}
-                  >
-                    <ConfigProvider locale={viVN}>
-                      <DatePicker
-                        size="large"
-                        defaultValue={
-                          form.getFieldValue("processingDate")
-                            ? dayjs(
-                                form.getFieldValue("processingDate"),
-                                "YYYY-MM-DD"
-                              )
-                            : null
+              <div className="flex space-x-10">
+                <Form.Item
+                  className="w-[40%]"
+                  label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
+                  name="date"
+                  rules={[
+                    {
+                      validator: (rule, value) => {
+                        if (value && value?.[0] && value?.[1]) {
+                          return Promise.resolve();
                         }
-                        className="w-full"
-                        onChange={(value) => {
-                          form.setFieldsValue({
-                            processingDate: momenttz(value?.$d).format(
+                        return Promise.reject("Chưa chọn thời gian tổ chức");
+                      },
+                    },
+                  ]}
+                >
+                  <ConfigProvider locale={viVN}>
+                    <RangePicker
+                      size="large"
+                      className="w-full"
+                      defaultValue={[
+                        dayjs(contactInfo?.startDate, "YYYY-MM-DD"),
+                        dayjs(contactInfo?.endDate, "YYYY-MM-DD"),
+                      ]}
+                      onChange={(value) => {
+                        // Update to specific field
+                        form.setFieldsValue({
+                          date: value?.map((item) =>
+                            momenttz(item?.$d).format("YYYY-MM-DD")
+                          ),
+                        });
+
+                        // Get date in range
+                        const startDate = momenttz(value?.[0]?.$d);
+                        const endDate = momenttz(value?.[1]?.$d);
+
+                        // Get processing date in range
+                        const selectedDate = momenttz(
+                          form.getFieldValue("processingDate")?.$d
+                        );
+
+                        // Check if processing date is not in range  => reset processing date
+                        if (
+                          !selectedDate.isBetween(
+                            startDate,
+                            endDate,
+                            null,
+                            "[]"
+                          ) ||
+                          !value
+                        ) {
+                          form.resetFields(["processingDate"]);
+                        }
+                      }}
+                      disabledDate={(current) => {
+                        return current && current < momenttz().startOf("day");
+                      }}
+                      format={"DD/MM/YYYY"}
+                    />
+                  </ConfigProvider>
+                </Form.Item>
+
+                <Form.Item
+                  className="flex-1"
+                  label={<Title title="Ngày bắt đầu dự án" />}
+                  name="processingDate"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Chưa chọn ngày bắt đầu!",
+                    },
+                  ]}
+                >
+                  <ConfigProvider locale={viVN}>
+                    <DatePicker
+                      size="large"
+                      defaultValue={
+                        form.getFieldValue("processingDate")
+                          ? dayjs(
+                              form.getFieldValue("processingDate"),
                               "YYYY-MM-DD"
-                            ),
-                          });
-                        }}
-                        disabledDate={(current) => {
-                          const startDate = form.getFieldValue("date")?.[0];
-                          const endDate = form.getFieldValue("date")?.[1];
+                            )
+                          : null
+                      }
+                      className="w-full"
+                      onChange={(value) => {
+                        form.setFieldsValue({
+                          processingDate: momenttz(value?.$d).format(
+                            "YYYY-MM-DD"
+                          ),
+                        });
+                      }}
+                      disabledDate={(current) => {
+                        const startDate = form.getFieldValue("date")?.[0];
+                        const endDate = form.getFieldValue("date")?.[1];
 
-                          if (!startDate && !endDate) {
-                            return (
-                              current && current < momenttz().startOf("day")
-                            );
-                          }
+                        if (!startDate && !endDate) {
+                          return current && current < momenttz().startOf("day");
+                        }
 
-                          return (
-                            current >
+                        return (
+                          (current && current < momenttz().startOf("day")) ||
+                          current >
                             momenttz(startDate, "YYYY-MM-DD")
                               .add(1, "day")
                               .startOf("day")
-                          );
-                        }}
-                        format={"DD/MM/YYYY"}
-                      />
-                    </ConfigProvider>
-                  </Form.Item>
-
-                  <Form.Item
-                    className="w-1/3"
-                    label={<Title title="Thể loại sự kiện" />}
-                    name="eventTypeId"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa chọn thể loại sự kiện!",
-                      },
-                    ]}
-                  >
-                    <Select
-                      size="large"
-                      options={
-                        eventType?.map((item) => ({
-                          value: item?.id,
-                          label: item?.typeName,
-                        })) ?? []
-                      }
-                      loading={eventTypeIsLoading}
-                      placeholder="Chọn 1 thể loại"
+                        );
+                      }}
+                      format={"DD/MM/YYYY"}
                     />
-                  </Form.Item>
-                </div>
+                  </ConfigProvider>
+                </Form.Item>
 
-                <div className="flex space-x-10">
-                  <Form.Item
-                    className="w-[20%]"
-                    label={<Title title="Ngân sách" />}
-                    name="estBudget"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa nhập ngân sách!",
-                      },
-                    ]}
-                  >
-                    <div className="flex items-center gap-x-3">
-                      <InputNumber
-                        size="large"
-                        className="w-full"
-                        defaultValue={contactInfo?.budget ?? 0}
-                        min={100000}
-                        step={100000}
-                        formatter={(value) =>
-                          `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                        }
-                        parser={(value) => {
-                          form.setFieldsValue({
-                            estBudget: value.replace(/,/g, ""),
-                          });
-                          return `${value}`.replace(/,/g, "");
-                        }}
-                        onStep={(value) => {
-                          form.setFieldsValue({ estBudget: value });
-                        }}
-                      />
-                      <p className="text-base font-medium">VNĐ</p>
-                    </div>
-                  </Form.Item>
-
-                  <Form.Item
-                    className="flex-1"
-                    name="coverUrl"
-                    label={<Title title="Ảnh về sự kiện" />}
-                    valuePropName="fileList"
-                    getValueFromEvent={(e) => e?.fileList}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa chọn ảnh đại diện",
-                      },
-                      {
-                        validator(_, fileList) {
-                          return new Promise((resolve, reject) => {
-                            if (
-                              fileList &&
-                              fileList[0]?.size > 10 * 1024 * 1024
-                            ) {
-                              reject("File quá lớn ( <10MB )");
-                            } else {
-                              resolve();
-                            }
-                          });
-                        },
-                      },
-                    ]}
-                  >
-                    <Upload.Dragger
-                      className="w-1/2 flex items-center space-x-3"
-                      maxCount={1}
-                      listType="picture"
-                      customRequest={({ file, onSuccess }) => {
-                        setTimeout(() => {
-                          onSuccess("ok");
-                        }, 0);
-                      }}
-                      showUploadList={{
-                        showPreviewIcon: false,
-                      }}
-                      beforeUpload={(file) => {
-                        return new Promise((resolve, reject) => {
-                          if (file && file?.size > 10 * 1024 * 1024) {
-                            reject("File quá lớn ( <10MB )");
-                            return false;
-                          } else {
-                            setFileList(file);
-                            resolve();
-                            return true;
-                          }
-                        });
-                      }}
-                    >
-                      Kéo tập tin vào đây
-                    </Upload.Dragger>
-                  </Form.Item>
-                </div>
-              </>
+                <Form.Item
+                  className="w-1/3"
+                  label={<Title title="Thể loại sự kiện" />}
+                  name="eventTypeId"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Chưa chọn thể loại sự kiện!",
+                    },
+                  ]}
+                >
+                  <Select
+                    size="large"
+                    options={
+                      eventType?.map((item) => ({
+                        value: item?.id,
+                        label: item?.typeName,
+                      })) ?? []
+                    }
+                    loading={eventTypeIsLoading}
+                    placeholder="Chọn 1 thể loại"
+                    disabled
+                  />
+                </Form.Item>
+              </div>
             </div>
           </>
 
-          <div className="text-center mb-5">
+          <div className="text-center mt-8 mb-6">
             <Popconfirm
               title="Bạn đã chắc chắn với các thông tin trên ?"
               description={

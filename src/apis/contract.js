@@ -19,9 +19,22 @@ export const postContractEvidence = (contractId, formData) =>
     data: formData,
   });
 
-export const createContractToCustomer = ({customerContactId, contract}) =>
+export const createContractToCustomer = ({ customerContactId, contract }) =>
   http({
     url: `/contracts/${customerContactId}/new`,
     method: "post",
     data: contract,
   });
+
+export const getAllContract = ({ sizePage, currentPage, sort, status }) =>
+  http({
+    url: `/contracts?sizePage=${sizePage}&currentPage=${currentPage}&sortProperty=createdAt&sort=${sort}&status=${status}`,
+  });
+
+export const getContractFile = () =>
+  http({
+    url: `/contracts/file`,
+  });
+
+export const getContractInfoByContact = (customerContactId) =>
+  http({ url: `/contracts/file/${customerContactId}` });
