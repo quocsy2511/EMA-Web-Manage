@@ -7,16 +7,14 @@ import {
   ConfigProvider,
   DatePicker,
   Drawer,
+  FloatButton,
   Form,
-  Image,
   Input,
   InputNumber,
   Popconfirm,
-  Progress,
   Select,
   Spin,
   Steps,
-  Switch,
   Tooltip,
   Upload,
   message,
@@ -27,15 +25,16 @@ import momenttz from "moment-timezone";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createEvent } from "../../apis/events";
+import { createEvent, getEventType } from "../../apis/events";
 import { uploadFile } from "../../apis/files";
-import { createContract } from "../../apis/contract";
+import { getContractInfoByContact } from "../../apis/contract";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 import { getCustomerContactDetail } from "../../apis/contact";
 import dayjs from "dayjs";
 import clsx from "clsx";
-import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import { FaPlus } from "react-icons/fa6";
+import { getPlanByContact } from "../../apis/planning";
+import { BsPiggyBank } from "react-icons/bs";
 
 const { RangePicker } = DatePicker;
 
@@ -46,10 +45,32 @@ const Title = memo(({ title }) => (
 ));
 
 const DefaultTemplateTask = memo(
-  ({ isDefault, custom, toggleSelectTemplateTasks, messageApi }) => {
+  ({
+    isDefault,
+    custom,
+    toggleSelectTemplateTasks,
+    messageApi,
+    task,
+    handleUpdateDesc,
+  }) => {
     const [isSelected, setIsSelected] = useState(true);
     const [budget, setBudget] = useState(0);
-    console.log("budget >> ", budget);
+    const [descText, setDescText] = useState();
+    // console.log("task > ", task);
+    // console.log("descText > ", descText);
+
+    useEffect(() => {
+      let identifier;
+      if (descText) {
+        identifier = setTimeout(() => {
+          handleUpdateDesc(task?.itemId, JSON.stringify(descText?.ops));
+        }, 1000);
+      }
+
+      return () => {
+        identifier && clearTimeout(identifier);
+      };
+    }, [descText]);
 
     return (
       <Tooltip title={!isDefault && !custom && "Chọn"}>
@@ -68,32 +89,18 @@ const DefaultTemplateTask = memo(
         >
           <div className="flex justify-between items-center space-x-5 p-5 pb-3 border-b">
             <p className="text-xl font-medium truncate max-w-[80%]">
-              Tên hạng mục 1
+              {task?.itemName}
             </p>
             {isDefault ? (
-              <ConfigProvider
-                theme={{
-                  components: {
-                    Switch: {
-                      handleSize: 20,
-                      trackHeight: 30,
-                      trackPadding: 5,
-                      trackMinWidth: 50,
-                    },
-                  },
-                }}
-              >
-                <Switch
-                  className="bg-slate-300"
-                  defaultChecked
-                  // defaultValue={true}
-                  // value={isSelected}
-                  onChange={(checked) => {
-                    console.log(`switch to ${checked}`);
-                    setIsSelected(checked);
-                  }}
-                />
-              </ConfigProvider>
+              <div className="flex items-center space-x-1">
+                <BsPiggyBank className="text-green-600 text-xl " />
+                <p className="text-sm font-medium text-green-600">
+                  {(
+                    task?.itemPlannedPrice * task?.itemPlannedAmount
+                  ).toLocaleString()}{" "}
+                  VNĐ
+                </p>
+              </div>
             ) : (
               custom && (
                 <Popconfirm
@@ -110,43 +117,21 @@ const DefaultTemplateTask = memo(
             )}
           </div>
 
-          <div className="p-5 pt-3">
-            <Title title="Mô tả" />
-            <p
-              className="text-base text-slate-500 mt-1 border rounded-lg p-3 max-h-44 overflow-y-scroll"
-              dangerouslySetInnerHTML={{
-                __html: new QuillDeltaToHtmlConverter(
-                  JSON.parse(
-                    '[{"insert":"Hội thảo chuyên đề này sẽ tập trung vào việc chia sẻ những xu hướng mới nhất trong ngành quảng cáo và tiếp thị, giúp các doanh nghiệp cập nhật những chiến lược hiệu quả nhất để thu hút khách hàng tiềm năng và tăng doanh thu.\\n\\n Các chuyên gia hàng đầu trong ngành sẽ chia sẻ kiến thức và kinh nghiệm của họ về các chủ đề như quảng cáo kỹ thuật số, marketing nội dung, SEO, và mạng xã hội. \\n\\nHội thảo cũng sẽ cung cấp cho các doanh nghiệp cơ hội để giao lưu và học hỏi lẫn nhau.\\n"}]'
-                  )
-                ).convert(),
-              }}
-            />
+          <div className="p-5 pt-3 pb-20">
+            <div>
+              <Title title="Mô tả" />
 
-            {(isDefault || custom) && (
-              <div className="mt-5 flex space-x-5 items-center">
-                <Title title="Ngân sách" />
-                <InputNumber
-                  size="large"
-                  className="w-1/3"
-                  // defaultValue={form.getFieldValue("estBudget")}
-                  defaultValue={0}
-                  min={0}
-                  step={100000}
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                  parser={(value) => {
-                    setBudget(value.replace(/,/g, ""));
-                    return `${value}`.replace(/,/g, "");
-                  }}
-                  onStep={(value) => {
-                    setBudget(value);
-                  }}
-                />
-                <p>VNĐ</p>
-              </div>
-            )}
+              <ReactQuill
+                // value={descText}
+                defaultValue={task?.itemDescription}
+                className="mt-2 h-20"
+                theme="snow"
+                placeholder="Mô tả về công việc"
+                onChange={(content, delta, source, editor) => {
+                  setDescText(editor.getContents());
+                }}
+              />
+            </div>
           </div>
         </div>
       </Tooltip>
@@ -194,30 +179,66 @@ const EventCreationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const contactId = location.state?.contactId;
+
   const [fileList, setFileList] = useState();
   const [current, setCurrent] = useState(0);
   const [selectTemplateTasks, setSelectTemplateTasks] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [taskList, setTaskList] = useState([]);
+  console.log("taskList > ", taskList);
 
   const [form] = Form.useForm();
   const [messageApi] = message.useMessage();
   const { notification } = App.useApp();
 
   const { data: contactInfo, isLoading: contactInfoIsLoading } = useQuery(
-    ["contact", location.state?.contactId],
-    () => getCustomerContactDetail(location.state?.contactId),
+    ["contact", contactId],
+    () => getContractInfoByContact(contactId),
     {
       select: (data) => {
         return {
           ...data,
-          startDate: momenttz(data?.startDate).format("YYYY-MM-DD"),
-          endDate: momenttz(data?.endDate).format("YYYY-MM-DD"),
+          contractTotalBudget: parseInt(data?.contractTotalBudget),
         };
       },
       refetchOnWindowFocus: false,
     }
   );
   console.log("contactInfo > ", contactInfo);
+
+  const { data: eventType, isLoading: eventTypeIsLoading } = useQuery(
+    ["event-type"],
+    getEventType,
+    { refetchOnWindowFocus: false }
+  );
+
+  const {
+    data: planningData,
+    isLoading: planningIsLoading,
+    isError: planningIsError,
+  } = useQuery(["planning", contactId], () => getPlanByContact(contactId), {
+    select: (data) => {
+      return data?.plan
+        ?.map((category) =>
+          category?.items?.map((item, index) => ({
+            itemId: item?.id,
+            itemName: item?.itemName,
+            itemDescription: item?.description,
+            itemPriority: item?.priority,
+            itemPlannedUnit: item?.plannedUnit,
+            itemPlannedAmount: item?.plannedAmount,
+            itemPlannedPrice: item?.plannedPrice,
+          }))
+        )
+        .flat();
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    planningData && setTaskList(planningData);
+  }, [planningData]);
 
   // Create event after upload banner image
   const { mutate: createEventMutate, isLoading: createEventIsLoading } =
@@ -292,131 +313,112 @@ const EventCreationPage = () => {
   const onFinish = (values) => {
     console.log("Success:", values);
 
-    const formData = new FormData();
-    formData.append("file", fileList);
-    formData.append("folderName", "event");
+    setCurrent((prev) => prev + 1);
 
-    const eventValues = setupEventValues(values);
+    // const formData = new FormData();
+    // formData.append("file", fileList);
+    // formData.append("folderName", "event");
 
-    const contractValues = {
-      ...values.contract,
-      contractValue: `${values.contract.contractValue}`,
-      paymentDate: momenttz().format("YYYY-MM-DD"),
-    };
+    // const eventValues = setupEventValues(values);
 
-    uploadFileMutate({
-      formData,
-      event: eventValues,
-      contract: contractValues,
-    });
+    // const contractValues = {
+    //   ...values.contract,
+    //   contractValue: `${values.contract.contractValue}`,
+    //   paymentDate: momenttz().format("YYYY-MM-DD"),
+    // };
+
+    // uploadFileMutate({
+    //   formData,
+    //   event: eventValues,
+    //   contract: contractValues,
+    // });
   };
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
 
+  const handleUpdateDesc = (itemId, desc) => {
+    setTaskList((prev) =>
+      prev?.map((item) => {
+        if (item?.itemId === itemId) {
+          return { ...item, itemDescription: desc };
+        } else {
+          return item;
+        }
+      })
+    );
+  };
+
   const steps = [
-    {
-      key: 1,
-      title: "Thông tin cơ bản",
-      content: (
-        <div className="">
-          <div className="flex space-x-10">
-            <Form.Item
-              className="w-[30%]"
-              label={<Title title="Tên sự kiện" />}
-              name="eventName"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập tên sự kiện!",
-                },
-              ]}
-              onChange={(value) => {
-                // Update to specific field
-                form.setFieldsValue({ eventName: value.target.value });
-              }}
-            >
-              <Input placeholder="Nhập tên sự kiện" size="large" />
-            </Form.Item>
-            <Form.Item
-              className="w-[70%]"
-              label={<Title title="Địa điểm" />}
-              name="location"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập địa điểm!",
-                },
-              ]}
-              onChange={(value) => {
-                // Update to specific field
-                form.setFieldsValue({ location: value.target.value });
-              }}
-            >
-              <Input placeholder="Nhập địa điểm" size="large" />
-            </Form.Item>
-          </div>
-
-          <Form.Item
-            label={<Title title="Mô tả" />}
-            name="description"
-            rules={[
-              {
-                required: true,
-                message: "Chưa nhập mô tả!",
-              },
-            ]}
-          >
-            <ReactQuill
-              className="h-36 mb-10"
-              theme="snow"
-              placeholder="Nhập mô tả"
-              onChange={(content, delta, source, editor) => {
-                // Update to specific field
-                form.setFieldsValue({ description: editor.getContents() });
-              }}
-            />
-          </Form.Item>
-
-          <div className="flex justify-end mt-5">
-            <Button
-              className=""
-              onClick={() => {
-                form
-                  .validateFields()
-                  .then((values) => {
-                    setCurrent((prev) => prev + 1);
-                  })
-                  .catch((errorInfo) => {
-                    console.log("Validation Fields:", errorInfo);
-                    const values = errorInfo.values;
-                    if (
-                      !!values.eventName &&
-                      !!values.location &&
-                      !!values.description
-                    ) {
-                      setCurrent((prev) => prev + 1);
-                    }
-                  });
-              }}
-              size="large"
-              type="primary"
-            >
-              Tiếp tục
-            </Button>
-          </div>
-        </div>
-      ),
-    },
     // {
-    //   key: 2,
-    //   title: "Thông tin chi tiết",
+    //   key: 1,
+    //   title: "Thông tin sự kiện",
     //   content: (
-    //     <>
+    //     <div className="">
     //       <div className="flex space-x-10">
     //         <Form.Item
-    //           className="w-[40%]"
+    //           className="w-[30%]"
+    //           label={<Title title="Tên sự kiện" />}
+    //           name="eventName"
+    //           rules={[
+    //             {
+    //               required: true,
+    //               message: "Chưa nhập tên sự kiện!",
+    //             },
+    //           ]}
+    //           onChange={(value) => {
+    //             // Update to specific field
+    //             form.setFieldsValue({ eventName: value.target.value });
+    //           }}
+    //         >
+    //           <Input placeholder="Nhập tên sự kiện" size="large" />
+    //         </Form.Item>
+    //         <Form.Item
+    //           className="w-[70%]"
+    //           label={<Title title="Địa điểm" />}
+    //           name="location"
+    //           rules={[
+    //             {
+    //               required: true,
+    //               message: "Chưa nhập địa điểm!",
+    //             },
+    //           ]}
+    //           onChange={(value) => {
+    //             // Update to specific field
+    //             form.setFieldsValue({ location: value.target.value });
+    //           }}
+    //         >
+    //           <Input placeholder="Nhập địa điểm" size="large" />
+    //         </Form.Item>
+    //       </div>
+
+    //       <div>
+    //         <Form.Item
+    //           label={<Title title="Mô tả" />}
+    //           name="description"
+    //           rules={[
+    //             {
+    //               required: true,
+    //               message: "Chưa nhập mô tả!",
+    //             },
+    //           ]}
+    //         >
+    //           <ReactQuill
+    //             className="h-36 mb-10"
+    //             theme="snow"
+    //             placeholder="Nhập mô tả"
+    //             onChange={(content, delta, source, editor) => {
+    //               // Update to specific field
+    //               form.setFieldsValue({ description: editor.getContents() });
+    //             }}
+    //           />
+    //         </Form.Item>
+    //       </div>
+
+    //       <div className="flex space-x-10">
+    //         <Form.Item
+    //           className="w-[35%]"
     //           label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
     //           name="date"
     //           rules={[
@@ -472,7 +474,7 @@ const EventCreationPage = () => {
     //         </Form.Item>
 
     //         <Form.Item
-    //           className="w-[30%]"
+    //           className="w-[25%]"
     //           label={<Title title="Ngày bắt đầu dự án" />}
     //           name="processingDate"
     //           rules={[
@@ -485,14 +487,10 @@ const EventCreationPage = () => {
     //           <ConfigProvider locale={viVN}>
     //             <DatePicker
     //               size="large"
-    //               defaultValue={
-    //                 form.getFieldValue("processingDate")
-    //                   ? dayjs(
-    //                       form.getFieldValue("processingDate"),
-    //                       "YYYY-MM-DD"
-    //                     )
-    //                   : null
-    //               }
+    //               defaultValue={dayjs(
+    //                 contactInfo?.processingDate,
+    //                 "YYYY-MM-DD"
+    //               )}
     //               className="w-full"
     //               onChange={(value) => {
     //                 form.setFieldsValue({
@@ -508,10 +506,8 @@ const EventCreationPage = () => {
     //                 }
 
     //                 return (
-    //                   current >
-    //                   moment(startDate, "YYYY-MM-DD")
-    //                     .add(1, "day")
-    //                     .startOf("day")
+    //                   current > moment(startDate, "YYYY-MM-DD")
+
     //                   //  || current > moment(endDate, "YYYY-MM-DD").endOf("day")
     //                 );
     //               }}
@@ -519,11 +515,9 @@ const EventCreationPage = () => {
     //             />
     //           </ConfigProvider>
     //         </Form.Item>
-    //       </div>
 
-    //       <div className="flex space-x-10">
     //         <Form.Item
-    //           className="w-[40%]"
+    //           className="flex-1"
     //           label={<Title title="Thể loại sự kiện" />}
     //           name="eventTypeId"
     //           rules={[
@@ -535,6 +529,7 @@ const EventCreationPage = () => {
     //         >
     //           <Select
     //             size="large"
+    //             defaultValue={contactInfo?.eventTypeId}
     //             options={
     //               eventType?.map((item) => ({
     //                 value: item?.id,
@@ -545,7 +540,9 @@ const EventCreationPage = () => {
     //             placeholder="Chọn 1 thể loại"
     //           />
     //         </Form.Item>
+    //       </div>
 
+    //       <div className="flex space-x-10 items-center">
     //         <Form.Item
     //           className="w-[30%]"
     //           label={<Title title="Ngân sách ước lượng" />}
@@ -561,7 +558,7 @@ const EventCreationPage = () => {
     //             <InputNumber
     //               size="large"
     //               className="w-full"
-    //               defaultValue={form.getFieldValue("estBudget")}
+    //               defaultValue={contactInfo?.contractTotalBudget}
     //               min={10000}
     //               step={100000}
     //               formatter={(value) =>
@@ -580,378 +577,86 @@ const EventCreationPage = () => {
     //             <p className="text-base font-medium">VNĐ</p>
     //           </div>
     //         </Form.Item>
+
+    //         <Form.Item
+    //           className="flex-1"
+    //           name="coverUrl"
+    //           label={<Title title="Ảnh về sự kiện" />}
+    //           valuePropName="fileList"
+    //           getValueFromEvent={(e) => e?.fileList}
+    //           rules={[
+    //             {
+    //               required: true,
+    //               message: "Chưa chọn ảnh đại diện",
+    //             },
+    //             {
+    //               validator(_, fileList) {
+    //                 return new Promise((resolve, reject) => {
+    //                   if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+    //                     reject("File quá lớn ( <10MB )");
+    //                   } else {
+    //                     resolve();
+    //                   }
+    //                 });
+    //               },
+    //             },
+    //           ]}
+    //         >
+    //           <Upload
+    //             className="flex items-center space-x-3"
+    //             maxCount={1}
+    //             listType="picture"
+    //             customRequest={({ file, onSuccess }) => {
+    //               setTimeout(() => {
+    //                 onSuccess("ok");
+    //               }, 0);
+    //             }}
+    //             showUploadList={{
+    //               showPreviewIcon: false,
+    //             }}
+    //             beforeUpload={(file) => {
+    //               return new Promise((resolve, reject) => {
+    //                 if (file && file?.size > 10 * 1024 * 1024) {
+    //                   reject("File quá lớn ( <10MB )");
+    //                   return false;
+    //                 } else {
+    //                   setFileList(file);
+    //                   resolve();
+    //                   return true;
+    //                 }
+    //               });
+    //             }}
+    //           >
+    //             <p className="hover:text-black hover:border-black transition-colors border border-slate-200 rounded-2xl border-dashed px-5 py-5 text-slate-400">
+    //               Kéo tập tin vào đây
+    //             </p>
+    //           </Upload>
+    //         </Form.Item>
     //       </div>
 
-    //       <Form.Item
-    //         className="w-[20%]"
-    //         name="coverUrl"
-    //         label={<Title title="Ảnh về sự kiện" />}
-    //         valuePropName="fileList"
-    //         getValueFromEvent={(e) => e?.fileList}
-    //         rules={[
-    //           {
-    //             required: true,
-    //             message: "Chưa chọn ảnh đại diện",
-    //           },
-    //           {
-    //             validator(_, fileList) {
-    //               return new Promise((resolve, reject) => {
-    //                 if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
-    //                   reject("File quá lớn ( <10MB )");
-    //                 } else {
-    //                   resolve();
-    //                 }
-    //               });
-    //             },
-    //           },
-    //         ]}
-    //       >
-    //         <Upload.Dragger
-    //           maxCount={1}
-    //           listType="picture"
-    //           customRequest={({ file, onSuccess }) => {
-    //             setTimeout(() => {
-    //               onSuccess("ok");
-    //             }, 0);
-    //           }}
-    //           showUploadList={{
-    //             showPreviewIcon: false,
-    //           }}
-    //           beforeUpload={(file) => {
-    //             return new Promise((resolve, reject) => {
-    //               if (file && file?.size > 10 * 1024 * 1024) {
-    //                 reject("File quá lớn ( <10MB )");
-    //                 return false;
-    //               } else {
-    //                 setFileList(file);
-    //                 resolve();
-    //                 return true;
-    //               }
-    //             });
-    //           }}
-    //         >
-    //           Kéo tập tin vào đây
-    //         </Upload.Dragger>
-    //       </Form.Item>
-
-    //       <div
-    //         className={clsx(
-    //           "flex justify-between",
-    //           { "mt-5": fileList },
-    //           { "mt-10": !fileList }
-    //         )}
-    //       >
-    //         <Button
-    //           onClick={() => setCurrent((prev) => prev - 1)}
-    //           size="large"
-    //           type="default"
-    //         >
-    //           Quay lại
-    //         </Button>
+    //       <div className="flex justify-end mt-10 mb-5">
     //         <Button
     //           className=""
-    //           onClick={() => {
-    //             form
-    //               .validateFields()
-    //               .then((values) => {
-    //                 console.log("success > ", values);
-    //                 setCurrent((prev) => prev + 1);
-    //               })
-    //               .catch((errorInfo) => {
-    //                 console.log("Validation Fields:", errorInfo);
-    //                 const values = errorInfo.values;
-    //                 if (
-    //                   !!values.date &&
-    //                   !!values.processingDate &&
-    //                   !!values.description &&
-    //                   !!values.estBudget &&
-    //                   !!values.coverUrl
-    //                 ) {
-    //                   setCurrent((prev) => prev + 1);
-    //                 }
-    //               });
-    //           }}
+    //           onClick={() => form.submit()}
     //           size="large"
     //           type="primary"
     //         >
     //           Tiếp tục
     //         </Button>
     //       </div>
-    //     </>
-    //   ),
-    // },
-    // {
-    //   key: 3,
-    //   title: "Điều khoản hợp đồng",
-    //   content: (
-    //     <>
-    //       <div className="flex space-x-10">
-    //         <Form.Item
-    //           className="w-1/2"
-    //           label={<Title title="Tên khách hàng" />}
-    //           // name="customerName"
-    //           name={["contract", "customerName"]}
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập tên khách hàng!",
-    //             },
-    //           ]}
-    //           onChange={(value) => {
-    //             // Update to specific field
-    //             form.setFieldsValue({
-    //               contract: { customerName: value.target.value },
-    //             });
-    //           }}
-    //         >
-    //           <Input disabled placeholder="Nhập tên khách hàng" size="large" />
-    //         </Form.Item>
-
-    //         <Form.Item
-    //           className="w-1/2"
-    //           label={<Title title="Email" />}
-    //           // name="customerEmail"
-    //           name={["contract", "customerEmail"]}
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập email khách hàng!",
-    //             },
-    //             {
-    //               type: "email",
-    //               message: "Địa chỉ email không hợp lệ!",
-    //             },
-    //           ]}
-    //           onChange={(value) => {
-    //             // Update to specific field
-    //             form.setFieldsValue({
-    //               contract: { customerEmail: value.target.value },
-    //             });
-    //           }}
-    //         >
-    //           <Input
-    //             disabled
-    //             placeholder="Nhập email khách hàng"
-    //             size="large"
-    //           />
-    //         </Form.Item>
-    //       </div>
-
-    //       <Form.Item
-    //         className="w-full"
-    //         label={<Title title="Địa chỉ" />}
-    //         // name="customerAddress"
-    //         name={["contract", "customerAddress"]}
-    //         rules={[
-    //           {
-    //             required: true,
-    //             message: "Chưa nhập địa chỉ khách hàng!",
-    //           },
-    //         ]}
-    //         onChange={(value) => {
-    //           // Update to specific field
-    //           form.setFieldsValue({
-    //             contract: { customerAddress: value.target.value },
-    //           });
-    //         }}
-    //       >
-    //         <Input
-    //           disabled
-    //           placeholder="Nhập địa chỉ khách hàng"
-    //           size="large"
-    //         />
-    //       </Form.Item>
-
-    //       <div className="flex space-x-10">
-    //         <Form.Item
-    //           className="flex-1"
-    //           label={<Title title="Căn cước công dân / Chứng minh nhân dân" />}
-    //           // name="customerNationalId"
-    //           name={["contract", "customerNationalId"]}
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập CCCD / CMND!",
-    //             },
-    //             {
-    //               pattern: /^[0-9]{12}$/,
-    //               message: "CCCD / CMND cần bao gồm 12 số!",
-    //             },
-    //           ]}
-    //           onChange={(value) => {
-    //             // Update to specific field
-    //             form.setFieldsValue({
-    //               contract: { customerNationalId: value.target.value },
-    //             });
-    //           }}
-    //         >
-    //           <Input
-    //             disabled
-    //             pattern="[0-9]*"
-    //             maxLength={12}
-    //             placeholder="Nhập CCCD / CMND"
-    //             size="large"
-    //           />
-    //         </Form.Item>
-
-    //         <div className="w-[10%] rounded-lg overflow-hidden">
-    //           <Image
-    //             className="rounded-lg overflow-hidden"
-    //             src={
-    //               contactInfo?.customerInfo?.nationalImages ??
-    //               "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-    //             }
-    //           />
-    //         </div>
-
-    //         <Form.Item
-    //           className="flex-1"
-    //           label={<Title title="Số điện thoại" />}
-    //           // name="customerPhoneNumber"
-    //           name={["contract", "customerPhoneNumber"]}
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập số điện thoại khách hàng!",
-    //             },
-    //             {
-    //               pattern: /^[0-9]{10}$/,
-    //               message: "Số điện thoại cần phải có 10 số!",
-    //             },
-    //           ]}
-    //           onChange={(value) => {
-    //             // Update to specific field
-    //             form.setFieldsValue({
-    //               contract: { customerPhoneNumber: value.target.value },
-    //             });
-    //           }}
-    //         >
-    //           <Input
-    //             disabled
-    //             pattern="[0-9]*"
-    //             maxLength={10}
-    //             max={10}
-    //             placeholder="Nhập số điện thoại khách hàng"
-    //             size="large"
-    //           />
-    //         </Form.Item>
-    //       </div>
-
-    //       <div className="flex space-x-10">
-    //         <Form.Item
-    //           className="w-[30%]"
-    //           label={<Title title="Giá trị hợp đồng" />}
-    //           name={["contract", "contractValue"]}
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập giá trị hợp đồng!",
-    //             },
-    //             {
-    //               pattern: /^[0-9,]*$/,
-    //               message: "Giá trị hợp đồng không có hiệu lực!!",
-    //             },
-    //           ]}
-    //         >
-    //           {/* <Input placeholder="Nhập giá trị hợp đồng" size="large" /> */}
-    //           <div className="flex items-center gap-x-3">
-    //             <InputNumber
-    //               size="large"
-    //               value={form.getFieldsValue().contract?.contractValue}
-    //               className="w-full"
-    //               placeholder="Nhập giá trị hợp đồng"
-    //               min={0}
-    //               step={100000}
-    //               formatter={(value) =>
-    //                 `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-    //               }
-    //               parser={(value) => {
-    //                 form.setFieldsValue({
-    //                   contract: { contractValue: +value.replace(/,/g, "") },
-    //                 });
-    //                 return `${value}`.replace(/,/g, "");
-    //               }}
-    //               onStep={(value) => {
-    //                 form.setFieldsValue({
-    //                   contract: { contractValue: +value },
-    //                 });
-    //               }}
-    //             />
-    //             <p className="text-base">VNĐ</p>
-    //           </div>
-    //         </Form.Item>
-    //         <Form.Item
-    //           className="w-[30%]"
-    //           label={<Title title="Hình thức thanh toán" />}
-    //           // name="paymentMethod"
-    //           name={["contract", "paymentMethod"]}
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập hình thức thanh toán!",
-    //             },
-    //           ]}
-    //           onChange={(value) => {
-    //             // Update to specific field
-    //             form.setFieldsValue({
-    //               contract: { paymentMethod: value.target.value },
-    //             });
-    //           }}
-    //         >
-    //           <Select
-    //             options={[
-    //               {
-    //                 value: "Tiền Mặt",
-    //                 label: "Tiền Mặt",
-    //               },
-    //               {
-    //                 value: "Chuyển Khoản",
-    //                 label: "Chuyển Khoản",
-    //               },
-    //             ]}
-    //             placeholder="Chọn hình thức thanh toán"
-    //             size="large"
-    //           />
-    //         </Form.Item>
-    //       </div>
-
-    //       <div className="flex justify-between mt-5">
-    //         <Button
-    //           onClick={() => setCurrent((prev) => prev - 1)}
-    //           size="large"
-    //           type="default"
-    //         >
-    //           Quay lại
-    //         </Button>
-
-    //         <Button size="large" type="primary" onClick={() => form.submit()}>
-    //           Tạo sự kiện
-    //         </Button>
-    //       </div>
-    //     </>
+    //     </div>
     //   ),
     // },
     {
-      key: 4,
-      title: "Hạng mục",
+      key: 2,
+      title: "Danh sách hạng mục",
       content: (
         <>
           <div className="mb-10">
             <Title title="Ngân sách" />
-            <div className="flex justify-between my-1">
-              <p className="text-base text-slate-400">Đã sử dụng</p>
-              <p className="text-base text-slate-400">Hạn mức</p>
-            </div>
-            <ConfigProvider theme={{}}>
-              <Progress
-                percent={10}
-                // success={{ percent: 10 }}
-              />
-            </ConfigProvider>
-            <div className="flex justify-between">
-              <p className="text-lg text-slate-500 font-medium">10,000 VNĐ</p>
-              <p className="text-lg text-slate-500 font-medium">100,000 VNĐ</p>
-            </div>
+            <p className="text-lg text-slate-500 font-medium">
+              {contactInfo?.contractTotalBudget.toLocaleString()} VNĐ
+            </p>
           </div>
 
           <div className="mb-10">
@@ -970,19 +675,20 @@ const EventCreationPage = () => {
                   <FaPlus className="text-2xl text-slate-200 group-hover:text-black/30 transition-colors" />
                 </div>
               </div>
-
-              {/* <DefaultTemplateTask /> */}
             </div>
           </div>
 
           <div className="">
             <Title title="Hạng mục mặc định" />
             <div className="flex flex-wrap mt-5">
-              <DefaultTemplateTask isDefault />
-              <DefaultTemplateTask isDefault />
-              <DefaultTemplateTask isDefault />
-              <DefaultTemplateTask isDefault />
-              <DefaultTemplateTask isDefault />
+              {planningData?.map((item) => (
+                <DefaultTemplateTask
+                  key={item?.itemId}
+                  isDefault
+                  task={item}
+                  handleUpdateDesc={handleUpdateDesc}
+                />
+              ))}
             </div>
           </div>
         </>
@@ -1022,7 +728,7 @@ const EventCreationPage = () => {
         animate={{ y: 0 }}
         className="bg-white px-8 py-5 rounded-2xl mt-6"
       >
-        <Spin spinning={contactInfoIsLoading}>
+        <Spin spinning={contactInfoIsLoading || planningIsLoading}>
           {contactInfoIsLoading ? (
             <div className="h-[calc(100vh/2)]" />
           ) : (
@@ -1040,13 +746,14 @@ const EventCreationPage = () => {
                   }
                 }}
                 initialValues={{
-                  location: contactInfo?.address,
-                  description: contactInfo?.note
+                  eventName: contactInfo?.eventName,
+                  location: contactInfo?.location,
+                  description: contactInfo?.description
                     ? {
                         ops: JSON.parse(
-                          contactInfo?.note?.startsWith(`[{"`)
-                            ? contactInfo?.note
-                            : parseJson(contactInfo?.note)
+                          contactInfo?.description?.startsWith(`[{"`)
+                            ? contactInfo?.description
+                            : parseJson(contactInfo?.description)
                         ),
                       }
                     : null,
@@ -1054,17 +761,9 @@ const EventCreationPage = () => {
                     momenttz(contactInfo?.startDate).format("YYYY-MM-DD"),
                     momenttz(contactInfo?.endDate).format("YYYY-MM-DD"),
                   ],
-                  eventTypeId: location.state?.eventType,
-                  estBudget: contactInfo?.budget ?? 0,
-                  contract: {
-                    customerName: contactInfo?.customerInfo?.fullName,
-                    customerEmail: contactInfo?.customerInfo?.email,
-                    customerAddress: contactInfo?.customerInfo?.address,
-                    customerNationalId: contactInfo?.customerInfo?.nationalId,
-                    customerPhoneNumber: contactInfo?.customerInfo?.phoneNumber,
-                    contractValue: contactInfo?.budget ?? 0,
-                    paymentMethod: "Chuyển Khoản",
-                  },
+                  estBudget: contactInfo?.contractTotalBudget ?? 0,
+                  processingDate: contactInfo?.processingDate,
+                  eventTypeId: contactInfo?.eventTypeId,
                 }}
               >
                 <Steps direction="horizontal" current={current} items={steps} />
@@ -1162,91 +861,14 @@ const EventCreationPage = () => {
                       },
                     ]}
                   />
-
-                  <Form.Item
-                    // name="customerName"
-                    name={["contract", "customerName"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa nhập tên khách hàng!",
-                      },
-                    ]}
-                  />
-                  <Form.Item
-                    // name="customerNationalId"
-                    name={["contract", "customerNationalId"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa nhập CCCD / CMND!",
-                      },
-                      {
-                        pattern: /^[0-9]{12}$/,
-                        message: "CCCD / CMND cần phải có 12 số!",
-                      },
-                    ]}
-                  />
-                  <Form.Item
-                    // name="customerAddress"
-                    name={["contract", "customerAddress"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa nhập địa chỉ khách hàng!",
-                      },
-                    ]}
-                  />
-                  <Form.Item
-                    // name="customerEmail"
-                    name={["contract", "customerEmail"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa nhập email khách hàng!",
-                      },
-                    ]}
-                  />
-                  <Form.Item
-                    // name="customerPhoneNumber"
-                    name={["contract", "customerPhoneNumber"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa nhập số điện thoại khách hàng!",
-                      },
-                      {
-                        pattern: /^[0-9]{10}$/,
-                        message: "Số điện thoại cần phải có 10 số!",
-                      },
-                    ]}
-                  />
-                  <Form.Item
-                    // name="contractValue"
-                    name={["contract", "contractValue"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa nhập giá trị hợp đồng khách hàng!",
-                      },
-                    ]}
-                  />
-                  <Form.Item
-                    // name="paymentMethod"
-                    name={["contract", "paymentMethod"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Chưa nhập hình thức thanh toán!",
-                      },
-                    ]}
-                  />
                 </div>
               </Form>
             </div>
           )}
         </Spin>
       </motion.div>
+
+      <FloatButton.BackTop />
     </Fragment>
   );
 };

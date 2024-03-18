@@ -90,14 +90,6 @@ const Sidebar = ({ collapsed }) => {
         <IoMailOutline className="text-[#795548]" size={24} />
       </p>
     ),
-    getItem(
-      <LabelText text="Hợp đồng" />,
-      "Hợp đồng",
-      "contract",
-      <p>
-        <LiaFileContractSolid className="text-[#52673b]" size={24} />
-      </p>
-    ),
   ];
 
   return (

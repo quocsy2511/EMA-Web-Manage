@@ -22,8 +22,13 @@ const ContactModal = ({
   setisOpenRejectConfirm,
   handleUpdateContact,
   updateContactStatusIsLoading,
+  contracts,
 }) => {
   console.log("🚀 ~ ContactModal ~ contact:", contact);
+  const hasContract = contracts?.find(
+    (item) => item?.customerContactId === contact?.id
+  );
+  console.log("hasContract > ", hasContract);
   const navigate = useNavigate();
 
   const confirmReject = () => {
@@ -49,6 +54,7 @@ const ContactModal = ({
     navigate("planning", {
       state: {
         contactId: contact?.id,
+        eventType: contact?.eventType?.id,
       },
     });
   };
@@ -59,10 +65,10 @@ const ContactModal = ({
       onCancel={() => setIsOpenContactModal(false)}
       footer={false}
       closeIcon={false}
-      width={"70%"}
+      width={"75%"}
       centered
     >
-      <div className="w-full flex flex-row bg-white max-h-[60vh] relative">
+      <div className="w-full flex flex-row bg-white max-h-[70vh] relative">
         <div
           className="absolute top-0 right-0 rotate-45 cursor-pointer"
           onClick={() => setIsOpenContactModal(false)}
@@ -71,7 +77,7 @@ const ContactModal = ({
         </div>
 
         {/* leftSize */}
-        <div className="w-[30%] flex flex-col justify-start items-start p-10 text-start bg-[#103f6e] rounded-lg">
+        <div className="w-[30%] flex flex-col justify-center items-start p-10 text-start bg-[#103f6e] rounded-lg">
           <h2 className="text-white font-semibold mb-12 text-[28px] text-start w-full">
             Thông tin khách hàng
           </h2>
@@ -105,24 +111,38 @@ const ContactModal = ({
 
             <>
               {contact?.status === "PENDING" ? (
-                // <MdOutlinePending className={clsx("text-2xl text-orange-300")} />
-                <p className="text-base text-yellow-500 border border-yellow-400 rounded-lg px-2 py-1">
+                <p className="text-base font-medium text-orange-500 border-[2px] border-orange-400 rounded-lg px-2 py-1">
                   Chờ duyệt
                 </p>
-              ) : contact?.status === "ACCEPTED" ? (
-                // <MdCheckCircleOutline className={clsx("text-2xl text-green-400")} />
-                <p className="text-base text-green-500 border border-green-500 rounded-lg px-2 py-1">
-                  Đã chấp nhận
+              ) : contact?.status === "REJECTED" ? (
+                <p className="text-base font-medium text-red-500 border-[2px] border-red-500 rounded-lg px-2 py-1">
+                  Đã từ chối
                 </p>
               ) : contact?.status === "SUCCESS" ? (
-                // <MdCheckCircleOutline className={clsx("text-2xl text-green-400")} />
-                <p className="text-base text-blue-500 border border-blue-500 rounded-lg px-2 py-1">
+                <p className="text-base font-medium text-blue-500 border-[2px] border-blue-500 rounded-lg px-2 py-1">
                   Đã tạo sự kiện
                 </p>
               ) : (
-                <p className="text-base text-red-500 border border-red-500 rounded-lg px-2 py-1">
-                  Đã từ chối
-                </p>
+                contact?.status === "ACCEPTED" &&
+                (!hasContract ? (
+                  <p className="text-base font-medium text-green-500 border-[2px] border-green-500 rounded-lg px-2 py-1">
+                    Đã chấp nhận
+                  </p>
+                ) : hasContract?.files?.[0]?.status === "REJECTED" ? (
+                  <p className="text-base font-medium text-red-500 border-[2px] border-red-500 rounded-lg px-2 py-1">
+                    Hợp đồng bị từ chối
+                  </p>
+                ) : hasContract?.status === "PENDING" ? (
+                  <p className="text-base font-medium text-orange-500 border-[2px] border-orange-400 rounded-lg px-2 py-1">
+                    Chờ xác nhận hợp đồng
+                  </p>
+                ) : hasContract?.status === "SUCCESS" ? (
+                  <p className="text-base font-medium text-green-500 border-[2px] border-green-500 rounded-lg px-2 py-1">
+                    Đã xác nhận hợp đồng
+                  </p>
+                ) : (
+                  <></>
+                ))
               )}
             </>
           </div>
@@ -204,35 +224,6 @@ const ContactModal = ({
           {/* button */}
           <div className="w-full flex flex-row justify-end items-center font-semibold text-[#103f6e] mb-2 gap-x-3">
             <div className="w-full bg-gray-200 h-[1px]" />
-            {contact?.status === "ACCEPTED" && (
-              <Popconfirm
-                title="Xác nhân từ chối liên hệ "
-                description="Bạn có chắc chắn từ chối liên hệ này?"
-                onConfirm={confirmReject}
-                okText="Đồng ý"
-                cancelText="Hủy"
-              >
-                <div>
-                  <ConfigProvider
-                    theme={{
-                      token: {
-                        colorPrimaryHover: "#ff4d4f",
-                      },
-                    }}
-                  >
-                    <Button
-                      size="large"
-                      type="dashed"
-                      icon={<CloseOutlined />}
-                      // loading={updateContactStatusIsLoading}
-                    >
-                      Từ chối
-                    </Button>
-                  </ConfigProvider>
-                </div>
-              </Popconfirm>
-            )}
-
             {contact?.status === "PENDING" && (
               <Popconfirm
                 title="Xác nhận chấp nhận liên hệ"
@@ -252,16 +243,57 @@ const ContactModal = ({
               </Popconfirm>
             )}
 
-            {contact?.status === "ACCEPTED" && (
-              <Button
-                onClick={goToPlanningPage}
-                type="primary"
-                size="large"
-                icon={<CheckOutlined />}
-              >
-                Lên kế hoạch
-              </Button>
-            )}
+            {contact?.status === "ACCEPTED" &&
+              (!hasContract ||
+              hasContract?.files?.[0]?.status === "REJECTED" ? (
+                <>
+                  <Popconfirm
+                    title="Xác nhân từ chối liên hệ "
+                    description="Bạn có chắc chắn từ chối liên hệ này?"
+                    onConfirm={confirmReject}
+                    okText="Đồng ý"
+                    cancelText="Hủy"
+                  >
+                    <div>
+                      <ConfigProvider
+                        theme={{
+                          token: {
+                            colorPrimaryHover: "#ff4d4f",
+                          },
+                        }}
+                      >
+                        <Button
+                          size="large"
+                          type="dashed"
+                          icon={<CloseOutlined />}
+                        >
+                          Từ chối
+                        </Button>
+                      </ConfigProvider>
+                    </div>
+                  </Popconfirm>
+                  <Button
+                    onClick={goToPlanningPage}
+                    type="primary"
+                    size="large"
+                    icon={<CheckOutlined />}
+                  >
+                    Lên kế hoạch
+                  </Button>
+                </>
+              ) : // ) : hasContract?.status === "SUCCESS" ? (
+              hasContract?.status === "PAID" ? (
+                <Button
+                  onClick={goToCreateEventPage}
+                  type="primary"
+                  size="large"
+                  icon={<CheckOutlined />}
+                >
+                  Tạo sự kiện
+                </Button>
+              ) : (
+                <></>
+              ))}
           </div>
         </div>
       </div>

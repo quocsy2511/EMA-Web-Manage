@@ -27,6 +27,7 @@ import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 const PlanningPage = () => {
   const location = useLocation();
   const contactId = location.state?.contactId;
+  const eventType = location.state?.eventType;
 
   const navigate = useNavigate();
 
@@ -41,6 +42,8 @@ const PlanningPage = () => {
   useEffect(() => {
     mergeValue.clear();
     mergeImportValue.clear();
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   // Handle import CVS
@@ -101,10 +104,7 @@ const PlanningPage = () => {
           TotalSuccessRecords: data?.TotalSuccessRecords,
           TotalErrorsRecords: data?.TotalErrorsRecords,
 
-          payload: data?.Success?.map((item) => {
-            const { categoryName, ...rest } = item;
-            return { ...rest };
-          }),
+          payload: data?.Success,
         };
 
         setTableData(tableData);
@@ -162,21 +162,22 @@ const PlanningPage = () => {
 
   const handleGetCSVFile = async () => {
     try {
-      const response = await axios.get(`${URL}/items/download-template`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        responseType: "blob",
-      });
+      const response = await axios.get(
+        `${URL}/items/download-template?eventTypeId=${eventType}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       console.log("response > ", response);
 
-      const url = window.URL.createObjectURL(response.data);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = response?.data?.result;
       a.download = "template.csv";
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(response?.data?.result);
       document.body.removeChild(a);
     } catch (error) {
       console.error("Error downloading template:", error);
@@ -529,25 +530,27 @@ const PlanningPage = () => {
                 pagination={false}
               />
 
-              <div className="mx-10 mt-5">
-                <p className="text-xl font-medium">
-                  Đã có {tableData?.TotalErrorsRecords} hàng dữ liệu không đọc
-                  được:
-                </p>
-                <div className="ml-5 my-2">
-                  {tableData?.error?.map((item, index) => (
-                    <p
-                      key={index}
-                      className="flex items-center text-base font-normal text-red-500"
-                    >
-                      <span className="mr-2">
-                        <FaCircle className="text-[6px]" />
-                      </span>{" "}
-                      {item}
-                    </p>
-                  ))}
+              {tableData?.TotalErrorsRecords !== 0 && (
+                <div className="mx-10 mt-5">
+                  <p className="text-xl font-medium">
+                    Đã có {tableData?.TotalErrorsRecords} hàng dữ liệu không đọc
+                    được:
+                  </p>
+                  <div className="ml-5 my-2">
+                    {tableData?.error?.map((item, index) => (
+                      <p
+                        key={index}
+                        className="flex items-center text-base font-normal text-red-500"
+                      >
+                        <span className="mr-2">
+                          <FaCircle className="text-[6px]" />
+                        </span>{" "}
+                        {item}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="my-10 text-center">
                 <Popconfirm

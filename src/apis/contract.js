@@ -35,3 +35,6 @@ export const getContractFile = () =>
   http({
     url: `/contracts/file`,
   });
+
+export const getContractInfoByContact = (customerContactId) =>
+  http({ url: `/contracts/file/${customerContactId}` });
