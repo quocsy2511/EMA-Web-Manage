@@ -206,18 +206,20 @@ const ContactModal = ({
               Ghi chú sự kiện
             </span>
             <div className="flex-1 w-full flex flex-col justify-start items-center font-semibold text-[#103f6e] mb-2 gap-y-1 overflow-y-scroll">
-              <p
-                className="text-start text-base w-full text-[#103f6e]"
-                dangerouslySetInnerHTML={{
-                  __html: new QuillDeltaToHtmlConverter(
-                    JSON.parse(
-                      contact?.note?.startsWith(`[{"`)
-                        ? contact?.note
-                        : parseJson(contact?.note)
-                    )
-                  ).convert(),
-                }}
-              />
+              {contact?.note && (
+                <p
+                  className="text-start text-base w-full text-[#103f6e]"
+                  dangerouslySetInnerHTML={{
+                    __html: new QuillDeltaToHtmlConverter(
+                      JSON.parse(
+                        contact?.note?.startsWith(`[{`)
+                          ? contact?.note
+                          : parseJson(contact?.note)
+                      )
+                    ).convert(),
+                  }}
+                />
+              )}
             </div>
           </div>
 

@@ -29,12 +29,13 @@ import { createEvent, getEventType } from "../../apis/events";
 import { uploadFile } from "../../apis/files";
 import { getContractInfoByContact } from "../../apis/contract";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
-import { getCustomerContactDetail } from "../../apis/contact";
+import { getAllDivision } from "../../apis/divisions";
 import dayjs from "dayjs";
 import clsx from "clsx";
 import { FaPlus } from "react-icons/fa6";
 import { getPlanByContact } from "../../apis/planning";
 import { BsPiggyBank } from "react-icons/bs";
+import { FaUserFriends } from "react-icons/fa";
 
 const { RangePicker } = DatePicker;
 
@@ -53,17 +54,13 @@ const DefaultTemplateTask = memo(
     task,
     handleUpdateDesc,
   }) => {
-    const [isSelected, setIsSelected] = useState(true);
-    const [budget, setBudget] = useState(0);
     const [descText, setDescText] = useState();
-    // console.log("task > ", task);
-    // console.log("descText > ", descText);
 
     useEffect(() => {
       let identifier;
       if (descText) {
         identifier = setTimeout(() => {
-          handleUpdateDesc(task?.itemId, JSON.stringify(descText?.ops));
+          handleUpdateDesc(task?.itemId, descText);
         }, 1000);
       }
 
@@ -186,7 +183,7 @@ const EventCreationPage = () => {
   const [selectTemplateTasks, setSelectTemplateTasks] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [taskList, setTaskList] = useState([]);
-  console.log("taskList > ", taskList);
+  const [selectedDivision, setSelectedDivision] = useState([]);
 
   const [form] = Form.useForm();
   const [messageApi] = message.useMessage();
@@ -205,13 +202,29 @@ const EventCreationPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("contactInfo > ", contactInfo);
+  // console.log("contactInfo > ", contactInfo);
 
   const { data: eventType, isLoading: eventTypeIsLoading } = useQuery(
     ["event-type"],
     getEventType,
     { refetchOnWindowFocus: false }
   );
+
+  const {
+    data: divisions,
+    isLoading: divisionsIsLoading,
+    isError: divisionsIsError,
+  } = useQuery(
+    ["divisions"],
+    () => getAllDivision({ pageSize: 25, currentPage: 1, mode: 1 }),
+    {
+      select: (data) => {
+        return data?.filter((item) => item?.status);
+      },
+      refetchOnWindowFocus: false,
+    }
+  );
+  console.log("divisions > ", divisions);
 
   const {
     data: planningData,
@@ -257,8 +270,9 @@ const EventCreationPage = () => {
           duration: 3,
         });
 
-        navigate(-1);
+        // navigate(-1);
         // navigate(`/manager/event/${variables?.eventId}`, { replace: true });
+        navigate(`/manager/event`, { replace: true });
       },
       onError: (error) => {
         messageApi.open({
@@ -270,15 +284,21 @@ const EventCreationPage = () => {
 
   // Upload banner image
   const { mutate: uploadFileMutate, isLoading: uploadIsLoading } = useMutation(
-    ({ formData, event, contract }) => uploadFile(formData),
+    ({ formData, event }) => uploadFile(formData),
     {
       onSuccess: (data, variables) => {
         console.log("variables upload > ", variables);
         variables.event = {
-          coverUrl: data.downloadUrl,
           ...variables.event,
-          ...variables.contract,
-          contactId: location.state?.contactId,
+          coverUrl: data.downloadUrl,
+          listTask: taskList?.map((item) => ({
+            title: item?.itemName,
+            desc: JSON.stringify(item?.itemDescription?.ops),
+            priority: item?.itemPriority,
+            itemId: item?.itemId,
+          })),
+          listDivision: selectedDivision,
+          contactId,
         };
         createEventMutate(variables.event);
       },
@@ -313,25 +333,18 @@ const EventCreationPage = () => {
   const onFinish = (values) => {
     console.log("Success:", values);
 
-    setCurrent((prev) => prev + 1);
-
-    // const formData = new FormData();
-    // formData.append("file", fileList);
-    // formData.append("folderName", "event");
-
-    // const eventValues = setupEventValues(values);
-
-    // const contractValues = {
-    //   ...values.contract,
-    //   contractValue: `${values.contract.contractValue}`,
-    //   paymentDate: momenttz().format("YYYY-MM-DD"),
-    // };
-
-    // uploadFileMutate({
-    //   formData,
-    //   event: eventValues,
-    //   contract: contractValues,
-    // });
+    if (current === 0) {
+      setCurrent((prev) => prev + 1);
+    } else {
+      const formData = new FormData();
+      formData.append("file", fileList);
+      formData.append("folderName", "event");
+      const eventValues = setupEventValues(values);
+      uploadFileMutate({
+        formData,
+        event: eventValues,
+      });
+    }
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -350,313 +363,366 @@ const EventCreationPage = () => {
     );
   };
 
+  const handleSelectDivision = (divisionId) => {
+    if (selectedDivision?.includes(divisionId)) {
+      setSelectedDivision((prev) =>
+        prev?.filter((item) => item !== divisionId)
+      );
+    } else {
+      setSelectedDivision((prev) => [...prev, divisionId]);
+    }
+  };
+
   const steps = [
-    // {
-    //   key: 1,
-    //   title: "Thông tin sự kiện",
-    //   content: (
-    //     <div className="">
-    //       <div className="flex space-x-10">
-    //         <Form.Item
-    //           className="w-[30%]"
-    //           label={<Title title="Tên sự kiện" />}
-    //           name="eventName"
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập tên sự kiện!",
-    //             },
-    //           ]}
-    //           onChange={(value) => {
-    //             // Update to specific field
-    //             form.setFieldsValue({ eventName: value.target.value });
-    //           }}
-    //         >
-    //           <Input placeholder="Nhập tên sự kiện" size="large" />
-    //         </Form.Item>
-    //         <Form.Item
-    //           className="w-[70%]"
-    //           label={<Title title="Địa điểm" />}
-    //           name="location"
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập địa điểm!",
-    //             },
-    //           ]}
-    //           onChange={(value) => {
-    //             // Update to specific field
-    //             form.setFieldsValue({ location: value.target.value });
-    //           }}
-    //         >
-    //           <Input placeholder="Nhập địa điểm" size="large" />
-    //         </Form.Item>
-    //       </div>
+    {
+      key: 1,
+      title: "Thông tin sự kiện",
+      content: (
+        <div className="">
+          <div className="flex space-x-10">
+            <Form.Item
+              className="w-[30%]"
+              label={<Title title="Tên sự kiện" />}
+              name="eventName"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa nhập tên sự kiện!",
+                },
+              ]}
+              onChange={(value) => {
+                // Update to specific field
+                form.setFieldsValue({ eventName: value.target.value });
+              }}
+            >
+              <Input placeholder="Nhập tên sự kiện" size="large" />
+            </Form.Item>
+            <Form.Item
+              className="w-[70%]"
+              label={<Title title="Địa điểm" />}
+              name="location"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa nhập địa điểm!",
+                },
+              ]}
+              onChange={(value) => {
+                // Update to specific field
+                form.setFieldsValue({ location: value.target.value });
+              }}
+            >
+              <Input placeholder="Nhập địa điểm" size="large" />
+            </Form.Item>
+          </div>
 
-    //       <div>
-    //         <Form.Item
-    //           label={<Title title="Mô tả" />}
-    //           name="description"
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập mô tả!",
-    //             },
-    //           ]}
-    //         >
-    //           <ReactQuill
-    //             className="h-36 mb-10"
-    //             theme="snow"
-    //             placeholder="Nhập mô tả"
-    //             onChange={(content, delta, source, editor) => {
-    //               // Update to specific field
-    //               form.setFieldsValue({ description: editor.getContents() });
-    //             }}
-    //           />
-    //         </Form.Item>
-    //       </div>
+          <div>
+            <Form.Item
+              label={<Title title="Mô tả" />}
+              name="description"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa nhập mô tả!",
+                },
+              ]}
+            >
+              <ReactQuill
+                className="h-36 mb-10"
+                theme="snow"
+                placeholder="Nhập mô tả"
+                onChange={(content, delta, source, editor) => {
+                  // Update to specific field
+                  form.setFieldsValue({ description: editor.getContents() });
+                }}
+              />
+            </Form.Item>
+          </div>
 
-    //       <div className="flex space-x-10">
-    //         <Form.Item
-    //           className="w-[35%]"
-    //           label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
-    //           name="date"
-    //           rules={[
-    //             {
-    //               validator: (rule, value) => {
-    //                 if (value && value?.[0] && value?.[1]) {
-    //                   return Promise.resolve();
-    //                 }
-    //                 return Promise.reject("Chưa chọn thời gian tổ chức");
-    //               },
-    //             },
-    //           ]}
-    //         >
-    //           <ConfigProvider locale={viVN}>
-    //             <RangePicker
-    //               size="large"
-    //               className="w-full"
-    //               defaultValue={[
-    //                 dayjs(contactInfo?.startDate, "YYYY-MM-DD"),
-    //                 dayjs(contactInfo?.endDate, "YYYY-MM-DD"),
-    //               ]}
-    //               onChange={(value) => {
-    //                 // Update to specific field
-    //                 form.setFieldsValue({
-    //                   date: value?.map((item) =>
-    //                     moment(item?.$d).format("YYYY-MM-DD")
-    //                   ),
-    //                 });
+          <div className="flex space-x-10">
+            <Form.Item
+              className="w-[35%]"
+              label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
+              name="date"
+              rules={[
+                {
+                  validator: (rule, value) => {
+                    if (value && value?.[0] && value?.[1]) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject("Chưa chọn thời gian tổ chức");
+                  },
+                },
+              ]}
+            >
+              <ConfigProvider locale={viVN}>
+                <RangePicker
+                  size="large"
+                  className="w-full"
+                  defaultValue={[
+                    dayjs(contactInfo?.startDate, "YYYY-MM-DD"),
+                    dayjs(contactInfo?.endDate, "YYYY-MM-DD"),
+                  ]}
+                  onChange={(value) => {
+                    // Update to specific field
+                    form.setFieldsValue({
+                      date: value?.map((item) =>
+                        moment(item?.$d).format("YYYY-MM-DD")
+                      ),
+                    });
 
-    //                 // Get date in range
-    //                 const startDate = moment(value?.[0]?.$d);
-    //                 const endDate = moment(value?.[1]?.$d);
+                    // Get date in range
+                    const startDate = moment(value?.[0]?.$d);
+                    const endDate = moment(value?.[1]?.$d);
 
-    //                 // Get processing date in range
-    //                 const selectedDate = moment(
-    //                   form.getFieldValue("processingDate")?.$d
-    //                 );
+                    // Get processing date in range
+                    const selectedDate = moment(
+                      form.getFieldValue("processingDate")?.$d
+                    );
 
-    //                 // Check if processing date is not in range  => reset processing date
-    //                 if (
-    //                   !selectedDate.isBetween(startDate, endDate, null, "[]") ||
-    //                   !value
-    //                 ) {
-    //                   form.resetFields(["processingDate"]);
-    //                 }
-    //               }}
-    //               disabledDate={(current) => {
-    //                 return current && current < moment().startOf("day");
-    //               }}
-    //               format={"DD/MM/YYYY"}
-    //             />
-    //           </ConfigProvider>
-    //         </Form.Item>
+                    // Check if processing date is not in range  => reset processing date
+                    if (
+                      !selectedDate.isBetween(startDate, endDate, null, "[]") ||
+                      !value
+                    ) {
+                      form.resetFields(["processingDate"]);
+                    }
+                  }}
+                  disabledDate={(current) => {
+                    return current && current < moment().startOf("day");
+                  }}
+                  format={"DD/MM/YYYY"}
+                />
+              </ConfigProvider>
+            </Form.Item>
 
-    //         <Form.Item
-    //           className="w-[25%]"
-    //           label={<Title title="Ngày bắt đầu dự án" />}
-    //           name="processingDate"
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa chọn ngày bắt đầu!",
-    //             },
-    //           ]}
-    //         >
-    //           <ConfigProvider locale={viVN}>
-    //             <DatePicker
-    //               size="large"
-    //               defaultValue={dayjs(
-    //                 contactInfo?.processingDate,
-    //                 "YYYY-MM-DD"
-    //               )}
-    //               className="w-full"
-    //               onChange={(value) => {
-    //                 form.setFieldsValue({
-    //                   processingDate: moment(value?.$d).format("YYYY-MM-DD"),
-    //                 });
-    //               }}
-    //               disabledDate={(current) => {
-    //                 const startDate = form.getFieldValue("date")?.[0];
-    //                 const endDate = form.getFieldValue("date")?.[1];
+            <Form.Item
+              className="w-[25%]"
+              label={<Title title="Ngày bắt đầu dự án" />}
+              name="processingDate"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn ngày bắt đầu!",
+                },
+              ]}
+            >
+              <ConfigProvider locale={viVN}>
+                <DatePicker
+                  size="large"
+                  defaultValue={dayjs(
+                    contactInfo?.processingDate,
+                    "YYYY-MM-DD"
+                  )}
+                  className="w-full"
+                  onChange={(value) => {
+                    form.setFieldsValue({
+                      processingDate: moment(value?.$d).format("YYYY-MM-DD"),
+                    });
+                  }}
+                  disabledDate={(current) => {
+                    const startDate = form.getFieldValue("date")?.[0];
+                    const endDate = form.getFieldValue("date")?.[1];
 
-    //                 if (!startDate && !endDate) {
-    //                   return current && current < moment().startOf("day");
-    //                 }
+                    if (!startDate && !endDate) {
+                      return current && current < moment().startOf("day");
+                    }
 
-    //                 return (
-    //                   current > moment(startDate, "YYYY-MM-DD")
+                    return (
+                      current > moment(startDate, "YYYY-MM-DD")
 
-    //                   //  || current > moment(endDate, "YYYY-MM-DD").endOf("day")
-    //                 );
-    //               }}
-    //               format={"DD/MM/YYYY"}
-    //             />
-    //           </ConfigProvider>
-    //         </Form.Item>
+                      //  || current > moment(endDate, "YYYY-MM-DD").endOf("day")
+                    );
+                  }}
+                  format={"DD/MM/YYYY"}
+                />
+              </ConfigProvider>
+            </Form.Item>
 
-    //         <Form.Item
-    //           className="flex-1"
-    //           label={<Title title="Thể loại sự kiện" />}
-    //           name="eventTypeId"
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa chọn thể loại sự kiện!",
-    //             },
-    //           ]}
-    //         >
-    //           <Select
-    //             size="large"
-    //             defaultValue={contactInfo?.eventTypeId}
-    //             options={
-    //               eventType?.map((item) => ({
-    //                 value: item?.id,
-    //                 label: item?.typeName,
-    //               })) ?? []
-    //             }
-    //             loading={eventTypeIsLoading}
-    //             placeholder="Chọn 1 thể loại"
-    //           />
-    //         </Form.Item>
-    //       </div>
+            <Form.Item
+              className="flex-1"
+              label={<Title title="Thể loại sự kiện" />}
+              name="eventTypeId"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn thể loại sự kiện!",
+                },
+              ]}
+            >
+              <Select
+                size="large"
+                defaultValue={contactInfo?.eventTypeId}
+                options={
+                  eventType?.map((item) => ({
+                    value: item?.id,
+                    label: item?.typeName,
+                  })) ?? []
+                }
+                loading={eventTypeIsLoading}
+                placeholder="Chọn 1 thể loại"
+              />
+            </Form.Item>
+          </div>
 
-    //       <div className="flex space-x-10 items-center">
-    //         <Form.Item
-    //           className="w-[30%]"
-    //           label={<Title title="Ngân sách ước lượng" />}
-    //           name="estBudget"
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa nhập ngân sách!",
-    //             },
-    //           ]}
-    //         >
-    //           <div className="flex items-center gap-x-3">
-    //             <InputNumber
-    //               size="large"
-    //               className="w-full"
-    //               defaultValue={contactInfo?.contractTotalBudget}
-    //               min={10000}
-    //               step={100000}
-    //               formatter={(value) =>
-    //                 `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-    //               }
-    //               parser={(value) => {
-    //                 form.setFieldsValue({
-    //                   estBudget: value.replace(/,/g, ""),
-    //                 });
-    //                 return `${value}`.replace(/,/g, "");
-    //               }}
-    //               onStep={(value) => {
-    //                 form.setFieldsValue({ estBudget: value });
-    //               }}
-    //             />
-    //             <p className="text-base font-medium">VNĐ</p>
-    //           </div>
-    //         </Form.Item>
+          <div className="flex space-x-10 items-center">
+            <Form.Item
+              className="w-[30%]"
+              label={<Title title="Ngân sách ước lượng" />}
+              name="estBudget"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa nhập ngân sách!",
+                },
+              ]}
+            >
+              <div className="flex items-center gap-x-3">
+                <InputNumber
+                  size="large"
+                  className="w-full"
+                  defaultValue={contactInfo?.contractTotalBudget}
+                  min={10000}
+                  step={100000}
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => {
+                    form.setFieldsValue({
+                      estBudget: value.replace(/,/g, ""),
+                    });
+                    return `${value}`.replace(/,/g, "");
+                  }}
+                  onStep={(value) => {
+                    form.setFieldsValue({ estBudget: value });
+                  }}
+                />
+                <p className="text-base font-medium">VNĐ</p>
+              </div>
+            </Form.Item>
 
-    //         <Form.Item
-    //           className="flex-1"
-    //           name="coverUrl"
-    //           label={<Title title="Ảnh về sự kiện" />}
-    //           valuePropName="fileList"
-    //           getValueFromEvent={(e) => e?.fileList}
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Chưa chọn ảnh đại diện",
-    //             },
-    //             {
-    //               validator(_, fileList) {
-    //                 return new Promise((resolve, reject) => {
-    //                   if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
-    //                     reject("File quá lớn ( <10MB )");
-    //                   } else {
-    //                     resolve();
-    //                   }
-    //                 });
-    //               },
-    //             },
-    //           ]}
-    //         >
-    //           <Upload
-    //             className="flex items-center space-x-3"
-    //             maxCount={1}
-    //             listType="picture"
-    //             customRequest={({ file, onSuccess }) => {
-    //               setTimeout(() => {
-    //                 onSuccess("ok");
-    //               }, 0);
-    //             }}
-    //             showUploadList={{
-    //               showPreviewIcon: false,
-    //             }}
-    //             beforeUpload={(file) => {
-    //               return new Promise((resolve, reject) => {
-    //                 if (file && file?.size > 10 * 1024 * 1024) {
-    //                   reject("File quá lớn ( <10MB )");
-    //                   return false;
-    //                 } else {
-    //                   setFileList(file);
-    //                   resolve();
-    //                   return true;
-    //                 }
-    //               });
-    //             }}
-    //           >
-    //             <p className="hover:text-black hover:border-black transition-colors border border-slate-200 rounded-2xl border-dashed px-5 py-5 text-slate-400">
-    //               Kéo tập tin vào đây
-    //             </p>
-    //           </Upload>
-    //         </Form.Item>
-    //       </div>
+            <Form.Item
+              className="flex-1"
+              name="coverUrl"
+              label={<Title title="Ảnh về sự kiện" />}
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList}
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn ảnh đại diện",
+                },
+                {
+                  validator(_, fileList) {
+                    return new Promise((resolve, reject) => {
+                      if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                        reject("File quá lớn ( <10MB )");
+                      } else {
+                        resolve();
+                      }
+                    });
+                  },
+                },
+              ]}
+            >
+              <Upload
+                className="flex items-center space-x-3"
+                maxCount={1}
+                listType="picture"
+                customRequest={({ file, onSuccess }) => {
+                  setTimeout(() => {
+                    onSuccess("ok");
+                  }, 0);
+                }}
+                showUploadList={{
+                  showPreviewIcon: false,
+                }}
+                beforeUpload={(file) => {
+                  return new Promise((resolve, reject) => {
+                    if (file && file?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( <10MB )");
+                      return false;
+                    } else {
+                      setFileList(file);
+                      resolve();
+                      return true;
+                    }
+                  });
+                }}
+              >
+                <p className="hover:text-black hover:border-black transition-colors border border-slate-200 rounded-2xl border-dashed px-5 py-5 text-slate-400">
+                  Kéo tập tin vào đây
+                </p>
+              </Upload>
+            </Form.Item>
+          </div>
 
-    //       <div className="flex justify-end mt-10 mb-5">
-    //         <Button
-    //           className=""
-    //           onClick={() => form.submit()}
-    //           size="large"
-    //           type="primary"
-    //         >
-    //           Tiếp tục
-    //         </Button>
-    //       </div>
-    //     </div>
-    //   ),
-    // },
+          <div className="flex justify-end mt-10 mb-5">
+            <Button
+              className=""
+              onClick={() => form.submit()}
+              size="large"
+              type="primary"
+            >
+              Tiếp tục
+            </Button>
+          </div>
+        </div>
+      ),
+    },
     {
       key: 2,
       title: "Danh sách hạng mục",
       content: (
         <>
+          <div className="flex justify-between ">
+            <div className="mb-10 flex items-center space-x-5">
+              <Title title="Ngân sách" />
+              <div className="text-lg text-slate-500 font-medium flex items-center space-x-2">
+                <BsPiggyBank className="text-green-600 text-xl " />
+                <p>{contactInfo?.contractTotalBudget.toLocaleString()} VNĐ</p>
+              </div>
+            </div>
+
+            <Button type="primary" size="large" onClick={() => form.submit()}>
+              Tạo sự kiện
+            </Button>
+          </div>
+
           <div className="mb-10">
-            <Title title="Ngân sách" />
-            <p className="text-lg text-slate-500 font-medium">
-              {contactInfo?.contractTotalBudget.toLocaleString()} VNĐ
-            </p>
+            <Title title="Bộ phận tham gia" />
+            <div className="flex flex-wrap items-center mt-5 gap-x-3 gap-y-5">
+              {divisions?.map((division) => (
+                <div
+                  onClick={() => handleSelectDivision(division?.id)}
+                  className={clsx(
+                    "flex items-center gap-x-2 px-5 py-2 rounded-full border cursor-pointer",
+                    {
+                      "border-blue-500": selectedDivision?.includes(
+                        division?.id
+                      ),
+                    }
+                  )}
+                >
+                  <FaUserFriends
+                    size={20}
+                    className={clsx("", {
+                      "text-blue-500": selectedDivision?.includes(division?.id),
+                      "text-slate-400": !selectedDivision?.includes(
+                        division?.id
+                      ),
+                    })}
+                  />
+                  <p
+                    className={clsx("text-sm font-medium", {
+                      "text-blue-500": selectedDivision?.includes(division?.id),
+                    })}
+                  >
+                    {division?.divisionName}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mb-10">
@@ -728,7 +794,11 @@ const EventCreationPage = () => {
         animate={{ y: 0 }}
         className="bg-white px-8 py-5 rounded-2xl mt-6"
       >
-        <Spin spinning={contactInfoIsLoading || planningIsLoading}>
+        <Spin
+          spinning={
+            contactInfoIsLoading || planningIsLoading || divisionsIsLoading
+          }
+        >
           {contactInfoIsLoading ? (
             <div className="h-[calc(100vh/2)]" />
           ) : (

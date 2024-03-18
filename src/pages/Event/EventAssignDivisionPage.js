@@ -35,6 +35,7 @@ const EventAssignDivisionPage = () => {
       select: (data) => {
         return data?.filter((item) => item?.status);
       },
+      refetchOnWindowFocus: false,
     }
   );
   console.log("divisions > ", divisions);

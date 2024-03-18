@@ -491,7 +491,7 @@ const EventAssignTaskPage = () => {
                 <RangePicker
                   size="large"
                   defaultValue={
-                    updateData
+                    updateData && updateData?.date?.[0] && updateData?.date?.[1]
                       ? [
                           dayjs(updateData?.date?.[0], "YYYY-MM-DD"),
                           dayjs(updateData?.date?.[1], "YYYY-MM-DD"),
