@@ -1,17 +1,17 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
 import Column from "../KanbanBoard/Column/Column.js";
 import DescriptionEvent from "./DescriptionEvent/DescriptionEvent.js";
-import { getEventTemplate } from "../../apis/events.js";
 import { useQuery } from "@tanstack/react-query";
 import AnErrorHasOccured from "../Error/AnErrorHasOccured.js";
 import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator.js";
-import { getTasks, getTasksTemplate } from "../../apis/tasks.js";
+import { getTasks } from "../../apis/tasks.js";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { addNotification } from "../../store/Slice/notificationsSlice.js";
 import TaskModal from "./ModalKanban/TaskModal.js";
-import { Empty } from "antd";
+import { Empty, Spin } from "antd";
 import { redirectionActions } from "../../store/redirection.js";
+import NewTaskModal from "./ModalKanban/NewTaskModal.js";
 
 const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
   const dispatch = useDispatch();
@@ -21,6 +21,9 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
   const [hideDescription, setHideDescription] = useState(false);
+  const [addNewTask, setAddNewTask] = useState(false);
+  const [selectTaskParent, setSelectTaskParent] = useState("");
+  const [addNewTaskTemplate, setAddNewTaskTemplate] = useState(false);
 
   const {
     data: parentTaskDetail,
@@ -51,7 +54,27 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
       enabled: !!notification?.redirect?.comment,
     }
   );
-  // console.log("🚀 ~ KanbanBoard ~ parentTaskDetail:", parentTaskDetail);
+  const {
+    data: templateTask,
+    isError: isErrorTemplateTask,
+    isLoading: isLoadingTemplateTask,
+    refetch: refetchTemplateTask,
+  } = useQuery(
+    ["template-task"],
+    () =>
+      getTasks({
+        fieldName: "isTemplate",
+        conValue: "true",
+        pageSize: 50,
+        currentPage: 1,
+      }),
+    {
+      select: (data) => {
+        return data;
+      },
+      refetchOnWindowFocus: false,
+    }
+  );
 
   useEffect(() => {
     if (notification?.redirect?.comment) {
@@ -83,25 +106,49 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
           <DescriptionEvent key={selectEvent?.id} selectEvent={selectEvent} />
         )}
 
-        <div className="flex overflow-x-scroll px-10 pb-8 gap-x-3 min-h-[55vh]">
-          {listTaskParents.length > 0 ? (
-            listTaskParents?.map((taskParent, index) => (
-              <Column
-                selectedStatus={selectedStatus}
-                TaskParent={taskParent}
-                idEvent={selectEvent?.id}
-                key={taskParent?.id}
+        {addNewTask ? (
+          <Spin spinning={isLoadingTemplateTask}>
+            <div>
+              <NewTaskModal
+                disableStartDate={selectTaskParent?.startDate}
+                disableEndDate={selectTaskParent?.endDate}
+                templateTask={templateTask}
+                setAddNewTask={setAddNewTask}
+                TaskParent={selectTaskParent}
                 setHideDescription={setHideDescription}
-              />
-            ))
-          ) : (
-            <div className="w-full flex justify-center items-center">
-              <Empty
-                description={<span>hiện tại bạn chưa có công việc nào</span>}
+                addNewTaskTemplate={addNewTaskTemplate}
+                setAddNewTaskTemplate={setAddNewTaskTemplate}
               />
             </div>
-          )}
-        </div>
+          </Spin>
+        ) : (
+          <>
+            <div className="flex overflow-x-scroll px-10 pb-8 gap-x-3 min-h-[55vh]">
+              {listTaskParents.length > 0 ? (
+                listTaskParents?.map((taskParent, index) => (
+                  <Column
+                    selectedStatus={selectedStatus}
+                    TaskParent={taskParent}
+                    idEvent={selectEvent?.id}
+                    key={taskParent?.id}
+                    setHideDescription={setHideDescription}
+                    setSelectTaskParent={setSelectTaskParent}
+                    setAddNewTaskTemplate={setAddNewTaskTemplate}
+                    setAddNewTask={setAddNewTask}
+                  />
+                ))
+              ) : (
+                <div className="w-full flex justify-center items-center">
+                  <Empty
+                    description={
+                      <span>hiện tại bạn chưa có công việc nào</span>
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {isOpenTaskModal && (
           <TaskModal
