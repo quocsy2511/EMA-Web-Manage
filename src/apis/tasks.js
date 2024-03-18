@@ -131,3 +131,19 @@ export const getListAssigneeEmployee = ({
   http({
     url: `/division/list/assignee/employee?fieldName=${fieldName}&conValue=${userId}&startDate=${dateStart}&endDate=${dateEnd}`,
   });
+export const createTaskTemplate = (task) =>
+  http({
+    url: "/task/createTask",
+    method: "post",
+    data: {
+      title: task.title,
+      eventID: task.eventID,
+      startDate: task.startDate,
+      endDate: task.endDate,
+      desc: task.desc,
+      priority: task.priority,
+      estimationTime: task.estimationTime,
+      assignee: task.assignee,
+      isTemplate: task.isTemplate,
+    },
+  });

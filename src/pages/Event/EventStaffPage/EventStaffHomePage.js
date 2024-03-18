@@ -1,5 +1,5 @@
 import React, { Fragment, memo, useState } from "react";
-import { Avatar, Image, Input, Popover, Progress, Tooltip } from "antd";
+import { Avatar, Empty, Image, Input, Popover, Progress, Tooltip } from "antd";
 import { FiSearch } from "react-icons/fi";
 import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
@@ -26,11 +26,15 @@ const EventItem = memo(({ event, gotoEventPage }) => {
       </motion.div>
     </Tooltip>
   ));
-  const percentage = (
-    (event?.tasks?.filter((item) => item?.status === "DONE").length /
-      (event?.tasks?.length ?? 1)) *
-    100
-  ).toFixed(0);
+  let percentage = 0;
+  if (event?.tasks?.length > 0) {
+    percentage = (
+      (event?.tasks?.filter((item) => item?.status === "DONE").length /
+        (event?.tasks?.length ?? 1)) *
+      100
+    ).toFixed(0);
+  }
+
   let status;
   switch (event?.status) {
     case "PENDING":
@@ -48,7 +52,6 @@ const EventItem = memo(({ event, gotoEventPage }) => {
     case "CANCEL":
       status = "Hủy bỏ";
       break;
-
     default:
       break;
   }
@@ -183,7 +186,7 @@ const EventStaffHomePage = () => {
     },
     refetchOnWindowFocus: false,
   });
-  // console.log("listEvent > ", listEvent);
+  console.log("listEvent > ", listEvent);
 
   const {
     data: listUsers,
@@ -317,13 +320,21 @@ const EventStaffHomePage = () => {
             </div>
           ) : (
             <AnimatePresence>
-              {listEvent?.map((event) => (
-                <EventItem
-                  key={event?.id}
-                  event={event}
-                  gotoEventPage={gotoEventPage}
-                />
-              ))}
+              {listEvent?.length > 0 ? (
+                listEvent?.map((event) => (
+                  <EventItem
+                    key={event?.id}
+                    event={event}
+                    gotoEventPage={gotoEventPage}
+                  />
+                ))
+              ) : (
+                <div className="w-full flex items-center justify-center ">
+                  <Empty
+                    description={<span>Hiện tại bạn chưa có sự kiện nào</span>}
+                  />
+                </div>
+              )}
             </AnimatePresence>
           )}
         </motion.div>

@@ -21,17 +21,17 @@ const DescriptionSubtask = ({
   taskParent,
   taskSelected,
 }) => {
+  console.log("description", description);
   const [form] = Form.useForm();
   const taskID = taskSelected?.id;
   const eventId = taskSelected?.eventDivision?.event?.id;
   const staff = useRouteLoaderData("staff");
   const [descriptionQuill, setDescriptionQuill] = useState({
     ops: JSON.parse(
-      description?.startsWith(`[{"`)
-        ? description
-        : parseJson(description)
+      description?.startsWith(`[{"`) ? description : parseJson(description)
     ),
   });
+  console.log("🚀 ~ descriptionQuill:", descriptionQuill);
   const [isOpenQuill, seItsOpenQuill] = useState(false);
   const queryClient = useQueryClient();
 
@@ -201,9 +201,7 @@ const DescriptionSubtask = ({
                     dangerouslySetInnerHTML={{
                       __html: new QuillDeltaToHtmlConverter(
                         JSON.parse(
-                          subtaskDetails?.[0].description?.startsWith(
-                            `[{"`
-                          )
+                          subtaskDetails?.[0].description?.startsWith(`[{"`)
                             ? subtaskDetails?.[0].description
                             : parseJson(subtaskDetails?.[0].description)
                         )
