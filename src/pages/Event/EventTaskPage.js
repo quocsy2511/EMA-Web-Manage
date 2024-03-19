@@ -296,8 +296,8 @@ const EventTaskPage = () => {
       id: task?.id,
       title: task?.title,
       date: [
-        momenttz(task?.startDate).format("YYYY-MM-DD"),
-        momenttz(task?.endDate).format("YYYY-MM-DD"),
+        task?.startDate ? momenttz(task?.startDate).format("YYYY-MM-DD") : null,
+        task?.endDate ? momenttz(task?.endDate).format("YYYY-MM-DD") : null,
       ],
       priority: task?.priority,
       desc: task?.description,
@@ -357,7 +357,6 @@ const EventTaskPage = () => {
         onClick={goToCreateTask}
         type="primary"
         icon={<RiAddFill />}
-        // disabled={eventDetail?.listDivision?.length === 0}
         tooltip={
           eventDetail?.listDivision?.length !== 0
             ? "Tạo đề mục"

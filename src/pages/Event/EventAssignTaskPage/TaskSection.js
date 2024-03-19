@@ -42,7 +42,7 @@ const now = momenttz();
 dayjs.locale("vi");
 
 const StatusRender = memo(({ bg, text }) => (
-  <div className="flex space-x-2 items-center mr-10">
+  <div className="flex space-x-2 items-center">
     <div className={`w-2 h-2 ${bg} rounded-full`} />
     <p className="text-sm font-medium">{text}</p>
   </div>
@@ -58,6 +58,12 @@ const PriorityRender = memo(({ icon, text }) => (
 const DrawerContainer = memo(
   ({ isDrawerOpen, setIsDrawerOpen, getColor, divisionChecking }) => {
     console.log("divisionChecking > ", divisionChecking);
+    const mapPriory = {
+      HIGH: 1,
+      MEDIUM: 2,
+      LOW: 3,
+    };
+
     return (
       <Drawer
         title={
@@ -75,7 +81,7 @@ const DrawerContainer = memo(
               </p>
             </div>
 
-            <div className="border-2 border-black rounded-md p-1 cursor-pointer">
+            {/* <div className="border-2 border-black rounded-md p-1 cursor-pointer">
               <Dropdown
                 placement="bottomLeft"
                 menu={{
@@ -176,7 +182,7 @@ const DrawerContainer = memo(
               >
                 <MdCategory className="text-lg" />
               </Dropdown>
-            </div>
+            </div> */}
           </div>
         }
         placement={"right"}
@@ -186,73 +192,98 @@ const DrawerContainer = memo(
         width={"30%"}
       >
         {/* Content */}
-        <div className="space-y-10">
-          {!divisionChecking?.division?.users?.[0]?.listEvent?.length === 0 ? (
-            <div>
-              <p className="text-lg text-center">Không có công việc nào !</p>
+        <div className="space-y-2">
+          <div className="flex space-x-5">
+            <p className="text-base font-medium">Trạng thái :</p>
+            <div className="flex items-center space-x-4">
+              <StatusRender bg="bg-gray-400" text="Đang chuẩn bị" />
+              <StatusRender bg="bg-blue-500" text="Đang thực hiện" />
             </div>
-          ) : (
-            divisionChecking?.division?.users?.[0]?.listEvent?.map((event) => {
-              // filter task list
-              const listTasks = event?.listTask?.filter((task) => {
-                if (
-                  divisionChecking?.date >= task?.startDate &&
-                  divisionChecking?.date <= task?.endDate
-                ) {
-                  return task;
-                }
-              });
+          </div>
 
-              if (!!listTasks?.length)
-                return (
-                  <div key={event?.eventID} className="w-full space-y-3">
-                    <div className="flex items-center bg-gray-50 rounded-full">
-                      <div className="border-2 border-blue-500 rounded-full p-2">
-                        <MdEmojiEvents className="text-xl text-blue-500" />
-                      </div>
+          <div className="flex space-x-5">
+            <p className="text-base font-medium">Độ ưu tiên :</p>
+            <div className="flex items-center space-x-4">
+              <StatusRender bg="bg-gray-400" text="Đang chuẩn bị" />
+              <StatusRender bg="bg-blue-500" text="Đang thực hiện" />
+            </div>
+          </div>
 
-                      <div className="flex-1 flex items-center space-x-2">
-                        <div className="bg-blue-500 h-0.5 flex-1" />
-                        <Tooltip title={event?.eventName}>
-                          <p className="w-auto max-w-xs text-center text-base font-medium truncate cursor-pointer">
-                            {event?.eventName}
-                          </p>
-                        </Tooltip>
-                        <div className="bg-blue-500 h-0.5 flex-1" />
-                      </div>
-                    </div>
+          <div className="space-y-10 pt-6">
+            {!divisionChecking?.division?.users?.[0]?.listEvent?.length ===
+            0 ? (
+              <div>
+                <p className="text-lg text-center">Không có công việc nào !</p>
+              </div>
+            ) : (
+              divisionChecking?.division?.users?.[0]?.listEvent?.map(
+                (event) => {
+                  // filter task list
+                  const listTasks = event?.listTask
+                    ?.filter((task) => {
+                      if (
+                        divisionChecking?.date >= task?.startDate &&
+                        divisionChecking?.date <= task?.endDate
+                      ) {
+                        return task;
+                      }
+                    })
+                    ?.sort(
+                      (a, b) => mapPriory[a?.priority] - mapPriory[b?.priority]
+                    );
 
-                    <div className="ml-5 space-y-1">
-                      {listTasks?.map((task) => {
-                        const { textColor } = getColor(task?.status);
-
-                        return (
-                          <div
-                            key={task?.id}
-                            className="flex items-center space-x-3 bg-red-20"
-                          >
-                            {/* {icon} */}
-                            <GoDotFill className={`${textColor}`} />
-                            <p
-                              className={`text-sm font-medium w-auto truncate`}
-                            >
-                              {task?.title}
-                            </p>
-                            {task?.priority === "LOW" ? (
-                              <FaCircleArrowDown className="text-lg text-green-500" />
-                            ) : task?.priority === "MEDIUM" ? (
-                              <PiDotsThreeCircleVerticalFill className="text-2xl text-orange-400 rotate-90" />
-                            ) : (
-                              <FaCircleExclamation className="text-lg text-red-500" />
-                            )}
+                  if (!!listTasks?.length)
+                    return (
+                      <div key={event?.eventID} className="w-full space-y-3">
+                        <div className="flex items-center bg-gray-50 rounded-full">
+                          <div className="border-2 border-blue-500 rounded-full p-2">
+                            <MdEmojiEvents className="text-xl text-blue-500" />
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-            })
-          )}
+
+                          <div className="flex-1 flex items-center space-x-2">
+                            <div className="bg-blue-500 h-0.5 flex-1" />
+                            <Tooltip title={event?.eventName}>
+                              <p className="w-auto max-w-xs text-center text-base font-medium truncate cursor-pointer">
+                                {event?.eventName}
+                              </p>
+                            </Tooltip>
+                            <div className="bg-blue-500 h-0.5 flex-1" />
+                          </div>
+                        </div>
+
+                        <div className="ml-5 space-y-1">
+                          {listTasks?.map((task) => {
+                            const { textColor } = getColor(task?.status);
+
+                            return (
+                              <div
+                                key={task?.id}
+                                className="flex items-center space-x-3 bg-red-20"
+                              >
+                                {/* {icon} */}
+                                <GoDotFill className={`${textColor}`} />
+                                <p
+                                  className={`max-w-[80%] text-sm font-medium w-auto truncate`}
+                                >
+                                  {task?.title}
+                                </p>
+                                {task?.priority === "LOW" ? (
+                                  <FaCircleArrowDown className="text-lg text-green-500" />
+                                ) : task?.priority === "MEDIUM" ? (
+                                  <PiDotsThreeCircleVerticalFill className="text-2xl text-orange-400 rotate-90" />
+                                ) : (
+                                  <FaCircleExclamation className="text-lg text-red-500" />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                }
+              )
+            )}
+          </div>
         </div>
       </Drawer>
     );
@@ -260,6 +291,12 @@ const DrawerContainer = memo(
 );
 
 const Item = memo(({ division, selectedId, handleSelectDivision }) => {
+  const countTask = !division?.users?.[0]?.listEvent?.length
+    ? 0
+    : division?.users?.[0]?.listEvent?.reduce((total, item) => {
+        return total + item?.totalTaskInEvent;
+      }, 0);
+
   return (
     <div className="relative">
       <motion.div
@@ -307,11 +344,9 @@ const Item = memo(({ division, selectedId, handleSelectDivision }) => {
         {division?.users?.[0]?.isFree ? (
           <div></div>
         ) : (
-          <Tooltip
-            title={`Đang tham gia ${division?.users?.[0]?.listEvent?.length} sự kiện`}
-          >
+          <Tooltip title={`Đang thực hiện ${countTask} hạng mục`}>
             <p className="bg-red-500 text-white font-medium w-5 h-5 rounded-full flex items-center justify-center">
-              {division?.users?.[0]?.listEvent?.length}
+              {countTask}
             </p>
           </Tooltip>
         )}
@@ -330,6 +365,7 @@ const TaskSection = ({
   console.log("updateDataDivision > ", updateDataDivision);
   console.log("isSelectDate > ", isSelectDate);
   const [selectedId, setSelectedId] = useState();
+  console.log("selectedId > ", selectedId);
   const [divisionChecking, setDivisionChecking] = useState();
   const [selectedDate, setSelectedDate] = useState();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -378,11 +414,23 @@ const TaskSection = ({
   console.log("divisions > ", divisions);
 
   const handleSelectDivision = (division) => {
-    if (division?.assignEvents > 0) {
+    if (
+      division?.users?.[0]?.listEvent?.reduce((total, item) => {
+        return total + item?.totalTaskInEvent;
+      }, 0) > 0
+    ) {
       setHasBusyUser([true]);
+    } else {
+      setHasBusyUser([false]);
     }
-    setSelectedId(division?.users?.[0]?.id);
-    form.setFieldsValue({ assignee: [division?.users?.[0]?.id] });
+
+    if (division?.users?.[0]?.id === selectedId) {
+      setSelectedId();
+      form.setFieldsValue({ assignee: undefined });
+    } else {
+      setSelectedId(division?.users?.[0]?.id);
+      form.setFieldsValue({ assignee: [division?.users?.[0]?.id] });
+    }
   };
 
   const handleSetDivisionChecking = (division, date) => {
@@ -471,14 +519,13 @@ const TaskSection = ({
     <Fragment>
       <DrawerContainer
         isDrawerOpen={isDrawerOpen}
-        // isDrawerOpen
         setIsDrawerOpen={setIsDrawerOpen}
         getColor={getColor}
         getPriority={getPriority}
         divisionChecking={divisionChecking}
       />
 
-      <div className="flex space-x-10">
+      {/* <div className="flex space-x-10">
         <p className="w-1/4 text-lg font-medium">Bộ phận chịu trách nhiệm</p>
         <p className="flex-1 text-black text-lg font-medium">
           {isSelectDate
@@ -487,32 +534,35 @@ const TaskSection = ({
               )}`
             : "Lịch trình"}
         </p>
-      </div>
+      </div> */}
 
       <Spin spinning={divisionsIsLoading} className="my-[15%]">
-        <div className="flex space-x-10 h-screen">
+        <div className="">
           {/* Division list */}
-          <div className="w-1/4 h-full max-h-screen overflow-scroll scrollbar-hide">
+          <div className="h-full max-h-screen overflow-scroll scrollbar-hide">
+            <p className="text-lg font-medium">Bộ phận chịu trách nhiệm</p>
             <Form.Item name="assignee">
-              <div className="space-y-5 mt-5 px-3">
+              <div className="flex overflow-x-scroll space-x-5 px-3 py-5">
                 {divisionsIsError ? (
-                  <p className="mt-10 text-lg font-medium text-center">
+                  <p className="text-lg font-medium text-center">
                     Không thể lấy dữ liệu hãy thử lại sau !
                   </p>
                 ) : (
-                  divisions?.map((division, index) => (
-                    <Item
-                      key={division?.id}
-                      division={division}
-                      selectedId={selectedId}
-                      handleSelectDivision={handleSelectDivision}
-                      isSelectDate={isSelectDate}
-                      // Update data flow
-                      updateDataDivision={
-                        updateDataDivision ? updateDataDivision : null
-                      }
-                    />
-                  ))
+                  <>
+                    {divisions?.map((division, index) => (
+                      <Item
+                        key={division?.id}
+                        division={division}
+                        selectedId={selectedId}
+                        handleSelectDivision={handleSelectDivision}
+                        isSelectDate={isSelectDate}
+                        // Update data flow
+                        updateDataDivision={
+                          updateDataDivision ? updateDataDivision : null
+                        }
+                      />
+                    ))}
+                  </>
                 )}
               </div>
             </Form.Item>
@@ -520,19 +570,22 @@ const TaskSection = ({
 
           {/* Calendar */}
           <div className="flex-1">
-            <div className="mt-2 border h-full">
-              <ConfigProvider
-                locale={vi_VN}
-                // theme={{
-                //   token: {
-                //     colorText: "#1677ff",
-                //     colorTextHeading: "#000000",
-                //     fontSize: 15,
-                //     fontWeightStrong: 800,
-                //     controlHeightLG: 30,
-                //   },
-                // }}
-              >
+            <div className="mt-2 h-full">
+              <p className="flex-1 text-black text-lg font-medium">
+                {/* {isSelectDate
+                  ? `Lịch trình bắt đầu từ ngày ${isSelectDate?.[0].format(
+                      "DD-MM-YYYY"
+                    )}`
+                  : "Lịch trình"} */}
+                {selectedId
+                  ? `Lịch trình của [ ${
+                      divisions?.find(
+                        (item) => item?.users?.[0]?.id === selectedId
+                      )?.divisionName
+                    } ]`
+                  : "Lịch trình tổng quát"}
+              </p>
+              <ConfigProvider locale={vi_VN}>
                 <Calendar
                   fullscreen={true}
                   value={
@@ -592,6 +645,13 @@ const TaskSection = ({
                       }
                     });
 
+                    // console.log("renderList > ", renderList);
+
+                    if (selectedId)
+                      renderList = renderList?.filter(
+                        (item) => item?.users?.[0]?.id === selectedId
+                      );
+
                     // return info.originNode;
                     if (!!renderList?.length)
                       return (
@@ -600,18 +660,6 @@ const TaskSection = ({
                             const { borderColor, textColor } = getColor(
                               item?.status
                             );
-
-                            let countTask = 0;
-                            item?.users?.[0]?.listEvent?.map((event) => {
-                              event?.listTask?.filter((task) => {
-                                if (
-                                  currentMoment >= task?.startDate &&
-                                  currentMoment <= task?.endDate
-                                ) {
-                                  countTask++;
-                                }
-                              });
-                            });
 
                             return (
                               <div
@@ -623,28 +671,19 @@ const TaskSection = ({
                                   ) & setIsDrawerOpen(true)
                                 }
                               >
-                                <Tooltip
-                                  placement="top"
-                                  title={`Gồm ${countTask} hạng mục`}
-                                  className="relative"
+                                <div
+                                  className={clsx(
+                                    `border ${borderColor} py-1 px-3 rounded-full mt-2 relative`
+                                  )}
                                 >
-                                  <div
+                                  <p
                                     className={clsx(
-                                      `border ${borderColor} py-1 px-3 rounded-md mt-2 relative`
+                                      `text-center text-base ${textColor} font-normal truncate`
                                     )}
                                   >
-                                    <p
-                                      className={clsx(
-                                        `text-center text-base ${textColor} font-normal truncate`
-                                      )}
-                                    >
-                                      {item?.divisionName}
-                                    </p>
-                                    <div className="absolute -top-2 right-3 text-xs text-blue-500 font-semibold border border-black bg-white w-4 h-4 flex items-center justify-center rounded-full">
-                                      {countTask}
-                                    </div>
-                                  </div>
-                                </Tooltip>
+                                    {item?.divisionName}
+                                  </p>
+                                </div>
                               </div>
                             );
                           })}

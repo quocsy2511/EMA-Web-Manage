@@ -55,6 +55,14 @@ const SettingPage = () => {
       refetchOnWindowFocus: false,
     }
   );
+
+  console.log("🚀 ~ SettingPage ~ templateTask:", templateTask);
+
+  const onChangeChecked = (checked) => {
+    console.log(`switch to ${checked}`);
+    setComponentDisabled(!checked);
+  };
+
   const handleChangeEventType = (value) => {
     // console.log("🚀 ~ handleChangeEventType ~ value:", value);
     if (value) {
@@ -133,7 +141,9 @@ const SettingPage = () => {
                       <CardSetting task={task} key={index} />
                     ))
                   ) : (
-                    <Empty description={<span>chưa có dữ liệu</span>} />
+                    <div className="w-full h-[50vh] flex justify-center items-center">
+                      <Empty description={<span>chưa có dữ liệu</span>} />
+                    </div>
                   )}
                 </div>
               </Spin>

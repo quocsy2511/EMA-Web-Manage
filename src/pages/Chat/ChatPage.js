@@ -4,7 +4,7 @@ import { FiSearch } from "react-icons/fi";
 import { IoVideocam, IoCall } from "react-icons/io5";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { BsSendFill } from "react-icons/bs";
-import { FaArrowUp } from "react-icons/fa";
+import { FaArrowUp, FaArrowLeft } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 import { useDispatch, useSelector } from "react-redux";
@@ -164,7 +164,7 @@ const GroupChatItem = memo(
           </p>
         </div>
 
-        <div className="flex items-start space-x-5">
+        <div className="flex items-start space-x-5 overflow-hidden">
           <p
             className={clsx(
               "flex-1 line-clamp-3 text-base font-medium truncate",
@@ -174,12 +174,9 @@ const GroupChatItem = memo(
             {!chat?.lastMessageSent
               ? "Gửi tin nhắn đầu tiên"
               : chat?.lastMessageSent?.author?.email === userEmail
-              ? "Bạn đã gửi 1 tin nhắn"
+              ? `Bạn đã gửi 1 tin nhắn: ${chat?.lastMessageSent?.content}`
               : `${chat?.lastMessageSent?.author?.profile?.fullName}: ${chat?.lastMessageSent?.content}`}
           </p>
-          <div className="w-5 h-5 flex justify-center items-center bg-red-500 rounded-full">
-            <p className="text-white text-xs font-medium">3</p>
-          </div>
         </div>
       </motion.div>
     );
@@ -195,7 +192,7 @@ const ChatPage = () => {
   const { onlineUsers, offlineUsers } = useSelector(
     (state) => state.onlineUser
   );
-  console.log("onlineUsers > ", onlineUsers);
+  // console.log("onlineUsers > ", onlineUsers);
 
   const { email: managerEmail, id: managerId } =
     useRouteLoaderData("manager") || {};
@@ -273,10 +270,12 @@ const ChatPage = () => {
             (user.email.includes(searchInput.toLowerCase()) ||
               user.fullName.toLowerCase().includes(searchInput.toLowerCase()))
         );
+        console.log("searchOfflineUsers > ", searchOfflineUsers);
 
         const filterUser = searchOnlineUser
           .map((item) => ({ ...item, online: true }))
           .concat(searchOfflineUsers);
+        console.log("filterUser > ", filterUser);
 
         setSearchUsers(filterUser);
       } else {
@@ -304,6 +303,7 @@ const ChatPage = () => {
           variables.name
         );
 
+        setSearchUsers(null);
         setSearchInput("");
       },
       onError: (error, variables) => {
@@ -319,6 +319,7 @@ const ChatPage = () => {
             variables.name
           );
 
+          setSearchUsers(null);
           setSearchInput("");
         }
       },
@@ -380,8 +381,19 @@ const ChatPage = () => {
         <div className="flex flex-col w-[35%] min-h-min max-h-[calc(100vh-64px-2.5rem)]">
           <p className="text-4xl text=black font-semibold ml-10 mb-5">Chats</p>
 
-          <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-md shadow-black/10 mx-10">
-            <FiSearch className="text-slate-300" size={25} />
+          <div className="flex items-center space-x-2 bg-white py-3 px-5 rounded-lg shadow-md shadow-black/10 mx-10">
+            {searchUsers ? (
+              <FaArrowLeft
+                className="text-black cursor-pointer"
+                size={20}
+                onClick={() => {
+                  setSearchUsers(null);
+                  setSearchInput("");
+                }}
+              />
+            ) : (
+              <FiSearch className="text-slate-300" size={20} />
+            )}
             <Input
               className="text-lg"
               bordered={false}
@@ -476,7 +488,7 @@ const ChatPage = () => {
               >
                 <AnimatePresence mode="wait">
                   {searchUsers &&
-                    (searchUsers.length === 0 ? (
+                    (searchUsers?.length === 0 ? (
                       <motion.div
                         key="search-not-found"
                         initial={{ x: -1, opacity: 0 }}
@@ -496,9 +508,9 @@ const ChatPage = () => {
                         exit={{ x: -1, opacity: 0 }}
                         className="space-y-5"
                       >
-                        {searchUsers.map((user) => (
+                        {searchUsers?.map((user) => (
                           <motion.div
-                            key={user.email}
+                            key={user?.email}
                             onClick={() =>
                               handleSelectConservation(
                                 user.email,

@@ -35,6 +35,7 @@ const EventAssignDivisionPage = () => {
       select: (data) => {
         return data?.filter((item) => item?.status);
       },
+      refetchOnWindowFocus: false,
     }
   );
   console.log("divisions > ", divisions);
@@ -79,10 +80,18 @@ const EventAssignDivisionPage = () => {
   };
 
   if (divisionsIsLoading) {
-    return <p>loading</p>;
+    return (
+      <div className="h-[calc(100vh-128px)] w-full">
+        <LoadingComponentIndicator />
+      </div>
+    );
   }
   if (divisionsIsError) {
-    return <p>error</p>;
+    return (
+      <div className="h-[calc(100vh-128px)] w-full">
+        <AnErrorHasOccured />
+      </div>
+    );
   }
 
   return (

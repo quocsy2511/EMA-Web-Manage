@@ -10,14 +10,9 @@ export const createEvent = ({
   coverUrl,
   estBudget,
   eventTypeId,
-  customerName,
-  customerNationalId,
-  customerAddress,
-  customerEmail,
-  customerPhoneNumber,
-  contractValue,
-  paymentMethod,
-  paymentDate,
+  listTask,
+  listDivision,
+
   contactId,
 }) =>
   http({
@@ -34,16 +29,8 @@ export const createEvent = ({
       coverUrl,
       estBudget,
       eventTypeId,
-
-      // Contract payload
-      customerName,
-      customerNationalId,
-      customerAddress,
-      customerEmail,
-      customerPhoneNumber,
-      contractValue,
-      paymentMethod,
-      paymentDate,
+      listTask,
+      listDivision,
     },
   });
 

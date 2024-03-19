@@ -1,8 +1,8 @@
 import http from "../utils/axios-utils";
 
-export const getCustomerContacts = ({ currentPage, sort, status }) =>
+export const getCustomerContacts = ({ currentPage, sort, status, sizePage }) =>
   http({
-    url: `/customer-contacts/info?sizePage=10&currentPage=${currentPage}&sortProperty=createdAt&sort=${sort}&status=${status}`,
+    url: `/customer-contacts/info?sizePage=${sizePage}&currentPage=${currentPage}&sortProperty=createdAt&sort=${sort}&status=${status}`,
     method: "get",
   });
 
