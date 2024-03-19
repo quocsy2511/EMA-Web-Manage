@@ -70,7 +70,8 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
       }),
     {
       select: (data) => {
-        return data;
+        const filterTemplate = data.filter((task) => task.status === "OVERDUE");
+        return filterTemplate;
       },
       refetchOnWindowFocus: false,
     }

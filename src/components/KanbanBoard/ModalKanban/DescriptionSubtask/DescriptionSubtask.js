@@ -74,7 +74,7 @@ const DescriptionSubtask = ({
       onError: () => {
         message.open({
           type: "error",
-          content: "Ko thể Cập nhật mô tả công việc Hãy thử lại sau",
+          content: "Không thể Cập nhật mô tả công việc Hãy thử lại sau",
         });
       },
     }

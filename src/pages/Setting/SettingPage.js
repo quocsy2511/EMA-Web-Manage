@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { getEventTemplate, getEventType } from "../../apis/events";
 import {
@@ -11,6 +11,7 @@ import {
   Spin,
   Switch,
   Tooltip,
+  message,
 } from "antd";
 import {
   CheckOutlined,
@@ -19,10 +20,11 @@ import {
   PlusOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import { getTasks } from "../../apis/tasks";
+import { getTasks, updateTaskStatus } from "../../apis/tasks";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import SettingModal from "../../components/Modal/SettingModal";
+import CardSetting from "./CardSetting/CardSetting";
 
 const SettingPage = () => {
   const [form] = Form.useForm();
@@ -30,7 +32,7 @@ const SettingPage = () => {
   const [selectTypeEvent, setSelectTypeEvent] = useState("");
   const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
   const [isOpenNewTaskTemplate, setIsOpenNewTaskTemplate] = useState(false);
-
+  const queryClient = useQueryClient();
   const {
     data: eventType,
     isLoading: eventTypeIsLoading,
@@ -72,11 +74,34 @@ const SettingPage = () => {
     }
   );
 
-  console.log("🚀 ~ SettingPage ~ templateTask:", templateTask);
+  // console.log("🚀 ~ SettingPage ~ templateTask:", templateTask);
+  const { mutate: UpdateStatusMutate, isSuccess } = useMutation(
+    ({ taskID, status }) => updateTaskStatus({ taskID, status }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("template-task");
+        message.open({
+          type: "success",
+          content: "Cập nhật trạng thái thành công",
+        });
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Ko thể cập nhật trạng thái lúc này! Hãy thử lại sau",
+        });
+      },
+    }
+  );
 
-  const onChangeChecked = (checked) => {
-    console.log(`switch to ${checked}`);
-    setComponentDisabled(!checked);
+  const onChangeChecked = (checked, value) => {
+    // console.log("🚀 ~ onChangeChecked ~ task:", value);
+    // console.log(`switch to ${checked}`);
+    if (checked === false && value) {
+      UpdateStatusMutate({ taskID: value?.id, status: "CANCEL" });
+    } else {
+      UpdateStatusMutate({ taskID: value?.id, status: "OVERDUE" });
+    }
   };
   const handleChangeEventType = (value) => {
     // console.log("🚀 ~ handleChangeEventType ~ value:", value);
@@ -86,7 +111,9 @@ const SettingPage = () => {
     }
   };
 
-  const onFinish = (value) => {};
+  const onFinish = (values) => {
+    console.log("🚀 ~ onFinish ~ values:", values);
+  };
 
   return (
     <section className="  w-full px-7 py-7 bg-[#f5f5f5]">
@@ -106,7 +133,7 @@ const SettingPage = () => {
           )}
         </div>
         {/* content */}
-        <div className="flex flex-wrap w-full">
+        <div className="flex w-full ">
           <div className="flex justify-start items-center flex-col w-full">
             {/* headerContent */}
             <div className="w-full flex justify-between items-center mb-8">
@@ -150,140 +177,20 @@ const SettingPage = () => {
             </div>
 
             {/* contentContent */}
-            <Spin spinning={isLoadingTemplateTask}>
-              <div className=" flex flex-wrap w-full gap-x-5 ">
-                {/* cardLayout */}
-                {templateTask?.length > 0 ? (
-                  templateTask?.map((task, index) => (
-                    <div
-                      className=" flex w-[49%] bg-white h-fit mb-7 rounded-xl"
-                      key={task.id}
-                    >
-                      {/* card */}
-                      <div className="border-none rounded-xl shadow-md w-full">
-                        {/* headerCard */}
-                        <div className="w-full bg-white border-b border-b-gray-300 p-4 flex justify-between justify-items-center flex-row rounded-t-xl overflow-hidden">
-                          <Tooltip title={task?.title}>
-                            <h5 className="text-lg font-semibold w-[90%] truncate">
-                              {task?.title}
-                            </h5>
-                          </Tooltip>
-                          <Switch
-                            checkedChildren={<CheckOutlined />}
-                            unCheckedChildren={<CloseOutlined />}
-                            defaultChecked
-                            onChange={onChangeChecked}
-                            className="bg-gray-300 w-auto"
-                          />
-                        </div>
-                        {/* contentCard */}
-                        <div className="p-6">
-                          <Form
-                            key={task.id}
-                            disabled={componentDisabled}
-                            name={`task-form-${task?.id}`}
-                            className="m-0 p-0 w-full"
-                            // form={form}
-                            onFinish={onFinish}
-                            autoComplete="off"
-                            layout="vertical"
-                            initialValues={{
-                              taskName: task?.title,
-                              priority: task?.priority,
-                              description: {
-                                ops: JSON.parse(
-                                  task?.description?.startsWith(`[{"`)
-                                    ? task?.description
-                                    : parseJson(task?.description)
-                                ),
-                              },
-                            }}
-                          >
-                            <Form.Item
-                              className="w-full p-0 "
-                              label="Tên đề mục"
-                              labelCol={{
-                                style: { fontWeight: "700" },
-                              }}
-                              name="taskName"
-                              rules={[
-                                {
-                                  required: true,
-                                  message: "Hãy nhập tên đề mục!",
-                                },
-                              ]}
-                            >
-                              <Input
-                                className="px-6 py-3 border-2 text-base font-inter font-normal"
-                                disabled={componentDisabled}
-                              />
-                            </Form.Item>
-                            {/* priority */}
-                            <Form.Item
-                              label="Độ ưu tiên"
-                              labelCol={{
-                                style: { fontWeight: "700" },
-                              }}
-                              name="priority"
-                            >
-                              <Segmented
-                                options={[
-                                  { label: "THẤP", value: "LOW" },
-                                  { label: "TRUNG BÌNH", value: "MEDIUM" },
-                                  { label: "CAO", value: "HIGH" },
-                                ]}
-                                value={task?.priority}
-                                // onChange={(value) =>
-                                //   updatePriorityFinish(value)
-                                // }
-                              />
-                            </Form.Item>
-                            {/* description */}
-                            <Form.Item name="description" className="mb-0">
-                              <ReactQuill
-                                theme="snow"
-                                onChange={(content, delta, source, editor) => {
-                                  form.setFieldsValue({
-                                    description: editor.getContents(),
-                                  });
-                                }}
-                                className="bg-transparent w-full py-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none  "
-                              />
-                            </Form.Item>
-
-                            <Form.Item
-                              wrapperCol={{
-                                span: 24,
-                              }}
-                              className=" mt-5 flex justify-between items-baseline gap-x-3"
-                            >
-                              <Button
-                                type="primary"
-                                className="hover:scale-105 duration-300 mr-5 font-bold text-base h-fit w-fit py-3"
-                                htmlType="submit"
-                                //   loading={isLoading}
-                              >
-                                Chỉnh sửa
-                              </Button>
-                              <Button
-                                type="default"
-                                className="hover:scale-105 duration-300 font-bold text-base h-fit w-fit py-3"
-                                htmlType="submit"
-                                //   loading={isLoading}
-                              >
-                                Huỷ
-                              </Button>
-                            </Form.Item>
-                          </Form>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <Empty description={<span>chưa có dữ liệu</span>} />
-                )}
-              </div>
-            </Spin>
+            <div className="w-full">
+              <Spin spinning={isLoadingTemplateTask}>
+                <div className=" flex w-full flex-wrap flex-row gap-x-5 ">
+                  {/* cardLayout */}
+                  {templateTask?.length > 0 ? (
+                    templateTask?.map((task, index) => (
+                      <CardSetting task={task} key={index} />
+                    ))
+                  ) : (
+                    <Empty description={<span>chưa có dữ liệu</span>} />
+                  )}
+                </div>
+              </Spin>
+            </div>
           </div>
         </div>
       </div>

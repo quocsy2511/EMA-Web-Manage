@@ -39,6 +39,7 @@ const SettingModal = ({
   );
 
   const onFinish = (values) => {
+    console.log("🚀 ~ onFinish ~ values:", values);
     const task = {
       ...values,
       eventID: eventID,
@@ -64,7 +65,7 @@ const SettingModal = ({
     >
       <div className="px-2 py-3 w-full overflow-hidden">
         <Form
-          //   form={form}
+          form={form}
           onFinish={onFinish}
           size="large"
           layout="vertical"

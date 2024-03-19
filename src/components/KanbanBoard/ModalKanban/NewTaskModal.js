@@ -243,6 +243,7 @@ const NewTaskModal = ({
 
   const onFinish = (values) => {
     const { fileUrl, date, ...data } = values;
+    console.log("🚀 ~ onFinish ~ values:", values);
     const task = {
       ...data,
       eventID: eventID,
