@@ -23,12 +23,18 @@ import {
 } from "react-icons/md";
 import Highlighter from "react-highlight-words";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllUser, updateStatusUser, updateUser } from "../../apis/users";
+import {
+  getAllUser,
+  getRoles,
+  updateStatusUser,
+  updateUser,
+} from "../../apis/users";
 import { getAllDivision } from "../../apis/divisions";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import CreateUserDrawer from "../../components/Drawer/CreateUserDrawer";
+import clsx from "clsx";
 
 const PersonnelPage = () => {
   const [page, setPage] = useState(1);
@@ -37,15 +43,16 @@ const PersonnelPage = () => {
     () => getAllUser({ pageSize: 10, currentPage: page }),
     {
       select: (data) => {
-        data.data = data.data.map((item) => {
-          item.dob = moment(item.dob).format("YYYY-MM-DD");
+        data.data = data?.data.map((item) => {
+          item.dob = moment(item?.dob).format("YYYY-MM-DD");
           return {
-            key: item.id,
+            key: item?.id,
             ...item,
           };
         });
         return data;
       },
+      refetchOnWindowFocus: false,
     }
   );
   console.log("DATA: ", data);
@@ -58,7 +65,8 @@ const PersonnelPage = () => {
     ["divisions", 1],
     () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 1 }),
     {
-      select: (data) => data.filter((division) => division.status),
+      select: (data) => data?.filter((division) => division?.status),
+      refetchOnWindowFocus: false,
     }
   );
   console.log("divisionsData: ", divisionsData);
@@ -71,10 +79,25 @@ const PersonnelPage = () => {
     ["divisions", 2],
     () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 2 }),
     {
-      select: (data) => data.filter((division) => division.status),
+      select: (data) => data?.filter((division) => division?.status),
+      refetchOnWindowFocus: false,
     }
   );
   console.log("divisionsWithoutStaff: ", divisionsWithoutStaff);
+
+  const {
+    data: roles,
+    isLoading: rolesIsLoading,
+    isError: rolesIsError,
+  } = useQuery(["roles"], getRoles, {
+    select: (data) => {
+      return data?.map((role) => ({
+        value: role?.id,
+        label: role?.roleName,
+      }));
+    },
+    refetchOnWindowFocus: false,
+  });
 
   const queryClient = useQueryClient();
   const { mutate, isLoading: updateUserIsLoading } = useMutation(
@@ -102,7 +125,7 @@ const PersonnelPage = () => {
   } = useMutation((user) => updateStatusUser(user), {
     onSuccess: (data, variables) => {
       queryClient.setQueryData(["users", page], (oldValue) => {
-        const updateOldData = oldValue.data.map((item) => {
+        const updateOldData = oldValue?.data?.map((item) => {
           if (item.id === variables.userId)
             return { ...item, status: variables.status };
           return item;
@@ -110,6 +133,11 @@ const PersonnelPage = () => {
         oldValue = { ...oldValue, data: updateOldData };
 
         return oldValue;
+      });
+
+      messageApi.open({
+        type: "success",
+        content: "Cập nhật trạng thái thành công",
       });
     },
     onError: () => {
@@ -145,10 +173,10 @@ const PersonnelPage = () => {
     const avatar = form.getFieldValue("avatar");
 
     const dataDivisionForm = form.getFieldValue("divisionName");
-    const divisionId = divisionsData.filter((item) => {
+    const divisionId = divisionsData?.filter((item) => {
       if (
-        dataDivisionForm === item.id ||
-        dataDivisionForm === item.divisionName
+        dataDivisionForm === item?.id ||
+        dataDivisionForm === item?.divisionName
       ) {
         return item;
       }
@@ -167,7 +195,7 @@ const PersonnelPage = () => {
 
   // Handle delete 1 record
   const handleDeleteAction = (record) => {
-    updateUserStatusMutate({ userId: record.id, status: "INACTIVE" });
+    updateUserStatusMutate({ userId: record?.id, status: "INACTIVE" });
   };
 
   const handleTableChange = (_, filter, sorter) => {
@@ -179,11 +207,11 @@ const PersonnelPage = () => {
 
   const searchGlobal = () => {
     if (searchText) {
-      const filterSearchedData = data.data.filter(
+      const filterSearchedData = data?.data?.filter(
         (value) =>
-          value.fullName.toLowerCase().includes(searchText.toLowerCase()) ||
-          value.email.toLowerCase().includes(searchText.toLowerCase()) ||
-          value.phoneNumber.includes(searchText.toLowerCase())
+          value?.fullName?.toLowerCase().includes(searchText?.toLowerCase()) ||
+          value?.email?.toLowerCase().includes(searchText?.toLowerCase()) ||
+          value?.phoneNumber?.includes(searchText?.toLowerCase())
       );
       setFilteredData(filterSearchedData);
     }
@@ -205,7 +233,6 @@ const PersonnelPage = () => {
   };
   // Editing mode
   const onEditing = (record) => {
-    console.log("On editing: ", record);
     form.setFieldsValue({
       fullName: "",
       phoneNumber: "",
@@ -324,12 +351,9 @@ const PersonnelPage = () => {
       align: "center",
       fixed: "left",
       render: (_, record) => {
-        console.log(record);
-        console.log(record.avatar123);
+        if (!record?.avatar123) return;
 
-        if (!record.avatar123) return;
-
-        return <Avatar src={record.avatar123} />;
+        return <Avatar src={record?.avatar123} />;
       },
     },
     {
@@ -339,7 +363,7 @@ const PersonnelPage = () => {
       width: 50,
       align: "center",
       fixed: "left",
-      render: (_, record) => <Avatar src={record.avatar} />,
+      render: (_, record) => <Avatar src={record?.avatar} />,
     },
     {
       title: "Họ và tên",
@@ -385,7 +409,7 @@ const PersonnelPage = () => {
       filteredValue: null,
       align: "center",
       render: (_, record) => (
-        <p className="text-center">{record.phoneNumber}</p>
+        <p className="text-center">{record?.phoneNumber}</p>
       ),
     },
     {
@@ -396,7 +420,7 @@ const PersonnelPage = () => {
       editTable: true,
       filteredValue: null,
       align: "center",
-      render: (_, record) => <p>{record.dob}</p>,
+      render: (_, record) => <p>{record?.dob}</p>,
     },
     {
       title: "Giới tính",
@@ -415,17 +439,14 @@ const PersonnelPage = () => {
       width: 150,
       editTable: true,
       filters: [
-        { text: "Nhân viên", value: "EMPLOYEE" },
-        { text: "Trưởng phòng", value: "STAFF" },
+        { text: "Nhân viên", value: "Nhân viên" },
+        { text: "Trưởng phòng", value: "Trưởng Nhóm" },
+        { text: "Khách Hàng", value: "Khách Hàng" },
       ],
       filteredValue: filteredInfo.role || null,
       onFilter: (value, record) => record.role?.includes(value),
       align: "center",
-      render: (_, record) => (
-        <p className="text-base">
-          {record.role === "STAFF" ? "Trưởng phòng" : "Nhân viên"}
-        </p>
-      ),
+      render: (_, record) => <p className="text-base">{record?.role}</p>,
     },
     {
       title: "Loại",
@@ -438,13 +459,19 @@ const PersonnelPage = () => {
         { text: "Bán thời gian", value: "PART_TIME" },
       ],
       filteredValue: filteredInfo.typeEmployee || null,
-      onFilter: (value, record) => record.typeEmployee?.includes(value),
+      onFilter: (value, record) => record?.typeEmployee?.includes(value),
       align: "center",
       render: (_, record) => (
-        <Tag color={record.typeEmployee === "FULL_TIME" ? "cyan" : "orange"}>
-          {record.typeEmployee === "FULL_TIME"
+        <Tag
+          color={
+            record?.typeEmployee === "FULL_TIME"
+              ? "cyan"
+              : record?.typeEmployee === "PART_TIME" && "orange"
+          }
+        >
+          {record?.typeEmployee === "FULL_TIME"
             ? "Toàn thời gian"
-            : "Bán thời gian"}
+            : record?.typeEmployee === "PART_TIME" && "Bán thời gian"}
         </Tag>
       ),
     },
@@ -456,21 +483,18 @@ const PersonnelPage = () => {
       editTable: true,
       filters:
         divisionsData
-          ?.filter((division) => division.status === 1)
+          ?.filter((division) => division?.status === 1)
           .map((division) => ({
-            text: division.divisionName,
-            value: division.id,
+            text: division?.divisionName,
+            value: division?.id,
           })) ?? [],
-      filteredValue: filteredInfo.divisionName || null,
+      filteredValue: filteredInfo?.divisionName || null,
       onFilter: (value, record) => {
-        console.log("value: ", value);
-        console.log("record: ", record);
-        // return record.divisionName?.toLowerCase().includes(value.toLowerCase());
-        return record.divisionId === value;
+        return record?.divisionId === value;
       },
       render: (_, record) => (
         <p className={`text-base ${!record.divisionName && "text-red-400"}`}>
-          {record.divisionName}
+          {record.divisionName ?? <Tag />}
         </p>
       ),
       align: "center",
@@ -625,15 +649,16 @@ const PersonnelPage = () => {
     let options;
     switch (dataIndex) {
       case "role":
-        options = [
-          { value: "STAFF", label: "Trường phòng" },
-          { value: "EMPLOYEE", label: "Nhân viên" },
-        ];
+        // options = [
+        //   { value: "Trường phòng", label: "Trường phòng" },
+        //   { value: "Nhân viên", label: "Nhân viên" },
+        // ];
+        options = roles;
         break;
       case "divisionName":
-        options = division.map((division) => ({
-          value: division.id,
-          label: division.divisionName,
+        options = division?.map((division) => ({
+          value: division?.id,
+          label: division?.divisionName,
         }));
         break;
       case "status":
@@ -667,7 +692,7 @@ const PersonnelPage = () => {
       ) : inputType === "date" ? (
         <ConfigProvider locale={viVN}>
           <DatePicker
-            // defaultValue={dayjs(record.dob)}
+            defaultValue={dayjs(record?.dob, "YYYY-MM-DD")}
             onChange={(value) => {
               const formattedDate = value
                 ? dayjs(value).format("YYYY-MM-DD")
@@ -680,8 +705,6 @@ const PersonnelPage = () => {
       ) : (
         <Select
           onChange={(value) => {
-            console.log("dataIndex: ", dataIndex);
-            console.log("value: ", value);
             form.setFieldsValue({ [dataIndex]: value });
             if (dataIndex === "role") form.resetFields(["divisionName"]);
           }}
@@ -782,7 +805,6 @@ const PersonnelPage = () => {
                     pagination={false}
                     scroll={{
                       x: "150%",
-                      // y: "100%",
                       scrollToFirstRowOnChange: true,
                     }}
                   />
@@ -791,18 +813,93 @@ const PersonnelPage = () => {
                   <div className="flex items-center gap-x-3">
                     <MdOutlineKeyboardArrowLeft
                       className={`text-slate-500 ${
-                        data.prevPage
+                        data?.prevPage
                           ? "cursor-pointer hover:text-blue-600"
                           : "cursor-not-allowed"
                       }`}
                       onClick={() =>
-                        data.prevPage && setPage((prev) => prev - 1)
+                        data?.prevPage && setPage((prev) => prev - 1)
                       }
                       size={25}
                     />
-                    <div className="px-4 py-2 border border-slate-300 rounded-md text-base font-medium cursor-default">
-                      {page}
+
+                    <div
+                      className={clsx(
+                        "px-4 py-2 border rounded-md text-base font-medium cursor-pointer",
+                        { "border-slate-300": page !== 1 },
+                        {
+                          "border-blue-500 text-blue-500": page === 1,
+                        }
+                      )}
+                      onClick={() => setPage(1)}
+                    >
+                      1
                     </div>
+
+                    {page !== 1 && page !== 2 ? (
+                      <div>. . .</div>
+                    ) : (
+                      <div
+                        className={clsx(
+                          "px-4 py-2 border rounded-md text-base font-medium cursor-pointer",
+                          { "border-slate-300": page !== 2 },
+                          { "border-blue-500 text-blue-500": page === 2 }
+                        )}
+                        onClick={() => setPage(2)}
+                      >
+                        2
+                      </div>
+                    )}
+
+                    {page !== 1 &&
+                      page !== 2 &&
+                      page !== data?.lastPage &&
+                      page !== data?.lastPage - 1 && (
+                        <div
+                          className={clsx(
+                            "px-4 py-2 border rounded-md text-base font-medium cursor-default",
+                            { "border-slate-300": page !== page },
+                            {
+                              "border-blue-500 text-blue-500": page === page,
+                            }
+                          )}
+                        >
+                          {page}
+                        </div>
+                      )}
+
+                    {page !== data?.lastPage && page !== data?.lastPage - 1 ? (
+                      <div>. . .</div>
+                    ) : (
+                      <div
+                        className={clsx(
+                          "px-4 py-2 border rounded-md text-base font-medium cursor-pointer",
+                          { "border-slate-300": page !== data?.lastPage - 1 },
+                          {
+                            "border-blue-500 text-blue-500":
+                              page === data?.lastPage - 1,
+                          }
+                        )}
+                        onClick={() => setPage(data?.lastPage - 1)}
+                      >
+                        {data?.lastPage - 1}
+                      </div>
+                    )}
+
+                    <div
+                      className={clsx(
+                        "px-4 py-2 border rounded-md text-base font-medium cursor-pointer",
+                        { "border-slate-300": page !== data?.lastPage },
+                        {
+                          "border-blue-500 text-blue-500":
+                            page === data?.lastPage,
+                        }
+                      )}
+                      onClick={() => setPage(data?.lastPage)}
+                    >
+                      {data?.lastPage}
+                    </div>
+
                     <MdOutlineKeyboardArrowRight
                       className={`text-slate-500 ${
                         data.nextPage
@@ -819,7 +916,7 @@ const PersonnelPage = () => {
               </>
             )
           ) : (
-            <div className="min-h-[calc(100vh-64px-12rem)]">
+            <div className="min-h-[calc(100vh-64px-12rem)] flex items-center">
               <LoadingComponentIndicator />
             </div>
           )}

@@ -158,13 +158,13 @@ const DivisionPage = () => {
       title: "Tên bộ phận",
       dataIndex: "divisionName",
       editTable: true,
-      width: 150,
+      width: "20%",
     },
     {
       title: "Mô tả",
       dataIndex: "description",
       editTable: true,
-      width: 300,
+      width: "60%",
     },
     {
       title: "Trạng thái",
@@ -176,10 +176,10 @@ const DivisionPage = () => {
         <div className="text-center">
           <Tag
             className="mr-0 mx-auto"
-            color={record.status === 1 ? "green" : "volcano"}
+            color={record.status ? "green" : "volcano"}
             key={record.id}
           >
-            {record.status === 1 ? "kích hoạt" : "vô hiệu"}
+            {record.status ? "kích hoạt" : "vô hiệu"}
           </Tag>
         </div>
       ),
@@ -194,7 +194,7 @@ const DivisionPage = () => {
       render: (_, record) => {
         const editable = checkEditing(record);
         return (
-          data.length >= 1 && (
+          data?.length >= 1 && (
             <div className="flex items-center justify-center">
               {editable ? (
                 <Space size="middle">
@@ -272,8 +272,8 @@ const DivisionPage = () => {
             form.setFieldsValue({ [dataIndex]: value });
           }}
           options={[
-            { value: 1, label: "kích hoạt" },
-            { value: 0, label: "vô hiệu" },
+            { value: true, label: "kích hoạt" },
+            { value: false, label: "vô hiệu" },
           ]}
           size="small"
         />

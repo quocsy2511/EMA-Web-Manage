@@ -2,18 +2,13 @@ import React, { memo, useEffect, useState } from "react";
 import HeaderEvent from "../../../components/Header/HeaderEvent";
 import KanbanBoard from "../../../components/KanbanBoard/KanbanBoard";
 import { useQuery } from "@tanstack/react-query";
-import { getEventDetail, getEventDivisions } from "../../../apis/events";
+import { getEventDetail } from "../../../apis/events";
 import AnErrorHasOccured from "../../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 import moment from "moment";
-import { Empty, Spin, message } from "antd";
-import { HeartTwoTone, SmileTwoTone } from "@ant-design/icons";
+import { Spin } from "antd";
 import { filterTask } from "../../../apis/tasks";
-import BudgetStaff from "../../../components/KanbanBoard/BudgetStaff/BudgetStaff";
-import { getProfile } from "../../../apis/users";
-import { getBudget } from "../../../apis/budgets";
 import { useLocation, useParams, useRouteLoaderData } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 moment.suppressDeprecationWarnings = true;
 

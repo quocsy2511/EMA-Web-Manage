@@ -296,6 +296,7 @@ const EventCreationPage = () => {
             desc: JSON.stringify(item?.itemDescription?.ops),
             priority: item?.itemPriority,
             itemId: item?.itemId,
+            itemPercentage: 80, // Tiền lơi
           })),
           listDivision: selectedDivision,
           contactId,
