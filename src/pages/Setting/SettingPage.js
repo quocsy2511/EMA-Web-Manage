@@ -1,38 +1,20 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { getEventTemplate, getEventType } from "../../apis/events";
+import { Button, Empty, Select, Spin } from "antd";
 import {
-  Button,
-  Empty,
-  Form,
-  Input,
-  Segmented,
-  Select,
-  Spin,
-  Switch,
-  Tooltip,
-  message,
-} from "antd";
-import {
-  CheckOutlined,
-  CloseOutlined,
   LoadingOutlined,
   PlusOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import { getTasks, updateTaskStatus } from "../../apis/tasks";
-import ReactQuill from "react-quill";
+import { getTasks } from "../../apis/tasks";
 import "react-quill/dist/quill.snow.css";
 import SettingModal from "../../components/Modal/SettingModal";
 import CardSetting from "./CardSetting/CardSetting";
 
 const SettingPage = () => {
-  const [form] = Form.useForm();
-  const [componentDisabled, setComponentDisabled] = useState(false);
   const [selectTypeEvent, setSelectTypeEvent] = useState("");
-  const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
   const [isOpenNewTaskTemplate, setIsOpenNewTaskTemplate] = useState(false);
-  const queryClient = useQueryClient();
   const {
     data: eventType,
     isLoading: eventTypeIsLoading,
@@ -73,46 +55,12 @@ const SettingPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-
-  // console.log("🚀 ~ SettingPage ~ templateTask:", templateTask);
-  const { mutate: UpdateStatusMutate, isSuccess } = useMutation(
-    ({ taskID, status }) => updateTaskStatus({ taskID, status }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("template-task");
-        message.open({
-          type: "success",
-          content: "Cập nhật trạng thái thành công",
-        });
-      },
-      onError: () => {
-        message.open({
-          type: "error",
-          content: "Ko thể cập nhật trạng thái lúc này! Hãy thử lại sau",
-        });
-      },
-    }
-  );
-
-  const onChangeChecked = (checked, value) => {
-    // console.log("🚀 ~ onChangeChecked ~ task:", value);
-    // console.log(`switch to ${checked}`);
-    if (checked === false && value) {
-      UpdateStatusMutate({ taskID: value?.id, status: "CANCEL" });
-    } else {
-      UpdateStatusMutate({ taskID: value?.id, status: "OVERDUE" });
-    }
-  };
   const handleChangeEventType = (value) => {
     // console.log("🚀 ~ handleChangeEventType ~ value:", value);
     if (value) {
       const eventTypeFind = eventType.find((item) => item.id === value);
       setSelectTypeEvent(eventTypeFind?.typeName);
     }
-  };
-
-  const onFinish = (values) => {
-    console.log("🚀 ~ onFinish ~ values:", values);
   };
 
   return (
@@ -175,7 +123,6 @@ const SettingPage = () => {
                 Thêm mới Công việc
               </Button>
             </div>
-
             {/* contentContent */}
             <div className="w-full">
               <Spin spinning={isLoadingTemplateTask}>

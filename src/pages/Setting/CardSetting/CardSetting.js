@@ -7,7 +7,6 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 const CardSetting = ({ task }) => {
-  //   console.log("🚀 ~ task:", task);
   const [form] = Form.useForm();
   const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
   const queryClient = useQueryClient();
