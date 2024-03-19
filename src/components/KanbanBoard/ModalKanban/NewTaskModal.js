@@ -62,7 +62,6 @@ const NewTaskModal = ({
   const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
   const handleChangeTaskTemplate = (value) => {
-    console.log("🚀 ~ handleChangeTaskTemplate ~ value:", value);
     if (value) {
       const TaskTemplateFind = templateTask.find((item) => item.id === value);
       setSelectedTaskTemplate(TaskTemplateFind?.title);
