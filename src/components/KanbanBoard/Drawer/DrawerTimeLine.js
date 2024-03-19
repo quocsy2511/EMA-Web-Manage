@@ -29,7 +29,7 @@ const DrawerTimeLine = ({
       onClose={onChildrenDrawerClose}
       open={childrenDrawer}
     >
-      {checkedDateData?.length > 0 && (
+      {checkedDateData && (
         <div className="w-full py-1  h-full">
           {/* info */}
           <div className="flex flex-row justify-start items-center gap-x-3 mb-1">
@@ -67,77 +67,75 @@ const DrawerTimeLine = ({
             </div>
           </div>
 
-          {checkedDateData?.map((item) => (
-            <div
-              className="w-full mb-5 border-b-2 border-b-slate-300 pt-3 "
-              key={item?.id}
-            >
-              {/* header */}
-              <div className="flex justify-start items-center  mb-2 gap-x-3">
-                <Avatar src={item?.profile?.avatar} size="large" />
-                <Tooltip title="testing">
-                  <p className="w-auto max-w-xs text-center text-base font-medium truncate cursor-pointer">
-                    {item?.profile?.fullName}
-                  </p>
-                </Tooltip>
-              </div>
-              {/* content */}
-              <div>
-                {item?.listEvent?.map((event) => (
-                  <div key={event?.eventID}>
-                    {/* listEvent */}
-                    <div className=" px-3 py-2 rounded-lg bg-blue-400 flex flex-row justify-start items-center gap-x-1 overflow-hidden mb-2">
-                      <CaretDownOutlined className="text-white" />
-                      <Tooltip title={event?.eventName}>
-                        <p className="text-base text-white pr-4 truncate cursor-pointer font-medium">
-                          {event?.eventName}
-                        </p>
-                      </Tooltip>
-                    </div>
-
-                    {/* List Task */}
-                    <div className="w-full pt-3 overflow-hidden pl-10">
-                      <Timeline
-                        items={event?.listTask
-                          ?.filter(
-                            (item) =>
-                              item.status === "PENDING" ||
-                              item.status === "PROCESSING"
-                          )
-                          ?.map((task) => {
-                            return {
-                              children: (
-                                <>
-                                  <p
-                                    className={clsx("text-base text-blue-500", {
-                                      "text-yellow-500":
-                                        task?.status === "PENDING",
-                                    })}
-                                  >
-                                    {task?.title}
-                                  </p>
-                                </>
-                              ),
-                              dot: (
-                                <>
-                                  {task?.priority === "HIGH" ? (
-                                    <ClockCircleOutlined className="text-lg timeline-clock-icon text-red-500" />
-                                  ) : task?.priority === "MEDIUM" ? (
-                                    <FieldTimeOutlined className="text-lg timeline-clock-icon text-gray-500" />
-                                  ) : (
-                                    <HistoryOutlined className="text-lg timeline-clock-icon text-green-500" />
-                                  )}
-                                </>
-                              ),
-                            };
-                          })}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <div
+            className="w-full mb-5 border-b-2 border-b-slate-300 pt-3 "
+            key={checkedDateData?.id}
+          >
+            {/* header */}
+            <div className="flex justify-start items-center  mb-2 gap-x-3">
+              <Avatar src={checkedDateData?.profile?.avatar} size="large" />
+              <Tooltip title="testing">
+                <p className="w-auto max-w-xs text-center text-base font-medium truncate cursor-pointer">
+                  {checkedDateData?.profile?.fullName}
+                </p>
+              </Tooltip>
             </div>
-          ))}
+            {/* content */}
+            <div>
+              {checkedDateData?.listEvent?.map((event) => (
+                <div key={event?.eventID}>
+                  {/* listEvent */}
+                  <div className=" px-3 py-2 rounded-lg bg-blue-400 flex flex-row justify-start items-center gap-x-1 overflow-hidden mb-2">
+                    <CaretDownOutlined className="text-white" />
+                    <Tooltip title={event?.eventName}>
+                      <p className="text-base text-white pr-4 truncate cursor-pointer font-medium">
+                        {event?.eventName}
+                      </p>
+                    </Tooltip>
+                  </div>
+
+                  {/* List Task */}
+                  <div className="w-full pt-3 overflow-hidden pl-10">
+                    <Timeline
+                      items={event?.listTask
+                        ?.filter(
+                          (item) =>
+                            item.status === "PENDING" ||
+                            item.status === "PROCESSING"
+                        )
+                        ?.map((task) => {
+                          return {
+                            children: (
+                              <>
+                                <p
+                                  className={clsx("text-base text-blue-500", {
+                                    "text-yellow-500":
+                                      task?.status === "PENDING",
+                                  })}
+                                >
+                                  {task?.title}
+                                </p>
+                              </>
+                            ),
+                            dot: (
+                              <>
+                                {task?.priority === "HIGH" ? (
+                                  <ClockCircleOutlined className="text-lg timeline-clock-icon text-red-500" />
+                                ) : task?.priority === "MEDIUM" ? (
+                                  <FieldTimeOutlined className="text-lg timeline-clock-icon text-gray-500" />
+                                ) : (
+                                  <HistoryOutlined className="text-lg timeline-clock-icon text-green-500" />
+                                )}
+                              </>
+                            ),
+                          };
+                        })}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </Drawer>
