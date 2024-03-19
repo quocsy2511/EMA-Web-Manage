@@ -39,6 +39,7 @@ const SettingModal = ({
   );
 
   const onFinish = (values) => {
+    console.log("🚀 ~ onFinish ~ values:", values);
     const task = {
       ...values,
       eventID: eventID,
@@ -64,7 +65,7 @@ const SettingModal = ({
     >
       <div className="px-2 py-3 w-full overflow-hidden">
         <Form
-          //   form={form}
+          form={form}
           onFinish={onFinish}
           size="large"
           layout="vertical"
@@ -129,7 +130,7 @@ const SettingModal = ({
               onChange={(content, delta, source, editor) => {
                 form.setFieldsValue({ desc: editor.getContents() });
               }}
-              className="bg-transparent  py-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full "
+              className="bg-transparent  py-2 rounded-md text-sm border-none h-20 border-gray-600 focus:outline-secondary outline-none ring-0 w-full "
             />
           </Form.Item>
           <Form.Item wrapperCol={{ span: 24 }}>
@@ -138,6 +139,7 @@ const SettingModal = ({
               htmlType="submit"
               loading={isLoading}
               block
+              size="large"
               className="mt-9"
             >
               Tạo công việc
