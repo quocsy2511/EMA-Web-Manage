@@ -400,7 +400,7 @@ const NewTaskModal = ({
             </Form.Item>
             {/* description */}
             <Form.Item
-              // initialValue={description}
+              initialValue={description}
               label="Mô tả"
               className="text-sm font-medium "
               name="desc"
