@@ -18,7 +18,7 @@ const ScheduleEmloyees = ({
   const now = momenttz();
   const staff = useRouteLoaderData("staff");
   const [messageApi, contextHolder] = message.useMessage();
-
+  const [selectedEmployee, setSelectedEmployee] = useState("");
   const {
     data: employeeAssignees,
     isLoading: isLoadingEmployees,
@@ -49,13 +49,18 @@ const ScheduleEmloyees = ({
           })),
         }));
 
-        // console.log("🚀 ~ updatedListEvent:", filteredEmployees);
         return filteredEmployees;
       },
       refetchOnWindowFocus: false,
-      //   enabled: !!selectedDate,
     }
   );
+
+  const handleSelectEmployee = (value) => {
+    if (value) {
+      setChildrenDrawer(true);
+      setCheckedDateData(value);
+    }
+  };
 
   useEffect(() => {
     const numOfDaysInCurrentMonth = now
@@ -109,31 +114,35 @@ const ScheduleEmloyees = ({
                 .format("YYYY-MM-DD"),
             ]);
           }}
+          // onSelect={(value) => {
+          //   // console.log("value > ", value);
+          //   let list = [];
+          //   const currentMoment = momenttz(value?.$d).format("YYYY-MM-DD");
+          //   setSelectedDateSchedule(currentMoment);
+          //   employeeAssignees?.map((user) => {
+          //     if (!!user?.listEvent?.length) {
+          //       user?.listEvent?.map((event) => {
+          //         if (
+          //           event?.listTask?.find(
+          //             (task) =>
+          //               currentMoment >= task?.startDate &&
+          //               currentMoment <= task?.endDate
+          //           )
+          //         ) {
+          //           if (!list?.find((item) => item?.id === user?.id)) {
+          //             setChildrenDrawer(true);
+          //             list = [...list, user];
+          //           }
+          //         }
+          //       });
+          //     }
+          //   });
+
+          //   !!list.length && setCheckedDateData(list);
+          // }}
           onSelect={(value) => {
-            // console.log("value > ", value);
-            let list = [];
             const currentMoment = momenttz(value?.$d).format("YYYY-MM-DD");
             setSelectedDateSchedule(currentMoment);
-            employeeAssignees?.map((user) => {
-              if (!!user?.listEvent?.length) {
-                user?.listEvent?.map((event) => {
-                  if (
-                    event?.listTask?.find(
-                      (task) =>
-                        currentMoment >= task?.startDate &&
-                        currentMoment <= task?.endDate
-                    )
-                  ) {
-                    if (!list?.find((item) => item?.id === user?.id)) {
-                      setChildrenDrawer(true);
-                      list = [...list, user];
-                    }
-                  }
-                });
-              }
-            });
-
-            !!list.length && setCheckedDateData(list);
           }}
           cellRender={(current) => {
             let renderList = [];
@@ -160,9 +169,13 @@ const ScheduleEmloyees = ({
               return (
                 <div className="gap-y-5 mb-3 mt-2 space-y-2">
                   {renderList?.map((user, index) => (
-                    <div key={currentMoment + user?.id} className="">
+                    <div
+                      key={currentMoment + user?.id}
+                      className=""
+                      onClick={() => handleSelectEmployee(user)}
+                    >
                       <Tooltip title={user?.profile?.fullName}>
-                        <p className="text-xs font-medium text-center truncate border border-black/30 rounded-full py-[2px] px-[2px] hover:border-black transition-colors">
+                        <p className="text-xs font-medium text-center truncate border border-black/30 py-[2px] px-[2px] hover:border-black rounded-lg transition-colors hover:text-blue-500">
                           {user?.profile?.fullName}
                         </p>
                       </Tooltip>
