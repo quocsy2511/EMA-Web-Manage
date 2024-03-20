@@ -16,7 +16,7 @@ const EmployeeSelected = ({
 }) => {
   // console.log("🚀 ~ EmployeeSelected ~ assignTasks:", assignTasks);
   const taskID = taskSelected?.id;
-  // console.log("🚀 ~ taskID:", taskID);
+  const [selectedLeader, setSelectedLeader] = useState("");
   const queryClient = useQueryClient();
   const [assignee, setAssignee] = useState(
     assignTasks?.map((item) => item.user?.id)
@@ -71,34 +71,59 @@ const EmployeeSelected = ({
       event.preventDefault();
       event.stopPropagation();
     };
-    let matchedUsers;
 
-    if (!isLoadingEmployees) {
-      matchedUsers = assignee?.map((id) => {
+    const handlerCloseTag = (value) => {
+      // console.log("🚀 ~ handlerCloseTag ~ value:", value);
+      if (value && value === selectedLeader?.id) {
+        setSelectedLeader("");
+      }
+      onClose();
+    };
+    let matchedUsers;
+    if (!isLoadingEmployees && !selectedLeader) {
+      matchedUsers = assignee.map((id, index) => {
         const user = employees.find((employee) => employee.id === id);
-        return user;
+        const isLeader = index === 0; //xem có phải index đầu không thì true
+        const data = { ...user, isLeader };
+        return data;
+      });
+    } else {
+      matchedUsers = assignee.map((id, index) => {
+        const user = employees.find((employee) => employee.id === id);
+        const isLeader = id === selectedLeader?.id; //xem có phải id giống không thì true
+        const data = { ...user, isLeader };
+        return data;
       });
     }
+
+    const handleSelectLeader = (value) => {
+      setSelectedLeader(value);
+    };
+
+    const leader = matchedUsers?.find((item) => item.id === props.value);
     const labelName = matchedUsers?.find((item) => item.id === props.value)
       ?.profile?.fullName;
     const avatar = matchedUsers?.find((item) => item.id === props.value)
       ?.profile?.avatar;
-    const color =
-      matchedUsers?.findIndex((user) => user.id === props.value) === 0
-        ? "green"
-        : "gold";
-    // console.log("🚀 ~ tagRender ~ matchedUsers:", matchedUsers);
+    // const color =
+    //   matchedUsers?.findIndex((user) => user.id === props.value) === 0
+    //     ? "green"
+    //     : "gold";
+    const defaultLeader = matchedUsers?.find((user) => user.id === props.value)
+      ?.isLeader
+      ? "green"
+      : "gold";
+
     return (
       <Tag
-        color={color}
+        color={defaultLeader}
         onMouseDown={onPreventMouseDown}
         closable={closable}
-        onClose={onClose}
-        style={{
-          marginRight: 8,
-        }}
+        onClose={() => handlerCloseTag(props.value)}
+        className="mr-4 py-2 cursor-pointer"
+        onClick={() => handleSelectLeader(leader)}
       >
-        {color === "green" && <StarFilled spin />}
+        {defaultLeader === "green" && <StarFilled spin />}
         <Avatar src={avatar} className="mr-2" size="small" />
         {labelName}
       </Tag>
@@ -130,10 +155,18 @@ const EmployeeSelected = ({
   };
 
   const handleUpdateMember = () => {
+    let leader;
+    if (selectedLeader) {
+      leader = selectedLeader?.id;
+    } else {
+      leader = assignee[0];
+    }
+
     const data = {
       assignee: assignee,
       taskID: taskID,
-      leader: assignee?.length > 0 ? assignee[0] : "",
+      // leader: assignee?.length > 0 ? assignee[0] : "",
+      leader: leader,
     };
     UpdateMember(data);
   };

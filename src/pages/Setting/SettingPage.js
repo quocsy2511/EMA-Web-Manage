@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getEventTemplate, getEventType } from "../../apis/events";
 import { Button, Empty, Select, Spin } from "antd";
 import {
@@ -63,6 +63,10 @@ const SettingPage = () => {
       setSelectTypeEvent(eventTypeFind?.typeName);
     }
   };
+
+  useEffect(() => {
+    refetchTemplateTask();
+  }, [isOpenNewTaskTemplate]);
 
   return (
     <section className="  w-full px-7 py-7 bg-[#f5f5f5]">
@@ -131,7 +135,7 @@ const SettingPage = () => {
                   {/* cardLayout */}
                   {templateTask?.length > 0 ? (
                     templateTask?.map((task, index) => (
-                      <CardSetting task={task} key={index} />
+                      <CardSetting task={task} key={task?.id} />
                     ))
                   ) : (
                     <div className="w-full h-[50vh] flex justify-center items-center">
