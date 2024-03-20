@@ -56,12 +56,12 @@ const SettingPage = () => {
     }
   );
 
-  console.log("🚀 ~ SettingPage ~ templateTask:", templateTask);
+  // console.log("🚀 ~ SettingPage ~ templateTask:", templateTask);
 
-  const onChangeChecked = (checked) => {
-    console.log(`switch to ${checked}`);
-    setComponentDisabled(!checked);
-  };
+  // const onChangeChecked = (checked) => {
+  //   console.log(`switch to ${checked}`);
+  //   setComponentDisabled(!checked);
+  // };
 
   const handleChangeEventType = (value) => {
     // console.log("🚀 ~ handleChangeEventType ~ value:", value);
