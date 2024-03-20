@@ -23,7 +23,7 @@ import {
   PlusCircleOutlined,
 } from "@ant-design/icons";
 import AvatarDefault from "../../../assets/images/avatar2.webp";
-import NewBudget from "./ModalBudget/NewBudget";
+import NewBudget from "./NewBudget";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import { getTasks } from "../../../apis/tasks";
@@ -32,7 +32,7 @@ const BudgetStaff = ({ selectEvent, listTaskParents, setIsBoardTask }) => {
   // console.log("🚀 ~ BudgetStaff ~ listTaskParents:", listTaskParents);
   const [isOpenBudgetModal, setIsOpenBudgetModal] = useState(false);
   const [selectedParentTask, setSelectedParentTask] = useState(
-    listTaskParents?.[0].id
+    listTaskParents?.[0]?.id
   );
   const { confirm } = Modal;
   const showDeleteConfirm = () => {
@@ -173,6 +173,12 @@ const BudgetStaff = ({ selectEvent, listTaskParents, setIsBoardTask }) => {
 
   return (
     <>
+      <NewBudget
+        selectEvent={selectEvent}
+        isOpenBudgetModal={isOpenBudgetModal}
+        setIsOpenBudgetModal={setIsOpenBudgetModal}
+      />
+      
       <div className="bg-bgG w-full h-[calc(100vh-76px-4rem)] ">
         <div className="w-full px-16 mt-3  overflow-y-scroll scrollbar-hide min-h-full ">
           {/* header */}
@@ -453,13 +459,6 @@ const BudgetStaff = ({ selectEvent, listTaskParents, setIsBoardTask }) => {
             </div>
           </div>
         </div>
-        {isOpenBudgetModal && (
-          <NewBudget
-            selectEvent={selectEvent}
-            isOpenBudgetModal={isOpenBudgetModal}
-            setIsOpenBudgetModal={setIsOpenBudgetModal}
-          />
-        )}
       </div>
     </>
   );

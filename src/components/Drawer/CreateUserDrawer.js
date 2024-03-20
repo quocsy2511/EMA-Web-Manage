@@ -96,6 +96,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             value: division.id,
             label: division.divisionName,
           })),
+      refetchOnWindowFocus: false,
     }
   );
   console.log("divisionData: ", divisionData);
@@ -115,8 +116,10 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
             value: division.id,
             label: division.divisionName,
           })),
+      refetchOnWindowFocus: false,
     }
   );
+  console.log("divisionsWithoutStaff >", divisionsWithoutStaff);
 
   const {
     data: roles,
@@ -124,11 +127,12 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     isError: rolesIsError,
   } = useQuery(["roles"], getRoles, {
     select: (data) => {
-      return data.map((role) => ({
-        value: role.id,
-        label: role.roleName,
+      return data?.map((role) => ({
+        value: role?.id,
+        label: role?.roleName,
       }));
     },
+    refetchOnWindowFocus: false,
   });
   console.log("roles > ", roles);
 
@@ -301,6 +305,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
               <ConfigProvider locale={viVN}>
                 <DatePicker
                   className="w-full"
+                  defaultValue={dayjs("2001-01-01", "YYYY-MM-DD")}
                   onChange={(value) => {
                     const formattedDate = dayjs(value).format(
                       "YYYY-MM-DDTHH:mm:ss.SSS[Z]"

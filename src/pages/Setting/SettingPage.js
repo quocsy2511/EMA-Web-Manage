@@ -59,7 +59,7 @@ const SettingPage = () => {
   const handleChangeEventType = (value) => {
     // console.log("🚀 ~ handleChangeEventType ~ value:", value);
     if (value) {
-      const eventTypeFind = eventType.find((item) => item.id === value);
+      const eventTypeFind = eventType?.find((item) => item?.id === value);
       setSelectTypeEvent(eventTypeFind?.typeName);
     }
   };

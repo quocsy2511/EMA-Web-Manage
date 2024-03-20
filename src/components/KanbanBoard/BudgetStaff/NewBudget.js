@@ -4,7 +4,7 @@ import { CloseOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { useRouteLoaderData } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createBudget } from "../../../../apis/budgets";
+// import { createBudget } from "../../../../apis/budgets";
 
 const NewBudget = ({
   selectEvent,
@@ -21,29 +21,29 @@ const NewBudget = ({
   );
 
   const queryClient = useQueryClient();
-  const { mutate: postListBudget } = useMutation(
-    (budget) => createBudget(budget),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("listBudgetConfirming");
-        queryClient.invalidateQueries("listBudgetConfirmed");
-        form.resetFields();
-        form.setFieldsValue({
-          items: [{}],
-        });
-        message.open({
-          type: "success",
-          content: "Tạo chi phí  mới thành công",
-        });
-      },
-      onError: () => {
-        message.open({
-          type: "error",
-          content: "Ko thể tạo chi phí mới lúc này! Hãy thử lại sau",
-        });
-      },
-    }
-  );
+  // const { mutate: postListBudget } = useMutation(
+  //   (budget) => createBudget(budget),
+  //   {
+  //     onSuccess: () => {
+  //       queryClient.invalidateQueries("listBudgetConfirming");
+  //       queryClient.invalidateQueries("listBudgetConfirmed");
+  //       form.resetFields();
+  //       form.setFieldsValue({
+  //         items: [{}],
+  //       });
+  //       message.open({
+  //         type: "success",
+  //         content: "Tạo chi phí  mới thành công",
+  //       });
+  //     },
+  //     onError: () => {
+  //       message.open({
+  //         type: "error",
+  //         content: "Ko thể tạo chi phí mới lúc này! Hãy thử lại sau",
+  //       });
+  //     },
+  //   }
+  // );
 
   const handleCancel = () => {
     setIsOpenBudgetModal(false);
@@ -63,7 +63,7 @@ const NewBudget = ({
         "🚀 ~ file: NewBudget.js:51 ~ data.forEach ~ budget:",
         budget
       );
-      postListBudget(budget);
+      // postListBudget(budget);
     });
   };
 
