@@ -1,8 +1,13 @@
 import http from "../utils/axios-utils";
 
-export const getBudget = ({ assignee, eventID, priority, sort, status }) =>
+export const getBudget = ({ assignee, eventID }) =>
   http({
-    url: `/budget?assignee=${assignee}&eventID=${eventID}&priority=${priority}&sort=${sort}&status=${status}`,
+    url: `/budget?assignee=${assignee}&eventID=${eventID}`,
+  });
+
+export const getBudgetTransactionRequest = ({ assignee, eventID }) =>
+  http({
+    url: `/budget/transaction-request?assignee=${assignee}&eventID=${eventID}`,
   });
 
 export const getOwnTransactionBudget = ({
