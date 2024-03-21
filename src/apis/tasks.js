@@ -19,7 +19,7 @@ export const createTask = (task) =>
       estimationTime: task.estimationTime,
       assignee: task.assignee,
       leader: task.leader,
-
+      itemId: task.itemId,
       // Subtask only
       parentTask: task.parentTask ?? undefined,
       file: task.file ?? undefined,

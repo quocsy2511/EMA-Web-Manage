@@ -42,8 +42,9 @@ const NewTaskModal = ({
   addNewTaskTemplate,
   setAddNewTaskTemplate,
 }) => {
-  // console.log("🚀 ~ TaskParent:", TaskParent);
+  console.log("🚀 ~ TaskParent:", TaskParent);
   const eventID = TaskParent?.eventDivision?.event?.id;
+  const itemId = TaskParent?.item?.id;
   const { RangePicker } = DatePicker;
   const { id } = TaskParent ?? {};
   const [startDate, setStartDate] = useState("");
@@ -61,7 +62,6 @@ const NewTaskModal = ({
   const [selectedDateSchedule, setSelectedDateSchedule] = useState("");
   const [selectedTaskTemplate, setSelectedTaskTemplate] = useState("");
   const [selectedLeader, setSelectedLeader] = useState("");
-  console.log("🚀 ~ selectedLeader:", selectedLeader);
   const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
   const handleChangeTaskTemplate = (value) => {
@@ -288,6 +288,7 @@ const NewTaskModal = ({
       endDate: endDate,
       parentTask: id,
       leader: leader,
+      itemId: itemId,
       desc: JSON.stringify(values.desc.ops),
     };
 
