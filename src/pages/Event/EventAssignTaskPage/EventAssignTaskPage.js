@@ -5,10 +5,13 @@ import {
   Button,
   ConfigProvider,
   DatePicker,
+  Drawer,
+  FloatButton,
   Form,
   Input,
   Popconfirm,
   Select,
+  Spin,
   Upload,
   message,
 } from "antd";
@@ -19,8 +22,13 @@ import momenttz from "moment-timezone";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import TaskSection from "./TaskSection";
-import { useMutation } from "@tanstack/react-query";
-import { assignMember, createTask, updateTask } from "../../../apis/tasks";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  assignMember,
+  createTask,
+  getTasks,
+  updateTask,
+} from "../../../apis/tasks";
 import SubTaskSection from "./SubTaskSection";
 import dayjs from "dayjs";
 import { UploadOutlined } from "@ant-design/icons";
@@ -36,6 +44,91 @@ const Title = memo(({ title, required }) => (
     {required && <span className="text-red-500 text-base font-bold">*</span>}
   </p>
 ));
+
+const DrawerContainer = memo(
+  ({
+    isDrawerOpen,
+    setIsDrawerOpen,
+    chosenTemplateTask,
+    setChosenTemplateTask,
+  }) => {
+    const {
+      data: templateTask,
+      isLoading: isLoadingTemplateTask,
+      isError: isErrorTemplateTask,
+    } = useQuery(
+      ["template-task"],
+      () =>
+        getTasks({
+          fieldName: "isTemplate",
+          conValue: "true",
+          pageSize: 50,
+          currentPage: 1,
+        }),
+      {
+        refetchOnWindowFocus: false,
+      }
+    );
+
+    console.log("templateTask > ", templateTask);
+
+    return (
+      <Drawer
+        title="Danh sách công việc mẫu"
+        placement="right"
+        onClose={() => setIsDrawerOpen(false)}
+        open={isDrawerOpen}
+        width={"30%"}
+      >
+        {/* Content */}
+        <div className="mx-5">
+          <p className="mb-6 text-lg text-black/60">Chọn các hạng mục mẫu</p>
+
+          <Spin spinning={isLoadingTemplateTask}>
+            {templateTask?.map((task) => (
+              <div
+                key={task?.id}
+                className={clsx(
+                  "rounded-2xl mb-10 overflow-hidden shadow-[0_0_8px_1px_rgba(0,0,0,0.15)] hover:scale-105 transition-transform cursor-pointer",
+                  { "shadow-blue-500": chosenTemplateTask?.id === task?.id }
+                )}
+                onClick={() => {
+                  setChosenTemplateTask(task);
+                }}
+              >
+                <div className="pb-3 overflow-hidden">
+                  <p className="px-5 pb-2 pt-3 text-xl font-medium truncate border-b overflow-hidden">
+                    {task?.title}
+                  </p>
+
+                  <div className="p-5 pt-3 pb-14">
+                    <Title title="Mô tả" />
+
+                    <ReactQuill
+                      // defaultValue={task?.description}
+                      defaultValue={{
+                        ops: JSON.parse(
+                          task?.description?.startsWith(`[{"`)
+                            ? task?.description
+                            : parseJson(task?.description)
+                        ),
+                      }}
+                      className="mt-2 h-20"
+                      theme="snow"
+                      placeholder="Mô tả về công việc"
+                      onChange={(content, delta, source, editor) => {}}
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </Spin>
+        </div>
+      </Drawer>
+    );
+  }
+);
 
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
@@ -67,7 +160,9 @@ const EventAssignTaskPage = () => {
   const [isSelectDate, setIsSelectDate] = useState(false);
   const [chosenFile, setChosenFile] = useState();
   const [hasBusyUser, setHasBusyUser] = useState([]);
-  console.log("hasBusyUser > ", hasBusyUser);
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [chosenTemplateTask, setChosenTemplateTask] = useState();
 
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
@@ -82,6 +177,21 @@ const EventAssignTaskPage = () => {
       fileHolder: chosenFile,
     });
   }, [chosenFile]);
+
+  useEffect(() => {
+    if (chosenTemplateTask) {
+      form.setFieldsValue({
+        title: chosenTemplateTask?.title,
+        desc: {
+          ops: JSON.parse(
+            chosenTemplateTask?.description?.startsWith(`[{"`)
+              ? chosenTemplateTask?.description
+              : parseJson(chosenTemplateTask?.description)
+          ),
+        },
+      });
+    }
+  }, [chosenTemplateTask]);
 
   const { mutate: taskMutate, isLoading: taskIsLoading } = useMutation(
     (task) => createTask(task),
@@ -389,6 +499,21 @@ const EventAssignTaskPage = () => {
   return (
     <Fragment>
       {contextHolder}
+
+      <DrawerContainer
+        isDrawerOpen={isDrawerOpen}
+        setIsDrawerOpen={setIsDrawerOpen}
+        chosenTemplateTask={chosenTemplateTask}
+        setChosenTemplateTask={setChosenTemplateTask}
+      />
+
+      <FloatButton
+        onClick={() => setIsDrawerOpen(true)}
+        type="primary"
+        // icon={<RiAddFill />}
+        tooltip={"Công việc mẫu"}
+        className="cursor-pointer"
+      />
 
       <motion.div
         initial={{ y: -75 }}

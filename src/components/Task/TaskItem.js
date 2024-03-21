@@ -32,14 +32,16 @@ const TaskItem = ({
   // Update subtask
   goToUpdateSubtask,
 }) => {
-  console.log("task > ", task);
+  console.log("TaskItem > ", task);
   const navigate = useNavigate();
 
   const [isOpenHistoryModal, setIsOpenHistoryModal] = useState(false);
 
   const responsor = isSubtask
-    ? task?.assignTasks?.filter((user) => user?.isLeader)?.[0]
-    : task?.assignTasks?.[0];
+    ? task?.assignTasks?.filter(
+        (user) => user?.isLeader && user?.status === "active"
+      )?.[0]
+    : task?.assignTasks?.find((user) => user?.status === "active");
 
   const goToSubTask = () => {
     if (eventName)
@@ -52,33 +54,6 @@ const TaskItem = ({
     setSelectedSubTask(task);
     setIsOpenModal(true);
   };
-
-  // const goToUpdateTask = () => {
-  //   const updateData = {
-  //     title: task?.title,
-  //     date: [
-  //       momenttz(task?.startDate).format("YYYY-MM-DD"),
-  //       momenttz(task?.endDate).format("YYYY-MM-DD"),
-  //     ],
-  //     priority: task?.priority,
-  //     desc: task?.description,
-  //     assignee: task?.assignTasks?.map((user) => user?.user?.id),
-  //   };
-
-  //   navigate("task", {
-  //     state: {
-  //       eventId,
-  //       eventName: eventDetail?.eventName,
-  //       dateRange: [eventDetail?.startDate, eventDetail?.endDate],
-  //       isSubTask: false,
-  //       listDivision: eventDetail?.listDivision?.map(
-  //         (division) => division?.divisionId
-  //       ),
-
-  //       updateData
-  //     },
-  //   });
-  // };
 
   let priority;
   switch (task?.priority) {

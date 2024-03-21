@@ -1,5 +1,6 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
 import {
+  Button,
   Calendar,
   ConfigProvider,
   Drawer,
@@ -40,13 +41,6 @@ const StatusRender = memo(({ bg, text }) => (
   <div className="flex space-x-2 items-center mr-10">
     <div className={`w-2 h-2 ${bg} rounded-full`} />
     <p className="text-sm font-medium">{text}</p>
-  </div>
-));
-
-const PriorityRender = memo(({ icon, text }) => (
-  <div className="flex space-x-2 items-center mr-10">
-    <div className="">{icon}</div>
-    <p className="w-3/4 text-sm font-medium truncate">{text}</p>
   </div>
 ));
 
@@ -114,7 +108,9 @@ const DrawerContainer = memo(
                       userChecking?.date >= task?.startDate &&
                       userChecking?.date <= task?.endDate
                   )
-                  ?.sort((a, b) => mapPriory[a?.priority] - mapPriory[b?.priority]);
+                  ?.sort(
+                    (a, b) => mapPriory[a?.priority] - mapPriory[b?.priority]
+                  );
 
                 if (!!listTasks?.length)
                   return (
@@ -243,29 +239,29 @@ const Item = memo(
 
           {selectedEmployees?.includes(user?.id) && (
             <div className="absolute -top-4 right-5">
-              <Tooltip title={leader !== user?.id && "Đổi trưởng nhóm"}>
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectLeader(user);
-                  }}
-                  className={clsx("border-2 bg-white rounded-full p-1", {
-                    "border-orange-400": leader === user?.id,
-                  })}
-                >
-                  <PiMedal
-                    className={clsx(
-                      "text-2xl",
-                      {
-                        "text-slate-300": leader !== user?.id,
-                      },
-                      {
-                        "text-orange-400": leader === user?.id,
-                      }
-                    )}
-                  />
-                </div>
-              </Tooltip>
+              {/* <Tooltip title={leader !== user?.id && "Đổi trưởng nhóm"}> */}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectLeader(user);
+                }}
+                className={clsx("border-2 bg-white rounded-full p-1", {
+                  "border-orange-400": leader === user?.id,
+                })}
+              >
+                <PiMedal
+                  className={clsx(
+                    "text-2xl",
+                    {
+                      "text-slate-300": leader !== user?.id,
+                    },
+                    {
+                      "text-orange-400": leader === user?.id,
+                    }
+                  )}
+                />
+              </div>
+              {/* </Tooltip> */}
             </div>
           )}
         </motion.div>
@@ -465,7 +461,15 @@ const SubTaskSection = ({
         <div className="">
           {/* Employee list */}
           <div className="h-full overflow-scroll scrollbar-hide">
-            <p className="text-lg font-medium">Nhân viên thực hiện</p>
+            <div className="flex justify-between">
+              <p className="text-lg py-1 font-medium">Nhân viên thực hiện</p>
+
+              {!!selectedEmployees?.length && (
+                <Button danger onClick={() => setSelectedEmployees([])}>
+                  Đặt lại
+                </Button>
+              )}
+            </div>
             <Form.Item name="assignee">
               <div className="flex overflow-x-scroll space-x-5 px-3 py-5">
                 {usersIsError ? (
@@ -490,13 +494,20 @@ const SubTaskSection = ({
 
           {/* Calendar */}
           <div className="flex-1">
-            <p className="flex-1 text-black text-lg font-medium">
-              {isSelectDate
-                ? `Lịch trình bắt đầu từ ngày ${isSelectDate?.[0].format(
-                    "DD-MM-YYYY"
-                  )}`
-                : "Lịch trình"}
-            </p>
+            <div className="flex justify-between">
+              <p className="flex-1 text-black text-lg py-1 font-medium">
+                {filterUser
+                  ? `Lịch trình của ${
+                      users?.find((item) => item?.id === filterUser)?.profile
+                        ?.fullName
+                    }`
+                  : "Lịch trình tổng quát"}
+              </p>
+
+              {filterUser && (
+                <Button onClick={() => setFilterUser()}>Xem tổng quát</Button>
+              )}
+            </div>
             <ConfigProvider locale={vi_VN}>
               <Calendar
                 // fullscreen={true}

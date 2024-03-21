@@ -57,7 +57,6 @@ const EventSubTaskPage = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("location > ", location.state);
 
   const dispatch = useDispatch();
   const { redirect } = useSelector((state) => state.redirection);
@@ -69,6 +68,10 @@ const EventSubTaskPage = () => {
   const [selectedStatus, setSelectedStatus] = useState();
 
   const [messageApi, contextHolder] = message.useMessage();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const resetTaskRedirect = () => {
     if (redirect.task) dispatch(redirectionActions.taskChange(undefined));
@@ -433,7 +436,7 @@ const EventSubTaskPage = () => {
               className={`flex items-center px-3 ${statusColor} border-2 ${statusBorder} rounded-full truncate cursor-pointer`}
             >
               <Dropdown
-                placement="bottomCenter"
+                placement="bottom"
                 arrow
                 trigger={["click"]}
                 menu={{
@@ -691,21 +694,18 @@ const EventSubTaskPage = () => {
           <AnimatePresence>
             {tasks?.subTask?.length !== 0 ? (
               tasks?.subTask?.map((subtask) => {
-                if (
-                  subtask?.assignTasks?.length !== 0 ||
-                  subtask?.createdBy === manager?.id
-                )
-                  return (
-                    <TaskItem
-                      key={subtask?.id}
-                      task={subtask}
-                      isSubtask={true}
-                      setSelectedSubTask={setSelectedSubTask}
-                      setIsOpenModal={setIsOpenModal}
-                      // Go to update subtask
-                      goToUpdateSubtask={() => goToUpdateSubtask(subtask)}
-                    />
-                  );
+                // if (subtask?.assignTasks?.length !== 0)
+                return (
+                  <TaskItem
+                    key={subtask?.id}
+                    task={subtask}
+                    isSubtask={true}
+                    setSelectedSubTask={setSelectedSubTask}
+                    setIsOpenModal={setIsOpenModal}
+                    // Go to update subtask
+                    goToUpdateSubtask={() => goToUpdateSubtask(subtask)}
+                  />
+                );
               })
             ) : (
               <p className="text-lg text-center font-medium">

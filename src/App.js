@@ -19,6 +19,9 @@ const EventPage = lazy(() => import("./pages/Event/EventPage"));
 const PersonnelPage = lazy(() => import("./pages/Personnel/PersonnelPage"));
 const EventTaskPage = lazy(() => import("./pages/Event/EventTaskPage"));
 const EventSubTaskPage = lazy(() => import("./pages/Event/EventSubTaskPage"));
+const EventBudgetPage = lazy(() =>
+  import("./pages/Event/EventBudgetPage/EventBudgetPage.js")
+);
 const EventCreationPage = lazy(() => import("./pages/Event/EventCreationPage"));
 const DivisionPage = lazy(() => import("./pages/Division/DivisionPage"));
 const ChatPage = lazy(() => import("./pages/Chat/ChatPage"));
@@ -124,6 +127,18 @@ const router = createBrowserRouter([
                 }
               >
                 <EventSubTaskPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: ":eventId/budget",
+            element: (
+              <Suspense
+                fallback={
+                  <LoadingPageIndicator title="ngân sách của sự kiện" />
+                }
+              >
+                <EventBudgetPage />
               </Suspense>
             ),
           },
