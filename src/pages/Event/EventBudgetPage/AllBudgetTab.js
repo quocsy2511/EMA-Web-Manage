@@ -1,15 +1,17 @@
 import React, { Fragment, memo, useState, useEffect } from "react";
 import momenttz from "moment-timezone";
-import { Progress, Table, Tag, Tooltip } from "antd";
+import { Image, Progress, Table, Tag, Tooltip } from "antd";
 import clsx from "clsx";
 import { HiOutlineExclamation } from "react-icons/hi";
+import { FaFileLines } from "react-icons/fa6";
+import { IoRemoveOutline } from "react-icons/io5";
 import AnErrorHasOccured from "../../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 
 const BudgetItem = memo(({ budget, setSelectBudget }) => (
   <div
     onClick={() => setSelectBudget(budget)}
-    className="flex items-center bg-white p-5 space-x-5 hover:scale-105 transition-transform cursor-pointer rounded-lg shadow-md"
+    className="flex items-center bg-white p-5 mx-5 space-x-5 hover:scale-105 transition-transform cursor-pointer rounded-lg shadow-md"
   >
     <div className="min-w-[20%] flex justify-center items-center">
       <Progress
@@ -25,7 +27,10 @@ const BudgetItem = memo(({ budget, setSelectBudget }) => (
           budget?.totalTransactionUsed /
             ((budget?.itemExisted?.plannedPrice ?? 1) *
               (budget?.itemExisted?.plannedAmount ?? 1)) >=
-            0.8 && { "0%": "#ff4d4f", "100%": "#ff4d4f" }
+            budget?.itemExisted?.percentage / 100 && {
+            "0%": "#ff4d4f",
+            "100%": "#ff4d4f",
+          }
         }
         gapDegree={30}
       />
@@ -38,7 +43,7 @@ const BudgetItem = memo(({ budget, setSelectBudget }) => (
         {(
           budget?.itemExisted?.plannedAmount * budget?.itemExisted?.plannedPrice
         )?.toLocaleString()}{" "}
-        <span className="text-sm text-slate-400 font-normal">VNĐ</span>
+        <span className="text-xs text-slate-400 font-normal">VNĐ</span>
       </p>
     </div>
   </div>
@@ -76,16 +81,22 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
 
   return (
     <Fragment>
-      <div className="flex justify-between space-x-10 mt-10">
+      <div className="flex justify-between space-x-10 mt-6 pb-20">
         {/* LEFT SIDE */}
         <div className="w-1/4 space-y-5">
-          {allBudget?.map((budget) => (
-            <BudgetItem
-              key={budget?.itemExisted?.id}
-              budget={budget}
-              setSelectBudget={setSelectBudget}
-            />
-          ))}
+          <p className="text-3xl mx-5 font-semibold truncate bg-white p-5 rounded-md">
+            Danh sách hạng mục
+          </p>
+
+          <div className="space-y-5 max-h-[100vh] overflow-y-scroll scrollbar-hide">
+            {allBudget?.map((budget) => (
+              <BudgetItem
+                key={budget?.itemExisted?.id}
+                budget={budget}
+                setSelectBudget={setSelectBudget}
+              />
+            ))}
+          </div>
         </div>
 
         {/* RIGHT SIDE */}
@@ -96,8 +107,10 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
 
           <div className="bg-white p-5 rounded-md space-y-2">
             <div className="flex justify-between items-center">
-              <p className="text-base text-slate-400 font-normal">Đã sử dụng</p>
-              <p className="text-base text-slate-400 font-normal">Hạn mức</p>
+              <p className="text-base text-slate-400 font-normal">
+                Đã chi tiêu
+              </p>
+              <p className="text-base text-slate-400 font-normal">Khả dụng</p>
             </div>
 
             <div className="flex justify-between items-center">
@@ -150,12 +163,33 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
               </p>
             </div>
 
-            <div className="relative">
+            <div className="relative pb-5">
               {selectBudget?.totalTransactionUsed /
                 ((selectBudget?.itemExisted?.plannedPrice ?? 1) *
                   (selectBudget?.itemExisted?.plannedAmount ?? 1)) <
-                0.8 && (
-                <div className="absolute w-[2px] h-4/5 bg-black/20 right-[calc(20%+2rem)] top-0" />
+                selectBudget?.itemExisted?.percentage / 100 && (
+                <Tooltip
+                  title={
+                    <p className="text-base text-center">
+                      Hạn mức
+                      <br />
+                      {(
+                        selectBudget?.itemExisted?.plannedPrice *
+                        selectBudget?.itemExisted?.plannedAmount *
+                        (selectBudget?.itemExisted?.percentage / 100)
+                      ).toLocaleString()}{" "}
+                      VNĐ
+                    </p>
+                  }
+                  placement="top"
+                >
+                  <div
+                    className={`absolute z-10 w-1 h-1/2 bg-black/20 top-0 mx-5 cursor-pointer`}
+                    style={{
+                      left: `calc(${selectBudget?.itemExisted?.percentage}% - 2rem)`,
+                    }}
+                  />
+                </Tooltip>
               )}
               <Progress
                 percent={(
@@ -184,7 +218,10 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
                   selectBudget?.totalTransactionUsed /
                     ((selectBudget?.itemExisted?.plannedPrice ?? 1) *
                       (selectBudget?.itemExisted?.plannedAmount ?? 1)) >=
-                    0.8 && { "0%": "#ff4d4f", "100%": "#ff4d4f" }
+                    selectBudget?.itemExisted?.percentage / 100 && {
+                    "0%": "#ff4d4f",
+                    "100%": "#ff4d4f",
+                  }
                 }
                 type="line"
               />
@@ -192,7 +229,7 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
           </div>
 
           <div className="p-5 pb-16 bg-white">
-            <p className="text-xl font-semibold">Khoản chi</p>
+            <p className="text-xl font-semibold mb-5">Khoản chi</p>
 
             <Table
               columns={[
@@ -279,6 +316,51 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
                   //     setHasFilter(value);
                   //     return record?.status === value;
                   //   },
+                },
+                {
+                  title: "Hóa đơn",
+                  dataIndex: "amount",
+                  align: "center",
+                  render: (_, record) => {
+                    // "image/jpg"
+                    return (
+                      <div className="flex justify-center">
+                        {record?.status === "SUCCESS" ? (
+                          <div
+                            className={clsx("flex justify-center", {
+                              "cursor-pointer": !!record?.evidences?.length,
+                            })}
+                          >
+                            <Tooltip
+                              title={
+                                !record?.evidences?.length && "Không có hóa đơn"
+                              }
+                            >
+                              <div className="relative">
+                                <FaFileLines className="text-2xl text-blue-500" />
+                              </div>
+                            </Tooltip>
+
+                            {!!record?.evidences?.length && (
+                              <div className="absolute left-0 right-0 opacity-0">
+                                <Image.PreviewGroup>
+                                  {record?.evidences?.map((evidence, index) => (
+                                    <Image
+                                      key={evidence?.id}
+                                      width={index === 0 ? "1.5rem" : 0}
+                                      src={evidence?.evidenceUrl}
+                                    />
+                                  ))}
+                                </Image.PreviewGroup>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <IoRemoveOutline className="text-2xl text-black/30" />
+                        )}
+                      </div>
+                    );
+                  },
                 },
               ]}
               dataSource={selectBudget?.itemExisted?.tasks

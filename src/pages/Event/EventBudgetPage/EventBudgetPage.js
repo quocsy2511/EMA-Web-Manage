@@ -1,7 +1,7 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { Progress, Tabs, Tooltip, message } from "antd";
+import { Tabs, message } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getBudgetTransactionRequest,
@@ -10,6 +10,8 @@ import {
 import BudgetModal from "../../../components/Modal/BudgetModal";
 import AllBudgetTab from "./AllBudgetTab";
 import OwnBudgetTab from "./OwnBudgetTab";
+import { BsFillPiggyBankFill } from "react-icons/bs";
+import { PiNewspaperFill } from "react-icons/pi";
 
 const EventBudgetPage = () => {
   const eventId = useParams().eventId;
@@ -90,7 +92,7 @@ const EventBudgetPage = () => {
     <Fragment>
       {contextHolder}
 
-      <BudgetModal
+      {/* <BudgetModal
         isModalOpen={isModalRejectOpen}
         setIsModalOpen={setIsModalRejectOpen}
         transactionId={transactionId}
@@ -105,7 +107,7 @@ const EventBudgetPage = () => {
         isModalOpen={isModalEvidenceRejectOpen}
         setIsModalOpen={setIsModalEvidenceRejectOpen}
         evidence={evidence}
-      />
+      /> */}
 
       <motion.div
         initial={{ y: -75, opacity: 0 }}
@@ -123,33 +125,51 @@ const EventBudgetPage = () => {
           / Ngân sách
         </p>
       </motion.div>
-      <Tabs
-        defaultActiveKey="1"
-        items={[
-          {
-            key: "1",
-            label: "Quản lý thu chi",
-            children: (
-              <AllBudgetTab
-                allBudget={allBudget}
-                allBudgetIsLoading={allBudgetIsLoading}
-                allBudgetIsError={allBudgetIsError}
-              />
-            ),
-          },
-          {
-            key: "2",
-            label: "Yêu cầu",
-            children: (
-              <OwnBudgetTab
-                ownBudget={ownBudget}
-                ownBudgetIsLoading={ownBudgetIsLoading}
-                ownBudgetIsError={ownBudgetIsError}
-              />
-            ),
-          },
-        ]}
-      />
+
+      <motion.div
+        initial={{ y: -75, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="mt-5"
+      >
+        <Tabs
+          defaultActiveKey="1"
+          items={[
+            {
+              key: "1",
+              label: (
+                <div className="flex items-center space-x-2">
+                  <BsFillPiggyBankFill className="text-xl" />
+                  <p className="text-base">Quản lý thu chi</p>
+                </div>
+              ),
+              children: (
+                <AllBudgetTab
+                  allBudget={allBudget}
+                  allBudgetIsLoading={allBudgetIsLoading}
+                  allBudgetIsError={allBudgetIsError}
+                />
+              ),
+            },
+            {
+              key: "2",
+              label: (
+                <div className="flex items-center space-x-2">
+                  <PiNewspaperFill className="text-xl" />
+                  <p className="text-base">Yêu cầu</p>
+                </div>
+              ),
+              children: (
+                <OwnBudgetTab
+                  ownBudget={ownBudget}
+                  ownBudgetIsLoading={ownBudgetIsLoading}
+                  ownBudgetIsError={ownBudgetIsError}
+                  messageApi={messageApi}
+                />
+              ),
+            },
+          ]}
+        />
+      </motion.div>
     </Fragment>
   );
 };

@@ -85,7 +85,6 @@ const CustomerPage = () => {
                   <MdOutlineConnectWithoutContact className="mr-2" /> Liên Hệ
                 </p>
               ),
-
               children: (
                 <ContactTab
                   currentPage={currentPage}
@@ -104,30 +103,30 @@ const CustomerPage = () => {
                 />
               ),
             },
-            {
-              key: "2",
-              label: (
-                <p className="flex items-center text-xl">
-                  <FaRegNoteSticky className="mr-2" /> Kế Hoạch
-                </p>
-              ),
-              children: "Content of Tab Pane 2",
-            },
-            {
-              key: "3",
-              label: (
-                <p className="flex items-center text-xl">
-                  <FaRegAddressBook className="mr-2" /> Hợp Đồng
-                </p>
-              ),
-              children: (
-                <ContractTab
-                  contracts={contracts}
-                  contractsIsLoading={contractsIsLoading}
-                  contractsIsError={contractsIsError}
-                />
-              ),
-            },
+            // {
+            //   key: "2",
+            //   label: (
+            //     <p className="flex items-center text-xl">
+            //       <FaRegNoteSticky className="mr-2" /> Kế Hoạch
+            //     </p>
+            //   ),
+            //   children: "Content of Tab Pane 2",
+            // },
+            // {
+            //   key: "3",
+            //   label: (
+            //     <p className="flex items-center text-xl">
+            //       <FaRegAddressBook className="mr-2" /> Hợp Đồng
+            //     </p>
+            //   ),
+            //   children: (
+            //     <ContractTab
+            //       contracts={contracts}
+            //       contractsIsLoading={contractsIsLoading}
+            //       contractsIsError={contractsIsError}
+            //     />
+            //   ),
+            // },
           ]}
           onChange={(key) => {
             console.log(key);

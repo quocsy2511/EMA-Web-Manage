@@ -112,7 +112,7 @@ const EventTaskPage = () => {
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
 
   const {

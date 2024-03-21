@@ -1,5 +1,14 @@
 import React, { Fragment, memo, useState } from "react";
-import { Button, Empty, Segmented, Spin, Table, Tag, Tooltip } from "antd";
+import {
+  Button,
+  Empty,
+  Image,
+  Segmented,
+  Spin,
+  Table,
+  Tag,
+  Tooltip,
+} from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateCustomerContacts } from "../../apis/contact";
 import ContactUpdateModal from "../../components/Modal/ContactUpdateModal";
@@ -16,7 +25,8 @@ import {
   SortDescendingOutlined,
   SwapRightOutlined,
 } from "@ant-design/icons";
-import { GiCancel } from "react-icons/gi";
+import { IoRemoveOutline } from "react-icons/io5";
+import { BsImages } from "react-icons/bs";
 import ContactModal from "../../components/Modal/ContactModal";
 import { motion } from "framer-motion";
 
@@ -119,7 +129,7 @@ const ContactTab = ({
       title: "Loại sự kiện",
       dataIndex: "eventType",
       key: "eventType",
-      width: "20%",
+      width: "15%",
       render: (_, record) => (
         <span className="text-blue-400">{record?.eventType?.typeName}</span>
       ),
@@ -149,12 +159,15 @@ const ContactTab = ({
       ),
     },
     {
-      title: "Ngân sách",
+      title: "Ngân sách (VNĐ)",
       dataIndex: "budget",
       key: "budget",
       width: "10%",
       sorter: (a, b) => a.budget - b.budget,
-      render: (text) => <p>{`${text?.toLocaleString()} VND`}</p>,
+      render: (text) => (
+        <p className="font-medium">{`${text?.toLocaleString()}`}</p>
+      ),
+      align: "center",
     },
     {
       title: "Trạng thái",
@@ -166,32 +179,32 @@ const ContactTab = ({
         switch (record?.status ?? "PENDING") {
           case "PENDING":
             return (
-              <p className="text-xs font-normal text-orange-500 border border-orange-400 rounded-lg px-2 py-1">
+              <p className="text-xs font-medium text-orange-500 border border-orange-400 rounded-lg px-2 py-1">
                 CHỜ DUYỆT
               </p>
             );
           case "REJECTED":
             return (
-              <p className="text-xs font-normal text-red-500 border border-red-500 rounded-lg px-2 py-1">
+              <p className="text-xs font-medium text-red-500 border border-red-500 rounded-lg px-2 py-1">
                 ĐÃ TỪ CHỐI
               </p>
             );
           case "SUCCESS":
             return (
-              <p className="text-xs font-normal text-blue-500 border border-blue-500 rounded-lg px-2 py-1">
+              <p className="text-xs font-medium text-blue-500 border border-blue-500 rounded-lg px-2 py-1">
                 ĐÃ TẠO SỰ KIỆN
               </p>
             );
 
           case "ACCEPTED":
             return (
-              <p className="text-xs font-normal text-green-500 border border-green-500 rounded-lg px-2 py-1">
+              <p className="text-xs font-medium text-green-500 border border-green-500 rounded-lg px-2 py-1">
                 ĐÃ CHẤP NHẬN
               </p>
             );
 
           default:
-            <p className="text-xs font-normal text-orange-500 border border-orange-400 rounded-lg px-2 py-1">
+            <p className="text-xs font-medium text-orange-500 border border-orange-400 rounded-lg px-2 py-1">
               CHỜ DUYỆT
             </p>;
         }
@@ -214,44 +227,70 @@ const ContactTab = ({
           if (hasContract) {
             if (hasContract?.files?.[0]?.status === "REJECTED")
               return (
-                <p className="text-xs font-normal text-red-500 border border-red-500 rounded-lg px-2 py-1">
+                <p className="text-xs font-medium text-red-500 border border-red-500 rounded-lg px-2 py-1">
                   HỢP ĐỒNG BỊ TỪ CHỐI
                 </p>
               );
             else if (hasContract?.status === "PENDING")
               return (
-                <p className="text-xs font-normal text-orange-500 border border-orange-400 rounded-lg px-2 py-1">
+                <p className="text-xs font-medium text-orange-500 border border-orange-400 rounded-lg px-2 py-1">
                   CHỜ XÁC NHẬN HỢP ĐỒNG
                 </p>
               );
             // else if (hasContract?.status === "SUCCESS")
             else if (hasContract?.status === "PAID")
               return (
-                <p className="text-xs font-normal text-green-500 border border-green-500 rounded-lg px-2 py-1">
+                <p className="text-xs font-medium text-green-500 border border-green-500 rounded-lg px-2 py-1">
                   ĐÃ XÁC NHẬN HỢP ĐỒNG
                 </p>
               );
             else
               return (
-                <p className="text-xs font-normal text-orange-500 border border-orange-400 rounded-lg px-2 py-1">
+                <p className="text-xs font-medium text-orange-500 border border-orange-400 rounded-lg px-2 py-1">
                   CHỜ XÁC NHẬN HỢP ĐỒNG
                 </p>
               );
           } else {
             return (
-              <p className="text-xs font-normal text-blue-500 border border-blue-500 rounded-lg px-2 py-1">
+              <p className="text-xs font-medium text-blue-500 border border-blue-500 rounded-lg px-2 py-1">
                 ĐANG LÊN KẾ HOẠCH
               </p>
             );
           }
+        } else if (record?.status === "SUCCESS") {
+          if (hasContract && !!hasContract?.files?.length) {
+            return (
+              <div className="flex justify-center cursor-pointer">
+                <div className="relative">
+                  <BsImages className="text-blue-500 text-2xl" />
+                </div>
+                <div className="absolute left-0 right-0 opacity-0">
+                  <Image.PreviewGroup>
+                    {hasContract?.files?.map((file, index) => (
+                      <Image
+                        key={file?.id}
+                        width={index === 0 ? "1.5rem" : 0}
+                        src={file?.contractFileUrl}
+                      />
+                    ))}
+                  </Image.PreviewGroup>
+                </div>
+              </div>
+            );
+          } else {
+            return (
+              <div className="flex justify-center">
+                <IoRemoveOutline className="text-2xl text-black/30" />
+              </div>
+            );
+          }
         } else {
           return (
-            <p className="flex justify-center">
-              <GiCancel className="text-red-500 text-lg" />
-            </p>
+            <div className="flex justify-center">
+              <IoRemoveOutline className="text-2xl text-black/30" />
+            </div>
           );
         }
-        // <p>{`${text?.toLocaleString()} VND`}</p>;
       },
     },
     {
@@ -404,7 +443,7 @@ const ContactTab = ({
                   ) : (
                     <Empty
                       description={<span>không có dữ liệu</span>}
-                      className=" mt-3"
+                      className="mt-3"
                     />
                   )}
                 </>

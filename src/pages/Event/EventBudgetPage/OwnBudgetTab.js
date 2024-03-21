@@ -1,12 +1,31 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../../components/Error/AnErrorHasOccured";
-import { Progress, Tooltip } from "antd";
+import {
+  Progress,
+  Table,
+  Tooltip,
+  Tag,
+  Dropdown,
+  Empty,
+  Popconfirm,
+} from "antd";
+import clsx from "clsx";
+import momenttz from "moment-timezone";
+import { BsThreeDots } from "react-icons/bs";
+import { FaCheck } from "react-icons/fa6";
+import { CgClose } from "react-icons/cg";
+import { useMutation } from "@tanstack/react-query";
+import {
+  updateBudgetTransaction,
+  updatePercentageBudget,
+} from "../../../apis/budgets";
+import BudgetModal from "../../../components/Modal/BudgetModal";
 
 const BudgetItem = memo(({ budget, selectBudget, setSelectBudget }) => (
   <div
     onClick={() => setSelectBudget(budget)}
-    className="flex items-center bg-white p-5 space-x-5 hover:scale-105 transition-transform cursor-pointer rounded-lg shadow-md"
+    className="flex items-center bg-white p-5 mx-5 space-x-5 hover:scale-105 transition-transform cursor-pointer rounded-lg shadow-md"
   >
     <div className="min-w-[20%] flex justify-center items-center">
       <Progress
@@ -44,15 +63,88 @@ const BudgetItem = memo(({ budget, selectBudget, setSelectBudget }) => (
   </div>
 ));
 
-const OwnBudgetTab = ({ ownBudget, ownBudgetIsLoading, ownBudgetIsError }) => {
+const OwnBudgetTab = ({
+  ownBudget,
+  ownBudgetIsLoading,
+  ownBudgetIsError,
+  messageApi,
+}) => {
   console.log("ownBudget > ", ownBudget);
 
   const mergeValue = new Set();
   const [selectBudget, setSelectBudget] = useState();
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState({
+    isOpen: false,
+    transactionId: null,
+  });
+  const [isRejectNoteModalOpen, setIsRejectNoteModalOpen] = useState({
+    isOpen: false,
+    rejectNote: null,
+  });
+  const [isHavingEvidenceModalOpen, setIsHavingEvidenceModalOpen] = useState({
+    isOpen: false,
+    evidences: null,
+  });
 
   useEffect(() => {
     ownBudget && !!ownBudget?.length && setSelectBudget(ownBudget?.[0]);
   }, [ownBudget]);
+
+  const {
+    mutate: updateStatusTransactionMutate,
+    isLoading: updateStatusTransactionIsLoading,
+  } = useMutation(
+    ({ transactionId, status, rejectNote }) =>
+      updateBudgetTransaction({ transactionId, status, rejectNote }),
+    {
+      onSuccess: (data) => {
+        messageApi.open({
+          type: "success",
+          content: "Cập nhật trạng thái thành công",
+        });
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content:
+            error?.response?.data?.message ??
+            "1 lỗi bất ngờ xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
+  const {
+    mutate: updatePercentageBudgetMutate,
+    isLoading: updatePercentageBudgetIsLoading,
+  } = useMutation(
+    ({ transactionId, amount }) =>
+      updatePercentageBudget({ transactionId, amount }),
+    {
+      onSuccess: (data) => {
+        messageApi.open({
+          type: "success",
+          content: "Cập nhật trạng thái thành công",
+        });
+      },
+      onError: (error) => {
+        messageApi.open({
+          type: "error",
+          content:
+            error?.response?.data?.message ??
+            "1 lỗi bất ngờ xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+
+  const handleUpdateStatusTransaction = (transactionId, status, rejectNote) => {
+    updateStatusTransactionMutate({ transactionId, status, rejectNote });
+  };
+
+  const handleUpdatePercentageBudgetMutate = (transactionId, amount) => {
+    updatePercentageBudgetMutate({ transactionId, amount });
+  };
 
   if (ownBudgetIsLoading) {
     return (
@@ -69,19 +161,41 @@ const OwnBudgetTab = ({ ownBudget, ownBudgetIsLoading, ownBudgetIsError }) => {
     );
   }
 
+  if (!ownBudget?.length) {
+    return (
+      <div className="h-[60vh] w-full flex flex-col justify-center items-center space-y-2">
+        <Empty description={false} />
+        <p className="font-medium text-xl">Chưa có yêu cầu nào.</p>
+      </div>
+    );
+  }
+
   return (
     <Fragment>
-      <div className="flex justify-between space-x-10 mt-10">
+      <BudgetModal
+        isModalOpen={isRejectModalOpen}
+        setIsModalOpen={setIsRejectModalOpen}
+        handleUpdateStatusTransaction={handleUpdateStatusTransaction}
+        messageApi={messageApi}
+      />
+
+      <div className="flex justify-between space-x-10 mt-6">
         {/* LEFT SIDE */}
         <div className="w-1/4 space-y-5">
-          {allBudget?.map((budget) => (
-            <BudgetItem
-              key={budget?.id}
-              budget={budget}
-              selectBudget={selectBudget}
-              setSelectBudget={setSelectBudget}
-            />
-          ))}
+          <p className="text-3xl mx-5 font-semibold truncate bg-white p-5 rounded-md">
+            Danh sách hạng mục
+          </p>
+
+          <div className="space-y-5 max-h-[100vh] overflow-y-scroll scrollbar-hide">
+            {ownBudget?.map((budget) => (
+              <BudgetItem
+                key={budget?.id}
+                budget={budget}
+                selectBudget={selectBudget}
+                setSelectBudget={setSelectBudget}
+              />
+            ))}
+          </div>
         </div>
 
         {/* RIGHT SIDE */}
@@ -146,12 +260,33 @@ const OwnBudgetTab = ({ ownBudget, ownBudgetIsLoading, ownBudgetIsError }) => {
               </p>
             </div>
 
-            <div className="relative">
+            <div className="relative pb-5">
               {selectBudget?.totalTransactionUsed /
                 ((selectBudget?.itemExisted?.plannedPrice ?? 1) *
                   (selectBudget?.itemExisted?.plannedAmount ?? 1)) <
-                0.8 && (
-                <div className="absolute w-[2px] h-4/5 bg-black/20 right-[calc(20%+2rem)] top-0" />
+                selectBudget?.itemExisted?.percentage / 100 && (
+                <Tooltip
+                  title={
+                    <p className="text-base text-center">
+                      Hạn mức
+                      <br />
+                      {(
+                        selectBudget?.itemExisted?.plannedPrice *
+                        selectBudget?.itemExisted?.plannedAmount *
+                        (selectBudget?.itemExisted?.percentage / 100)
+                      ).toLocaleString()}{" "}
+                      VNĐ
+                    </p>
+                  }
+                  placement="top"
+                >
+                  <div
+                    className={`absolute z-10 w-1 h-1/2 bg-black/20 top-0 mx-5 cursor-pointer`}
+                    style={{
+                      left: `calc(${selectBudget?.itemExisted?.percentage}% - 2rem)`,
+                    }}
+                  />
+                </Tooltip>
               )}
               <Progress
                 percent={(
@@ -268,17 +403,61 @@ const OwnBudgetTab = ({ ownBudget, ownBudgetIsLoading, ownBudgetIsError }) => {
                 },
                 {
                   title: "Hành động",
-                  dataIndex: "status",
+                  dataIndex: "",
                   align: "center",
-                  render: (text) => {
-                    if (text === "PENDING")
-                      return <Tag color="orange">CHỜ DUYỆT</Tag>;
-                    if (text === "ACCEPTED")
-                      return <Tag color="green">CHẤP NHẬN</Tag>;
-                    if (text === "REJECTED")
-                      return <Tag color="red">TỪ CHỐI</Tag>;
-                    if (text === "SUCCESS")
-                      return <Tag color="blue">THÀNH CÔNG</Tag>;
+                  render: (_, record) => {
+                    return (
+                      <div className="flex justify-center cursor-pointer">
+                        <Dropdown
+                          menu={{
+                            items: [
+                              {
+                                key: "1",
+                                label: (
+                                  <Popconfirm
+                                    title="Xác nhận chấp nhận liên hệ"
+                                    description="Bạn có chắc chắn chấp nhận liên hệ này?"
+                                    onConfirm={() => {
+                                      handleUpdatePercentageBudgetMutate(
+                                        record?.id,
+                                        record?.amount
+                                      );
+                                    }}
+                                    okText="Đồng ý"
+                                    cancelText="Hủy"
+                                  >
+                                    <div className="flex space-x-2 items-center">
+                                      <FaCheck className="text-green-500 text-lg" />
+                                      <p>Chấp nhận</p>
+                                    </div>
+                                  </Popconfirm>
+                                ),
+                              },
+                              {
+                                key: "2",
+                                label: (
+                                  <div
+                                    onClick={() => {
+                                      setIsRejectNoteModalOpen({
+                                        isOpen: true,
+                                        transactionId: record?.id,
+                                      });
+                                    }}
+                                    className="flex space-x-2 items-center"
+                                  >
+                                    <CgClose className="text-red-500 text-lg" />
+                                    <p>Từ chối</p>
+                                  </div>
+                                ),
+                              },
+                            ],
+                          }}
+                          arrow
+                        >
+                          <BsThreeDots className="text-xl" />
+                        </Dropdown>
+                      </div>
+                    );
                   },
                 },
               ]}

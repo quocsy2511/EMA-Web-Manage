@@ -5,12 +5,8 @@ const BudgetModal = ({
   isModalOpen,
   setIsModalOpen,
 
-  transactionId,
-  handleChangeStatusTransaction,
-
-  rejectNote,
-
-  evidence,
+  handleUpdateStatusTransaction,
+  messageApi,
 }) => {
   const [input, setInput] = useState("Không phù hợp");
 
@@ -18,17 +14,22 @@ const BudgetModal = ({
     <Modal
       title={
         <p className="text-center text-3xl">
-          {evidence ? "Bằng chứng" : "Lý do từ chối"}
+          {/* {evidence ? "Bằng chứng" : "Lý do từ chối"} */}123
         </p>
       }
-      open={isModalOpen}
-      onCancel={() => setIsModalOpen(false)}
+      open={isModalOpen?.isOpen}
+      onCancel={() =>
+        setIsModalOpen((prev) => ({
+          ...prev,
+          isOpen: false,
+        }))
+      }
       centered
       //   width={"50%"}
       footer={null}
       //   className="flex justify-center items-center"
     >
-      {!!transactionId && (
+      {!!isModalOpen?.transactionId && (
         <>
           <Input
             className="my-5"
@@ -36,13 +37,23 @@ const BudgetModal = ({
             placeholder="Nhập lý do từ chối..."
             onChange={(target) => setInput(target.target.value)}
             size="large"
+            allowClear
           />
           <Button
             size="large"
             type="primary"
             className="w-full"
             onClick={() =>
-              handleChangeStatusTransaction(transactionId, "REJECTED", input)
+              input !== ""
+                ? handleUpdateStatusTransaction(
+                    isModalOpen?.transactionId,
+                    "REJECTED",
+                    input
+                  )
+                : messageApi.open({
+                    type: "error",
+                    content: "Chưa điền lý do từ chối!",
+                  })
             }
           >
             Gửi
@@ -50,12 +61,14 @@ const BudgetModal = ({
         </>
       )}
 
-      {!!rejectNote && <p className="my-5 text-xl">{rejectNote}</p>}
+      {!!isModalOpen?.rejectNote && (
+        <p className="my-5 text-xl">{isModalOpen?.rejectNote}</p>
+      )}
 
-      {!!evidence && (
+      {!!isModalOpen?.evidences && (
         <>
-          {evidence?.map((item) => (
-            <Image key={item?.id} src={item?.evidenceUrl} />
+          {isModalOpen?.evidences?.map((evidence) => (
+            <Image key={evidence?.id} src={evidence?.evidenceUrl} />
           ))}
         </>
       )}

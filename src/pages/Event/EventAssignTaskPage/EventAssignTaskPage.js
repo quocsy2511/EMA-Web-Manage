@@ -507,13 +507,15 @@ const EventAssignTaskPage = () => {
         setChosenTemplateTask={setChosenTemplateTask}
       />
 
-      <FloatButton
-        onClick={() => setIsDrawerOpen(true)}
-        type="primary"
-        // icon={<RiAddFill />}
-        tooltip={"Công việc mẫu"}
-        className="cursor-pointer"
-      />
+      {isSubTask && (
+        <FloatButton
+          onClick={() => setIsDrawerOpen(true)}
+          type="primary"
+          // icon={<RiAddFill />}
+          tooltip={"Công việc mẫu"}
+          className="cursor-pointer"
+        />
+      )}
 
       <motion.div
         initial={{ y: -75 }}
@@ -608,7 +610,17 @@ const EventAssignTaskPage = () => {
               rules={[
                 {
                   required: true,
-                  message: "chọn ngày thực hiện và kết thúc !",
+                  message: "Chọn ngày thực hiện và kết thúc !",
+                },
+                {
+                  validator: (_, value) => {
+                    if (value && value?.length === 2) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      "Vui lòng chọn ngày thực hiện và kết thúc."
+                    );
+                  },
                 },
               ]}
             >
@@ -622,8 +634,8 @@ const EventAssignTaskPage = () => {
                           dayjs(updateData?.date?.[1], "YYYY-MM-DD"),
                         ]
                       : momenttz(dateRange?.[0]).isBefore(momenttz(), "days")
-                      ? [dayjs(), null]
-                      : [dayjs(dateRange?.[0], "YYYY-MM-DD"), null]
+                      ? [dayjs(), undefined]
+                      : [dayjs(dateRange?.[0], "YYYY-MM-DD"), undefined]
                   }
                   onChange={(value) => {
                     if (value) {
