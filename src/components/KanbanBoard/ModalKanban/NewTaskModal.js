@@ -23,6 +23,7 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
 import {
+  CloseCircleOutlined,
   DoubleRightOutlined,
   StarFilled,
   SwapOutlined,
@@ -41,8 +42,9 @@ const NewTaskModal = ({
   addNewTaskTemplate,
   setAddNewTaskTemplate,
 }) => {
-  // console.log("🚀 ~ TaskParent:", TaskParent);
+  console.log("🚀 ~ TaskParent:", TaskParent);
   const eventID = TaskParent?.eventDivision?.event?.id;
+  const itemId = TaskParent?.item?.id;
   const { RangePicker } = DatePicker;
   const { id } = TaskParent ?? {};
   const [startDate, setStartDate] = useState("");
@@ -59,6 +61,7 @@ const NewTaskModal = ({
   const [checkedDateData, setCheckedDateData] = useState([]);
   const [selectedDateSchedule, setSelectedDateSchedule] = useState("");
   const [selectedTaskTemplate, setSelectedTaskTemplate] = useState("");
+  const [selectedLeader, setSelectedLeader] = useState("");
   const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
   const handleChangeTaskTemplate = (value) => {
@@ -198,58 +201,94 @@ const NewTaskModal = ({
       return current.isBefore(today) || current.isAfter(disableEndDate, "day");
     }
   };
+
   const tagRender = (props) => {
     // const { label, value, closable, onClose } = props;
     const { closable, onClose } = props;
+
+    const handlerCloseTag = (value) => {
+      console.log("🚀 ~ handlerCloseTag ~ value:", value);
+      if (value && value === selectedLeader?.id) {
+        setSelectedLeader("");
+      }
+      onClose();
+    };
     const onPreventMouseDown = (event) => {
       event.preventDefault();
       event.stopPropagation();
     };
 
     let matchedUsers;
-    if (!isLoadingEmployees) {
-      matchedUsers = assignee.map((id) => {
+    if (!isLoadingEmployees && !selectedLeader) {
+      // console.log("1");
+      matchedUsers = assignee.map((id, index) => {
         const user = employees.find((employee) => employee.id === id);
-        return user;
+        const isLeader = index === 0; //xem có phải index đầu không thì true
+        const data = { ...user, isLeader };
+        return data;
+      });
+    } else {
+      matchedUsers = assignee.map((id, index) => {
+        // console.log("2");
+        const user = employees.find((employee) => employee.id === id);
+        const isLeader = id === selectedLeader?.id; //xem có phải id giống không thì true
+        const data = { ...user, isLeader };
+        return data;
       });
     }
+
+    const handleSelectLeader = (value) => {
+      setSelectedLeader(value);
+    };
+    const defaultLeader = matchedUsers?.find((user) => user.id === props.value)
+      ?.isLeader
+      ? "green"
+      : "gold";
+
+    const leader = matchedUsers?.find((item) => item.id === props.value);
     const label = matchedUsers?.find((item) => item.id === props.value)?.profile
       ?.fullName;
 
-    const color =
-      matchedUsers?.findIndex((user) => user.id === props.value) === 0
-        ? "green"
-        : "gold";
     const avatar = matchedUsers?.find((item) => item.id === props.value)
       ?.profile?.avatar;
+
     return (
       <Tag
-        // color={isFirstAssignee ? "green" : "gold"}
-        color={color}
+        color={defaultLeader}
         onMouseDown={onPreventMouseDown}
         closable={closable}
-        onClose={onClose}
-        style={{
-          marginRight: 8,
-        }}
+        onClose={() => handlerCloseTag(props.value)}
+        className="mr-4 py-2 cursor-pointer"
+        onClick={() => handleSelectLeader(leader)}
       >
-        {color === "green" && <StarFilled spin />}
+        {defaultLeader === "green" && <StarFilled spin />}
         <Avatar src={avatar} className="mr-2" size="small" />
         {label}
       </Tag>
     );
   };
+  const handleClearSelectEmployee = () => {
+    setSelectedLeader("");
+  };
 
   const onFinish = (values) => {
     const { fileUrl, date, ...data } = values;
-    console.log("🚀 ~ onFinish ~ values:", values);
+
+    let leader;
+    if (selectedLeader) {
+      leader = selectedLeader?.id;
+    } else {
+      leader = assignee?.[0]?.toString();
+    }
+
     const task = {
       ...data,
       eventID: eventID,
       startDate: startDate,
       endDate: endDate,
       parentTask: id,
-      leader: assignee?.[0]?.toString(),
+      leader: leader,
+      itemId: itemId,
       desc: JSON.stringify(values.desc.ops),
     };
 
@@ -400,7 +439,7 @@ const NewTaskModal = ({
             </Form.Item>
             {/* description */}
             <Form.Item
-              // initialValue={description}
+              initialValue={description}
               label="Mô tả"
               className="text-sm font-medium "
               name="desc"
@@ -518,6 +557,7 @@ const NewTaskModal = ({
                       <Select
                         maxTagCount="responsive"
                         allowClear
+                        onClear={handleClearSelectEmployee}
                         mode="multiple"
                         placeholder="Người được chọn đầu tiên là nhóm trưởng"
                         style={{
