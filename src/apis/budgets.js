@@ -2,12 +2,15 @@ import http from "../utils/axios-utils";
 
 export const getBudget = ({ assignee, eventID }) =>
   http({
-    url: `/budget?assignee=${assignee}&eventID=${eventID}`,
+    url: `/budget?${assignee ? `assignee=${assignee}` : ""}&eventID=${eventID}`,
   });
 
-export const getBudgetTransactionRequest = ({ assignee, eventID }) =>
+// type = "ALL" | "OWN";
+export const getBudgetTransactionRequest = ({ assignee, eventID, type }) =>
   http({
-    url: `/budget/transaction-request?assignee=${assignee}&eventID=${eventID}`,
+    url: `/budget/transaction-request?${
+      assignee ? `assignee=${assignee}` : ""
+    }&eventID=${eventID}&type=${type}`,
   });
 
 export const getOwnTransactionBudget = ({
@@ -59,4 +62,10 @@ export const postTransactionBudgetEvidence = (transactionId, formData) =>
     url: `/budget/${transactionId}/evidence`,
     method: "post",
     data: formData,
+  });
+
+export const updatePercentageBudget = ({ transactionId, amount }) =>
+  http({
+    url: `/budget/${transactionId}/update-budget-percentage?amount=${amount}`,
+    method: "put",
   });

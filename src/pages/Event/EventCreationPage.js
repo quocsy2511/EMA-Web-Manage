@@ -685,9 +685,17 @@ const EventCreationPage = () => {
               </div>
             </div>
 
-            <Button type="primary" size="large" onClick={() => form.submit()}>
-              Tạo sự kiện
-            </Button>
+            <Popconfirm
+              title="Xác nhận thông tin sự kiện"
+              description="Bạn có chắc chắn với các thông tin trên?"
+              onConfirm={() => form.submit()}
+              okText="Có"
+              cancelText="Không"
+            >
+              <Button type="primary" size="large">
+                Tạo sự kiện
+              </Button>
+            </Popconfirm>
           </div>
 
           <div className="mb-10">
@@ -726,7 +734,7 @@ const EventCreationPage = () => {
             </div>
           </div>
 
-          <div className="mb-10">
+          {/* <div className="mb-10">
             <Title title="Hạng mục mẫu" />
             <div className="flex flex-wrap items-center mt-5">
               {!!selectTemplateTasks?.length &&
@@ -743,7 +751,7 @@ const EventCreationPage = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="">
             <Title title="Hạng mục mặc định" />

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Modal, Timeline, Tooltip } from "antd";
 import momenttz from "moment-timezone";
 import { IoMdTime } from "react-icons/io";
@@ -118,4 +118,4 @@ const AssignmentHistoryModal = ({
   );
 };
 
-export default AssignmentHistoryModal;
+export default memo(AssignmentHistoryModal);

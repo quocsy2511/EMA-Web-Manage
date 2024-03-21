@@ -109,12 +109,11 @@ const EventTaskPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // update event
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
 
-  const [isUpdateContractModalOpen, setIsUpdateContractModalOpen] =
-    useState(false);
-  const [updateContractFile, setUpdateContractFile] = useState();
-  console.log("updateContractFile > ", updateContractFile);
-
   const [messageApi, contextHolder] = message.useMessage();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
 
   const {
     data: eventDetail,
@@ -132,7 +131,6 @@ const EventTaskPage = () => {
   } = useQuery(["contract", eventId], () => getContract(eventId), {
     refetchOnWindowFocus: false,
   });
-  console.log("contract > ", contract);
 
   const {
     data: contractEvidence,
@@ -250,20 +248,6 @@ const EventTaskPage = () => {
       },
     });
 
-  const {
-    mutate: contractEvidenceMutate,
-    isLoading: contractEvidenceMutateIsLoading,
-  } = useMutation((formData) => postContractEvidence(contract?.id, formData), {
-    onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Đã cập nhật hợp đồng",
-      });
-      setIsUpdateContractModalOpen(false);
-      queryClient.invalidateQueries(["contract-evidence", contract?.id]);
-    },
-  });
-
   useEffect(() => {
     if (assigneeSelection || prioritySelection || statusSelection) {
     }
@@ -364,67 +348,6 @@ const EventTaskPage = () => {
         }
         className="cursor-pointer"
       />
-
-      <Modal
-        title="Cập nhật hợp đồng"
-        open={isUpdateContractModalOpen}
-        onOk={() => {
-          if (updateContractFile) {
-            if (updateContractFile?.size > 10 * 1024 * 1024) {
-              messageApi.open({
-                type: "warning",
-                content: "File quá lớn ! Chỉ cho phép dung lượng < 10MB.",
-              });
-            } else {
-              const formData = new FormData();
-              formData.append("file", updateContractFile);
-              formData.append("folderName", "contract");
-
-              contractEvidenceMutate(formData);
-            }
-          }
-        }}
-        onCancel={() => setIsUpdateContractModalOpen(false)}
-        width={"20%"}
-        cancelText="Hủy"
-        confirmLoading={contractEvidenceMutateIsLoading}
-      >
-        <div className="flex items-center justify-center">
-          <Upload
-            className="flex items-center gap-x-3"
-            maxCount={1}
-            listType="picture-circle"
-            customRequest={({ file, onSuccess }) => {
-              setTimeout(() => {
-                onSuccess("ok");
-              }, 0);
-            }}
-            showUploadList={{
-              showPreviewIcon: false,
-              // showRemoveIcon: false,
-            }}
-            accept=".pdf"
-            beforeUpload={(file) => {
-              return new Promise((resolve, reject) => {
-                if (file && file?.size > 10 * 1024 * 1024) {
-                  reject("File quá lớn ( <10MB )");
-                  messageApi.open({
-                    type: "warning",
-                    content: "File quá lớn ! Chỉ cho phép dung lượng < 10MB.",
-                  });
-                  return false;
-                } else {
-                  setUpdateContractFile(file);
-                  resolve();
-                  return true;
-                }
-              });
-            }}
-          >
-            Tệp Tin PDF
-          </Upload>
-        </div>
-      </Modal>
 
       <EventUpdateModal
         isModalOpen={isModalOpen}
@@ -633,14 +556,15 @@ const EventTaskPage = () => {
                 items: [
                   {
                     key: "1",
+                    disabled: !contractEvidence?.find(
+                      (item) => item?.evidenceType === "CONTRACT_SIGNED"
+                    )?.evidenceUrl,
                     label: (
                       <a
                         href={
-                          contract &&
-                          contractEvidence &&
-                          (contractEvidence?.length > 0
-                            ? contractEvidence?.[0]?.evidenceUrl
-                            : contract?.contractFileUrl ?? null)
+                          contractEvidence?.find(
+                            (item) => item?.evidenceType === "CONTRACT_SIGNED"
+                          )?.evidenceUrl
                         }
                         target="_blank"
                         className=""
@@ -651,15 +575,21 @@ const EventTaskPage = () => {
                   },
                   {
                     key: "2",
-                    disabled:
-                      !!contractEvidence && contractEvidence?.length > 0,
+                    disabled: !contractEvidence?.find(
+                      (item) => item?.evidenceType === "CONTRACT_PAID"
+                    )?.evidenceUrl,
                     label: (
-                      <div
-                        onClick={() => setIsUpdateContractModalOpen(true)}
+                      <a
+                        href={
+                          contractEvidence?.find(
+                            (item) => item?.evidenceType === "CONTRACT_PAID"
+                          )?.evidenceUrl
+                        }
+                        target="_blank"
                         className=""
                       >
-                        <p>Cập nhật hợp đồng</p>
-                      </div>
+                        Xem thanh toán
+                      </a>
                     ),
                   },
                 ],
