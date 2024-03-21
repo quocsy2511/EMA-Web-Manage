@@ -21,7 +21,7 @@ const DescriptionSubtask = ({
   taskParent,
   taskSelected,
 }) => {
-  console.log("description", description);
+  // console.log("description", description);
   const [form] = Form.useForm();
   const taskID = taskSelected?.id;
   const eventId = taskSelected?.eventDivision?.event?.id;
@@ -31,7 +31,7 @@ const DescriptionSubtask = ({
       description?.startsWith(`[{"`) ? description : parseJson(description)
     ),
   });
-  console.log("🚀 ~ descriptionQuill:", descriptionQuill);
+  // console.log("🚀 ~ descriptionQuill:", descriptionQuill);
   const [isOpenQuill, seItsOpenQuill] = useState(false);
   const queryClient = useQueryClient();
 

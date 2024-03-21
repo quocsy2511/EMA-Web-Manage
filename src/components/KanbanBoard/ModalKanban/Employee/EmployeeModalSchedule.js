@@ -30,7 +30,7 @@ const EmployeeModalSchedule = ({
       onCancel={handleCancel}
       footer={false}
       closeIcon={true}
-      width={900}
+      width={"75%"}
       style={{
         top: 20,
       }}
