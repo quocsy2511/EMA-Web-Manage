@@ -242,16 +242,30 @@ const BudgetTransactionModal = ({
                         <Popconfirm
                           title="Xác nhân ngân sách"
                           description="Bạn có chắc chắn xác nhận ngân sách này ?"
-                          onConfirm={() => confirm(transaction, "SUCCESS")}
+                          onConfirm={() =>
+                            !!transaction?.evidences?.length &&
+                            confirm(transaction, "SUCCESS")
+                          }
                           okText="Xác nhận"
                           cancelText="Huỷ"
                           key={transaction?.id}
                           okButtonProps={{
                             loading: isLoadingAccept,
                           }}
+                          disabled={!transaction?.evidences?.length}
                         >
-                          <Button type="primary" key={transaction?.id}>
-                            Chấp nhận
+                          <Button
+                            type="primary"
+                            onClick={() =>
+                              !transaction?.evidences?.length &&
+                              message.open({
+                                type: "error",
+                                content: "Chưa có hóa đơn!",
+                              })
+                            }
+                            key={transaction?.id}
+                          >
+                            Xác nhận
                           </Button>
                         </Popconfirm>
                       </div>

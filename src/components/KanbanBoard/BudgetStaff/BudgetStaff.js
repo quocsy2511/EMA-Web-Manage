@@ -1,5 +1,5 @@
 import { Empty, Spin, Tabs, Tooltip } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { BulbOutlined, DoubleRightOutlined } from "@ant-design/icons";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
@@ -312,4 +312,4 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
   );
 };
 
-export default BudgetStaff;
+export default memo(BudgetStaff);
