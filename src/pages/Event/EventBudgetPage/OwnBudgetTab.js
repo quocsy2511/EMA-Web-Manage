@@ -15,7 +15,7 @@ import momenttz from "moment-timezone";
 import { BsThreeDots } from "react-icons/bs";
 import { FaCheck } from "react-icons/fa6";
 import { CgClose } from "react-icons/cg";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   updateBudgetTransaction,
   updatePercentageBudget,
@@ -57,7 +57,7 @@ const BudgetItem = memo(({ budget, selectBudget, setSelectBudget }) => (
         {(
           budget?.itemExisted?.plannedAmount * budget?.itemExisted?.plannedPrice
         )?.toLocaleString()}{" "}
-        <span className="text-sm text-slate-400 font-normal">VNĐ</span>
+        <span className="text-xs text-slate-400 font-normal">VNĐ</span>
       </p>
     </div>
   </div>
@@ -77,19 +77,20 @@ const OwnBudgetTab = ({
     isOpen: false,
     transactionId: null,
   });
-  const [isRejectNoteModalOpen, setIsRejectNoteModalOpen] = useState({
-    isOpen: false,
-    rejectNote: null,
-  });
-  const [isHavingEvidenceModalOpen, setIsHavingEvidenceModalOpen] = useState({
-    isOpen: false,
-    evidences: null,
-  });
+  // const [isRejectNoteModalOpen, setIsRejectNoteModalOpen] = useState({
+  //   isOpen: false,
+  //   rejectNote: null,
+  // });
+  // const [isHavingEvidenceModalOpen, setIsHavingEvidenceModalOpen] = useState({
+  //   isOpen: false,
+  //   evidences: null,
+  // });
 
   useEffect(() => {
     ownBudget && !!ownBudget?.length && setSelectBudget(ownBudget?.[0]);
   }, [ownBudget]);
 
+  const queryClient = useQueryClient();
   const {
     mutate: updateStatusTransactionMutate,
     isLoading: updateStatusTransactionIsLoading,
@@ -98,6 +99,11 @@ const OwnBudgetTab = ({
       updateBudgetTransaction({ transactionId, status, rejectNote }),
     {
       onSuccess: (data) => {
+        queryClient.invalidateQueries(["transaction-request-own"]);
+        queryClient.invalidateQueries(["transaction-request-all"]);
+
+        setIsRejectModalOpen((prev) => ({ ...prev, isOpen: false }));
+
         messageApi.open({
           type: "success",
           content: "Cập nhật trạng thái thành công",
@@ -186,7 +192,7 @@ const OwnBudgetTab = ({
             Danh sách hạng mục
           </p>
 
-          <div className="space-y-5 max-h-[100vh] overflow-y-scroll scrollbar-hide">
+          <div className="space-y-5 max-h-[100vh] overflow-y-scroll scrollbar-hide pt-5">
             {ownBudget?.map((budget) => (
               <BudgetItem
                 key={budget?.id}
@@ -323,7 +329,7 @@ const OwnBudgetTab = ({
           </div>
 
           <div className="p-5 pb-16 bg-white">
-            <p className="text-xl font-semibold">Khoản chi</p>
+            <p className="text-xl font-semibold mb-5">Khoản chi</p>
 
             <Table
               columns={[
@@ -432,13 +438,14 @@ const OwnBudgetTab = ({
                                     </div>
                                   </Popconfirm>
                                 ),
+                                disabled: record?.status !== "PENDING",
                               },
                               {
                                 key: "2",
                                 label: (
                                   <div
                                     onClick={() => {
-                                      setIsRejectNoteModalOpen({
+                                      setIsRejectModalOpen({
                                         isOpen: true,
                                         transactionId: record?.id,
                                       });
@@ -449,6 +456,7 @@ const OwnBudgetTab = ({
                                     <p>Từ chối</p>
                                   </div>
                                 ),
+                                disabled: record?.status !== "PENDING",
                               },
                             ],
                           }}

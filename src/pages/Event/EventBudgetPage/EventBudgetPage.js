@@ -51,7 +51,16 @@ const EventBudgetPage = () => {
   } = useQuery(
     ["transaction-request-own"],
     () => getBudgetTransactionRequest({ eventID: eventId, type: "OWN" }),
-    { refetchOnWindowFocus: false }
+    {
+      refetchOnWindowFocus: false,
+      select: (data) =>
+        data?.filter(
+          (item) =>
+            !!item?.itemExisted?.tasks?.filter(
+              (subtask) => !!subtask?.transactions?.length
+            )?.length && item
+        ),
+    }
   );
 
   const queryClient = useQueryClient();
@@ -80,10 +89,6 @@ const EventBudgetPage = () => {
     }
   );
 
-  // const handleSelectBudget = (id) => {
-  //   setSelectedBudgetId(id);
-  // };
-
   const handleChangeStatusTransaction = (transactionId, status, rejectNote) => {
     updateBudgetStatusMutate({ transactionId, status, rejectNote });
   };
@@ -91,23 +96,6 @@ const EventBudgetPage = () => {
   return (
     <Fragment>
       {contextHolder}
-
-      {/* <BudgetModal
-        isModalOpen={isModalRejectOpen}
-        setIsModalOpen={setIsModalRejectOpen}
-        transactionId={transactionId}
-        handleChangeStatusTransaction={handleChangeStatusTransaction}
-      />
-      <BudgetModal
-        isModalOpen={isModalSeenRejectOpen}
-        setIsModalOpen={setIsModalSeenRejectOpen}
-        rejectNote={rejectNote}
-      />
-      <BudgetModal
-        isModalOpen={isModalEvidenceRejectOpen}
-        setIsModalOpen={setIsModalEvidenceRejectOpen}
-        evidence={evidence}
-      /> */}
 
       <motion.div
         initial={{ y: -75, opacity: 0 }}

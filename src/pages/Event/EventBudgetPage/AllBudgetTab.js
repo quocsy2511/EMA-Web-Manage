@@ -88,7 +88,7 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
             Danh sách hạng mục
           </p>
 
-          <div className="space-y-5 max-h-[100vh] overflow-y-scroll scrollbar-hide">
+          <div className="space-y-5 max-h-[100vh] overflow-y-scroll scrollbar-hide pt-5">
             {allBudget?.map((budget) => (
               <BudgetItem
                 key={budget?.itemExisted?.id}

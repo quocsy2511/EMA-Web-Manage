@@ -66,6 +66,6 @@ export const postTransactionBudgetEvidence = (transactionId, formData) =>
 
 export const updatePercentageBudget = ({ transactionId, amount }) =>
   http({
-    url: `/budget/{transactionId}/update-budget-percentage?transactionId=${transactionId}&amount=${amount}`,
+    url: `/budget/${transactionId}/update-budget-percentage?amount=${amount}`,
     method: "put",
   });
