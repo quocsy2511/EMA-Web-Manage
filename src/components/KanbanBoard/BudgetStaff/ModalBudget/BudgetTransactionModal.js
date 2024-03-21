@@ -58,11 +58,18 @@ const BudgetTransactionModal = ({
         });
         setIsOpenTransactionModal(false);
       },
-      onError: () => {
-        message.open({
-          type: "error",
-          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-        });
+      onError: (error) => {
+        if (error?.response?.data?.statusCode === 500) {
+          message.open({
+            type: "error",
+            content: `${error?.response?.data?.message}`,
+          });
+        } else {
+          message.open({
+            type: "error",
+            content: "Đã xảy ra lỗi bất ngờ vui lòng thử lại",
+          });
+        }
       },
     }
   );
