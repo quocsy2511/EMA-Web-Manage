@@ -102,66 +102,66 @@ const HeaderEvent = ({
       label: "Thành viên",
       children: users?.map((item) => {
         return {
-          key: item.id,
+          key: item?.id,
           label:
-            item.id === filterMember ? (
+            item?.id === filterMember ? (
               <div className="flex flex-row gap-x-2 justify-start items-center w-fit h-fit text-secondary text-base">
-                {item.role === "Trưởng phòng" ? (
+                {item?.role === "Trưởng phòng" ? (
                   <>
                     <Tooltip
-                      key={item.key}
-                      title={item.fullName}
+                      key={item?.key}
+                      title={item?.fullName}
                       placement="top"
                     >
                       <Avatar src={item?.avatar ?? defaultAvatar} size={24} />
                     </Tooltip>
                     <p className="text-ellipsis w-full flex-1 overflow-hidden ">
-                      {item.fullName}
+                      {item?.fullName}
                     </p>
                     <StarFilled className="text-yellow-400" />
                   </>
                 ) : (
                   <>
                     <Tooltip
-                      key={item.key}
-                      title={item.fullName}
+                      key={item?.key}
+                      title={item?.fullName}
                       placement="top"
                     >
                       <Avatar src={item?.avatar ?? defaultAvatar} size={24} />
                     </Tooltip>
                     <p className="text-ellipsis w-full flex-1 overflow-hidden ">
-                      {item.fullName}
+                      {item?.fullName}
                     </p>
                   </>
                 )}
               </div>
             ) : (
               <div className="flex flex-row gap-x-2 justify-start items-center w-fit h-fit opacity-60">
-                {item.role === "Trưởng phòng" ? (
+                {item?.role === "Trưởng phòng" ? (
                   <>
                     <Tooltip
-                      key={item.key}
-                      title={item.fullName}
+                      key={item?.key}
+                      title={item?.fullName}
                       placement="top"
                     >
                       <Avatar src={item?.avatar ?? defaultAvatar} size={24} />
                     </Tooltip>
                     <p className="text-ellipsis w-full flex-1 overflow-hidden ">
-                      {item.fullName}
+                      {item?.fullName}
                     </p>
                     <StarFilled className="text-yellow-400" />
                   </>
                 ) : (
                   <>
                     <Tooltip
-                      key={item.key}
-                      title={item.fullName}
+                      key={item?.key}
+                      title={item?.fullName}
                       placement="top"
                     >
                       <Avatar src={item?.avatar ?? defaultAvatar} size={24} />
                     </Tooltip>
                     <p className="text-ellipsis w-full flex-1 overflow-hidden ">
-                      {item.fullName}
+                      {item?.fullName}
                     </p>
                   </>
                 )}
@@ -174,23 +174,23 @@ const HeaderEvent = ({
       key: 2,
       type: "group",
       label: "Trạng thái Công việc",
-      children: listStatus.map((status) => {
+      children: listStatus?.map((status) => {
         return {
-          key: status.value,
+          key: status?.value,
           label: (
-            <div key={status.value} className="pl-2">
-              {status.value === statusSelected ? (
-                <Tag color={status.color}>
-                  {status.label}{" "}
+            <div key={status?.value} className="pl-2">
+              {status?.value === statusSelected ? (
+                <Tag color={status?.color}>
+                  {status?.label}{" "}
                   <CheckOutlined className="text-green-400 ml-2" />
                 </Tag>
               ) : (
                 <Tag
-                  color={status.color}
+                  color={status?.color}
                   className="opacity-50"
                   bordered={false}
                 >
-                  {status.label}
+                  {status?.label}
                 </Tag>
               )}
             </div>
@@ -236,7 +236,7 @@ const HeaderEvent = ({
   }, []);
 
   return (
-    <div className="p-4 left-0 z-40 right-0 bg-bgBoard h-16">
+    <div className="p-4 left-0 z-40 right-0 bg-bgBoard">
       <AnimatePresence mode="wait">
         <motion.div
           initial={{ opacity: 0 }}
@@ -244,7 +244,7 @@ const HeaderEvent = ({
           exit={{ opacity: 0 }}
           className="flex items-center space-x-2 md:space-x-4"
         >
-          <header className="flex justify-between items-center w-full ml-8 mr-1">
+          <header className="flex justify-between items-center w-full py-1">
             {/* left header */}
             {!isDashBoard && (
               <div className="flex-1 flex justify-center items-center gap-x-3">
@@ -279,14 +279,15 @@ const HeaderEvent = ({
                         transition={{ duration: 0.3, type: "tween" }}
                         className="flex-1 flex justify-between items-center gap-x-3"
                       >
-                        <div className="w-1/2 flex justify-start">
-                          <Button
-                            type="link"
+                        <div className="w-1/2 flex justify-start items-center space-x-2">
+                          <div
                             onClick={() => navigate(-1)}
-                            className="text-sm font-semibold "
+                            className="w-1/2 text-sm font-semibold flex item-center space-x-2 hover:opacity-50 transition-all cursor-pointer"
                           >
-                            <ArrowLeftOutlined className="text-lg font-bold" />
-                          </Button>
+                            <ArrowLeftOutlined className="text-lg" />
+                            <span className="text-base">Quay lại</span>
+                          </div>
+
                           <Input
                             size="large"
                             className="w-full"
@@ -297,13 +298,13 @@ const HeaderEvent = ({
                           />
                         </div>
                         <div className="flex justify-end items-center gap-x-3">
-                          <span
+                          <p
                             className=" flex gap-x-2 justify-center items-center hover:text-blue-500 cursor-pointer"
                             onClick={() => setIsBoardTask(false)}
                           >
                             <DollarOutlined className="text-xl" />
                             Ngân sách
-                          </span>
+                          </p>
                           <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 ">
                             {sort === "DESC" ? (
                               <span

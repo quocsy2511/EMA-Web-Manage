@@ -8,10 +8,13 @@ import { IoRemoveOutline } from "react-icons/io5";
 import AnErrorHasOccured from "../../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 
-const BudgetItem = memo(({ budget, setSelectBudget }) => (
+const BudgetItem = memo(({ budget, selectBudget, setSelectBudget }) => (
   <div
     onClick={() => setSelectBudget(budget)}
-    className="flex items-center bg-white p-5 mx-5 space-x-5 hover:scale-105 transition-transform cursor-pointer rounded-lg shadow-md"
+    className={clsx(
+      "flex items-center bg-white p-5 mx-5 space-x-5 hover:scale-105 transition-transform cursor-pointer rounded-lg shadow-md",
+      { "scale-110": selectBudget?.id === budget?.id }
+    )}
   >
     <div className="min-w-[20%] flex justify-center items-center">
       <Progress
@@ -93,6 +96,7 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
               <BudgetItem
                 key={budget?.itemExisted?.id}
                 budget={budget}
+                selectBudget={selectBudget}
                 setSelectBudget={setSelectBudget}
               />
             ))}

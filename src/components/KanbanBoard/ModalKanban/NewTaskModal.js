@@ -307,16 +307,16 @@ const NewTaskModal = ({
 
   return (
     <>
-      <div className="px-16 mt-1  py-8 rounded-lg ">
+      <div className="px-10 py-8 rounded-lg ">
         {/* header */}
-        <div className="flex flex-row w-full  py-2">
-          <div className="flex flex-row w-full justify-between items-center mb-2 ">
-            <div className="w-[50%] flex flex-col justify-center items-start  py-2">
-              <h3 className="font-bold text-3xl text-blueBudget mb-2">
-                Thêm mới công việc
+        <div className="flex flex-row w-full">
+          <div className="flex flex-row w-full justify-between items-center mb-2">
+            <div className="w-[50%] flex flex-col justify-center items-start">
+              <h3 className="font-semibold text-4xl text-blueBudget mb-2">
+                Tạo công việc
               </h3>
               <p className="mb-2 text-blueSecondBudget inline-block">
-                Thêm công việc cho đề mục -{" "}
+                Thêm công việc cho hạng mục -{" "}
                 <b className="text-base text-blueBudget">{TaskParent?.title}</b>{" "}
               </p>
             </div>
@@ -347,7 +347,7 @@ const NewTaskModal = ({
           </div>
         </div>
         {/* content */}
-        <div className="px-14 py-8 rounded-lg w-full flex justify-center flex-col bg-white">
+        <div className="px-10 py-6 rounded-lg w-full flex justify-center flex-col bg-white">
           {addNewTaskTemplate && (
             <div className="w-full flex flex-col justify-start items-start gap-y-3 mb-4">
               <h3 className="font-bold">
@@ -382,69 +382,72 @@ const NewTaskModal = ({
             autoComplete="off"
             className="m-0 p-0 "
           >
-            {/* title */}
-            <Form.Item
-              label="Tên công việc"
-              labelCol={{
-                style: { padding: 0, fontWeight: 700 },
-              }}
-              name="title"
-              className="text-sm font-medium "
-              rules={[
-                {
-                  required: true,
-                  message: "Hãy nhập  tên công việc!",
-                },
-                {
-                  whitespace: true,
-                  message: " Tên công việc không được để trống!",
-                },
-                {
-                  min: 3,
-                  max: 200,
-                  message: "tên công việc từ 3 đến 200 kí tự!",
-                },
-              ]}
-              hasFeedback
-            >
-              <Input
-                placeholder="Tên công việc  ..."
-                autoFocus={!addNewTaskTemplate}
-              />
-            </Form.Item>
-            {/* date */}
-            <Form.Item
-              name="date"
-              label="Thời hạn"
-              className="text-sm font-medium "
-              labelCol={{
-                style: { padding: 0, fontWeight: 700 },
-              }}
-              rules={[
-                {
-                  type: "array",
-                  required: true,
-                  message: "Hãy chọn thời gian!",
-                },
-              ]}
-              hasFeedback
-            >
-              <RangePicker
-                placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
-                disabledDate={disabledDate}
-                onChange={onChangeDate}
-                formatDate="YYYY/MM/DD HH:mm:ss"
-                className="w-full"
-              />
-            </Form.Item>
+            <div className="flex space-x-5">
+              {/* title */}
+              <Form.Item
+                label="Tên công việc"
+                labelCol={{
+                  style: { padding: 0, fontWeight: 700 },
+                }}
+                name="title"
+                className="w-2/3 text-sm font-medium "
+                rules={[
+                  {
+                    required: true,
+                    message: "Hãy nhập  tên công việc!",
+                  },
+                  {
+                    whitespace: true,
+                    message: " Tên công việc không được để trống!",
+                  },
+                  {
+                    min: 3,
+                    max: 200,
+                    message: "tên công việc từ 3 đến 200 kí tự!",
+                  },
+                ]}
+                hasFeedback
+              >
+                <Input
+                  size="large"
+                  placeholder="Tên công việc  ..."
+                  autoFocus={!addNewTaskTemplate}
+                />
+              </Form.Item>
+              {/* date */}
+              <Form.Item
+                name="date"
+                label="Thời hạn"
+                className="flex-1 text-sm font-medium "
+                labelCol={{
+                  style: { padding: 0, fontWeight: 700 },
+                }}
+                rules={[
+                  {
+                    type: "array",
+                    required: true,
+                    message: "Hãy chọn thời gian!",
+                  },
+                ]}
+                hasFeedback
+              >
+                <RangePicker
+                  placeholder={["Ngày bắt đầu  ", "Ngày kết thúc "]}
+                  disabledDate={disabledDate}
+                  onChange={onChangeDate}
+                  formatDate="YYYY/MM/DD HH:mm:ss"
+                  className="w-full"
+                />
+              </Form.Item>
+            </div>
             {/* description */}
             <Form.Item
               initialValue={description}
               label="Mô tả"
-              className="text-sm font-medium "
+              className="text-sm font-medium mb-12"
               name="desc"
               labelCol={{
-                style: { padding: 0, fontWeight: 700 },
+                  style: { padding: 0, fontWeight: 700 },
               }}
             >
               <ReactQuill
@@ -453,7 +456,7 @@ const NewTaskModal = ({
                 onChange={(content, delta, source, editor) => {
                   form.setFieldsValue({ desc: editor.getContents() });
                 }}
-                className="bg-transparent  py-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full "
+                className="bg-transparent py-2 rounded-md text-sm border-none  border-gray-600 focus:outline-secondary outline-none ring-0 w-full h-28"
               />
             </Form.Item>
             <div className="flex w-full justify-between items-center my-2">
@@ -468,9 +471,10 @@ const NewTaskModal = ({
                 }}
               >
                 <Segmented
+                size="large"
                   options={[
                     { label: "THẤP", value: "LOW" },
-                    { label: "TRUNG BÌNH", value: "MEDIUM" },
+                    { label: "VỪA", value: "MEDIUM" },
                     { label: "CAO", value: "HIGH" },
                   ]}
                   value={priority.value}
@@ -503,8 +507,9 @@ const NewTaskModal = ({
               >
                 <Upload
                   // className="upload-list-inline"
+                  className="flex items-center space-x-5"
                   maxCount={1}
-                  listType="text"
+                  listType="picture"
                   action=""
                   customRequest={({ file, onSuccess }) => {
                     setTimeout(() => {
@@ -555,6 +560,7 @@ const NewTaskModal = ({
                   !isErrorEmployees ? (
                     <>
                       <Select
+                      size="large"
                         maxTagCount="responsive"
                         allowClear
                         onClear={handleClearSelectEmployee}

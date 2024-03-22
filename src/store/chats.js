@@ -53,7 +53,20 @@ const chatsSlice = createSlice({
         state.chats =
           state.chats.length === 0
             ? action.payload.data
-            : [...state.chats, ...action.payload.data];
+            : state.currentPage !== 1
+            ? [...state.chats, ...action.payload.data]
+            : action.payload.data;
+
+        if (!state.chats?.length) {
+          state.chats = action.payload.data;
+        } else {
+          if (state.currentPage === 1) {
+            state.chats = action.payload.data;
+          } else {
+            state.chats = [...state.chats, ...action.payload.data];
+          }
+        }
+
         state.status = "succeeded";
       })
       .addCase(getChatsList.rejected, (state, action) => {

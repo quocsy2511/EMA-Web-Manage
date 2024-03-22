@@ -379,11 +379,6 @@ const ContactTab = ({
             size="large"
             options={[
               {
-                label: "TẤT CẢ",
-                value: "ALL",
-                icon: <BarsOutlined />,
-              },
-              {
                 label: "ĐANG CHỜ",
                 value: "PENDING",
                 icon: <ExclamationCircleOutlined className="text-yellow-500" />,
@@ -402,6 +397,11 @@ const ContactTab = ({
                 label: "THÀNH CÔNG",
                 value: "SUCCESS",
                 icon: <CarryOutOutlined className="text-blue-500" />,
+              },
+              {
+                label: "TẤT CẢ",
+                value: "ALL",
+                icon: <BarsOutlined />,
               },
             ]}
             onChange={(value) => handleChangeStatus(value)}

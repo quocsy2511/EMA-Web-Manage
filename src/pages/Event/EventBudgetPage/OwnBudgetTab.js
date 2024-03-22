@@ -13,6 +13,7 @@ import {
 import clsx from "clsx";
 import momenttz from "moment-timezone";
 import { BsThreeDots } from "react-icons/bs";
+import { HiOutlineExclamation } from "react-icons/hi";
 import { FaCheck } from "react-icons/fa6";
 import { CgClose } from "react-icons/cg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,7 +26,10 @@ import BudgetModal from "../../../components/Modal/BudgetModal";
 const BudgetItem = memo(({ budget, selectBudget, setSelectBudget }) => (
   <div
     onClick={() => setSelectBudget(budget)}
-    className="flex items-center bg-white p-5 mx-5 space-x-5 hover:scale-105 transition-transform cursor-pointer rounded-lg shadow-md"
+    className={clsx(
+      "flex items-center bg-white p-5 mx-5 space-x-5 hover:scale-105 transition-transform cursor-pointer rounded-lg shadow-md",
+      { "scale-110": selectBudget?.id === budget?.id }
+    )}
   >
     <div className="min-w-[20%] flex justify-center items-center">
       <Progress

@@ -1,54 +1,50 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
-import {
-  Button,
-  Empty,
-  FloatButton,
-  Popconfirm,
-  Popover,
-  Segmented,
-  Select,
-  Space,
-  Spin,
-  Table,
-  Tabs,
-  Tag,
-  Tooltip,
-  message,
-} from "antd";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getCustomerContacts,
-  updateCustomerContacts,
-} from "../../apis/contact";
-import momenttz from "moment-timezone";
-import { useNavigate } from "react-router-dom";
+import { Tabs, message } from "antd";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getCustomerContacts } from "../../apis/contact";
+
 import { MdOutlineConnectWithoutContact } from "react-icons/md";
-import { FaRegNoteSticky } from "react-icons/fa6";
-import { FaRegAddressBook } from "react-icons/fa";
+
 import { motion } from "framer-motion";
 import ContactTab from "./ContactTab";
-import ContractTab from "./ContractTab";
 import { getContractFile } from "../../apis/contract";
+import { socketOnNotification } from "../../utils/socket";
 
 const CustomerPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sort, setSort] = useState("DESC");
-  const [contactStatus, setContactStatus] = useState("ALL");
+  const [contactStatus, setContactStatus] = useState("PENDING");
 
   const [messageApi, contextHolder] = message.useMessage();
+
+  const queryclient = useQueryClient();
+
+  useEffect(() => {
+    socketOnNotification();
+  }, []);
+
+  const handleRefetchContact = () => {
+    queryclient.invalidateQueries([
+      "contact",
+      currentPage,
+      sort,
+      contactStatus,
+      10,
+    ]);
+  };
 
   const {
     data: contacts,
     isLoading: contactsIsLoading,
     isError: contactsIsError,
   } = useQuery(
-    ["contact", currentPage, sort, contactStatus, 50],
+    ["contact", currentPage, sort, contactStatus, 10],
     () =>
       getCustomerContacts({
         currentPage,
         sort,
         status: contactStatus,
-        sizePage: 50,
+        sizePage: 10,
       }),
     {
       select: (data) => data?.data,

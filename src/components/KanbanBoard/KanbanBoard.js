@@ -2,12 +2,9 @@ import React, { Fragment, memo, useEffect, useState } from "react";
 import Column from "../KanbanBoard/Column/Column.js";
 import DescriptionEvent from "./DescriptionEvent/DescriptionEvent.js";
 import { useQuery } from "@tanstack/react-query";
-import AnErrorHasOccured from "../Error/AnErrorHasOccured.js";
-import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator.js";
 import { getTasks } from "../../apis/tasks.js";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
-import { addNotification } from "../../store/Slice/notificationsSlice.js";
 import TaskModal from "./ModalKanban/TaskModal.js";
 import { Empty, Spin } from "antd";
 import { redirectionActions } from "../../store/redirection.js";
@@ -143,7 +140,9 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
                 <div className="w-full flex justify-center items-center">
                   <Empty
                     description={
-                      <span>hiện tại bạn chưa có công việc nào</span>
+                      <span className="text-xl font-medium">
+                        Hiện tại bạn chưa có công việc nào.
+                      </span>
                     }
                   />
                 </div>

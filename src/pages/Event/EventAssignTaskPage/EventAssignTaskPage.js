@@ -614,11 +614,11 @@ const EventAssignTaskPage = () => {
                 },
                 {
                   validator: (_, value) => {
-                    if (value && value?.length === 2) {
+                    if (value && value?.[0] && value?.[1]) {
                       return Promise.resolve();
                     }
                     return Promise.reject(
-                      "Vui lòng chọn ngày thực hiện và kết thúc."
+                      "Vui lòng chọn khoảng thời gian thực hiện."
                     );
                   },
                 },

@@ -30,7 +30,7 @@ export const socketListener = (dispatch, notificationAPI) => {
 
   // Listen to get notification
   socket.on("notification", (data) => {
-    console.log("notification data:", data);
+    console.log(" -------- notification data:", data);
 
     // queryClient.invalidateQueries(["notifications", "10"]);
 
@@ -38,8 +38,8 @@ export const socketListener = (dispatch, notificationAPI) => {
       message: <p className="text-base">Đã nhận 1 thông báo</p>,
       description: (
         <div className="flex items-center gap-x-3">
-          <Avatar src={data?.avatarSender} />
-          <p className="text-sm">
+          <Avatar className="w-1/4" src={data?.avatarSender} />
+          <p className="text-sm flex-1">
             <span className="font-semibold">
               {data?.content?.split("đã")[0]}{" "}
             </span>
@@ -74,6 +74,7 @@ export const socketListener = (dispatch, notificationAPI) => {
       })
     );
 
+    console.log("newConservations > ", newConservations);
     dispatch(chatsActions.updateChat(newConservations));
   });
 
@@ -87,6 +88,25 @@ export const socketListener = (dispatch, notificationAPI) => {
         offlineUsers: data.offlineUsers,
       })
     );
+  });
+};
+
+export const socketOnNotification = (refetchFunction) => {
+  socket.on("notification", (data) => {
+    console.log("Export notification data > ", data);
+
+    // const data = {
+    //   title: "Đã có một comment mới ",
+    //   content: "Quyên Đặng đã comment vào 123",
+    //   readFlag: false,
+    //   type: "COMMENT",
+    //   userId: "61bcb6ef-a41a-451a-848a-da94439f8eeb",
+    //   eventID: "0c60ba92-b850-4d99-bafa-3e4f3efedd37",
+    //   commonId: "d4967d82-6caa-4f09-b16e-e27f24c33319",
+    //   avatarSender:
+    //     "https://i0.wp.com/www.muscleandfitness.com/wp-content/uploads/2015/03/John_Cena.jpg?quality=86&strip=all",
+    // };
+    refetchFunction(data);
   });
 };
 

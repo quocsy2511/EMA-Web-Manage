@@ -59,7 +59,6 @@ import { GrStatusInfo } from "react-icons/gr";
 import { FaRegPenToSquare, FaFilePdf } from "react-icons/fa6";
 import EventTaskSelection from "../../components/Selection/EventTaskSelection";
 import TaskItem from "../../components/Task/TaskItem";
-import TaskAdditionModal from "../../components/Modal/TaskAdditionModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getDetailEvent, updateStatusEvent } from "../../apis/events";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
@@ -67,15 +66,11 @@ import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
 import momenttz from "moment-timezone";
 import "moment/locale/vi";
-import { filterTask, getTasks, getTemplateTask } from "../../apis/tasks";
+import { filterTask } from "../../apis/tasks";
 import EmptyList from "../../components/Error/EmptyList";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import EventUpdateModal from "../../components/Modal/EventUpdateModal";
-import {
-  getContract,
-  getContractEvidence,
-  postContractEvidence,
-} from "../../apis/contract";
+import { getContract, getContractEvidence } from "../../apis/contract";
 import ContractCreatePage from "../../components/Modal/ContractCreatePage";
 import clsx from "clsx";
 import defaultBanner from "../../assets/images/default_banner_images.png";
@@ -879,17 +874,21 @@ const EventTaskPage = () => {
 
                   <div className="flex-1" />
 
-                  <motion.button
-                    whileHover={{
-                      scale: 1.1,
-                    }}
-                    transition={{ type: "spring", duration: 0.5 }}
-                    onClick={resetFilter}
-                    className="flex items-center gap-x-2 border hover:bg-red-500 hover:text-white border-red-500 text-red-500 text-base px-3 py-1.5 rounded-lg"
-                  >
-                    Đặt lại bộ lọc
-                    <MdFilterListAlt size={18} />
-                  </motion.button>
+                  {(assigneeSelection ||
+                    prioritySelection ||
+                    statusSelection) && (
+                    <motion.button
+                      whileHover={{
+                        scale: 1.1,
+                      }}
+                      transition={{ type: "spring", duration: 0.5 }}
+                      onClick={resetFilter}
+                      className="flex items-center gap-x-2 border hover:bg-red-500 hover:text-white border-red-500 text-red-500 text-base px-3 py-1.5 rounded-lg"
+                    >
+                      Đặt lại bộ lọc
+                      <MdFilterListAlt size={18} />
+                    </motion.button>
+                  )}
                 </div>
 
                 {/*  ----------------------------------------------------------------------------------------------------------------------------------  */}
