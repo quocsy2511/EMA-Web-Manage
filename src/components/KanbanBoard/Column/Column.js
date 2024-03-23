@@ -63,6 +63,7 @@ const Column = ({
   };
 
   let completed = 0;
+
   let subTask = TaskParent?.subTask;
 
   subTask?.forEach((task) => {
@@ -104,7 +105,7 @@ const Column = ({
 
   const startDate = moment(TaskParent?.startDate).format("DD-MM-YYYY");
   const endDate = moment(TaskParent?.endDate).format("DD-MM-YYYY");
-
+  
   return (
     <>
       <div className="scrollbar-hide mt-5 min-w-[280px]">

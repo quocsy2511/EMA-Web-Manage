@@ -110,7 +110,7 @@ const DescriptionSubtask = ({
   };
 
   return (
-    <div className="mt-8 flex flex-row gap-x-6 justify-start items-start">
+    <div className="mt-4 flex flex-row gap-x-6 justify-start items-start ">
       <div className="flex justify-center items-center">
         <label
           htmlFor="board-description-input" //lấy id :D
@@ -119,11 +119,11 @@ const DescriptionSubtask = ({
           <AlignLeftOutlined className="text-black text-2xl" />
         </label>
       </div>
-      <div className="w-full">
+      <div className="w-full ">
         <h3 className="text-lg font-bold">Mô tả</h3>
         {taskParent ? (
           <>
-            <div className="rounded-md text-sm text-black font-normal bg-slate-100 cursor-pointer w-full bg-transparent px-4 py-2">
+            <div className="rounded-md text-sm text-black font-normal bg-slate-100 cursor-pointer w-full bg-transparent px-4 py-2 ">
               {description !== undefined && description !== null ? (
                 <p
                   className="text-base italic text-black "
@@ -191,13 +191,13 @@ const DescriptionSubtask = ({
               </>
             ) : (
               <div
-                className="rounded-md text-sm text-black font-normal bg-slate-100 cursor-pointer w-full bg-transparent px-4 py-2"
+                className="rounded-md text-base italic text-black font-normal bg-gray-500 cursor-pointer w-full bg-transparent px-4 py-2 hover:bg-gray-200 hover:text-blue-600"
                 onClick={() => seItsOpenQuill(true)}
               >
                 {subtaskDetails?.[0].description !== undefined &&
                 subtaskDetails?.[0].description !== null ? (
                   <p
-                    className="text-base italic text-black "
+                    // className="text-base italic text-black bg-transparent "
                     dangerouslySetInnerHTML={{
                       __html: new QuillDeltaToHtmlConverter(
                         JSON.parse(
@@ -209,7 +209,7 @@ const DescriptionSubtask = ({
                     }}
                   ></p>
                 ) : (
-                  <p className="text-base italic text-black bg-slate-100 p-4 rounded-md opacity-40">
+                  <p className="text-base italic text-black bg-gray-200 p-4 rounded-md opacity-40">
                     Add more detail description ....
                   </p>
                 )}

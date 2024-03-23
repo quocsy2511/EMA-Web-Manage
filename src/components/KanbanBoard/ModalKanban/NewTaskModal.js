@@ -23,11 +23,11 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 import { createTask } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
 import {
-  CloseCircleOutlined,
   DoubleRightOutlined,
   StarFilled,
-  SwapOutlined,
+  TeamOutlined,
   UploadOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
 import DrawerTimeLine from "../Drawer/DrawerTimeLine";
@@ -258,12 +258,19 @@ const NewTaskModal = ({
         onMouseDown={onPreventMouseDown}
         closable={closable}
         onClose={() => handlerCloseTag(props.value)}
-        className="mr-4 py-2 cursor-pointer"
+        className="mr-4 py-2 cursor-pointer flex justify-center items-center "
         onClick={() => handleSelectLeader(leader)}
       >
-        {defaultLeader === "green" && <StarFilled spin />}
+        {defaultLeader === "green" ? (
+          <UserOutlined className="text-lg text-green-500" />
+        ) : (
+          <TeamOutlined className="text-lg text-yellow-500" />
+        )}
         <Avatar src={avatar} className="mr-2" size="small" />
-        {label}
+        <p className="font-semibold text-sm">{label}</p>
+        {defaultLeader === "green" && (
+          <span className="text-green-500">-(Nhóm trưởng) </span>
+        )}
       </Tag>
     );
   };
@@ -447,7 +454,7 @@ const NewTaskModal = ({
               className="text-sm font-medium mb-12"
               name="desc"
               labelCol={{
-                  style: { padding: 0, fontWeight: 700 },
+                style: { padding: 0, fontWeight: 700 },
               }}
             >
               <ReactQuill
@@ -471,7 +478,7 @@ const NewTaskModal = ({
                 }}
               >
                 <Segmented
-                size="large"
+                  size="large"
                   options={[
                     { label: "THẤP", value: "LOW" },
                     { label: "VỪA", value: "MEDIUM" },
@@ -560,7 +567,7 @@ const NewTaskModal = ({
                   !isErrorEmployees ? (
                     <>
                       <Select
-                      size="large"
+                        size="large"
                         maxTagCount="responsive"
                         allowClear
                         onClear={handleClearSelectEmployee}

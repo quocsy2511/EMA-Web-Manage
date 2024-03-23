@@ -70,9 +70,11 @@ const TaskModalContent = ({
   const [description, setDescription] = useState(taskSelected?.description);
   const [subTasks, setSubTasks] = useState(taskSelected?.subTask);
   const [isHistoryAssignee, setIsHistoryAssignee] = useState(false);
-  let completionPercentage;
-  if (taskParent) {
+  let completionPercentage = 0;
+  if (taskParent && subTasks?.length > 0) {
     completionPercentage = ((completed / subTasks?.length) * 100).toFixed(0);
+  } else {
+    completionPercentage = 0;
   }
 
   return (

@@ -58,10 +58,9 @@ const FieldSubtask = ({
 
   return (
     <div className="flex flex-col ">
-      {/* member */}
+      {/* member/ upload file*/}
       <div className=" flex flex-row gap-x-6">
         <div className="flex flex-col w-1/2">
-          {/* task member */}
           <div className="flex flex-col  pl-12 mt-2">
             <h4 className="text-sm font-semibold flex flex-row gap-x-2">
               <UserOutlined />
@@ -96,7 +95,6 @@ const FieldSubtask = ({
           </div>
         </div>
         <div className=" flex flex-col  w-1/2">
-          {/* upload file */}
           <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden">
             <h4 className="text-sm font-semibold flex flex-row gap-x-2">
               <FolderOutlined />
@@ -127,7 +125,7 @@ const FieldSubtask = ({
         </div>
       </div>
       {/* priority / status */}
-      <div className=" flex flex-row gap-x-6">
+      <div className=" flex flex-row gap-x-6 mt-4">
         <div className="flex flex-col w-1/2">
           {/* priority */}
           <div className="flex flex-col  pl-12 mt-2">
@@ -227,8 +225,8 @@ const FieldSubtask = ({
           </div>
         </div>
       </div>
-      {/* process */}
-      <div className=" flex flex-row gap-x-6 ">
+      {/* process/ task date */}
+      <div className=" flex flex-row gap-x-6 mt-4">
         <div className="flex flex-col w-1/2 mt-2 ">
           <div className="flex flex-col w-full pl-12 mt-2 overflow-hidden pr-3">
             <h4 className="text-sm font-semibold flex flex-row gap-x-2">
@@ -250,11 +248,8 @@ const FieldSubtask = ({
             )}
           </div>
         </div>
-      </div>
 
-      {/* task date */}
-      <div className=" flex flex-row gap-x-6">
-        <div className="flex flex-col w-full pl-12 mt-4">
+        <div className="flex flex-col w-1/2 pl-12 mt-2">
           <h4 className="text-sm font-semibold flex flex-row gap-x-2">
             <FieldTimeOutlined />
             Thời gian
@@ -288,7 +283,6 @@ const FieldSubtask = ({
           )}
         </div>
       </div>
-
       <EmployeeModalSchedule
         isModalAssigneeOpen={isModalAssigneeOpen}
         setIsModalAssigneeOpen={setIsModalAssigneeOpen}

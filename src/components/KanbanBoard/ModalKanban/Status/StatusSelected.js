@@ -120,6 +120,7 @@ const StatusSelected = ({
         className={classNameStyle}
         onChange={(value) => handleChangeStatus(value)}
         popupMatchSelectWidth={false}
+        
       >
         {taskParent
           ? StatusParentTask?.map((status) => (

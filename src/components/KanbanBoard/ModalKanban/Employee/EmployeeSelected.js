@@ -7,7 +7,7 @@ import { Avatar, Button, Select, Space, Tag, Tooltip, message } from "antd";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
 import { assignMember } from "../../../../apis/tasks";
-import { StarFilled } from "@ant-design/icons";
+import { StarFilled, TeamOutlined, UserOutlined } from "@ant-design/icons";
 
 const EmployeeSelected = ({
   assignTasks,
@@ -105,10 +105,6 @@ const EmployeeSelected = ({
       ?.profile?.fullName;
     const avatar = matchedUsers?.find((item) => item.id === props.value)
       ?.profile?.avatar;
-    // const color =
-    //   matchedUsers?.findIndex((user) => user.id === props.value) === 0
-    //     ? "green"
-    //     : "gold";
     const defaultLeader = matchedUsers?.find((user) => user.id === props.value)
       ?.isLeader
       ? "green"
@@ -120,12 +116,21 @@ const EmployeeSelected = ({
         onMouseDown={onPreventMouseDown}
         closable={closable}
         onClose={() => handlerCloseTag(props.value)}
-        className="mr-4 py-2 cursor-pointer"
+        className="mr-4 py-2 cursor-pointer flex justify-center items-center "
         onClick={() => handleSelectLeader(leader)}
       >
-        {defaultLeader === "green" && <StarFilled spin />}
+        {/* {defaultLeader === "green" && <StarFilled spin />} */}
+        {defaultLeader === "green" ? (
+          <UserOutlined className="text-lg text-green-500" />
+        ) : (
+          <TeamOutlined className="text-lg text-yellow-500" />
+        )}
         <Avatar src={avatar} className="mr-2" size="small" />
-        {labelName}
+        {/* {labelName} */}
+        <p className="font-semibold text-sm">{labelName}</p>
+        {defaultLeader === "green" && (
+          <span className="text-green-500">-(Nhóm trưởng) </span>
+        )}
       </Tag>
     );
   };
