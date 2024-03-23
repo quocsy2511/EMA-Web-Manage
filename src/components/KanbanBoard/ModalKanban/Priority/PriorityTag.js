@@ -22,7 +22,7 @@ const PriorityTag = ({ updatePriority, setIsOpenPriority }) => {
     <div className="cursor-pointer">
       <Tag
         color={getColorStatusPriority(updatePriority)?.color}
-        className="h-fit"
+        className="h-fit hover:text-blue-500 hover:border-blue-500"
         onClick={() => setIsOpenPriority(true)}
       >
         {getColorStatusPriority(updatePriority)?.title}

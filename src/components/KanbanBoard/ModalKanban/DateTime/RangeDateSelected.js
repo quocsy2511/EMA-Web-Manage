@@ -160,7 +160,7 @@ const RangeDateSelected = ({
             </Form>
           ) : (
             <span
-              className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 ${
+              className={` px-[6px] py-[2px] w-fit text-sm font-medium flex justify-start items-center gap-x-1 hover:text-blue-600  ${
                 taskSelected.status === "CANCEL" ||
                 taskSelected.status === "OVERDUE"
                   ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"

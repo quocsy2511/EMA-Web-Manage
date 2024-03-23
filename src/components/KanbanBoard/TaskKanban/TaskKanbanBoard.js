@@ -281,12 +281,9 @@ const TaskKanbanBoard = ({
                                   {item.isLeader ? (
                                     <Badge
                                       count={
-                                        <StarFilled
-                                          className="text-yellow-400 text-[9px]"
-                                          spin
-                                        />
+                                        <StarFilled className="text-yellow-400 text-[11px]" />
                                       }
-                                      offset={[-7, 3]}
+                                      offset={[-21, 5]}
                                       className="mr-1"
                                     >
                                       <Avatar
