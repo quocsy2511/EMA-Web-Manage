@@ -1,3 +1,13 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useRouteLoaderData } from "react-router-dom";
+import {
+  getAllUser,
+  getRoles,
+  updateStatusUser,
+  updateUser,
+} from "../../../apis/users";
+import moment from "moment";
 import {
   Avatar,
   Button,
@@ -12,39 +22,45 @@ import {
   Tag,
   message,
 } from "antd";
-import React, { Fragment, useState } from "react";
-import { PiTrash, PiNotePencilBold } from "react-icons/pi";
-import viVN from "antd/locale/vi_VN";
-import dayjs from "dayjs";
 import { BsSearch } from "react-icons/bs";
+import Highlighter from "react-highlight-words";
+import { PiNotePencilBold, PiTrash } from "react-icons/pi";
+import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
+import CreateUserDrawer from "../../Drawer/CreateUserDrawer";
 import {
   MdOutlineKeyboardArrowLeft,
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
-import Highlighter from "react-highlight-words";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getAllUser,
-  getRoles,
-  updateStatusUser,
-  updateUser,
-} from "../../apis/users";
-import { getAllDivision } from "../../apis/divisions";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
-import moment from "moment";
-import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
-import CreateUserDrawer from "../../components/Drawer/CreateUserDrawer";
 import clsx from "clsx";
+import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
+import viVN from "antd/locale/vi_VN";
+import dayjs from "dayjs";
 
-const PersonnelPage = () => {
+const DepartmentStaffPage = () => {
   const [page, setPage] = useState(1);
-  const { data, isLoading, isError } = useQuery(
+  const divisionId = useRouteLoaderData("staff").divisionID;
+  const queryClient = useQueryClient();
+  const [form] = Form.useForm();
+  const [searchText, setSearchText] = useState("");
+  const [sortedInfo, setSortedInfo] = useState({});
+  const [filteredInfo, setFilteredInfo] = useState({});
+  const [searchColText, setSearchColText] = useState("");
+  const [searchedCol, setSearchedCol] = useState("");
+  const [editingRowKey, setEditingRowKey] = useState("");
+  const [filteredData, setFilteredData] = useState();
+  const [showDrawer, setShowDrawer] = useState(false);
+  const { data, isError, isLoading } = useQuery(
     ["users", page],
-    () => getAllUser({ pageSize: 10, currentPage: page }),
+    () =>
+      getAllUser({
+        divisionId,
+        pageSize: 7,
+        currentPage: page,
+        role: "Nhân Viên",
+      }),
     {
       select: (data) => {
         data.data = data?.data.map((item) => {
-          item.dob = moment(item?.dob).format("YYYY-MM-DD");
           return {
             key: item?.id,
             ...item,
@@ -52,75 +68,62 @@ const PersonnelPage = () => {
         });
         return data;
       },
+
       refetchOnWindowFocus: false,
     }
   );
-  console.log("DATA: ", data);
+  // console.log("🚀 ~ DepartmentStaffPage ~ users:", data);
 
   const {
-    data: divisionsData,
-    isLoading: divisionsIsLoading,
-    isError: divisionsIsError,
-  } = useQuery(
-    ["divisions", 1],
-    () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 1 }),
-    {
-      select: (data) => data?.filter((division) => division?.status),
-      refetchOnWindowFocus: false,
-    }
-  );
-  console.log("divisionsData: ", divisionsData);
-
-  const {
-    data: divisionsWithoutStaff,
-    isLoading: divisionsWithoutStaffIsLoading,
-    isError: divisionsWithoutStaffIsError,
-  } = useQuery(
-    ["divisions", 2],
-    () => getAllDivision({ pageSize: 20, currentPage: 1, mode: 2 }),
-    {
-      select: (data) => data?.filter((division) => division?.status),
-      refetchOnWindowFocus: false,
-    }
-  );
-  console.log("divisionsWithoutStaff: ", divisionsWithoutStaff);
-
-  const {
-    data: roles,
+    data: roleEmployee,
     isLoading: rolesIsLoading,
     isError: rolesIsError,
-  } = useQuery(["roles"], getRoles, {
+  } = useQuery(["roles-Employee"], getRoles, {
     select: (data) => {
-      console.log("🚀 ~ PersonnelPage ~ data:", data);
-      return data?.map((role) => ({
-        value: role?.id,
-        label: role?.roleName,
-      }));
+      const findRole = data?.find((role) => role?.roleName === "Nhân Viên");
+      return findRole;
     },
     refetchOnWindowFocus: false,
   });
-  console.log("🚀 ~ PersonnelPage ~ roles:", roles);
 
-  const queryClient = useQueryClient();
-  const { mutate, isLoading: updateUserIsLoading } = useMutation(
-    (user) => updateUser(user),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["users", page]);
-        onCancelEditing();
-        messageApi.open({
-          type: "success",
-          content: "Cập nhật thành công",
-        });
-      },
-      onError: () => {
-        messageApi.open({
-          type: "error",
-          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-        });
-      },
+  const handleTableChange = (_, filter, sorter) => {
+    const { order, field } = sorter;
+    setSortedInfo({ columnKey: field, order });
+    setFilteredInfo(filter);
+  };
+
+  const handleSearchCol = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchColText(selectedKeys[0]);
+    setSearchedCol(dataIndex);
+  };
+  const handleResetCol = (clearFilters, selectedKeys, confirm, dataIndex) => {
+    clearFilters();
+    handleSearchCol(selectedKeys, confirm, dataIndex);
+    setSearchColText("");
+  };
+  const checkEditing = (record) => {
+    return record.key === editingRowKey;
+  };
+
+  const onCancelEditing = () => {
+    setEditingRowKey("");
+  };
+  const onSaveEditing = () => {
+    form.submit();
+  };
+
+  const searchGlobal = () => {
+    if (searchText) {
+      const filterSearchedData = data?.data?.filter(
+        (value) =>
+          value?.fullName?.toLowerCase().includes(searchText?.toLowerCase()) ||
+          value?.email?.toLowerCase().includes(searchText?.toLowerCase()) ||
+          value?.phoneNumber?.includes(searchText?.toLowerCase())
+      );
+      setFilteredData(filterSearchedData);
     }
-  );
+  };
   const {
     mutate: updateUserStatusMutate,
     isLoading: updateUserStatusIsLoading,
@@ -137,101 +140,24 @@ const PersonnelPage = () => {
         return oldValue;
       });
 
-      messageApi.open({
+      message.open({
         type: "success",
         content: "Cập nhật trạng thái thành công",
       });
     },
     onError: () => {
-      messageApi.open({
+      message.open({
         type: "error",
         content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
       });
     },
   });
 
-  const [editingRowKey, setEditingRowKey] = useState(""); // Tracking which row is editing - contain key of selected row
-  const [sortedInfo, setSortedInfo] = useState({}); // Tracking which field (col) is being sorted - contain columnKey and order (asc/desc)
-  const [filteredInfo, setFilteredInfo] = useState({});
-  const [searchText, setSearchText] = useState("");
-  const [searchColText, setSearchColText] = useState("");
-  const [searchedCol, setSearchedCol] = useState(""); // Tracking which col is being searched
-  const [showDrawer, setShowDrawer] = useState(false);
-
-  const [filteredData, setFilteredData] = useState(); // Contain the global data after search
-
-  const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
-
-  // Check if the row is editing or not
-  const checkEditing = (record) => {
-    return record.key === editingRowKey;
-  };
-
-  // Submit form
-  const onFinish = (values) => {
-    console.log("Success:", values);
-    const userId = form.getFieldValue("id");
-    const avatar = form.getFieldValue("avatar");
-
-    const dataDivisionForm = form.getFieldValue("divisionName");
-    const divisionId = divisionsData?.filter((item) => {
-      if (
-        dataDivisionForm === item?.id ||
-        dataDivisionForm === item?.divisionName
-      ) {
-        return item;
-      }
-    })[0].id;
-
-    values = {
-      ...values,
-      userId,
-      avatar,
-      divisionId,
-    };
-    const { divisionName, ...restValues } = values;
-    console.log("restValue: ", restValues);
-    mutate(restValues);
-  };
-
-  // Handle delete 1 record
   const handleDeleteAction = (record) => {
+    // console.log("🚀 ~ handleDeleteAction ~ record:", record);
     updateUserStatusMutate({ userId: record?.id, status: "INACTIVE" });
   };
 
-  const handleTableChange = (_, filter, sorter) => {
-    const { order, field } = sorter;
-    setSortedInfo({ columnKey: field, order });
-    setFilteredInfo(filter);
-  };
-
-  const searchGlobal = () => {
-    if (searchText) {
-      const filterSearchedData = data?.data?.filter(
-        (value) =>
-          value?.fullName?.toLowerCase().includes(searchText?.toLowerCase()) ||
-          value?.email?.toLowerCase().includes(searchText?.toLowerCase()) ||
-          value?.phoneNumber?.includes(searchText?.toLowerCase())
-      );
-      setFilteredData(filterSearchedData);
-    }
-  };
-
-  const handleResetTable = () => {
-    setSortedInfo({});
-    setFilteredInfo({});
-    setSearchText("");
-  };
-
-  //  =========================================================================
-
-  const onCancelEditing = () => {
-    setEditingRowKey("");
-  };
-  const onSaveEditing = () => {
-    form.submit();
-  };
   // Editing mode
   const onEditing = (record) => {
     form.setFieldsValue({
@@ -248,18 +174,40 @@ const PersonnelPage = () => {
     setEditingRowKey(record.key);
   };
 
-  //  =========================================================================
+  const { mutate, isLoading: updateUserIsLoading } = useMutation(
+    (user) => updateUser(user),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["users", page]);
+        onCancelEditing();
+        message.open({
+          type: "success",
+          content: "Cập nhật thành công",
+        });
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+        });
+      },
+    }
+  );
+  const onFinish = (values) => {
+    // console.log("Success:", values);
+    const userId = form.getFieldValue("id");
+    const avatar = form.getFieldValue("avatar");
+    const { role, ...data } = values;
 
-  //  =========================================================================
-  const handleSearchCol = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchColText(selectedKeys[0]);
-    setSearchedCol(dataIndex);
-  };
-  const handleResetCol = (clearFilters, selectedKeys, confirm, dataIndex) => {
-    clearFilters();
-    handleSearchCol(selectedKeys, confirm, dataIndex);
-    setSearchColText("");
+    const updateData = {
+      ...data,
+      userId,
+      avatar,
+      divisionId,
+      roleId: roleEmployee?.id,
+    };
+    // console.log("🚀 ~ onFinish ~ updateData:", updateData);
+    mutate(updateData);
   };
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
@@ -341,8 +289,6 @@ const PersonnelPage = () => {
         text
       ),
   });
-  //  =========================================================================
-  // address - gender - nationalId
 
   const columns = [
     {
@@ -421,7 +367,7 @@ const PersonnelPage = () => {
       editTable: true,
       filteredValue: null,
       align: "center",
-      render: (_, record) => <p>{record?.dob}</p>,
+      render: (_, record) => <p>{moment(record.dob).format("DD-MM-YYYY")}</p>,
     },
     {
       title: "Giới tính",
@@ -439,13 +385,6 @@ const PersonnelPage = () => {
       key: "role",
       width: 150,
       editTable: true,
-      filters: [
-        { text: "Nhân viên", value: "Nhân viên" },
-        { text: "Trưởng phòng", value: "Trưởng Nhóm" },
-        { text: "Khách Hàng", value: "Khách Hàng" },
-      ],
-      filteredValue: filteredInfo.role || null,
-      onFilter: (value, record) => record.role?.includes(value),
       align: "center",
       render: (_, record) => <p className="text-base">{record?.role}</p>,
     },
@@ -476,30 +415,7 @@ const PersonnelPage = () => {
         </Tag>
       ),
     },
-    {
-      title: "Bộ phận",
-      dataIndex: "divisionName",
-      key: "divisionName",
-      width: 150,
-      editTable: true,
-      filters:
-        divisionsData
-          ?.filter((division) => division?.status === true)
-          .map((division) => ({
-            text: division?.divisionName,
-            value: division?.id,
-          })) ?? [],
-      filteredValue: filteredInfo?.divisionName || null,
-      onFilter: (value, record) => {
-        return record?.divisionId === value;
-      },
-      render: (_, record) => (
-        <p className={`text-base ${!record.divisionName && "text-red-400"}`}>
-          {record.divisionName ?? <Tag />}
-        </p>
-      ),
-      align: "center",
-    },
+
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -642,26 +558,8 @@ const PersonnelPage = () => {
     children,
     ...restProps
   }) => {
-    // Setup input field type
-    const division =
-      form.getFieldValue("role") === "STAFF"
-        ? divisionsWithoutStaff
-        : divisionsData;
     let options;
     switch (dataIndex) {
-      case "role":
-        // options = [
-        //   { value: "Trường phòng", label: "Trường phòng" },
-        //   { value: "Nhân viên", label: "Nhân viên" },
-        // ];
-        options = roles;
-        break;
-      case "divisionName":
-        options = division?.map((division) => ({
-          value: division?.id,
-          label: division?.divisionName,
-        }));
-        break;
       case "status":
         options = [
           { value: "ACTIVE", label: "kích hoạt" },
@@ -746,15 +644,12 @@ const PersonnelPage = () => {
   };
 
   return (
-    <Fragment>
-      {contextHolder}
+    <>
       <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-8">
         <div className="bg-white min-h rounded-xl p-8">
           <p className="text-2xl font-medium mb-5">Quản lý nhân sự</p>
-          {!isLoading &&
-          !divisionsIsLoading &&
-          !divisionsWithoutStaffIsLoading ? (
-            isError || divisionsIsError || divisionsWithoutStaffIsError ? (
+          {!isLoading ? (
+            isError ? (
               <div className="min-h-[calc(100vh-64px-12rem)]">
                 <AnErrorHasOccured />
               </div>
@@ -776,9 +671,7 @@ const PersonnelPage = () => {
                   <Button type="primary" onClick={searchGlobal}>
                     Tìm kiếm
                   </Button>
-                  {/* <Button danger onClick={handleResetTable}>
-                    Đặt lại
-                  </Button> */}
+
                   <div className="flex-1 text-end">
                     <Button
                       type="primary"
@@ -869,22 +762,29 @@ const PersonnelPage = () => {
                         </div>
                       )}
 
-                    {page !== data?.lastPage && page !== data?.lastPage - 1 ? (
-                      <div>. . .</div>
-                    ) : (
-                      <div
-                        className={clsx(
-                          "px-4 py-2 border rounded-md text-base font-medium cursor-pointer",
-                          { "border-slate-300": page !== data?.lastPage - 1 },
-                          {
-                            "border-blue-500 text-blue-500":
-                              page === data?.lastPage - 1,
-                          }
+                    {data?.lastPage > 3 && (
+                      <>
+                        {page !== data?.lastPage &&
+                        page !== data?.lastPage - 1 ? (
+                          <div>. . .</div>
+                        ) : (
+                          <div
+                            className={clsx(
+                              "px-4 py-2 border rounded-md text-base font-medium cursor-pointer",
+                              {
+                                "border-slate-300": page !== data?.lastPage - 1,
+                              },
+                              {
+                                "border-blue-500 text-blue-500":
+                                  page === data?.lastPage - 1,
+                              }
+                            )}
+                            onClick={() => setPage(data?.lastPage - 1)}
+                          >
+                            {data?.lastPage - 1}
+                          </div>
                         )}
-                        onClick={() => setPage(data?.lastPage - 1)}
-                      >
-                        {data?.lastPage - 1}
-                      </div>
+                      </>
                     )}
 
                     <div
@@ -923,8 +823,8 @@ const PersonnelPage = () => {
           )}
         </div>
       </div>
-    </Fragment>
+    </>
   );
 };
 
-export default PersonnelPage;
+export default DepartmentStaffPage;
