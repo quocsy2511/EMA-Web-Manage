@@ -6,13 +6,13 @@ import { postTransactionBudget } from "../../../../apis/budgets";
 const BudgetRequestModal = ({
   isOpenRequestModal,
   setIsOpenRequestModal,
-  requests,
+  // requests,
   taskParentId,
+  title,
+  selectTransactionTask,
+  setActiveKey,
 }) => {
-  console.log("🚀 ~ requests:", requests);
-  // const { taskId } = requests;
   const onCloseModal = () => {
-    console.log("Click");
     setIsOpenRequestModal(false);
   };
   const queryClient = useQueryClient();
@@ -26,6 +26,9 @@ const BudgetRequestModal = ({
           content: "Đã gửi yêu cầu ngân sách mới thành công",
         });
         setIsOpenRequestModal(false);
+        if (selectTransactionTask) {
+          setActiveKey("request");
+        }
       },
       onError: () => {
         message.open({
@@ -37,12 +40,11 @@ const BudgetRequestModal = ({
   );
 
   const onFinish = (value) => {
-    console.log("🚀 ~ onFinish ~ value:", value);
     newRequest(value);
   };
   return (
     <Modal
-      title={`Yêu cầu thêm ngân sách công việc - ${requests?.taskTitle}`}
+      title={`Yêu cầu thêm ngân sách công việc - ${title}`}
       width={"60%"}
       open={isOpenRequestModal}
       onCancel={onCloseModal}
@@ -70,6 +72,11 @@ const BudgetRequestModal = ({
               },
             ]}
             className="w-full h-fit"
+            initialValue={
+              selectTransactionTask
+                ? selectTransactionTask?.transactionName
+                : ""
+            }
           >
             <Input placeholder="Tên yêu cầu ngân sách ...." />
           </Form.Item>
@@ -92,6 +99,9 @@ const BudgetRequestModal = ({
                     : Promise.reject(new Error("Chi phí tối thiểu là 1,000")),
               },
             ]}
+            initialValue={
+              selectTransactionTask ? selectTransactionTask?.amount : 0
+            }
           >
             <InputNumber
               className="w-full"
@@ -120,6 +130,9 @@ const BudgetRequestModal = ({
               },
             ]}
             className="w-full   mb-4 h-fit"
+            initialValue={
+              selectTransactionTask ? selectTransactionTask?.description : ""
+            }
           >
             <Input.TextArea
               placeholder="mô tả ngân sách ...."

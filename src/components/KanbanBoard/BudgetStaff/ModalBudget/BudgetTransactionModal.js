@@ -15,12 +15,16 @@ const BudgetTransactionModal = ({
   selectItemTask,
   usedBudget,
   selectItemBudgetId,
+  remainingBudget,
+  setIsOpenRequestModal,
+  setSelectTransactionTask = { setSelectTransactionTask },
 }) => {
   const { transactions } = selectItemTask;
   const queryClient = useQueryClient();
   const [isRejectRequest, setIsRejectRequest] = useState(false);
   const [selectRequest, setSelectRequest] = useState("");
   const listStatus = ["PENDING", "ACCEPTED", "SUCCESS", "REJECTED"];
+
   const onCloseModal = () => {
     console.log("Click");
     setIsOpenTransactionModal(false);
@@ -35,7 +39,7 @@ const BudgetTransactionModal = ({
     });
   };
   const sortedTransactions = sortTransactions(transactions, listStatus);
-  console.log("🚀 ~ sortedTransactions:", sortedTransactions);
+  // console.log("🚀 ~ sortedTransactions:", sortedTransactions);
   const handleSelectRequest = (value) => {
     setSelectRequest(value);
     setIsRejectRequest(true);
@@ -99,6 +103,14 @@ const BudgetTransactionModal = ({
   const confirm = (value, type) => {
     // console.log("🚀 ~ confirm ~ type:", type);
     acceptMutate({ transactionId: value?.id, status: type });
+  };
+
+  const handleRequestBudget = (value) => {
+    setSelectTransactionTask(value);
+    setIsOpenTransactionModal(false);
+    setTimeout(() => {
+      setIsOpenRequestModal(true);
+    }, 200);
   };
 
   const onFinish = (value) => {
@@ -206,70 +218,50 @@ const BudgetTransactionModal = ({
                         </div>
                       )}
                     </div>
-                    {transaction?.status === "PENDING" && (
-                      <div className="w-[50%] flex flex-row justify-end items-start gap-x-2">
-                        <Popconfirm
-                          title="Duyệt yêu cầu"
-                          description="Bạn có chắc chắn xác nhận yêu cầu này ?"
-                          onConfirm={() => confirm(transaction, "ACCEPTED")}
-                          okText="Xác nhận"
-                          cancelText="Huỷ"
-                          key={transaction?.id}
-                          okButtonProps={{
-                            loading: isLoadingAccept,
-                          }}
-                        >
+                    {transaction?.status === "PENDING" &&
+                      transaction?.amount < remainingBudget && (
+                        <div className="w-[50%] flex flex-row justify-end items-start gap-x-2">
+                          <Popconfirm
+                            title="Duyệt yêu cầu"
+                            description="Bạn có chắc chắn xác nhận yêu cầu này ?"
+                            onConfirm={() => confirm(transaction, "SUCCESS")}
+                            okText="Xác nhận"
+                            cancelText="Huỷ"
+                            key={transaction?.id}
+                            okButtonProps={{
+                              loading: isLoadingAccept,
+                            }}
+                          >
+                            <Button
+                              type="primary"
+                              // loading={isLoadingAccept}
+                              key={transaction?.id}
+                            >
+                              Chấp nhận
+                            </Button>
+                          </Popconfirm>
+
+                          <Button
+                            type="default"
+                            onClick={() => handleSelectRequest(transaction)}
+                          >
+                            Từ chối
+                          </Button>
+                        </div>
+                      )}
+
+                    {transaction?.status === "PENDING" &&
+                      transaction?.amount > remainingBudget && (
+                        <div className="w-[50%] flex flex-row justify-end items-start gap-x-2">
                           <Button
                             type="primary"
-                            // loading={isLoadingAccept}
                             key={transaction?.id}
+                            onClick={() => handleRequestBudget(transaction)}
                           >
-                            Chấp nhận
+                            Yêu cầu ngân sách
                           </Button>
-                        </Popconfirm>
-
-                        <Button
-                          type="default"
-                          onClick={() => handleSelectRequest(transaction)}
-                        >
-                          Từ chối
-                        </Button>
-                      </div>
-                    )}
-
-                    {transaction?.status === "ACCEPTED" && (
-                      <div className="w-[50%] flex flex-row justify-end items-start gap-x-2">
-                        <Popconfirm
-                          title="Xác nhân ngân sách"
-                          description="Bạn có chắc chắn xác nhận ngân sách này ?"
-                          onConfirm={() =>
-                            !!transaction?.evidences?.length &&
-                            confirm(transaction, "SUCCESS")
-                          }
-                          okText="Xác nhận"
-                          cancelText="Huỷ"
-                          key={transaction?.id}
-                          okButtonProps={{
-                            loading: isLoadingAccept,
-                          }}
-                          disabled={!transaction?.evidences?.length}
-                        >
-                          <Button
-                            type="primary"
-                            onClick={() =>
-                              !transaction?.evidences?.length &&
-                              message.open({
-                                type: "error",
-                                content: "Chưa có hóa đơn!",
-                              })
-                            }
-                            key={transaction?.id}
-                          >
-                            Xác nhận
-                          </Button>
-                        </Popconfirm>
-                      </div>
-                    )}
+                        </div>
+                      )}
                   </div>
 
                   <div className="w-full flex flex-row justify-between items-stretch mb-2  gap-x-5 ">

@@ -8,14 +8,18 @@ import { getBudget, getBudgetItem } from "../../../apis/budgets";
 import BudgetTransactionModal from "./ModalBudget/BudgetTransactionModal";
 import BudgetTask from "./BudgetTask";
 import BudgetRequest from "./BudgetRequest";
+import BudgetRequestModal from "./ModalBudget/BudgetRequestModal";
 
 const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
   const [selectItemBudgetId, setSelectItemBudgetId] = useState("");
   const [selectBudget, setSelectBudget] = useState("");
+
   const staffId = useRouteLoaderData("staff")?.id;
   const [isOpenTransactionModal, setIsOpenTransactionModal] = useState(false);
   const [selectItemTask, setSelectItemTask] = useState("");
-
+  const [isOpenRequestModal, setIsOpenRequestModal] = useState(false);
+  const [selectTransactionTask, setSelectTransactionTask] = useState("");
+  const [activeKey, setActiveKey] = useState("task");
   const {
     data: budgets,
     isError: isErrorBudgets,
@@ -103,9 +107,9 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
     }, 0);
   };
 
-  // let remainingBudget = 0;
   let percent = 0;
   let usedBudget = 0;
+  let remainingBudget = 0;
   if (
     !isLoadingBudgetItem &&
     !isLoadingBudgets &&
@@ -115,12 +119,12 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
     const total = calculateBudgetParentTask(budgetItem?.itemExisted);
     usedBudget = sumTasks(budgetItem?.itemExisted?.tasks);
 
-    // const remaining = total - usedBudget;
+    remainingBudget = total - usedBudget;
     percent = ((usedBudget / total) * 100).toFixed(0);
   }
 
   const onChangeTabs = (key) => {
-    console.log(key);
+    setActiveKey(key);
   };
 
   return (
@@ -250,7 +254,8 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
                   <div className="w-[75%] overflow-hidden mx-2 min-h-fit">
                     <Spin spinning={isLoadingBudgetItem}>
                       <Tabs
-                        defaultActiveKey="task"
+                        // defaultActiveKey="task"
+                        activeKey={activeKey}
                         className=" p-0 m-0"
                         items={[
                           {
@@ -268,6 +273,7 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
                                   setIsOpenTransactionModal
                                 }
                                 setSelectItemTask={setSelectItemTask}
+                                remainingBudget={remainingBudget}
                               />
                             ),
                           },
@@ -306,6 +312,19 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
           setIsOpenTransactionModal={setIsOpenTransactionModal}
           usedBudget={usedBudget}
           selectItemBudgetId={selectItemBudgetId}
+          remainingBudget={remainingBudget}
+          setIsOpenRequestModal={setIsOpenRequestModal}
+          setSelectTransactionTask={setSelectTransactionTask}
+        />
+      )}
+      {isOpenRequestModal && (
+        <BudgetRequestModal
+          isOpenRequestModal={isOpenRequestModal}
+          setIsOpenRequestModal={setIsOpenRequestModal}
+          title={selectBudget?.title}
+          taskParentId={selectBudget?.id}
+          selectTransactionTask={selectTransactionTask}
+          setActiveKey={setActiveKey}
         />
       )}
     </>
