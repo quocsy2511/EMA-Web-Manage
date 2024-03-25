@@ -129,7 +129,7 @@ const BudgetTransactionModal = ({
           ? `Lý do từ chối - ${selectItemTask?.title}`
           : `${
               selectItemTask?.title
-            } - Ngân sách còn lại : ${usedBudget.toLocaleString()} VND`
+            } - Ngân sách còn lại : ${remainingBudget.toLocaleString()} VND`
       }
       width={"60%"}
       open={isOpenTransactionModal}

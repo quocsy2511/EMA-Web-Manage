@@ -29,6 +29,7 @@ import { IoRemoveOutline } from "react-icons/io5";
 import { BsImages } from "react-icons/bs";
 import ContactModal from "../../components/Modal/ContactModal";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const ContactTab = ({
   currentPage,
@@ -51,6 +52,8 @@ const ContactTab = ({
   console.log("contacts > ", contacts);
   console.log("contracts > ", contracts);
 
+  const navigate = useNavigate();
+
   const [selectedContact, setSelectedContact] = useState();
   const [isOpenRejectConfirm, setisOpenRejectConfirm] = useState(false);
   const [isOpenContactModal, setIsOpenContactModal] = useState(false);
@@ -60,7 +63,7 @@ const ContactTab = ({
     mutate: updateContactStatusMutate,
     isLoading: updateContactStatusIsLoading,
   } = useMutation(
-    ({ contactId, status, rejectNote }) =>
+    ({ contactId, status, rejectNote, eventTypeId }) =>
       updateCustomerContacts({ contactId, status, rejectNote }),
     {
       onSuccess: (data, variables) => {
@@ -69,7 +72,7 @@ const ContactTab = ({
           currentPage,
           sort,
           contactStatus,
-          50,
+          20,
         ]);
 
         messageApi.open({
@@ -80,7 +83,14 @@ const ContactTab = ({
               : "Đã từ chối 1 sự kiện từ khách hàng",
         });
 
-        if (variables.status === "ACCEPTED") setIsOpenContactModal(false);
+        // if (variables.status === "ACCEPTED") setIsOpenContactModal(false);
+        if (variables.status === "ACCEPTED")
+          navigate("planning", {
+            state: {
+              contactId: variables?.contactId,
+              eventType: variables?.eventTypeId,
+            },
+          });
 
         if (variables.status === "REJECTED") setisOpenRejectConfirm(false);
       },
@@ -93,11 +103,12 @@ const ContactTab = ({
     }
   );
 
-  const handleUpdateContact = (contactId, status, rejectNote) => {
+  const handleUpdateContact = (contactId, status, rejectNote, eventTypeId) => {
     updateContactStatusMutate({
       contactId,
       status,
       rejectNote: rejectNote ? rejectNote : undefined,
+      eventTypeId,
     });
   };
 
@@ -377,6 +388,7 @@ const ContactTab = ({
           </div>
           <Segmented
             size="large"
+            value={contactStatus}
             options={[
               {
                 label: "ĐANG CHỜ",

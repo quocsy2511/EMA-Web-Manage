@@ -202,7 +202,6 @@ const EventCreationPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  // console.log("contactInfo > ", contactInfo);
 
   const { data: eventType, isLoading: eventTypeIsLoading } = useQuery(
     ["event-type"],
@@ -257,22 +256,13 @@ const EventCreationPage = () => {
   const { mutate: createEventMutate, isLoading: createEventIsLoading } =
     useMutation((event) => createEvent(event), {
       onSuccess: (data, variables) => {
-        // createContractMutate({
-        //   eventId: data?.split(" ")?.[0],
-        //   contract: variables?.contract,
-        // });
-        console.log("event success data > ", data);
-
         notification.success({
           message: <p className="font-medium">Tạo sự kiện thành công</p>,
-          // description: "Hello, Ant Design!!",
           placement: "topRight",
           duration: 3,
         });
 
-        // navigate(-1);
-        // navigate(`/manager/event/${variables?.eventId}`, { replace: true });
-        navigate(`/manager/event`, { replace: true });
+        navigate(`/manager/event/${data}`, { replace: true });
       },
       onError: (error) => {
         messageApi.open({
@@ -287,7 +277,6 @@ const EventCreationPage = () => {
     ({ formData, event }) => uploadFile(formData),
     {
       onSuccess: (data, variables) => {
-        console.log("variables upload > ", variables);
         variables.event = {
           ...variables.event,
           coverUrl: data.downloadUrl,

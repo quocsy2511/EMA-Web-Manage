@@ -9,11 +9,19 @@ import TaskModal from "./ModalKanban/TaskModal.js";
 import { Empty, Spin } from "antd";
 import { redirectionActions } from "../../store/redirection.js";
 import NewTaskModal from "./ModalKanban/NewTaskModal.js";
+import { ArrowLeftOutlined } from "@ant-design/icons";
+import { socketOnNotification } from "../../utils/socket.js";
 
-const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
+const KanbanBoard = ({
+  selectEvent,
+  listTaskParents,
+  selectedStatus,
+  setIsHideHeaderEvent,
+}) => {
   const dispatch = useDispatch();
 
   const notification = useSelector((state) => state.redirection);
+  console.log("🚀 ~ notification:", notification);
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
@@ -26,6 +34,7 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
     data: parentTaskDetail,
     isError: isErrorParentTaskDetail,
     isLoading: isLoadingParentTaskDetail,
+    refetch,
   } = useQuery(
     ["parentTaskDetail", notification?.redirect?.comment],
     () =>
@@ -98,16 +107,46 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
       completed++;
     }
   });
+
+  const handleBackKanbanBoard = () => {
+    setAddNewTask(false);
+    setHideDescription(false);
+    setIsHideHeaderEvent(false);
+  };
+
+  useEffect(() => {
+    socketOnNotification(handleRefetchContact);
+  }, []);
+
+  const handleRefetchContact = (noti) => {
+    noti?.type === "COMMENT" && refetch();
+  };
+
   return (
     <Fragment>
-      <div className="bg-bgG h-[calc(100vh-64px-4rem)]">
+      <div
+        className={
+          addNewTask
+            ? "bg-bgG h-[calc(100vh-64px)]"
+            : "bg-bgG h-[calc(100vh-64px-80px)]"
+        }
+      >
         {!hideDescription && (
           <DescriptionEvent key={selectEvent?.id} selectEvent={selectEvent} />
         )}
 
         {addNewTask ? (
           <Spin spinning={isLoadingTemplateTask}>
-            <div>
+            <div className="min-h-full pb-3 ">
+              <div className=" left-0 z-40 right-0 bg-bgBoard w-full p-5">
+                <div
+                  onClick={handleBackKanbanBoard}
+                  className="w-1/2 text-sm font-semibold flex item-center space-x-2 hover:opacity-50 transition-all cursor-pointer"
+                >
+                  <ArrowLeftOutlined className="text-lg" />
+                  <span className="text-base">Quay lại Công việc</span>
+                </div>
+              </div>
               <NewTaskModal
                 disableStartDate={selectTaskParent?.startDate}
                 disableEndDate={selectTaskParent?.endDate}
@@ -117,12 +156,13 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
                 setHideDescription={setHideDescription}
                 addNewTaskTemplate={addNewTaskTemplate}
                 setAddNewTaskTemplate={setAddNewTaskTemplate}
+                setIsHideHeaderEvent={setIsHideHeaderEvent}
               />
             </div>
           </Spin>
         ) : (
           <>
-            <div className="flex overflow-x-scroll px-10 pb-8 gap-x-3 min-h-[55vh]">
+            <div className="flex overflow-x-scroll px-10 pb-3 gap-x-3 min-h-[calc(808px-250px)]">
               {listTaskParents.length > 0 ? (
                 listTaskParents?.map((taskParent, index) => (
                   <Column
@@ -134,6 +174,7 @@ const KanbanBoard = ({ selectEvent, listTaskParents, selectedStatus }) => {
                     setSelectTaskParent={setSelectTaskParent}
                     setAddNewTaskTemplate={setAddNewTaskTemplate}
                     setAddNewTask={setAddNewTask}
+                    setIsHideHeaderEvent={setIsHideHeaderEvent}
                   />
                 ))
               ) : (

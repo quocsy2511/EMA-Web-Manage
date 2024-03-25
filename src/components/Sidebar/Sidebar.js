@@ -1,14 +1,11 @@
-import { Avatar, ConfigProvider, Menu } from "antd";
+import { ConfigProvider, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
-import { AnimatePresence, motion } from "framer-motion";
 import { HiOutlineHome, HiOutlineCalendarDays } from "react-icons/hi2";
-import { BsPersonVcard, BsJournalCheck, BsMailbox } from "react-icons/bs";
 import { IoMailOutline } from "react-icons/io5";
 import { IoChatboxOutline } from "react-icons/io5";
-import { LiaFileContractSolid } from "react-icons/lia";
 import logo from "../../assets/images/logo.png";
 import logo_domain from "../../assets/images/logo_domain.png";
 
@@ -155,7 +152,7 @@ const Sidebar = ({ collapsed }) => {
                 theme={theme}
                 mode="inline"
                 onClick={({ key }) => navigate(key)}
-                defaultSelectedKeys={location.pathname}
+                selectedKeys={[location.pathname]}
                 items={sidebarItems}
                 inlineIndent={30}
               />
@@ -163,7 +160,7 @@ const Sidebar = ({ collapsed }) => {
           </div>
 
           {/* dark mode here */}
-          <div className="flex justify-center items-center mt-20 py-1 flex-col">
+          {/* <div className="flex justify-center items-center mt-20 py-1 flex-col">
             <AnimatePresence mode="wait">
               {darkSide ? (
                 <motion.div
@@ -178,7 +175,6 @@ const Sidebar = ({ collapsed }) => {
                     stiffness: 200,
                   }}
                 >
-                  {/* <Icon component={SunSvg} className="text-orange-300" /> */}
                 </motion.div>
               ) : (
                 <motion.div
@@ -193,11 +189,10 @@ const Sidebar = ({ collapsed }) => {
                     stiffness: 200,
                   }}
                 >
-                  {/* <Icon component={MoonSvg} className="text-[#eb2f96]" /> */}
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </div> */}
         </div>
       </Sider>
     </>

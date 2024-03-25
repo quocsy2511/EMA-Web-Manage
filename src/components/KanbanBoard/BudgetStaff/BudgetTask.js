@@ -109,10 +109,7 @@ const BudgetTask = ({
               filterSub = subTask?.transactions?.filter(
                 (item) => item?.status === "PENDING"
               );
-            console.log(
-              "🚀 ~ budgetItem?.itemExisted?.tasks?.map ~ filterSub:",
-              filterSub
-            );
+
             return (
               <div
                 className="mb-3 w-[32%] h-[265px] overflow-hidden flex flex-col cursor-pointer"

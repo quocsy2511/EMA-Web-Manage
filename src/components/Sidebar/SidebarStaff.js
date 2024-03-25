@@ -1,11 +1,10 @@
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
-import { BsJournalCheck, BsPersonVcard } from "react-icons/bs";
 import { MdOutlineCelebration, MdOutlineCalendarMonth } from "react-icons/md";
 import { HiOutlineHome } from "react-icons/hi2";
 import { useLocation, useNavigate } from "react-router-dom";
 import useDarkMode from "../../hooks/useDarkMode";
-import { Avatar, ConfigProvider, Menu } from "antd";
+import { ConfigProvider, Menu } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import { IoChatboxOutline } from "react-icons/io5";
 import logo from "../../assets/images/logo.png";
@@ -164,16 +163,15 @@ const SidebarStaff = ({ collapsed }) => {
                 theme="light"
                 mode="inline"
                 onClick={({ key }) => navigate(key)}
-                defaultSelectedKeys={location.pathname}
+                selectedKeys={[location.pathname]}
                 items={sideBarItems}
                 inlineIndent={30}
-                selectedKeys={location.pathname}
               />
             </ConfigProvider>
           </div>
 
           {/* dark mode here */}
-          <div className="flex justify-center items-center mt-20 py-1 flex-col">
+          {/* <div className="flex justify-center items-center mt-20 py-1 flex-col">
             <AnimatePresence mode="wait">
               {darkSide ? (
                 <motion.div
@@ -188,7 +186,6 @@ const SidebarStaff = ({ collapsed }) => {
                     stiffness: 200,
                   }}
                 >
-                  {/* <Icon component={SunSvg} className="text-orange-300" /> */}
                 </motion.div>
               ) : (
                 <motion.div
@@ -203,11 +200,10 @@ const SidebarStaff = ({ collapsed }) => {
                     stiffness: 200,
                   }}
                 >
-                  {/* <Icon component={MoonSvg} className="text-[#eb2f96]" /> */}
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </div> */}
         </div>
       </Sider>
     </>

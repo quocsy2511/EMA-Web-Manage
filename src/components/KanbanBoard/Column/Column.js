@@ -18,6 +18,7 @@ const Column = ({
   setSelectTaskParent,
   setAddNewTask,
   setAddNewTaskTemplate,
+  setIsHideHeaderEvent,
 }) => {
   const colors = [
     "bg-red-500",
@@ -37,29 +38,12 @@ const Column = ({
   const [disableUpdate, setDisableUpdate] = useState(false);
   const [disableDoneTaskParent, setDisableDoneTaskParent] = useState(true);
 
-  const TypeNewTask = [
-    {
-      label: <p>Tạo công việc thủ công</p>,
-      key: "newTask",
-    },
-    {
-      label: <p>Tạo công việc nhanh</p>,
-      key: "templateTask",
-    },
-  ];
-
-  const handleSelectTypeNewTask = ({ key }) => {
-    if (key === "newTask") {
-      setSelectTaskParent(TaskParent);
-      setHideDescription(true);
-      setAddNewTask(true);
-      setAddNewTaskTemplate(false);
-    } else {
-      setSelectTaskParent(TaskParent);
-      setAddNewTaskTemplate(true);
-      setHideDescription(true);
-      setAddNewTask(true);
-    }
+  const handleSelectTypeNewTask = () => {
+    setSelectTaskParent(TaskParent);
+    setAddNewTaskTemplate(true);
+    setHideDescription(true);
+    setAddNewTask(true);
+    setIsHideHeaderEvent(true);
   };
 
   let completed = 0;
@@ -105,7 +89,7 @@ const Column = ({
 
   const startDate = moment(TaskParent?.startDate).format("DD-MM-YYYY");
   const endDate = moment(TaskParent?.endDate).format("DD-MM-YYYY");
-  
+
   return (
     <>
       <div className="scrollbar-hide mt-5 min-w-[280px]">
@@ -158,23 +142,14 @@ const Column = ({
               ))}
           </AnimatePresence>
 
-          {!disableUpdate && (
-            <Dropdown
-              menu={{
-                items: TypeNewTask,
-                onClick: handleSelectTypeNewTask,
-              }}
-              // trigger={["click"]}
-              placement="bottomLeft"
-              arrow
-            >
-              <div className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow">
-                <p className="text-sm font-semibold tracking-tighter">
-                  + Thêm công việc mới
-                </p>
-              </div>
-            </Dropdown>
-          )}
+          <div
+            className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow"
+            onClick={handleSelectTypeNewTask}
+          >
+            <p className="text-sm font-semibold tracking-tighter">
+              + Thêm công việc mới
+            </p>
+          </div>
         </div>
 
         {isOpenTaskModal && (

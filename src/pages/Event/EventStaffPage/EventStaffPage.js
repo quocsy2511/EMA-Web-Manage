@@ -10,6 +10,7 @@ import { Spin } from "antd";
 import { filterTask } from "../../../apis/tasks";
 import { useLocation, useParams, useRouteLoaderData } from "react-router-dom";
 import BudgetStaff from "../../../components/KanbanBoard/BudgetStaff/BudgetStaff";
+import { socketOnNotification } from "../../../utils/socket";
 
 moment.suppressDeprecationWarnings = true;
 
@@ -24,8 +25,6 @@ const EventStaffPage = () => {
   ];
 
   const location = useLocation();
-  // const selectEvent = location.state?.event ?? {};
-  // const listEvent = location.state?.listEvent ?? [];
   const [isBoardTask, setIsBoardTask] = useState(true);
   const [searchText, setSearchText] = useState(null);
   const [sort, setSort] = useState("DESC");
@@ -33,6 +32,7 @@ const EventStaffPage = () => {
   const staff = useRouteLoaderData("staff");
   const [filterMember, setFilterMember] = useState(staff?.id);
   const { eventId } = useParams();
+  const [isHideHeaderEvent, setIsHideHeaderEvent] = useState(false);
 
   const {
     data: selectEvent,
@@ -42,7 +42,6 @@ const EventStaffPage = () => {
     refetchOnWindowFocus: false,
     enabled: !!eventId,
   });
-  // console.log("🚀 ~ EventStaffPage ~ selectEvent:", selectEvent);
 
   const {
     data: listTaskParents,
@@ -226,21 +225,31 @@ const EventStaffPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterMember]);
+  useEffect(() => {
+    socketOnNotification(handleRefetchContact);
+  }, []);
+
+  const handleRefetchContact = (noti) => {
+    noti?.type === "TASK" && refetch();
+  };
 
   return (
     <div className="flex flex-col">
-      <HeaderEvent
-        statusSelected={statusSelected}
-        setStatusSelected={setStatusSelected}
-        filterMember={filterMember}
-        setSort={setSort}
-        sort={sort}
-        selectEvent={selectEvent}
-        setIsBoardTask={setIsBoardTask}
-        isBoardTask={isBoardTask}
-        setSearchText={setSearchText}
-        setFilterMember={setFilterMember}
-      />
+      {!isHideHeaderEvent && (
+        <HeaderEvent
+          statusSelected={statusSelected}
+          setStatusSelected={setStatusSelected}
+          filterMember={filterMember}
+          setSort={setSort}
+          sort={sort}
+          selectEvent={selectEvent}
+          setIsBoardTask={setIsBoardTask}
+          isBoardTask={isBoardTask}
+          setSearchText={setSearchText}
+          setFilterMember={setFilterMember}
+        />
+      )}
+
       <Spin spinning={selectEventIsLoading}>
         {isBoardTask ? (
           !isLoadingListTask ? (
@@ -249,6 +258,7 @@ const EventStaffPage = () => {
                 selectedStatus={statusSelected}
                 selectEvent={selectEvent}
                 listTaskParents={searchFilterTask}
+                setIsHideHeaderEvent={setIsHideHeaderEvent}
               />
             ) : (
               <AnErrorHasOccured />

@@ -60,6 +60,12 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
   const [selectBudget, setSelectBudget] = useState();
 
   useEffect(() => {
+    return () => {
+      setSelectBudget();
+    };
+  }, []);
+
+  useEffect(() => {
     allBudget && !!allBudget?.length && setSelectBudget(allBudget?.[0]);
   }, [allBudget]);
 
@@ -87,7 +93,7 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
       <div className="flex justify-between space-x-10 mt-6 pb-20">
         {/* LEFT SIDE */}
         <div className="w-1/4 space-y-5">
-          <p className="text-3xl mx-5 font-semibold truncate bg-white p-5 rounded-md">
+          <p className="text-lg text-center text-slate-400 mx-5 font-medium truncate bg-white p-5 rounded-md">
             Danh sách hạng mục
           </p>
 
@@ -168,33 +174,32 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
             </div>
 
             <div className="relative pb-5">
+              <Tooltip
+                title={
+                  <p className="text-base text-center">
+                    Hạn mức
+                    <br />
+                    {(
+                      selectBudget?.itemExisted?.plannedPrice *
+                      selectBudget?.itemExisted?.plannedAmount *
+                      (selectBudget?.itemExisted?.percentage / 100)
+                    ).toLocaleString()}{" "}
+                    VNĐ
+                  </p>
+                }
+                placement="top"
+              >
+                <div
+                  className={`absolute z-10 w-1 h-1/2 bg-black/20 top-0 mx-5 cursor-pointer`}
+                  style={{
+                    left: `calc(${selectBudget?.itemExisted?.percentage}% - 2rem)`,
+                  }}
+                />
+              </Tooltip>
               {selectBudget?.totalTransactionUsed /
                 ((selectBudget?.itemExisted?.plannedPrice ?? 1) *
                   (selectBudget?.itemExisted?.plannedAmount ?? 1)) <
-                selectBudget?.itemExisted?.percentage / 100 && (
-                <Tooltip
-                  title={
-                    <p className="text-base text-center">
-                      Hạn mức
-                      <br />
-                      {(
-                        selectBudget?.itemExisted?.plannedPrice *
-                        selectBudget?.itemExisted?.plannedAmount *
-                        (selectBudget?.itemExisted?.percentage / 100)
-                      ).toLocaleString()}{" "}
-                      VNĐ
-                    </p>
-                  }
-                  placement="top"
-                >
-                  <div
-                    className={`absolute z-10 w-1 h-1/2 bg-black/20 top-0 mx-5 cursor-pointer`}
-                    style={{
-                      left: `calc(${selectBudget?.itemExisted?.percentage}% - 2rem)`,
-                    }}
-                  />
-                </Tooltip>
-              )}
+                selectBudget?.itemExisted?.percentage / 100 && <></>}
               <Progress
                 percent={(
                   (selectBudget?.totalTransactionUsed /
@@ -251,10 +256,6 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
                       )
                       .flat();
 
-                    // if (hasFilter) {
-                    //   tableData?.filter((data) => data?.status === hasFilter);
-                    // }
-
                     if (mergeValue?.has(record?.title)) {
                       return { rowSpan: 0 };
                     } else {
@@ -310,16 +311,6 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
                     if (text === "SUCCESS")
                       return <Tag color="blue">THÀNH CÔNG</Tag>;
                   },
-                  //   filters: [
-                  //     { text: "CHỜ DUYỆT", value: "PENDING" },
-                  //     { text: "CHẤP NHẬN", value: "ACCEPTED" },
-                  //     { text: "TỪ CHỐI", value: "REJECTED" },
-                  //     { text: "THÀNH CÔNG", value: "SUCCESS" },
-                  //   ],
-                  //   onFilter: (value, record) => {
-                  //     setHasFilter(value);
-                  //     return record?.status === value;
-                  //   },
                 },
                 {
                   title: "Hóa đơn",

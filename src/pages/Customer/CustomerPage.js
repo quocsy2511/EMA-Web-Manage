@@ -9,28 +9,35 @@ import { motion } from "framer-motion";
 import ContactTab from "./ContactTab";
 import { getContractFile } from "../../apis/contract";
 import { socketOnNotification } from "../../utils/socket";
+import { useLocation } from "react-router-dom";
 
 const CustomerPage = () => {
+  const location = useLocation();
+  console.log(location);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [sort, setSort] = useState("DESC");
-  const [contactStatus, setContactStatus] = useState("PENDING");
+  const [contactStatus, setContactStatus] = useState(
+    location.state?.isSuccess ? "ACCEPTED" : "PENDING"
+  );
 
   const [messageApi, contextHolder] = message.useMessage();
 
   const queryclient = useQueryClient();
 
   useEffect(() => {
-    socketOnNotification();
+    socketOnNotification(handleRefetchContact);
   }, []);
 
-  const handleRefetchContact = () => {
-    queryclient.invalidateQueries([
-      "contact",
-      currentPage,
-      sort,
-      contactStatus,
-      10,
-    ]);
+  const handleRefetchContact = (noti) => {
+    noti?.type === "" &&
+      queryclient.invalidateQueries([
+        "contact",
+        currentPage,
+        sort,
+        contactStatus,
+        10,
+      ]);
   };
 
   const {
@@ -38,13 +45,13 @@ const CustomerPage = () => {
     isLoading: contactsIsLoading,
     isError: contactsIsError,
   } = useQuery(
-    ["contact", currentPage, sort, contactStatus, 10],
+    ["contact", currentPage, sort, contactStatus, 20],
     () =>
       getCustomerContacts({
         currentPage,
         sort,
         status: contactStatus,
-        sizePage: 10,
+        sizePage: 20,
       }),
     {
       select: (data) => data?.data,
@@ -66,6 +73,7 @@ const CustomerPage = () => {
   return (
     <Fragment>
       {contextHolder}
+
       <motion.div
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}

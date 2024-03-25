@@ -189,6 +189,7 @@ const EventAssignTaskPage = () => {
               : parseJson(chosenTemplateTask?.description)
           ),
         },
+        priority: chosenTemplateTask?.priority,
       });
     }
   }, [chosenTemplateTask]);
