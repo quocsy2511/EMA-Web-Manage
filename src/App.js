@@ -8,6 +8,7 @@ import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
+import DepartmentStaffPage from "./components/KanbanBoard/Department/DepartmentStaffPage";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -361,6 +362,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPageIndicator />}>
             <ChatPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "department",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator />}>
+            <DepartmentStaffPage />
           </Suspense>
         ),
       },

@@ -14,8 +14,8 @@ const BudgetTask = ({
   setIsOpenTransactionModal,
   usedBudget,
   percent,
+  remainingBudget,
 }) => {
-  console.log("🚀 ~ budgetItem:", budgetItem);
   const getColorStatusPriority = (value) => {
     const colorMapping = {
       DONE: { color: "green", title: "HOÀN THÀNH" },
@@ -66,6 +66,14 @@ const BudgetTask = ({
                   budgetItem
                 )?.toLocaleString()}{" "} */}
                 {usedBudget.toLocaleString()} VND
+              </h3>
+            </div>
+            <div className="flex flex-col gap-y-1 justify-center items-center  px-5">
+              <p className="text-blueSecondBudget font-semibold text-center">
+                Tổng tiền còn lại
+              </p>
+              <h3 className="text-blueBudget font-bold text-xl text-center">
+                {remainingBudget?.toLocaleString()} VND
               </h3>
             </div>
             <div className="flex flex-col gap-y-1 justify-end items-end ">

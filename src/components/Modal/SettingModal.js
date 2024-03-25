@@ -9,7 +9,9 @@ const SettingModal = ({
   isOpenNewTaskTemplate,
   setIsOpenNewTaskTemplate,
   templateEvent,
+  selectTypeEvent,
 }) => {
+  console.log("🚀 ~ selectTypeEvent:", selectTypeEvent);
   const [form] = Form.useForm();
   const eventID = templateEvent?.id;
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
@@ -57,7 +59,7 @@ const SettingModal = ({
 
   return (
     <Modal
-      title="Thêm công việc mới"
+      title={`Thêm công việc mới - ${selectTypeEvent}`}
       open={isOpenNewTaskTemplate}
       footer={false}
       onCancel={handleCancel}
