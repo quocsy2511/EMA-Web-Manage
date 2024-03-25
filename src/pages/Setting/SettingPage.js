@@ -15,6 +15,7 @@ import CardSetting from "./CardSetting/CardSetting";
 const SettingPage = () => {
   const [selectTypeEvent, setSelectTypeEvent] = useState("");
   const [isOpenNewTaskTemplate, setIsOpenNewTaskTemplate] = useState(false);
+  const [selectTemplateEvent, setSelectTemplateEvent] = useState("");
   const {
     data: eventType,
     isLoading: eventTypeIsLoading,
@@ -33,6 +34,7 @@ const SettingPage = () => {
     },
     refetchOnWindowFocus: false,
   });
+  console.log("🚀 ~ SettingPage ~ templateEvent:", templateEvent);
 
   const {
     data: templateTask,
@@ -67,6 +69,11 @@ const SettingPage = () => {
   useEffect(() => {
     refetchTemplateTask();
   }, [isOpenNewTaskTemplate]);
+  useEffect(() => {
+    if (!isLoadingTemplateEvent && !isErrorTemplateEvent) {
+      setSelectTemplateEvent(templateEvent);
+    }
+  }, [templateEvent]);
 
   return (
     <section className="  w-full px-7 py-7 bg-[#f5f5f5]">
@@ -130,20 +137,26 @@ const SettingPage = () => {
             </div>
             {/* contentContent */}
             <div className="w-full">
-              <Spin spinning={isLoadingTemplateTask}>
-                <div className=" flex w-full flex-wrap flex-row gap-x-5 ">
-                  {/* cardLayout */}
-                  {templateTask?.length > 0 ? (
-                    templateTask?.map((task, index) => (
-                      <CardSetting task={task} key={task?.id} />
-                    ))
-                  ) : (
-                    <div className="w-full h-[50vh] flex justify-center items-center">
-                      <Empty description={<span>chưa có dữ liệu</span>} />
-                    </div>
-                  )}
+              {selectTemplateEvent?.eventType?.typeName === selectTypeEvent ? (
+                <Spin spinning={isLoadingTemplateTask}>
+                  <div className=" flex w-full flex-wrap flex-row gap-x-5 ">
+                    {/* cardLayout */}
+                    {templateTask?.length > 0 ? (
+                      templateTask?.map((task, index) => (
+                        <CardSetting task={task} key={task?.id} />
+                      ))
+                    ) : (
+                      <div className="w-full h-[50vh] flex justify-center items-center">
+                        <Empty description={<span>chưa có dữ liệu</span>} />
+                      </div>
+                    )}
+                  </div>
+                </Spin>
+              ) : (
+                <div className="flex justify-center items-center mt-2 py-4">
+                  <Empty description={<span>chưa có công việc nào</span>} />
                 </div>
-              </Spin>
+              )}
             </div>
           </div>
         </div>
@@ -153,6 +166,7 @@ const SettingPage = () => {
           isOpenNewTaskTemplate={isOpenNewTaskTemplate}
           setIsOpenNewTaskTemplate={setIsOpenNewTaskTemplate}
           templateEvent={templateEvent}
+          selectTypeEvent={selectTypeEvent}
         />
       )}
     </section>

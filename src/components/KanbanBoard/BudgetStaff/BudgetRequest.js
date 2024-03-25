@@ -41,7 +41,6 @@ const BudgetRequest = ({ selectBudget }) => {
       enabled: !!taskParentId,
     }
   );
-  console.log("🚀 ~ BudgetRequest ~ requests:", requests);
   return (
     <div className=" w-full h-fit">
       <div
@@ -64,12 +63,9 @@ const BudgetRequest = ({ selectBudget }) => {
                       Đang chờ
                     </p>
                   ) : transaction?.status === "ACCEPTED" ? (
-                    <>
-                      <CheckCircleFilled className="text-green-500 text-2xl" />
-                      <p className="text-base text-green-500 border border-green-500 rounded-lg px-2 py-1">
-                        Đã chấp nhận
-                      </p>
-                    </>
+                    <p className="text-base text-green-500 border border-green-500 rounded-lg px-2 py-1">
+                      Đã chấp nhận
+                    </p>
                   ) : transaction?.status === "REJECTED" ? (
                     <p className="text-base text-red-500 border border-red-500 rounded-lg px-2 py-1">
                       Đã từ chối
@@ -98,7 +94,9 @@ const BudgetRequest = ({ selectBudget }) => {
                 <div className="w-[50%] flex flex-col justify-start items-start gap-y-2 border-b-gray-300 border-b py-2">
                   <p className="text-sm text-blueSecondBudget">Ngày tạo</p>
                   <b className="font-bold text-lg text-blueBudget">
-                    {moment(transaction?.createdAt).format("DD-MM-YYYY")}
+                    {moment(transaction?.createdAt).format(
+                      "HH:mm:ss, DD-MM-YYYY"
+                    )}
                   </b>
                 </div>
               </div>
@@ -146,8 +144,10 @@ const BudgetRequest = ({ selectBudget }) => {
           <BudgetRequestModal
             isOpenRequestModal={isOpenRequestModal}
             setIsOpenRequestModal={setIsOpenRequestModal}
-            requests={requests}
+            // requests={requests}
             taskParentId={taskParentId}
+            selectTransactionTask={null}
+            title={requests?.taskTitle}
           />
         )}
       </Spin>

@@ -26,11 +26,11 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 import { createTask, getTasks } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
 import {
-  CloseCircleOutlined,
   DoubleRightOutlined,
   StarFilled,
-  SwapOutlined,
+  TeamOutlined,
   UploadOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
 import DrawerTimeLine from "../Drawer/DrawerTimeLine";
@@ -371,12 +371,19 @@ const NewTaskModal = ({
         onMouseDown={onPreventMouseDown}
         closable={closable}
         onClose={() => handlerCloseTag(props.value)}
-        className="mr-4 py-2 cursor-pointer"
+        className="mr-4 py-2 cursor-pointer flex justify-center items-center "
         onClick={() => handleSelectLeader(leader)}
       >
-        {defaultLeader === "green" && <StarFilled spin />}
+        {defaultLeader === "green" ? (
+          <UserOutlined className="text-lg text-green-500" />
+        ) : (
+          <TeamOutlined className="text-lg text-yellow-500" />
+        )}
         <Avatar src={avatar} className="mr-2" size="small" />
-        {label}
+        <p className="font-semibold text-sm">{label}</p>
+        {defaultLeader === "green" && (
+          <span className="text-green-500">-(Nhóm trưởng) </span>
+        )}
       </Tag>
     );
   };

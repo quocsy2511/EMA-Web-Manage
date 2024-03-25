@@ -9,7 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { IoChatboxOutline } from "react-icons/io5";
 import logo from "../../assets/images/logo.png";
 import logo_domain from "../../assets/images/logo_domain.png";
-
+import { AiOutlineTeam } from "react-icons/ai";
 const SidebarStaff = ({ collapsed }) => {
   const [colorTheme, setColorTheme] = useDarkMode();
   const [theme, setTheme] = useState(colorTheme === "light" ? "dark" : "light");
@@ -98,6 +98,13 @@ const SidebarStaff = ({ collapsed }) => {
       "/staff/chat",
       <p>
         <IoChatboxOutline className="text-[#9c27b0]" size={24} />
+      </p>
+    ),
+    getItem(
+      <LabelText text="Nhân viên" />,
+      "/staff/department",
+      <p>
+        <AiOutlineTeam className="text-[#b03c27]" size={24} />
       </p>
     ),
   ];

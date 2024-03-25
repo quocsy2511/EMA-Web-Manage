@@ -19,13 +19,16 @@ import viVN from "antd/locale/vi_VN";
 import moment from "moment";
 import dayjs from "dayjs";
 import { uploadFile } from "../../apis/files";
+import { useRouteLoaderData } from "react-router-dom";
 
 const Label = ({ label }) => <p className="text-lg font-medium">{label}</p>;
 
 const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
   const [divisionMode, setDivisionMode] = useState(1);
   const [fileList, setFileList] = useState();
-
+  const admin = useRouteLoaderData("administrator");
+  const staff = useRouteLoaderData("staff");
+  const divisionId = useRouteLoaderData("staff")?.divisionID;
   const queryClient = useQueryClient();
   const { mutate: createUserMutate, isLoading } = useMutation(
     (user) => createUser(user),
@@ -71,6 +74,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
         const user = variables.user;
         variables.user = { avatar: data.downloadUrl, ...user };
         createUserMutate(variables.user);
+        console.log("🚀 ~ CreateUserDrawer ~ variables.user :", variables.user);
       },
       onError: () => {
         messageApi.open({
@@ -99,7 +103,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("divisionData: ", divisionData);
+  // console.log("divisionData: ", divisionData);
 
   const {
     data: divisionsWithoutStaff,
@@ -119,7 +123,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("divisionsWithoutStaff >", divisionsWithoutStaff);
+  // console.log("divisionsWithoutStaff >", divisionsWithoutStaff);
 
   const {
     data: roles,
@@ -133,23 +137,42 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
       }));
     },
     refetchOnWindowFocus: false,
+    enabled: !!admin,
   });
-  console.log("roles > ", roles);
+  // console.log("roles > ", roles);
+
+  const {
+    data: roleEmployee,
+    isLoading: roleEmployeeLoading,
+    isError: roleEmployeeError,
+  } = useQuery(["roles-Employee"], getRoles, {
+    select: (data) => {
+      const findRole = data?.find((role) => role?.roleName === "Nhân Viên");
+      return findRole;
+    },
+    refetchOnWindowFocus: false,
+    enabled: !!staff,
+  });
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = (values) => {
-    console.log("FORM DATA: ", values);
+    // console.log("FORM DATA: ", values);
     const { avatar, ...user } = values;
-
     const formData = new FormData();
     formData.append("file", fileList);
     formData.append("folderName", "avatar");
 
-    console.log("User: ", user);
-
-    uploadFileMutate({ formData, user });
+    // console.log("User: ", user);
+    if (staff) {
+      user.roleId = roleEmployee?.id;
+      user.divisionId = divisionId;
+      // console.log("🚀 ~ onFinish ~ employee:", user);
+      uploadFileMutate({ formData, user });
+    } else {
+      uploadFileMutate({ formData, user });
+    }
   };
 
   return (
@@ -347,65 +370,69 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                 ]}
               />
             </Form.Item>
-            <Form.Item
-              className="w-[45%]"
-              name="roleId"
-              label={<Label label="Vai trò" />}
-              rules={[
-                {
-                  required: true,
-                  message: `Chưa chọn vai trò!`,
-                },
-              ]}
-            >
-              <Select
-                placeholder="Vai trò"
-                onChange={(value) => {
-                  if (value === "EMPLOYEE") setDivisionMode(1);
-                  else setDivisionMode(2);
-                  form.setFieldsValue({ role: value });
-                  form.resetFields(["divisionId"]);
-                }}
-                loading={rolesIsLoading || rolesIsError}
-                options={roles ?? []}
-              />
-            </Form.Item>
-            <Form.Item
-              className="w-[45%]"
-              name="divisionId"
-              label={
-                <div className="md:flex md:items-center md:gap-x-1">
-                  <Label label="Bộ phận" />
-                  <p className="text-sm text-slate-400">(tùy chọn)</p>
-                </div>
-              }
-              rules={[
-                {
-                  required: true,
-                  message: `Chưa chọn bộ phận!`,
-                },
-              ]}
-            >
-              <Select
-                placeholder="Bộ phận"
-                onChange={(value) => {
-                  form.setFieldsValue({ divisionId: value });
-                }}
-                loading={
-                  divisionLoading ||
-                  divisionsWithoutStaffIsLoading ||
-                  divisionIsError ||
-                  divisionsWithoutStaffIsError
-                }
-                options={
-                  !divisionLoading && !divisionsWithoutStaffIsLoading
-                    ? divisionMode === 1
-                      ? divisionData
-                      : divisionsWithoutStaff
-                    : []
-                }
-              />
-            </Form.Item>
+            {admin && (
+              <>
+                <Form.Item
+                  className="w-[45%]"
+                  name="roleId"
+                  label={<Label label="Vai trò" />}
+                  rules={[
+                    {
+                      required: true,
+                      message: `Chưa chọn vai trò!`,
+                    },
+                  ]}
+                >
+                  <Select
+                    placeholder="Vai trò"
+                    onChange={(value) => {
+                      if (value === "EMPLOYEE") setDivisionMode(1);
+                      else setDivisionMode(2);
+                      form.setFieldsValue({ role: value });
+                      form.resetFields(["divisionId"]);
+                    }}
+                    loading={rolesIsLoading || rolesIsError}
+                    options={roles ?? []}
+                  />
+                </Form.Item>
+                <Form.Item
+                  className="w-[45%]"
+                  name="divisionId"
+                  label={
+                    <div className="md:flex md:items-center md:gap-x-1">
+                      <Label label="Bộ phận" />
+                      <p className="text-sm text-slate-400">(tùy chọn)</p>
+                    </div>
+                  }
+                  rules={[
+                    {
+                      required: true,
+                      message: `Chưa chọn bộ phận!`,
+                    },
+                  ]}
+                >
+                  <Select
+                    placeholder="Bộ phận"
+                    onChange={(value) => {
+                      form.setFieldsValue({ divisionId: value });
+                    }}
+                    loading={
+                      divisionLoading ||
+                      divisionsWithoutStaffIsLoading ||
+                      divisionIsError ||
+                      divisionsWithoutStaffIsError
+                    }
+                    options={
+                      !divisionLoading && !divisionsWithoutStaffIsLoading
+                        ? divisionMode === 1
+                          ? divisionData
+                          : divisionsWithoutStaff
+                        : []
+                    }
+                  />
+                </Form.Item>
+              </>
+            )}
           </div>
 
           <Form.Item name="typeEmployee">
