@@ -38,7 +38,12 @@ const ContactModal = ({
   };
 
   const confirmAccepted = () => {
-    handleUpdateContact(contact?.id, "ACCEPTED");
+    handleUpdateContact(
+      contact?.id,
+      "ACCEPTED",
+      undefined,
+      contact?.eventType?.id
+    );
   };
 
   const goToCreateEventPage = () => {

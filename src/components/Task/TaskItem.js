@@ -171,8 +171,15 @@ const TaskItem = ({
 
       <div className="flex-1 flex justify-end space-x-8">
         <div className="w-40 flex flex-col gap-y-1 justify-center">
+          <p
+            className={clsx("text-center text-sm font-medium", {
+              "line-through text-black/30": task?.status === "CONFIRM",
+            })}
+          >
+           Trạng thái
+          </p>
           <div
-            className={`text-center flex justify-center items-center px-3 py-1 ${statusColor} border-2  ${statusBorder} rounded-full truncate`}
+            className={`text-center flex justify-center items-center px-3 py-1 ${statusColor} border-2 ${statusBorder} rounded-full truncate`}
           >
             <p className="text-sm font-medium truncate">{status}</p>
           </div>

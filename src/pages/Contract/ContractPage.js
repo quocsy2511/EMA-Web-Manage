@@ -79,14 +79,17 @@ const ContractPage = () => {
             content: "Đã tạo hợp đồng thành công",
           });
 
-          navigate("/manager/customer", { replace: true });
+          navigate("/manager/customer", {
+            replace: true,
+            state: { isSuccess: true },
+          });
         },
         onError: (err) => {
           console.log("erorr > ", err);
           messageApi.open({
             type: "error",
             content: "Không thể tạo hợp đồng lúc này! Hãy thử lại sau",
-          })
+          });
         },
       }
     );

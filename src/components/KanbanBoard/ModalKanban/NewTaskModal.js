@@ -3,16 +3,19 @@ import {
   Avatar,
   Button,
   DatePicker,
+  Drawer,
+  FloatButton,
   Form,
   Input,
   Segmented,
   Select,
+  Spin,
   Tag,
   Tooltip,
   Upload,
   message,
 } from "antd";
-import React, { memo, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRouteLoaderData } from "react-router-dom";
@@ -20,7 +23,7 @@ import { getEmployee } from "../../../apis/users";
 import moment from "moment";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
-import { createTask } from "../../../apis/tasks";
+import { createTask, getTasks } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
 import {
   CloseCircleOutlined,
@@ -31,6 +34,93 @@ import {
 } from "@ant-design/icons";
 import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
 import DrawerTimeLine from "../Drawer/DrawerTimeLine";
+import clsx from "clsx";
+
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
+
+const DrawerContainer = memo(
+  ({
+    isDrawerOpen,
+    setIsDrawerOpen,
+    selectedTaskTemplate,
+    setSelectedTaskTemplate,
+  }) => {
+    const {
+      data: templateTask,
+      isLoading: isLoadingTemplateTask,
+      isError: isErrorTemplateTask,
+    } = useQuery(
+      ["template-task"],
+      () =>
+        getTasks({
+          fieldName: "isTemplate",
+          conValue: "true",
+          pageSize: 50,
+          currentPage: 1,
+        }),
+      {
+        refetchOnWindowFocus: false,
+      }
+    );
+    console.log("templateTask > ", templateTask);
+
+    return (
+      <Drawer
+        title="Danh sách công việc mẫu"
+        placement="right"
+        onClose={() => setIsDrawerOpen(false)}
+        open={isDrawerOpen}
+        width={"30%"}
+      >
+        {/* Content */}
+        <div className="mx-5">
+          <p className="mb-6 text-lg text-black/60">Chọn các hạng mục mẫu</p>
+
+          <Spin spinning={isLoadingTemplateTask}>
+            {templateTask?.map((task) => (
+              <div
+                key={task?.id}
+                className={clsx(
+                  "rounded-2xl mb-10 overflow-hidden shadow-[0_0_8px_1px_rgba(0,0,0,0.15)] hover:scale-105 transition-transform cursor-pointer"
+                  // { "shadow-blue-500": chosenTemplateTask?.id === task?.id }
+                )}
+                onClick={() => {
+                  setSelectedTaskTemplate(task);
+                }}
+              >
+                <div className="pb-3 overflow-hidden">
+                  <p className="px-5 pb-2 pt-3 text-xl font-medium truncate border-b overflow-hidden">
+                    {task?.title}
+                  </p>
+
+                  <div className="p-5 pt-3 pb-14">
+                    <p className="text-lg font-medium">Mô tả</p>
+
+                    <ReactQuill
+                      // defaultValue={task?.description}
+                      defaultValue={{
+                        ops: JSON.parse(
+                          task?.description?.startsWith(`[{"`)
+                            ? task?.description
+                            : parseJson(task?.description)
+                        ),
+                      }}
+                      className="mt-2 h-20"
+                      theme="snow"
+                      placeholder="Mô tả về công việc"
+                      onChange={(content, delta, source, editor) => {}}
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </Spin>
+        </div>
+      </Drawer>
+    );
+  }
+);
 
 const NewTaskModal = ({
   setAddNewTask,
@@ -51,7 +141,6 @@ const NewTaskModal = ({
   const [endDate, setEndDate] = useState("");
   const [description, setDescription] = useState("");
   const [assignee, setAssignee] = useState([]);
-  // console.log("🚀 ~ assignee:", assignee);
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
   const [fileList, setFileList] = useState();
   const divisionId = useRouteLoaderData("staff").divisionID;
@@ -62,29 +151,53 @@ const NewTaskModal = ({
   const [selectedDateSchedule, setSelectedDateSchedule] = useState("");
   const [selectedTaskTemplate, setSelectedTaskTemplate] = useState("");
   const [selectedLeader, setSelectedLeader] = useState("");
-  const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    console.log("selectedTaskTemplate > ", selectedTaskTemplate);
+    if (selectedTaskTemplate) {
+      const parseDes =
+        selectedTaskTemplate?.description?.ops?.[0].insert.replace(".\n", "");
+
+      form.setFieldsValue({
+        title: `${selectedTaskTemplate?.title}`,
+        desc: {
+          ops: JSON.parse(
+            selectedTaskTemplate?.description?.startsWith(`[{"`)
+              ? selectedTaskTemplate?.description
+              : parseJson(selectedTaskTemplate?.description)
+          ),
+        },
+        priority: selectedTaskTemplate?.priority,
+      });
+
+      setIsDrawerOpen(false);
+    }
+  }, [selectedTaskTemplate]);
 
   const handleChangeTaskTemplate = (value) => {
-    if (value) {
-      const TaskTemplateFind = templateTask.find((item) => item.id === value);
-      setSelectedTaskTemplate(TaskTemplateFind?.title);
-      const descriptionTemplate = {
-        ops: JSON.parse(
-          TaskTemplateFind?.description?.startsWith(`[{"`)
-            ? TaskTemplateFind?.description
-            : parseJson(TaskTemplateFind?.description)
-        ),
-      };
-      const parseDes = descriptionTemplate?.ops?.[0].insert.replace(".\n", "");
-      form.setFieldsValue({
-        title: `${TaskTemplateFind?.title}`,
-        desc: `${parseDes}`,
-        priority: `${TaskTemplateFind.priority}`,
-      });
-    } else {
-      form.resetFields();
-    }
+    // if (value) {
+    //   const TaskTemplateFind = templateTask.find((item) => item.id === value);
+    //   setSelectedTaskTemplate(TaskTemplateFind?.title);
+    //   const descriptionTemplate = {
+    //     ops: JSON.parse(
+    //       TaskTemplateFind?.description?.startsWith(`[{"`)
+    //         ? TaskTemplateFind?.description
+    //         : parseJson(TaskTemplateFind?.description)
+    //     ),
+    //   };
+    //   const parseDes = descriptionTemplate?.ops?.[0].insert.replace(".\n", "");
+    //   form.setFieldsValue({
+    //     title: `${TaskTemplateFind?.title}`,
+    //     desc: `${parseDes}`,
+    //     priority: `${TaskTemplateFind.priority}`,
+    //   });
+    // } else {
+    //   form.resetFields();
+    // }
   };
+
   //search templateTask
   const filterOptionTaskTemplate = (input, option) =>
     (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
@@ -307,6 +420,21 @@ const NewTaskModal = ({
 
   return (
     <>
+      <DrawerContainer
+        isDrawerOpen={isDrawerOpen}
+        setIsDrawerOpen={setIsDrawerOpen}
+        selectedTaskTemplate={selectedTaskTemplate}
+        setSelectedTaskTemplate={setSelectedTaskTemplate}
+      />
+
+      <FloatButton
+        onClick={() => setIsDrawerOpen(true)}
+        type="primary"
+        // icon={<RiAddFill />}
+        tooltip={"Công việc mẫu"}
+        className="cursor-pointer"
+      />
+
       <div className="px-10 py-8 rounded-lg ">
         {/* header */}
         <div className="flex flex-row w-full">
@@ -336,12 +464,12 @@ const NewTaskModal = ({
                     <span className="font-bold">Thêm mới</span>
                   </span>
                 </li>
-                {selectedTaskTemplate && (
+                {/* {selectedTaskTemplate && (
                   <li className="relative float-left mr-0 text-blueSecondBudget">
                     <DoubleRightOutlined className="mr-1" />
                     <span>{selectedTaskTemplate}</span>
                   </li>
-                )}
+                )} */}
               </ul>
             </div>
           </div>
@@ -447,7 +575,7 @@ const NewTaskModal = ({
               className="text-sm font-medium mb-12"
               name="desc"
               labelCol={{
-                  style: { padding: 0, fontWeight: 700 },
+                style: { padding: 0, fontWeight: 700 },
               }}
             >
               <ReactQuill
@@ -471,7 +599,7 @@ const NewTaskModal = ({
                 }}
               >
                 <Segmented
-                size="large"
+                  size="large"
                   options={[
                     { label: "THẤP", value: "LOW" },
                     { label: "VỪA", value: "MEDIUM" },
@@ -560,15 +688,13 @@ const NewTaskModal = ({
                   !isErrorEmployees ? (
                     <>
                       <Select
-                      size="large"
+                        size="large"
                         maxTagCount="responsive"
                         allowClear
                         onClear={handleClearSelectEmployee}
                         mode="multiple"
-                        placeholder="Người được chọn đầu tiên là nhóm trưởng"
-                        style={{
-                          width: "100%",
-                        }}
+                        placeholder="Chọn người thực hiện"
+                        className="w-full"
                         onChange={(value) => handleChangeSelectMember(value)}
                         optionLabelProp="label"
                         tagRender={tagRender}
@@ -610,6 +736,8 @@ const NewTaskModal = ({
                 setCheckedDateData={setCheckedDateData}
                 setChildrenDrawer={setChildrenDrawer}
                 setSelectedDateSchedule={setSelectedDateSchedule}
+
+                employees={employees}
               />
             </div>
 
@@ -620,6 +748,7 @@ const NewTaskModal = ({
                 loading={isLoadingUploadFile || isLoading}
                 block
                 className="mt-9"
+                size="large"
               >
                 Tạo công việc
               </Button>

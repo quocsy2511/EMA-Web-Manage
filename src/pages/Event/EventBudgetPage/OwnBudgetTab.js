@@ -22,6 +22,7 @@ import {
   updatePercentageBudget,
 } from "../../../apis/budgets";
 import BudgetModal from "../../../components/Modal/BudgetModal";
+import { useParams } from "react-router-dom";
 
 const BudgetItem = memo(({ budget, selectBudget, setSelectBudget }) => (
   <div
@@ -57,12 +58,35 @@ const BudgetItem = memo(({ budget, selectBudget, setSelectBudget }) => (
       <Tooltip title={budget?.title ?? "Tên hạng mục"} placement="topLeft">
         <p className="w-full text-xl font-semibold truncate">{budget?.title}</p>
       </Tooltip>
-      <p className="text-base">
-        {(
-          budget?.itemExisted?.plannedAmount * budget?.itemExisted?.plannedPrice
-        )?.toLocaleString()}{" "}
-        <span className="text-xs text-slate-400 font-normal">VNĐ</span>
-      </p>
+      <div className="flex justify-between">
+        <p className="text-base">
+          {(
+            budget?.itemExisted?.plannedAmount *
+            budget?.itemExisted?.plannedPrice
+          )?.toLocaleString()}{" "}
+          <span className="text-xs text-slate-400 font-normal">VNĐ</span>
+        </p>
+
+        {budget?.itemExisted?.tasks?.reduce((total, task) => {
+          const count = task?.transactions?.filter(
+            (transaction) => transaction?.status === "PENDING"
+          )?.length;
+
+          if (count > 0) return total + count;
+          else return total;
+        }, 0) > 0 && (
+          <p className="bg-red-500 w-5 h-5 flex justify-center items-center text-white text-sm rounded font-medium">
+            {budget?.itemExisted?.tasks?.reduce((total, task) => {
+              const count = task?.transactions?.filter(
+                (transaction) => transaction?.status === "PENDING"
+              )?.length;
+
+              if (count > 0) return total + count;
+              else return total;
+            }, 0)}
+          </p>
+        )}
+      </div>
     </div>
   </div>
 ));
@@ -74,6 +98,7 @@ const OwnBudgetTab = ({
   messageApi,
 }) => {
   console.log("ownBudget > ", ownBudget);
+  const eventId = useParams().eventId;
 
   const mergeValue = new Set();
   const [selectBudget, setSelectBudget] = useState();
@@ -103,8 +128,8 @@ const OwnBudgetTab = ({
       updateBudgetTransaction({ transactionId, status, rejectNote }),
     {
       onSuccess: (data) => {
-        queryClient.invalidateQueries(["transaction-request-own"]);
-        queryClient.invalidateQueries(["transaction-request-all"]);
+        queryClient.invalidateQueries(["transaction-request-own", eventId]);
+        queryClient.invalidateQueries(["transaction-request-all", eventId]);
 
         setIsRejectModalOpen((prev) => ({ ...prev, isOpen: false }));
 
@@ -132,6 +157,9 @@ const OwnBudgetTab = ({
       updatePercentageBudget({ transactionId, amount }),
     {
       onSuccess: (data) => {
+        queryClient.invalidateQueries(["transaction-request-own", eventId]);
+        queryClient.invalidateQueries(["transaction-request-all", eventId]);
+
         messageApi.open({
           type: "success",
           content: "Cập nhật trạng thái thành công",
@@ -192,7 +220,7 @@ const OwnBudgetTab = ({
       <div className="flex justify-between space-x-10 mt-6">
         {/* LEFT SIDE */}
         <div className="w-1/4 space-y-5">
-          <p className="text-3xl mx-5 font-semibold truncate bg-white p-5 rounded-md">
+          <p className="text-lg text-center text-slate-400 mx-5 font-medium truncate bg-white p-5 rounded-md">
             Danh sách hạng mục
           </p>
 
@@ -271,33 +299,32 @@ const OwnBudgetTab = ({
             </div>
 
             <div className="relative pb-5">
+              <Tooltip
+                title={
+                  <p className="text-base text-center">
+                    Hạn mức
+                    <br />
+                    {(
+                      selectBudget?.itemExisted?.plannedPrice *
+                      selectBudget?.itemExisted?.plannedAmount *
+                      (selectBudget?.itemExisted?.percentage / 100)
+                    ).toLocaleString()}{" "}
+                    VNĐ
+                  </p>
+                }
+                placement="top"
+              >
+                <div
+                  className={`absolute z-10 w-1 h-1/2 bg-black/20 top-0 mx-5 cursor-pointer`}
+                  style={{
+                    left: `calc(${selectBudget?.itemExisted?.percentage-6}%)`,
+                  }}
+                />
+              </Tooltip>
               {selectBudget?.totalTransactionUsed /
                 ((selectBudget?.itemExisted?.plannedPrice ?? 1) *
                   (selectBudget?.itemExisted?.plannedAmount ?? 1)) <
-                selectBudget?.itemExisted?.percentage / 100 && (
-                <Tooltip
-                  title={
-                    <p className="text-base text-center">
-                      Hạn mức
-                      <br />
-                      {(
-                        selectBudget?.itemExisted?.plannedPrice *
-                        selectBudget?.itemExisted?.plannedAmount *
-                        (selectBudget?.itemExisted?.percentage / 100)
-                      ).toLocaleString()}{" "}
-                      VNĐ
-                    </p>
-                  }
-                  placement="top"
-                >
-                  <div
-                    className={`absolute z-10 w-1 h-1/2 bg-black/20 top-0 mx-5 cursor-pointer`}
-                    style={{
-                      left: `calc(${selectBudget?.itemExisted?.percentage}% - 2rem)`,
-                    }}
-                  />
-                </Tooltip>
-              )}
+                selectBudget?.itemExisted?.percentage / 100 && <></>}
               <Progress
                 percent={(
                   (selectBudget?.totalTransactionUsed /
@@ -325,7 +352,10 @@ const OwnBudgetTab = ({
                   selectBudget?.totalTransactionUsed /
                     ((selectBudget?.itemExisted?.plannedPrice ?? 1) *
                       (selectBudget?.itemExisted?.plannedAmount ?? 1)) >=
-                    0.8 && { "0%": "#ff4d4f", "100%": "#ff4d4f" }
+                    selectBudget?.itemExisted?.percentage / 100 && {
+                    "0%": "#ff4d4f",
+                    "100%": "#ff4d4f",
+                  }
                 }
                 type="line"
               />
@@ -428,13 +458,15 @@ const OwnBudgetTab = ({
                                     title="Xác nhận chấp nhận liên hệ"
                                     description="Bạn có chắc chắn chấp nhận liên hệ này?"
                                     onConfirm={() => {
-                                      handleUpdatePercentageBudgetMutate(
-                                        record?.id,
-                                        record?.amount
-                                      );
+                                      record?.status === "PENDING" &&
+                                        handleUpdatePercentageBudgetMutate(
+                                          record?.id,
+                                          record?.amount
+                                        );
                                     }}
                                     okText="Đồng ý"
                                     cancelText="Hủy"
+                                    disabled={record?.status !== "PENDING"}
                                   >
                                     <div className="flex space-x-2 items-center">
                                       <FaCheck className="text-green-500 text-lg" />
@@ -449,10 +481,11 @@ const OwnBudgetTab = ({
                                 label: (
                                   <div
                                     onClick={() => {
-                                      setIsRejectModalOpen({
-                                        isOpen: true,
-                                        transactionId: record?.id,
-                                      });
+                                      record?.status === "PENDING" &&
+                                        setIsRejectModalOpen({
+                                          isOpen: true,
+                                          transactionId: record?.id,
+                                        });
                                     }}
                                     className="flex space-x-2 items-center"
                                   >
