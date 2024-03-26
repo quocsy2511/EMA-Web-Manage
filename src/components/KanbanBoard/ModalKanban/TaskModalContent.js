@@ -19,6 +19,7 @@ import { getProfile } from "../../../apis/users";
 import moment from "moment";
 import { Button } from "antd";
 import HistoryAssignee from "./HistoryAssignee";
+import { socketOnNotification } from "../../../utils/socket";
 
 const TaskModalContent = ({
   disableEndDate,
@@ -37,6 +38,7 @@ const TaskModalContent = ({
     data: listComments,
     isError: isErrorListComments,
     isLoading: isLoadingListComments,
+    refetch: refetchListComment,
   } = useQuery(
     ["comments", taskSelected.id],
     () => getComment(taskSelected.id),
@@ -76,6 +78,13 @@ const TaskModalContent = ({
   } else {
     completionPercentage = 0;
   }
+  useEffect(() => {
+    socketOnNotification(handleRefetchContact);
+  }, []);
+
+  const handleRefetchContact = (noti) => {
+    noti?.type === "COMMENT" && refetchListComment();
+  };
 
   return (
     <div>
