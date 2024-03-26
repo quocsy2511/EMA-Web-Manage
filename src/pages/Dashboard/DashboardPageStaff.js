@@ -194,7 +194,7 @@ const DashboardPageStaff = () => {
       sorter: (a, b) => a.tasks.overdue - b.tasks.overdue,
     },
     {
-      title: "Công việc chuẩn bị",
+      title: "Công việc đang chuẩn bị",
       dataIndex: "tasks",
       key: "pending",
       render: (tasks) => tasks.pending,
@@ -225,7 +225,7 @@ const DashboardPageStaff = () => {
             color={record.status === "PENDING" ? "warning" : "green"}
             key={record.id}
           >
-            {record.status === "PENDING" ? "CHUẨN BỊ" : "HOÀN THÀNH"}
+            {record.status === "PENDING" ? "ĐANG CHUẨN BỊ" : "HOÀN THÀNH"}
           </Tag>
         </div>
       ),

@@ -96,9 +96,9 @@ const TaskKanbanBoard = ({
   const getColorStatusPriority = (value) => {
     const colorMapping = {
       DONE: { color: "green", title: "HOÀN THÀNH" },
-      PENDING: { color: "default", title: "CHUẨN BỊ" },
+      PENDING: { color: "default", title: "ĐANG CHUẨN BỊ" },
       CANCEL: { color: "red", title: "ĐÃ HUỶ" },
-      CONFIRM: { color: "purple", title: "XÁC NHẬN" },
+      CONFIRM: { color: "purple", title: "ĐÃ XÁC THỰC" },
       PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
       OVERDUE: { color: "orange", title: "QUÁ HẠN" },
       LOW: { color: "warning", title: "THẤP" },

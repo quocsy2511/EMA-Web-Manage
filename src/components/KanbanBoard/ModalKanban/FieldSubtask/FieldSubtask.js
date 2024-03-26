@@ -48,6 +48,7 @@ const FieldSubtask = ({
   const [updateStartDate, setUpdateStartDate] = useState(
     taskSelected?.startDate
   );
+  // console.log("🚀 ~ updateStartDate:", updateStartDate);
   const [updateEndDate, setUpdateEndDate] = useState(taskSelected?.endDate);
   const [isOpenPriority, setIsOpenPriority] = useState(false);
   const [updateEstimateTime, setUpdateEstimateTime] = useState(
@@ -202,6 +203,7 @@ const FieldSubtask = ({
                         taskParent={taskParent}
                         classNameStyle="w-[190px] mt-2"
                         setIsOpenTaskModal={setIsOpenTaskModal}
+                        updateStartDate={updateStartDate}
                       />
                     ) : (
                       <StatusTag
@@ -218,6 +220,7 @@ const FieldSubtask = ({
                     taskParent={taskParent}
                     classNameStyle="w-[190px] mt-2"
                     setIsOpenTaskModal={setIsOpenTaskModal}
+                    updateStartDate={updateStartDate}
                   />
                 )}
               </>

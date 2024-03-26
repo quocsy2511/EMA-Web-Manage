@@ -87,10 +87,10 @@ const HeaderEvent = ({
   }, 500);
 
   const listStatus = [
-    { label: "CHUẨN BỊ", value: "PENDING", color: "default" },
+    { label: "ĐANG CHUẨN BỊ", value: "PENDING", color: "default" },
     { label: "ĐANG DIỄN RA", value: "PROCESSING", color: "processing" },
     { label: "HOÀN THÀNH", value: "DONE", color: "green" },
-    { label: "XÁC NHẬN", value: "CONFIRM", color: "purple" },
+    { label: "ĐÃ XÁC NHẬN", value: "CONFIRM", color: "purple" },
     { label: "ĐÃ HUỶ", value: "CANCEL", color: "red" },
     { label: "QUÁ HẠN", value: "OVERDUE", color: "red" },
   ];

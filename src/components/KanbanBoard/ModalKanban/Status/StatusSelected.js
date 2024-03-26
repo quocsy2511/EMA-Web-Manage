@@ -3,6 +3,7 @@ import { Button, Modal, Popconfirm, Select, Tag, message } from "antd";
 import React, { useState } from "react";
 import { updateTaskStatus } from "../../../../apis/tasks";
 import { useRouteLoaderData } from "react-router-dom";
+import moment from "moment";
 
 const StatusSelected = ({
   taskSelected,
@@ -11,17 +12,17 @@ const StatusSelected = ({
   setUpdateStatus,
   classNameStyle,
   setIsOpenTaskModal,
+  updateStartDate,
 }) => {
-  // console.log("🚀 ~ taskSelected:", taskSelected);
-
+  const startDate = moment(updateStartDate);
+  const today = moment();
   const eventId = taskSelected?.eventDivision?.event?.id;
-  // console.log("🚀 ~ eventId:", eventId)
   const staff = useRouteLoaderData("staff");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const statusTask = [
     {
       value: "PENDING",
-      label: "CHUẨN BỊ",
+      label: "ĐANG CHUẨN BỊ",
       color: "default",
     },
     {
@@ -36,7 +37,7 @@ const StatusSelected = ({
     },
     {
       value: "CONFIRM",
-      label: "XÁC NHẬN",
+      label: "ĐÃ XÁC THỰC",
       color: "purple",
     },
     {
@@ -57,6 +58,7 @@ const StatusSelected = ({
       task.value !== "CANCEL" &&
       task.value !== "OVERDUE"
   );
+
   const [uploadStatus, setUploadStatus] = useState("");
   const [isCancel, setIsCancel] = useState(false);
   const taskID = taskSelected?.id;
@@ -82,6 +84,17 @@ const StatusSelected = ({
       },
     }
   );
+
+  let filterStatusTaskStatus;
+  if (today?.isBefore(startDate)) {
+    filterStatusTaskStatus = statusTask.filter(
+      (task) => task.value !== "CONFIRM" && task.value !== "DONE"
+    );
+  } else if (today?.isSame(startDate)) {
+    filterStatusTaskStatus = statusTask;
+  } else {
+    filterStatusTaskStatus = statusTask;
+  }
 
   if (isSuccess && isCancel) {
     setIsCancel(false);
@@ -120,7 +133,6 @@ const StatusSelected = ({
         className={classNameStyle}
         onChange={(value) => handleChangeStatus(value)}
         popupMatchSelectWidth={false}
-        
       >
         {taskParent
           ? StatusParentTask?.map((status) => (
@@ -128,7 +140,7 @@ const StatusSelected = ({
                 <Tag color={status.color}>{status.label}</Tag>
               </Select.Option>
             ))
-          : statusTask?.map((status) => (
+          : filterStatusTaskStatus?.map((status) => (
               <Select.Option key={status.value}>
                 <Tag color={status.color}>{status.label}</Tag>
               </Select.Option>
