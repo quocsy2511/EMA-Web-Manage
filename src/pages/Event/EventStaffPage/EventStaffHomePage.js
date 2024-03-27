@@ -284,7 +284,7 @@ const EventStaffHomePage = () => {
                 "bg-blue-500 text-white": selectedStatus === "PREPARING",
               })}
             >
-              Đang Chuẩn Bị
+              Đang chuẩn Bị
             </p>
             <p
               onClick={() => handleSelectStatus("PROCESSING")}

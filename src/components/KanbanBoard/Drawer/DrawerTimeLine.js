@@ -60,10 +60,10 @@ const DrawerTimeLine = ({
               <p className="font-semibold text-sm">Trạng thái công việc :</p>
             </div>
             <div className="flex flex-row justify-center items-start gap-x-2">
-              <Badge color="blue" text="Đang diễn ra" />
+              <Badge color="blue" text="ĐANG DIỄN RA" />
             </div>
             <div className="flex flex-row justify-center items-start gap-x-2">
-              <Badge color="yellow" text="Đang chuẩn bị" />
+              <Badge color="yellow" text="ĐANG CHUẨN BỊ" />
             </div>
           </div>
 

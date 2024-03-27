@@ -56,11 +56,11 @@ const Subtasks = ({
   const getColorStatus = (status) => {
     const colorMapping = {
       DONE: { color: "green", status: "HOÀN THÀNH" },
-      PENDING: { color: "default", status: "CHUẨN BỊ" },
+      PENDING: { color: "default", status: "ĐANG CHUẨN BỊ" },
       CANCEL: { color: "red", status: "ĐÃ HUỶ" },
       PROCESSING: { color: "processing", status: "ĐANG DIỄN RA" },
       OVERDUE: { color: "red", status: "QUÁ HẠN" },
-      CONFIRM: { color: "purple", status: "XÁC NHẬN" },
+      CONFIRM: { color: "purple", status: "ĐÃ XÁC THỰC" },
     };
     //colorMapping[status] ở đây để truy suất value bằng key
     return colorMapping[status];

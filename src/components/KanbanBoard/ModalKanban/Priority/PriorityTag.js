@@ -5,14 +5,14 @@ const PriorityTag = ({ updatePriority, setIsOpenPriority }) => {
   const getColorStatusPriority = (value) => {
     const colorMapping = {
       DONE: { color: "green", title: "HOÀN THÀNH" },
-      PENDING: { color: "default", title: "CHUẨN BỊ" },
+      PENDING: { color: "default", title: "ĐANG CHUẨN BỊ" },
       CANCEL: { color: "red", title: "ĐÃ HUỶ" },
       PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
       OVERDUE: { color: "orange", title: "QUÁ HẠN" },
       LOW: { color: "warning", title: "THẤP" },
       HIGH: { color: "red", title: "CAO" },
       MEDIUM: { color: "processing", title: "TRUNG BÌNH" },
-      CONFIRM: { color: "purple", title: "XÁC NHẬN" },
+      CONFIRM: { color: "purple", title: "ĐÃ XÁC THỰC" },
     };
     //colorMapping[status] ở đây để truy suất value bằng key
     return colorMapping[value];

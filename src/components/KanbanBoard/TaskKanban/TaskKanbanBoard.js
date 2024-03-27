@@ -5,7 +5,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Avatar, Badge, Tag, Tooltip } from "antd";
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import { getComment } from "../../../apis/comments";
@@ -13,6 +13,7 @@ import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import { getTasks } from "../../../apis/tasks";
 import { AnimatePresence, motion } from "framer-motion";
 import { MoonLoader } from "react-spinners";
+import { socketOnNotification } from "../../../utils/socket";
 
 const TaskKanbanBoard = ({
   setIsOpenTaskModal,
@@ -65,6 +66,7 @@ const TaskKanbanBoard = ({
     data: listComments,
     isError: isErrorListComments,
     isLoading: isLoadingListComments,
+    refetch: refetchListComment,
   } = useQuery(["comments", id], () => getComment(id), {
     select: (data) => {
       const formatDate = data.map(({ ...item }) => {
@@ -94,9 +96,9 @@ const TaskKanbanBoard = ({
   const getColorStatusPriority = (value) => {
     const colorMapping = {
       DONE: { color: "green", title: "HOÀN THÀNH" },
-      PENDING: { color: "default", title: "CHUẨN BỊ" },
+      PENDING: { color: "default", title: "ĐANG CHUẨN BỊ" },
       CANCEL: { color: "red", title: "ĐÃ HUỶ" },
-      CONFIRM: { color: "purple", title: "XÁC NHẬN" },
+      CONFIRM: { color: "purple", title: "ĐÃ XÁC THỰC" },
       PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
       OVERDUE: { color: "orange", title: "QUÁ HẠN" },
       LOW: { color: "warning", title: "THẤP" },
@@ -107,7 +109,13 @@ const TaskKanbanBoard = ({
     return colorMapping[value];
   };
 
-  // console.log("🚀 ~ subtaskDetails:", subtaskDetails);
+  useEffect(() => {
+    socketOnNotification(handleRefetchContact);
+  }, []);
+
+  const handleRefetchContact = (noti) => {
+    noti?.type === "COMMENT" && refetchListComment();
+  };
 
   return (
     <motion.div

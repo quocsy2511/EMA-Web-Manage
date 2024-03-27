@@ -692,7 +692,7 @@ const EventAssignTaskPage = () => {
                   },
                   {
                     value: "MEDIUM",
-                    label: "Bình thường",
+                    label: "Vừa",
                   },
                   {
                     value: "HIGH",

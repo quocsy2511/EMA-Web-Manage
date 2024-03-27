@@ -3,7 +3,7 @@ import {
   CheckCircleFilled,
   DollarOutlined,
 } from "@ant-design/icons";
-import { Empty, Modal, Progress, Tag, Tooltip } from "antd";
+import { Badge, Card, Empty, Modal, Progress, Tag, Tooltip } from "antd";
 import moment from "moment";
 import React from "react";
 
@@ -16,12 +16,13 @@ const BudgetTask = ({
   percent,
   remainingBudget,
 }) => {
+  // console.log("🚀 ~ budgetItem:", budgetItem);
   const getColorStatusPriority = (value) => {
     const colorMapping = {
       DONE: { color: "green", title: "HOÀN THÀNH" },
-      PENDING: { color: "default", title: "CHUẨN BỊ" },
+      PENDING: { color: "default", title: "ĐANG CHUẨN BỊ" },
       CANCEL: { color: "red", title: "ĐÃ HUỶ" },
-      CONFIRM: { color: "purple", title: "XÁC NHẬN" },
+      CONFIRM: { color: "purple", title: "ĐÃ XÁC THỰC" },
       PROCESSING: { color: "processing", title: "ĐANG DIỄN RA" },
       OVERDUE: { color: "orange", title: "QUÁ HẠN" },
       LOW: { color: "warning", title: "THẤP" },
@@ -102,70 +103,107 @@ const BudgetTask = ({
 
       <div className="w-full flex flex-wrap h-fit  gap-x-3 py-2 ">
         {budgetItem?.itemExisted?.tasks?.length > 0 ? (
-          budgetItem?.itemExisted?.tasks?.map((subTask, index) => (
-            <div
-              className="mb-3 w-[32%] h-[265px] overflow-hidden flex flex-col cursor-pointer"
-              key={index}
-              onClick={() => handleSelectItemTask(subTask)}
-            >
-              <div className=" bg-white rounded-lg  w-full h-full flex flex-col hover:opacity-50">
-                <div className="w-full p-5 flex flex-row justify-between items-center text-blueBudget overflow-hidden">
-                  <Tooltip title=" Mua banner để dựng sân khấu">
-                    <h3 className="font-bold text-base text-start w-[80%] truncate">
-                      {subTask?.title}
-                    </h3>
-                  </Tooltip>
-                </div>
+          budgetItem?.itemExisted?.tasks?.map((subTask, index) => {
+            let filterSub = [];
+            if (subTask?.transactions?.length > 0)
+              filterSub = subTask?.transactions?.filter(
+                (item) => item?.status === "PENDING"
+              );
 
-                <div className="w-full p-3 flex flex-row gap-x-2 justify-start items-center  overflow-hidden bg-[#F7F7FF]">
-                  <p className="font-semibold text-base">
-                    Số giao dịch : {subTask?.transactions?.length}
-                  </p>
-                </div>
-
-                <div className="w-full p-5 flex flex-row gap-x-2 justify-between items-center overflow-hidden ">
-                  <div className="flex flex-col justify-start items-start w-[65%]">
-                    <p className="flex flex-row gap-x-1  text-blueSecondBudget text-sm font-semibold text-start">
-                      <DollarOutlined />
-                      <span>Ngân sách (VND)</span>
-                    </p>
-                    <Tooltip
-                      title={calculateTotalAmountTask(
-                        subTask
-                      )?.toLocaleString()}
-                    >
-                      <h3 className="text-blueBudget text-base font-bold w-[95%]  truncate">
-                        {calculateTotalAmountTask(subTask)?.toLocaleString()}
+            return (
+              <div
+                className="mb-3 w-[32%] h-[265px] overflow-hidden flex flex-col cursor-pointer"
+                key={index}
+                onClick={() => handleSelectItemTask(subTask)}
+              >
+                <div className=" bg-white rounded-lg  w-full h-full flex flex-col hover:opacity-50">
+                  <div className="w-full p-5 flex flex-row justify-between items-center text-blueBudget overflow-hidden">
+                    <Tooltip title=" Mua banner để dựng sân khấu">
+                      <h3 className="font-bold text-base text-start w-[80%] truncate">
+                        {subTask?.title}
                       </h3>
                     </Tooltip>
                   </div>
 
-                  <div className="flex flex-col justify-end items-end w-[35%] text-end">
-                    <p className="flex flex-row gap-x-1  text-blueSecondBudget text-sm font-semibold  text-end">
-                      <CalendarOutlined />
-                      <span>Hết hạn</span>
-                    </p>
-                    <p className="text-blueBudget  font-bold text-sm">
-                      {moment(subTask?.endDate).format("DD-MM-YYYY")}
-                    </p>
+                  {/* <div className="w-full p-3 flex flex-row gap-x-2 justify-start items-center  overflow-hidden bg-[#F7F7FF]">
+                  <p className="font-semibold text-base">
+                    Số giao dịch : {subTask?.transactions?.length}
+                  </p>
+                </div> */}
+                  <div className="w-full px-3  h-fit">
+                    <Badge.Ribbon
+                      text={
+                        subTask?.transactions?.length > 0
+                          ? filterSub?.length > 0
+                            ? `mới ${filterSub?.length}`
+                            : "Hoàn thành"
+                          : "chưa có"
+                      }
+                      color={
+                        subTask?.transactions?.length > 0
+                          ? filterSub?.length > 0
+                            ? "gold"
+                            : ""
+                          : "lime"
+                      }
+                    >
+                      <Card
+                        // title="Số giao dịch"
+                        size="small"
+                        className="w-full h-fit my-1 bg-[#F7F7FF] font-medium text-blueSecondBudget"
+                      >
+                        Số giao dịch:{" "}
+                        <b className="text-blueBudget">
+                          {subTask?.transactions?.length}
+                        </b>
+                      </Card>
+                    </Badge.Ribbon>
+                  </div>
+
+                  <div className="w-full p-5 flex flex-row gap-x-2 justify-between items-center overflow-hidden ">
+                    <div className="flex flex-col justify-start items-start w-[65%]">
+                      <p className="flex flex-row gap-x-1  text-blueSecondBudget text-sm font-semibold text-start">
+                        <DollarOutlined />
+                        <span>Ngân sách (VND)</span>
+                      </p>
+                      <Tooltip
+                        title={calculateTotalAmountTask(
+                          subTask
+                        )?.toLocaleString()}
+                      >
+                        <h3 className="text-blueBudget text-base font-bold w-[95%]  truncate">
+                          {calculateTotalAmountTask(subTask)?.toLocaleString()}
+                        </h3>
+                      </Tooltip>
+                    </div>
+
+                    <div className="flex flex-col justify-end items-end w-[35%] text-end">
+                      <p className="flex flex-row gap-x-1  text-blueSecondBudget text-sm font-semibold  text-end">
+                        <CalendarOutlined />
+                        <span>Hết hạn</span>
+                      </p>
+                      <p className="text-blueBudget  font-bold text-sm">
+                        {moment(subTask?.endDate).format("DD-MM-YYYY")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="w-full p-5 flex flex-row gap-x-2 justify-between items-center overflow-hidden">
+                    <p className="font-semibold">Trạng thái công việc</p>
+                    <Tag
+                      icon={
+                        subTask?.status === "CONFIRM" && <CheckCircleFilled />
+                      }
+                      color={getColorStatusPriority(subTask?.status)?.color}
+                      className="font-semibold"
+                    >
+                      {getColorStatusPriority(subTask?.status)?.title}
+                    </Tag>
                   </div>
                 </div>
-
-                <div className="w-full p-5 flex flex-row gap-x-2 justify-between items-center overflow-hidden">
-                  <p className="font-semibold">Trạng thái công việc</p>
-                  <Tag
-                    icon={
-                      subTask?.status === "CONFIRM" && <CheckCircleFilled />
-                    }
-                    color={getColorStatusPriority(subTask?.status)?.color}
-                    className="font-semibold"
-                  >
-                    {getColorStatusPriority(subTask?.status)?.title}
-                  </Tag>
-                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="w-full justify-center items-center flex">
             <Empty

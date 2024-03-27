@@ -4,14 +4,12 @@ import {
   Button,
   DatePicker,
   Drawer,
-  FloatButton,
   Form,
   Input,
   Segmented,
   Select,
   Spin,
   Tag,
-  Tooltip,
   Upload,
   message,
 } from "antd";
@@ -26,11 +24,10 @@ import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator
 import { createTask, getTasks } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
 import {
-  DoubleRightOutlined,
-  StarFilled,
   TeamOutlined,
   UploadOutlined,
   UserOutlined,
+  WalletOutlined,
 } from "@ant-design/icons";
 import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
 import DrawerTimeLine from "../Drawer/DrawerTimeLine";
@@ -131,6 +128,7 @@ const NewTaskModal = ({
   templateTask,
   addNewTaskTemplate,
   setAddNewTaskTemplate,
+  setIsHideHeaderEvent,
 }) => {
   console.log("🚀 ~ TaskParent:", TaskParent);
   const eventID = TaskParent?.eventDivision?.event?.id;
@@ -176,31 +174,6 @@ const NewTaskModal = ({
     }
   }, [selectedTaskTemplate]);
 
-  const handleChangeTaskTemplate = (value) => {
-    // if (value) {
-    //   const TaskTemplateFind = templateTask.find((item) => item.id === value);
-    //   setSelectedTaskTemplate(TaskTemplateFind?.title);
-    //   const descriptionTemplate = {
-    //     ops: JSON.parse(
-    //       TaskTemplateFind?.description?.startsWith(`[{"`)
-    //         ? TaskTemplateFind?.description
-    //         : parseJson(TaskTemplateFind?.description)
-    //     ),
-    //   };
-    //   const parseDes = descriptionTemplate?.ops?.[0].insert.replace(".\n", "");
-    //   form.setFieldsValue({
-    //     title: `${TaskTemplateFind?.title}`,
-    //     desc: `${parseDes}`,
-    //     priority: `${TaskTemplateFind.priority}`,
-    //   });
-    // } else {
-    //   form.resetFields();
-    // }
-  };
-
-  //search templateTask
-  const filterOptionTaskTemplate = (input, option) =>
-    (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
   //search Employee
   const filterOption = (input, option) =>
     (option?.label?.props?.label ?? "")
@@ -248,6 +221,7 @@ const NewTaskModal = ({
         setHideDescription(false);
         setAddNewTask(false);
         setAddNewTaskTemplate(false);
+        setIsHideHeaderEvent(false);
       },
       onError: () => {
         message.open({
@@ -433,15 +407,6 @@ const NewTaskModal = ({
         selectedTaskTemplate={selectedTaskTemplate}
         setSelectedTaskTemplate={setSelectedTaskTemplate}
       />
-
-      <FloatButton
-        onClick={() => setIsDrawerOpen(true)}
-        type="primary"
-        // icon={<RiAddFill />}
-        tooltip={"Công việc mẫu"}
-        className="cursor-pointer"
-      />
-
       <div className="px-10 py-8 rounded-lg ">
         {/* header */}
         <div className="flex flex-row w-full">
@@ -456,59 +421,18 @@ const NewTaskModal = ({
               </p>
             </div>
             <div className="w-[50%] flex justify-end text-end">
-              <ul className="pl-0 list-none inline-block mt-6">
-                <li className="relative float-left mr-[10px] text-blueSecondBudget space-x-2">
-                  <span
-                    className="cursor-pointer hover:text-blue-500 text-blueBudget"
-                    onClick={handleCloseNewTask}
-                  >
-                    <span className="font-bold">Bảng công việc</span>
-                  </span>
-                  <DoubleRightOutlined />
-                </li>
-                <li className="relative float-left mr-[10px] text-blueSecondBudget space-x-2">
-                  <span className="cursor-pointer hover:text-blueBudget">
-                    <span className="font-bold">Thêm mới</span>
-                  </span>
-                </li>
-                {/* {selectedTaskTemplate && (
-                  <li className="relative float-left mr-0 text-blueSecondBudget">
-                    <DoubleRightOutlined className="mr-1" />
-                    <span>{selectedTaskTemplate}</span>
-                  </li>
-                )} */}
-              </ul>
+              <Button
+                type="primary"
+                icon={<WalletOutlined />}
+                onClick={() => setIsDrawerOpen(true)}
+              >
+                Công việc mẫu
+              </Button>
             </div>
           </div>
         </div>
         {/* content */}
         <div className="px-10 py-6 rounded-lg w-full flex justify-center flex-col bg-white">
-          {addNewTaskTemplate && (
-            <div className="w-full flex flex-col justify-start items-start gap-y-3 mb-4">
-              <h3 className="font-bold">
-                <StarFilled className="text-yellow-400 mr-2" /> Chọn nhanh các
-                công việc có sẵn
-              </h3>
-              <Select
-                allowClear
-                showSearch
-                autoFocus={addNewTaskTemplate}
-                size="large"
-                optionFilterProp="children"
-                filterOption={filterOptionTaskTemplate}
-                options={
-                  templateTask?.map((item) => ({
-                    value: item?.id,
-                    label: item?.title,
-                  })) ?? []
-                }
-                placeholder="Chọn công mẫu"
-                className="w-full"
-                onChange={handleChangeTaskTemplate}
-              />
-            </div>
-          )}
-
           <Form
             form={form}
             onFinish={onFinish}
@@ -743,7 +667,6 @@ const NewTaskModal = ({
                 setCheckedDateData={setCheckedDateData}
                 setChildrenDrawer={setChildrenDrawer}
                 setSelectedDateSchedule={setSelectedDateSchedule}
-
                 employees={employees}
               />
             </div>
