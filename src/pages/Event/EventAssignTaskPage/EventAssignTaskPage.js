@@ -145,17 +145,18 @@ const EventAssignTaskPage = () => {
     listDivision,
 
     // Subtask only
+    isSubTask,
     taskId,
     taskName,
     taskResponsorId,
-    isSubTask,
+    item,
 
     // Update data : assignee of task -> [idStaff] | assignee of subtask: [{id->leader, id, id, ...}]
     updateData,
   } = location.state;
 
   console.log("updateData > ", updateData);
-  console.log("dateRange > ", dateRange);
+  console.log("itemId > ", item);
 
   const [isSelectDate, setIsSelectDate] = useState(false);
   const [chosenFile, setChosenFile] = useState();
@@ -348,9 +349,12 @@ const EventAssignTaskPage = () => {
 
         // Optional
         file: undefined,
+        // isTemplate,
 
         // Subtask only
         parentTask: isSubTask ? taskId : undefined,
+        itemId: isSubTask ? item?.itemId : undefined,
+        itemPercentage: isSubTask ? item?.itemPercentage : undefined,
 
         // unexpected
         estimationTime: 1,
@@ -688,7 +692,7 @@ const EventAssignTaskPage = () => {
                   },
                   {
                     value: "MEDIUM",
-                    label: "Bình thường",
+                    label: "Vừa",
                   },
                   {
                     value: "HIGH",

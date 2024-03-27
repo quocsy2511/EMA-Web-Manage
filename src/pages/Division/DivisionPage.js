@@ -122,10 +122,9 @@ const DivisionPage = () => {
     values = {
       ...values,
       divisionId,
-      status: values.status === 1 ? true : false,
+      status: values.status,
     };
 
-    console.log("Modified value: ", values);
     mutate(values);
   };
 

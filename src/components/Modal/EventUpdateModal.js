@@ -12,6 +12,7 @@ import {
 } from "antd";
 import viVN from "antd/locale/vi_VN";
 import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllUser } from "../../apis/users";
 import { updateDetailEvent } from "../../apis/events";
@@ -84,8 +85,6 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
       processingDate: values?.processingDate,
       endDate: values?.date[1],
       location: values?.location,
-      // coverUrl:
-      //   "https://img.freepik.com/free-psd/saturday-party-social-media-template_505751-2935.jpg?w=740&t=st=1696662680~exp=1696663280~hmac=30be138e6333ca7cbd4ea46fc39296aed44c5b3247173cab7bd45c230b65bfec",
       estBudget: +values?.estBudget,
       eventTypeId: event?.eventTypeID,
       divisionId: event?.listDivision?.map((item) => item?.divisionId),
@@ -95,20 +94,15 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
 
     if (values?.fileChosen) {
       console.log("HAS FILE");
+      console.log("HAS FILE", values?.fileChosen?.file);
 
       const formData = new FormData();
-      formData.append("file", values?.fileChosen);
+      formData.append("file", values?.fileChosen?.file?.originFileObj);
       formData.append("folderName", "event");
-
-      // const { date, divisions, ...eventInfo } = values;
-      // console.log(eventInfo);
-
-      // uploadFileMutate({ formData, event: eventInfo });
+      console.log("formData > ", formData);
       uploadFileMutate({ formData, event: payload });
     } else {
       console.log("NO FILE");
-      // values = { ...values, coverUrl: event.coverUrl };
-      // const { date, divisions, ...eventInfo } = values;
       payload.coverUrl = event?.coverUrl;
       console.log(payload);
       updateEventMutate(payload);
@@ -187,7 +181,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
 
           <Form.Item
             className="w-[40%]"
-            label={<Title title="Thời gian tổ chức" />}
+            label={<Title title="Thời gian diễn ra sự kiện" />}
             name="date"
             rules={[
               {
@@ -237,12 +231,12 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
               },
             ]}
           >
-            <Input placeholder="Nhập địa điểm" size="large" />
+            <Input disabled placeholder="Nhập địa điểm" size="large" />
           </Form.Item>
 
           <Form.Item
             className="w-[40%]"
-            label={<Title title="Thời gian bắt đầu" />}
+            label={<Title title="Thời gian bắt đầu dự án" />}
             name="processingDate"
             rules={[
               {
@@ -306,6 +300,7 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           >
             <div className="flex items-center gap-x-2">
               <InputNumber
+                disabled
                 className="w-full"
                 defaultValue={event?.estBudget}
                 min={500000}
@@ -328,11 +323,8 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
           </Form.Item>
 
           <Form.Item
-            className="flex items-center justify-center"
+            className="flex items-center justify-center overflow-hidden"
             name="fileChosen"
-            // label={<Title title="Ảnh về sự kiện" />}
-            // valuePropName="fileList"
-            // getValueFromEvent={(e) => e?.fileList}
           >
             <Upload.Dragger
               // className="h-40 text-center"

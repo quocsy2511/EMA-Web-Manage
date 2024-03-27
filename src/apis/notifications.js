@@ -1,7 +1,9 @@
 import http from "../utils/axios-utils";
 
-export const getAllNotification = (pageSize) =>
-  http({ url: `/notification?sizePage=${pageSize}&currentPage=1` });
+export const getAllNotification = (pageSize, currentPage, type) =>
+  http({
+    url: `/notification?sizePage=${pageSize}&currentPage=${currentPage}&type=${type}`,
+  });
 
 export const seenNotification = (notificationId) =>
   http({

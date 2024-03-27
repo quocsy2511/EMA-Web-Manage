@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
-  Checkbox,
   ConfigProvider,
   DatePicker,
   Drawer,
@@ -20,21 +19,23 @@ import moment from "moment";
 import dayjs from "dayjs";
 import { uploadFile } from "../../apis/files";
 import { useRouteLoaderData } from "react-router-dom";
+import TEXT from "../../constants/string";
 
 const Label = ({ label }) => <p className="text-lg font-medium">{label}</p>;
 
-const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
+const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
   const [divisionMode, setDivisionMode] = useState(1);
   const [fileList, setFileList] = useState();
   const admin = useRouteLoaderData("administrator");
   const staff = useRouteLoaderData("staff");
   const divisionId = useRouteLoaderData("staff")?.divisionID;
   const queryClient = useQueryClient();
+
   const { mutate: createUserMutate, isLoading } = useMutation(
     (user) => createUser(user),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["users", 1]);
+        queryClient.invalidateQueries(["users", page]);
         queryClient.invalidateQueries(["divisions", 2]);
 
         form.resetFields();
@@ -130,16 +131,18 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     isLoading: rolesIsLoading,
     isError: rolesIsError,
   } = useQuery(["roles"], getRoles, {
-    select: (data) => {
-      return data?.map((role) => ({
-        value: role?.id,
-        label: role?.roleName,
-      }));
-    },
+    select: (data) =>
+      data
+        ?.filter(
+          (role) =>
+            role?.roleName !== "Administrator" &&
+            role?.roleName !== "Khách Hàng"
+        )
+        .map((role) => ({ value: role?.id, label: role?.roleName })),
     refetchOnWindowFocus: false,
     enabled: !!admin,
   });
-  // console.log("roles > ", roles);
+  console.log("roles > ", roles);
 
   const {
     data: roleEmployee,
@@ -164,7 +167,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
     formData.append("file", fileList);
     formData.append("folderName", "avatar");
 
-    // console.log("User: ", user);
+    console.log("User: ", user);
     if (staff) {
       user.roleId = roleEmployee?.id;
       user.divisionId = divisionId;
@@ -197,6 +200,8 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
           initialValues={{
             gender: "MALE",
             typeEmployee: "FULL_TIME",
+            dob: moment("2001-01-01", "YYYY-MM-DD").format("YYYY-MM-DD"),
+            roleId: roles?.[0]?.value,
           }}
         >
           <Form.Item
@@ -296,9 +301,17 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                 required: true,
                 message: `Chưa nhập thông tin!`,
               },
+              {
+                pattern: /^[0-9]{12}$/,
+                message: "CCCD / CMND cần bao gồm 12 số!",
+              },
             ]}
           >
-            <Input placeholder="Nhập thông tin ..." />
+            <Input
+              placeholder="Nhập thông tin ..."
+              pattern="[0-9]*"
+              maxLength={12}
+            />
           </Form.Item>
           <Form.Item
             name="address"
@@ -330,9 +343,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                   className="w-full"
                   defaultValue={dayjs("2001-01-01", "YYYY-MM-DD")}
                   onChange={(value) => {
-                    const formattedDate = dayjs(value).format(
-                      "YYYY-MM-DDTHH:mm:ss.SSS[Z]"
-                    );
+                    const formattedDate = moment(value.$d).format("YYYY-MM-DD");
                     form.setFieldsValue({ dob: formattedDate });
                   }}
                   disabledDate={(current) => {
@@ -386,9 +397,14 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer }) => {
                   <Select
                     placeholder="Vai trò"
                     onChange={(value) => {
-                      if (value === "EMPLOYEE") setDivisionMode(1);
+                      const roleId = roles?.find(
+                        (item) => item?.label === TEXT.EMPLOYEE
+                      )?.value;
+                      if (value === roleId) setDivisionMode(1);
                       else setDivisionMode(2);
+
                       form.setFieldsValue({ role: value });
+                      form.setFieldsValue({ typeEmployee: "FULL_TIME" });
                       form.resetFields(["divisionId"]);
                     }}
                     loading={rolesIsLoading || rolesIsError}

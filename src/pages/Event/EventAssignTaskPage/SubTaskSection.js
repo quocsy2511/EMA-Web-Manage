@@ -1,11 +1,13 @@
 import React, { Fragment, memo, useEffect, useState } from "react";
 import {
+  Avatar,
   Button,
   Calendar,
   ConfigProvider,
   Drawer,
   Dropdown,
   Form,
+  Select,
   Spin,
   Tooltip,
 } from "antd";
@@ -285,8 +287,7 @@ const SubTaskSection = ({
   const [selectedDate, setSelectedDate] = useState();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const [filterUser, setFilterUser] = useState();
-  console.log("filterUser > ", filterUser);
+  const [filterUser, setFilterUser] = useState("");
 
   useEffect(() => {
     // Update subtask
@@ -362,7 +363,6 @@ const SubTaskSection = ({
 
   const handleSelectUser = (employee) => {
     console.log("employee > ", employee);
-    setFilterUser(employee?.id);
     if (selectedEmployees?.length === 0) {
       setLeader(employee?.id);
     }
@@ -494,7 +494,7 @@ const SubTaskSection = ({
 
           {/* Calendar */}
           <div className="flex-1">
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <p className="flex-1 text-black text-lg py-1 font-medium">
                 {filterUser
                   ? `Lịch trình của ${
@@ -507,107 +507,150 @@ const SubTaskSection = ({
               {filterUser && (
                 <Button onClick={() => setFilterUser()}>Xem tổng quát</Button>
               )}
-            </div>
+            </div> */}
             <ConfigProvider locale={vi_VN}>
-              <Calendar
-                // fullscreen={true}
-                value={
-                  isSelectDate
-                    ? dayjs(
-                        isSelectDate?.[0]?.format("YYYY-MM-DD"),
-                        "YYYY-MM-DD"
-                      )
-                    : undefined
-                }
-                // onSelect={(value, info) => {
-                //   // setCalendarDateChecking(momenttz(value.$d));
-                //   !!userChecking && setIsDrawerOpen(true);
-                // }}
-                onPanelChange={(value, mode) => {
-                  console.log("onPanelChange > ", value, mode);
-
-                  const numOfDaysInCurrentMonth = value
-                    .clone()
-                    .month(value.clone().month() + 1)
-                    .daysInMonth();
-
-                  setSelectedDate([
-                    value
-                      .clone()
-                      .startOf("month")
-                      .subtract(42 - numOfDaysInCurrentMonth, "days")
-                      .format("YYYY-MM-DD"),
-                    value
-                      .clone()
-                      .endOf("month")
-                      .add(42 - numOfDaysInCurrentMonth, "days")
-                      .format("YYYY-MM-DD"),
-                  ]);
-                }}
-                cellRender={(current) => {
-                  let renderList = [];
-                  const currentMoment = momenttz(current?.$d).format(
-                    "YYYY-MM-DD"
-                  );
-
-                  users?.map((user) => {
-                    if (!!user?.listEvent?.length) {
-                      user?.listEvent?.map((event) => {
-                        if (
-                          event?.listTask?.find(
-                            (task) =>
-                              currentMoment >= task?.startDate &&
-                              currentMoment <= task?.endDate
-                          )
-                        ) {
-                          if (
-                            !renderList?.find((item) => item?.id === user?.id)
-                          ) {
-                            renderList = [...renderList, user];
-                          }
-                        }
-                      });
+              <div className="relative">
+                <div className="absolute flex items-center top-4 left-5 space-x-3 w-full">
+                  <p className="text-lg font-medium">Xem lịch trình</p>
+                  <Select
+                    className="w-1/6"
+                    onChange={(value) =>
+                      (value || value === "") && setFilterUser(value)
                     }
-                  });
-
-                  // console.log("renderList > ", renderList);
-                  if (filterUser)
-                    renderList = renderList?.filter(
-                      (item) => item?.id === filterUser
-                    );
-
-                  // return info.originNode;
-                  if (!!renderList?.length) {
-                    return (
-                      <div className="space-y-1 mb-3 mt-2">
-                        {renderList?.map((user, index) => (
-                          <motion.div
-                            key={currentMoment + user?.id}
-                            className=""
-                            whileHover={{ y: -2 }}
-                            onClick={() =>
-                              handleSetUserChecking(user, currentMoment) &
-                              setIsDrawerOpen(true)
-                            }
-                          >
-                            {/* <Tooltip title="Xem chi tiết"> */}
-                            {/* <p className="text-sm text-center font-medium truncate border border-black/30 rounded-full py-1 px-3 hover:border-black transition-colors">
-                              {user?.profile?.fullName}
-                            </p> */}
-                            <div className="flex items-center space-x-3 mx-3">
-                              <div className="h-[1px] w-3 bg-black" />
-                              <p className="flex-1 text-base truncate">
-                                {user?.profile?.fullName}
+                    allowClear={filterUser !== ""}
+                    onClear={() => {
+                      setFilterUser("");
+                    }}
+                    value={filterUser}
+                    options={[
+                      {
+                        label: <p className="font-medium h-0">Tổng quát</p>,
+                        value: "",
+                      },
+                      ...(users?.map((item) => {
+                        return {
+                          label: (
+                            <div
+                              key={item?.id}
+                              label={item?.profile?.fullName}
+                              className="flex items-center space-x-3"
+                            >
+                              <Avatar
+                                src={item?.profile?.avatar}
+                                className="mr-2"
+                                size="small"
+                              />
+                              <p className="font-medium">
+                                {item?.profile?.fullName}
                               </p>
                             </div>
-                            {/* </Tooltip> */}
-                          </motion.div>
-                        ))}
-                      </div>
-                    );
+                          ),
+                          value: item?.id,
+                        };
+                      }) ?? []),
+                    ]}
+                  />
+                </div>
+                <Calendar
+                  // fullscreen={true}
+                  value={
+                    isSelectDate
+                      ? dayjs(
+                          isSelectDate?.[0]?.format("YYYY-MM-DD"),
+                          "YYYY-MM-DD"
+                        )
+                      : undefined
                   }
-                }}
-              />
+                  // onSelect={(value, info) => {
+                  //   // setCalendarDateChecking(momenttz(value.$d));
+                  //   !!userChecking && setIsDrawerOpen(true);
+                  // }}
+                  onPanelChange={(value, mode) => {
+                    console.log("onPanelChange > ", value, mode);
+
+                    const numOfDaysInCurrentMonth = value
+                      .clone()
+                      .month(value.clone().month() + 1)
+                      .daysInMonth();
+
+                    setSelectedDate([
+                      value
+                        .clone()
+                        .startOf("month")
+                        .subtract(42 - numOfDaysInCurrentMonth, "days")
+                        .format("YYYY-MM-DD"),
+                      value
+                        .clone()
+                        .endOf("month")
+                        .add(42 - numOfDaysInCurrentMonth, "days")
+                        .format("YYYY-MM-DD"),
+                    ]);
+                  }}
+                  cellRender={(current) => {
+                    let renderList = [];
+                    const currentMoment = momenttz(current?.$d).format(
+                      "YYYY-MM-DD"
+                    );
+
+                    users?.map((user) => {
+                      if (!!user?.listEvent?.length) {
+                        user?.listEvent?.map((event) => {
+                          if (
+                            event?.listTask?.find(
+                              (task) =>
+                                currentMoment >= task?.startDate &&
+                                currentMoment <= task?.endDate
+                            )
+                          ) {
+                            if (
+                              !renderList?.find((item) => item?.id === user?.id)
+                            ) {
+                              renderList = [...renderList, user];
+                            }
+                          }
+                        });
+                      }
+                    });
+
+                    // console.log("renderList > ", renderList);
+                    if (filterUser)
+                      renderList = renderList?.filter(
+                        (item) => item?.id === filterUser
+                      );
+
+                    // return info.originNode;
+                    if (!!renderList?.length) {
+                      return (
+                        <div className="space-y-1 mb-3 mt-2">
+                          {renderList?.map((user, index) => (
+                            <motion.div
+                              key={currentMoment + user?.id}
+                              className=""
+                              whileHover={{ y: -2 }}
+                              onClick={() =>
+                                handleSetUserChecking(user, currentMoment) &
+                                setIsDrawerOpen(true)
+                              }
+                            >
+                              {/* <Tooltip title="Xem chi tiết"> */}
+                              {/* <p className="text-sm text-center font-medium truncate border border-black/30 rounded-full py-1 px-3 hover:border-black transition-colors">
+                              {user?.profile?.fullName}
+                            </p> */}
+                              <div className="flex items-center space-x-3 mx-3">
+                                <div className="h-[1px] w-3 bg-black" />
+                                <p className="flex-1 text-base truncate">
+                                  {user?.profile?.fullName}
+                                </p>
+                              </div>
+                              {/* </Tooltip> */}
+                            </motion.div>
+                          ))}
+                        </div>
+                      );
+                    }
+                  }}
+                />
+              </div>
             </ConfigProvider>
           </div>
         </div>

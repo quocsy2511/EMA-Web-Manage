@@ -188,6 +188,10 @@ const EventSubTaskPage = () => {
         taskId: tasks?.id,
         taskName: tasks?.title,
         taskResponsorId: tasks?.assignTasks?.[0]?.user?.id,
+        item: {
+          itemId: tasks?.item?.id,
+          itemPercentage: tasks?.item?.percentage,
+        },
       },
     });
   };
