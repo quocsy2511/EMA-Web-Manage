@@ -35,16 +35,19 @@ import moment from "moment";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import CreateUserDrawer from "../../components/Drawer/CreateUserDrawer";
 import clsx from "clsx";
+import TEXT from "../../constants/string";
 
 const PersonnelPage = () => {
   const [page, setPage] = useState(1);
+  const [divisionMode, setDivisionMode] = useState(1);
+
   const { data, isLoading, isError } = useQuery(
     ["users", page],
     () => getAllUser({ pageSize: 10, currentPage: page }),
     {
       select: (data) => {
         data.data = data?.data.map((item) => {
-          item.dob = moment(item?.dob).format("YYYY-MM-DD");
+          if (item.dob) item.dob = moment(item?.dob).format("YYYY-MM-DD");
           return {
             key: item?.id,
             ...item,
@@ -85,17 +88,15 @@ const PersonnelPage = () => {
   );
   console.log("divisionsWithoutStaff: ", divisionsWithoutStaff);
 
-  const {
-    data: roles,
-    isLoading: rolesIsLoading,
-    isError: rolesIsError,
-  } = useQuery(["roles"], getRoles, {
+  const { data: roles } = useQuery(["roles"], getRoles, {
     select: (data) => {
       console.log("🚀 ~ PersonnelPage ~ data:", data);
-      return data?.map((role) => ({
-        value: role?.id,
-        label: role?.roleName,
-      }));
+      return data
+        ?.map((role) => ({
+          value: role?.id,
+          label: role?.roleName,
+        }))
+        .filter((item) => item?.label !== "Administrator");
     },
     refetchOnWindowFocus: false,
   });
@@ -113,10 +114,15 @@ const PersonnelPage = () => {
           content: "Cập nhật thành công",
         });
       },
-      onError: () => {
+      onError: (error) => {
+        onCancelEditing();
         messageApi.open({
           type: "error",
-          content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
+          content:
+            error?.response?.status === 500
+              ? error?.response?.data?.message ??
+                "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau"
+              : "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
         });
       },
     }
@@ -142,7 +148,8 @@ const PersonnelPage = () => {
         content: "Cập nhật trạng thái thành công",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      onCancelEditing();
       messageApi.open({
         type: "error",
         content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
@@ -175,6 +182,7 @@ const PersonnelPage = () => {
     const avatar = form.getFieldValue("avatar");
 
     const dataDivisionForm = form.getFieldValue("divisionName");
+
     const divisionId = divisionsData?.filter((item) => {
       if (
         dataDivisionForm === item?.id ||
@@ -184,15 +192,17 @@ const PersonnelPage = () => {
       }
     })[0].id;
 
-    values = {
+    const tranformValues = {
       ...values,
       userId,
       avatar,
       divisionId,
+      roleId: values?.roleId,
     };
-    const { divisionName, ...restValues } = values;
-    console.log("restValue: ", restValues);
-    mutate(restValues);
+    const { divisionName, role, ...payload } = tranformValues;
+    console.log("payload: ", payload);
+
+    mutate(payload);
   };
 
   // Handle delete 1 record
@@ -421,7 +431,7 @@ const PersonnelPage = () => {
       editTable: true,
       filteredValue: null,
       align: "center",
-      render: (_, record) => <p>{record?.dob}</p>,
+      render: (_, record) => <p>{record?.dob ? record?.dob : <Tag />}</p>,
     },
     {
       title: "Giới tính",
@@ -439,11 +449,10 @@ const PersonnelPage = () => {
       key: "role",
       width: 150,
       editTable: true,
-      filters: [
-        { text: "Nhân viên", value: "Nhân viên" },
-        { text: "Trưởng phòng", value: "Trưởng Nhóm" },
-        { text: "Khách Hàng", value: "Khách Hàng" },
-      ],
+      filters: roles?.map((role) => ({
+        text: role?.label,
+        value: role?.label,
+      })),
       filteredValue: filteredInfo.role || null,
       onFilter: (value, record) => record.role?.includes(value),
       align: "center",
@@ -504,7 +513,7 @@ const PersonnelPage = () => {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      width: 100,
+      width: 150,
       align: "center",
       editTable: true,
       filteredValue: null,
@@ -643,24 +652,38 @@ const PersonnelPage = () => {
     ...restProps
   }) => {
     // Setup input field type
-    const division =
-      form.getFieldValue("role") === "STAFF"
-        ? divisionsWithoutStaff
-        : divisionsData;
+    // console.log("dataIndex > ", dataIndex);
+    // console.log("record > ", record);
+
+    // form.setFieldsValue({
+    //   role: record?.roleId,
+    // });
+    // console.log("form.getFieldValue(role) > ", form.getFieldValue("role"));
+    const role = roles?.find(
+      (role) =>
+        role?.value === form.getFieldValue("role") ||
+        role?.label === form.getFieldValue("role")
+    );
+    // console.log("role > ", role);
+
+    setDivisionMode(role?.label === TEXT.STAFF ? 2 : 1);
+
     let options;
     switch (dataIndex) {
       case "role":
-        // options = [
-        //   { value: "Trường phòng", label: "Trường phòng" },
-        //   { value: "Nhân viên", label: "Nhân viên" },
-        // ];
-        options = roles;
+        options = roles ?? [];
         break;
       case "divisionName":
-        options = division?.map((division) => ({
-          value: division?.id,
-          label: division?.divisionName,
-        }));
+        options =
+          divisionMode === 1
+            ? divisionsData?.map((division) => ({
+                value: division?.id,
+                label: division?.divisionName,
+              }))
+            : divisionsWithoutStaff?.map((division) => ({
+                value: division?.id,
+                label: division?.divisionName,
+              }));
         break;
       case "status":
         options = [
@@ -685,11 +708,14 @@ const PersonnelPage = () => {
         options = [];
         break;
     }
-
     // Input field type
     const inputNode =
       inputType === "text" ? (
-        <Input size="small" allowClear />
+        <Input
+          size="small"
+          allowClear
+          maxLength={dataIndex === "nationalId" && 12}
+        />
       ) : inputType === "date" ? (
         <ConfigProvider locale={viVN}>
           <DatePicker
@@ -706,8 +732,12 @@ const PersonnelPage = () => {
       ) : (
         <Select
           onChange={(value) => {
-            form.setFieldsValue({ [dataIndex]: value });
-            if (dataIndex === "role") form.resetFields(["divisionName"]);
+            if (dataIndex === "role") {
+              form.resetFields(["divisionName"]);
+              form.setFieldsValue({ roleId: value });
+            } else {
+              form.setFieldsValue({ [dataIndex]: value });
+            }
           }}
           options={options}
           size="small"
@@ -718,26 +748,35 @@ const PersonnelPage = () => {
     return (
       <td {...restProps}>
         {editing ? (
-          <Form.Item
-            className="m-0"
-            name={dataIndex}
-            rules={[
-              (inputType === "text" || inputType === "selection") && {
-                required: true,
-                message: `Chưa nhập dữ liệu !`,
-              },
-              inputType === "date" && {
-                validator: (rule, value) => {
-                  if (value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject("Chưa chọn ngày !");
+          <>
+            <div className="h-0 d-none">
+              <Form.Item name="roleId" className="h-0 d-none" />
+            </div>
+            <Form.Item
+              className="m-0"
+              name={dataIndex}
+              rules={[
+                (inputType === "text" || inputType === "selection") && {
+                  required: true,
+                  message: `Chưa nhập dữ liệu !`,
                 },
-              },
-            ]}
-          >
-            {inputNode}
-          </Form.Item>
+                inputType === "date" && {
+                  validator: (rule, value) => {
+                    if (value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject("Chưa chọn ngày !");
+                  },
+                },
+                dataIndex === "nationalId" && {
+                  pattern: /^[0-9]{12}$/,
+                  message: "CCCD / CMND cần bao gồm 12 số!",
+                },
+              ]}
+            >
+              {inputNode}
+            </Form.Item>
+          </>
         ) : (
           children
         )}
@@ -790,6 +829,7 @@ const PersonnelPage = () => {
                     <CreateUserDrawer
                       showDrawer={showDrawer}
                       setShowDrawer={setShowDrawer}
+                      page={page}
                     />
                   </div>
                 </div>
@@ -837,18 +877,35 @@ const PersonnelPage = () => {
                       1
                     </div>
 
-                    {page !== 1 && page !== 2 ? (
-                      <div>. . .</div>
-                    ) : (
+                    {page !== 1 && page !== 2 && <div>. . .</div>}
+
+                    {page === 2 && (
                       <div
                         className={clsx(
                           "px-4 py-2 border rounded-md text-base font-medium cursor-pointer",
                           { "border-slate-300": page !== 2 },
-                          { "border-blue-500 text-blue-500": page === 2 }
+                          {
+                            "border-blue-500 text-blue-500": page === 2,
+                          }
                         )}
                         onClick={() => setPage(2)}
                       >
                         2
+                      </div>
+                    )}
+
+                    {page - 1 !== 1 && page - 1 !== 0 && (
+                      <div
+                        className={clsx(
+                          "px-4 py-2 border rounded-md text-base font-medium cursor-pointer",
+                          { "border-slate-300": page !== page - 1 },
+                          {
+                            "border-blue-500 text-blue-500": page === page - 1,
+                          }
+                        )}
+                        onClick={() => setPage(page - 1)}
+                      >
+                        {page - 1}
                       </div>
                     )}
 
@@ -858,7 +915,7 @@ const PersonnelPage = () => {
                       page !== data?.lastPage - 1 && (
                         <div
                           className={clsx(
-                            "px-4 py-2 border rounded-md text-base font-medium cursor-default",
+                            "px-4 py-2 border rounded-md text-base font-medium cursor-point",
                             { "border-slate-300": page !== page },
                             {
                               "border-blue-500 text-blue-500": page === page,
@@ -869,9 +926,24 @@ const PersonnelPage = () => {
                         </div>
                       )}
 
-                    {page !== data?.lastPage && page !== data?.lastPage - 1 ? (
-                      <div>. . .</div>
-                    ) : (
+                    {page + 1 !== data?.lastPage &&
+                      page + 1 !== data?.lastPage + 1 && (
+                        <div
+                          className={clsx(
+                            "px-4 py-2 border rounded-md text-base font-medium cursor-pointer",
+                            { "border-slate-300": page !== page + 1 },
+                            {
+                              "border-blue-500 text-blue-500":
+                                page === page + 1,
+                            }
+                          )}
+                          onClick={() => setPage(page + 1)}
+                        >
+                          {page + 1}
+                        </div>
+                      )}
+
+                    {page === data?.lastPage - 1 && (
                       <div
                         className={clsx(
                           "px-4 py-2 border rounded-md text-base font-medium cursor-pointer",
@@ -885,6 +957,10 @@ const PersonnelPage = () => {
                       >
                         {data?.lastPage - 1}
                       </div>
+                    )}
+
+                    {page !== data?.lastPage && page !== data?.lastPage - 1 && (
+                      <div>. . .</div>
                     )}
 
                     <div
