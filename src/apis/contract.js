@@ -26,6 +26,16 @@ export const createContractToCustomer = ({ customerContactId, contract }) =>
     data: contract,
   });
 
+export const updateContractToCustomer = ({ contractId, contract }) =>
+  http({
+    url: `/contracts/info/${contractId}`,
+    method: "put",
+    data: contract,
+  });
+
+export const reCreateContract = (customerContactId) =>
+  http({ url: `/contracts/${customerContactId}/re-create`, method: "post" });
+
 export const getAllContract = ({ sizePage, currentPage, sort, status }) =>
   http({
     url: `/contracts?sizePage=${sizePage}&currentPage=${currentPage}&sortProperty=createdAt&sort=${sort}&status=${status}`,

@@ -28,6 +28,9 @@ const PlanningPage = () => {
   const location = useLocation();
   const contactId = location.state?.contactId;
   const eventType = location.state?.eventType;
+  const hasContract = location.state?.hasContract;
+  console.log("hasContract > ", hasContract);
+  const readOnly = location.state?.readOnly;
 
   const navigate = useNavigate();
 
@@ -233,7 +236,7 @@ const PlanningPage = () => {
   };
 
   const goToCreateContractPage = () => {
-    navigate("contract", { state: { contactId } });
+    navigate("contract", { state: { contactId, hasContract, readOnly } });
   };
 
   return (
@@ -263,37 +266,41 @@ const PlanningPage = () => {
           Lên kế hoạch cho hợp đồng (Tải file CSV và đưa lên hệ thống)
         </h1>
 
-        <div className="flex items-center space-x-10 mt-12">
-          <p className="w-[15%] text-lg font-medium">Tải tệp CSV: </p>
+        {!readOnly && (
+          <>
+            <div className="flex items-center space-x-10 mt-12">
+              <p className="w-[15%] text-lg font-medium">Tải tệp CSV: </p>
 
-          <p
-            onClick={handleGetCSVFile}
-            className="text-lg font-medium bg-blue-500 text-white px-7 py-3 rounded-md cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-black/30"
-          >
-            Nhấn để tải bản mẫu
-          </p>
-        </div>
+              <p
+                onClick={handleGetCSVFile}
+                className="text-lg font-medium bg-blue-500 text-white px-7 py-3 rounded-md cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-black/30"
+              >
+                Nhấn để tải bản mẫu
+              </p>
+            </div>
 
-        <div className="flex items-center space-x-10 mt-12">
-          <p className="w-[15%] text-lg font-medium">Tệp đã cập nhật: </p>
+            <div className="flex items-center space-x-10 mt-12">
+              <p className="w-[15%] text-lg font-medium">Tệp đã cập nhật: </p>
 
-          {planningIsError ? (
-            <p className="text-center text-slate-400 text-base font-medium">
-              Không thể lấy thông tin kế hoạch! Hãy thử lại sau
-            </p>
-          ) : !planningData?.length ? (
-            <p className="text-center text-slate-400 text-base font-medium">
-              Chưa có thông tin kế hoạch
-            </p>
-          ) : (
-            <p
-              onClick={handleExportCSVFile}
-              className="text-lg font-medium bg-blue-500 text-white px-7 py-3 rounded-md cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-black/30"
-            >
-              Nhấn để tải bản kế hoạch đã cập nhật
-            </p>
-          )}
-        </div>
+              {planningIsError ? (
+                <p className="text-center text-slate-400 text-base font-medium">
+                  Không thể lấy thông tin kế hoạch! Hãy thử lại sau
+                </p>
+              ) : !planningData?.length ? (
+                <p className="text-center text-slate-400 text-base font-medium">
+                  Chưa có thông tin kế hoạch
+                </p>
+              ) : (
+                <p
+                  onClick={handleExportCSVFile}
+                  className="text-lg font-medium bg-blue-500 text-white px-7 py-3 rounded-md cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-black/30"
+                >
+                  Nhấn để tải bản kế hoạch đã cập nhật
+                </p>
+              )}
+            </div>
+          </>
+        )}
 
         <div className="mt-10">
           <div className="mb-10 pb-10 border-b border-slate-300/50">
@@ -413,163 +420,167 @@ const PlanningPage = () => {
                   onClick={goToCreateContractPage}
                   className="text-center text-lg font-medium bg-blue-500 text-white px-7 py-3 mt-8 mx-[40%] rounded-md cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-black/30"
                 >
-                  Tạo hợp đồng
+                  {readOnly ? "Xem hợp đồng" : "Tạo hợp đồng"}
                 </p>
               )}
           </div>
-          <Spin spinning={importFileIsLoading}>
-            {!!planningData?.length && (
-              <p className="text-lg font-medium mb-4 text-center">
-                Cập nhật lại kế hoạch
-              </p>
-            )}
-            <Upload
-              className="flex items-center justify-center space-x-3"
-              maxCount={1}
-              customRequest={({ file, onSuccess }) => {
-                setTimeout(() => {
-                  onSuccess("ok");
-                }, 0);
-              }}
-              showUploadList={false}
-              accept=".csv"
-              onChange={(info) => {
-                setChosenImportCSV(info?.file?.originFileObj);
-              }}
-            >
-              <div className="flex items-center space-x-3 border-dashed border-2 border-slate-400 rounded-lg px-10 py-5 group hover:border-black transition-colors">
-                <FiPlus className="text-2xl text-slate-400 group-hover:text-black transition-colors" />
-                <p className="text-xl text-slate-400 group-hover:text-black transition-colors">
-                  Kéo tệp CSV vào đây
+
+          {!readOnly && (
+            <Spin spinning={importFileIsLoading}>
+              {!!planningData?.length && (
+                <p className="text-lg font-medium mb-4 text-center">
+                  Cập nhật lại kế hoạch
                 </p>
-              </div>
-            </Upload>
-
-            <div
-              className={clsx(
-                "mt-10 overflow-hidden transition-all mb-20",
-                {
-                  "h-0 opacity-0": !tableData,
-                },
-                {
-                  "h-full opacity-100": !!tableData,
-                }
               )}
-            >
-              <Table
-                columns={[
-                  {
-                    title: "Loại hạng mục",
-                    dataIndex: "categoryName",
-                    onCell: (record, index) => {
-                      if (mergeImportValue.has(record?.categoryName)) {
-                        return { rowSpan: 0 };
-                      } else {
-                        const rowCount = tableData?.success?.filter(
-                          (data) => data?.categoryName === record?.categoryName
-                        ).length;
-                        mergeImportValue.add(record?.categoryName);
-                        return { rowSpan: rowCount };
-                      }
-                    },
-                    width: "12%",
-                  },
-                  {
-                    title: "Hạng mục",
-                    dataIndex: "itemName",
-                    width: "15%",
-                    render: (text) => <p className="line-clamp-2">{text}</p>,
-                  },
-                  {
-                    title: "Diễn giải",
-                    dataIndex: "itemDescription",
-                    width: "25%",
-                    render: (text) => <p className="line-clamp-4">{text}</p>,
-                  },
-                  {
-                    title: "Độ ưu tiên",
-                    dataIndex: "itemPriority",
-                    align: "center",
-                  },
-                  {
-                    title: "Đơn vị tính",
-                    dataIndex: "itemPlannedUnit",
-                    align: "center",
-                  },
-                  {
-                    title: "Số lượng",
-                    dataIndex: "itemPlannedAmount",
-                    align: "center",
-                  },
-                  {
-                    title: "Đơn giá",
-                    dataIndex: "itemPlannedPrice",
-                    render: (text) => (
-                      <p className="line-clamp-4">
-                        {text?.toLocaleString()} VNĐ
-                      </p>
-                    ),
-                    align: "center",
-                  },
-                  {
-                    title: "Tổng cộng",
-                    dataIndex: "",
-                    render: (text, record, index) => (
-                      <p className="line-clamp-4">
-                        {(
-                          record?.itemPlannedAmount * record?.itemPlannedPrice
-                        )?.toLocaleString()}{" "}
-                        VNĐ
-                      </p>
-                    ),
-                    align: "center",
-                  },
-                ]}
-                dataSource={tableData?.success}
-                bordered
-                pagination={false}
-              />
-
-              {tableData?.TotalErrorsRecords !== 0 && (
-                <div className="mx-10 mt-5">
-                  <p className="text-xl font-medium">
-                    Đã có {tableData?.TotalErrorsRecords} hàng dữ liệu không đọc
-                    được:
+              <Upload
+                className="flex items-center justify-center space-x-3"
+                maxCount={1}
+                customRequest={({ file, onSuccess }) => {
+                  setTimeout(() => {
+                    onSuccess("ok");
+                  }, 0);
+                }}
+                showUploadList={false}
+                accept=".csv"
+                onChange={(info) => {
+                  setChosenImportCSV(info?.file?.originFileObj);
+                }}
+              >
+                <div className="flex items-center space-x-3 border-dashed border-2 border-slate-400 rounded-lg px-10 py-5 group hover:border-black transition-colors">
+                  <FiPlus className="text-2xl text-slate-400 group-hover:text-black transition-colors" />
+                  <p className="text-xl text-slate-400 group-hover:text-black transition-colors">
+                    Kéo tệp CSV vào đây
                   </p>
-                  <div className="ml-5 my-2">
-                    {tableData?.error?.map((item, index) => (
-                      <p
-                        key={index}
-                        className="flex items-center text-base font-normal text-red-500"
-                      >
-                        <span className="mr-2">
-                          <FaCircle className="text-[6px]" />
-                        </span>{" "}
-                        {item}
-                      </p>
-                    ))}
-                  </div>
                 </div>
-              )}
+              </Upload>
 
-              <div className="my-10 text-center">
-                <Popconfirm
-                  title="Bạn có chắc chắn với bản kế hoạch này ?"
-                  description={
-                    tableData?.TotalErrorsRecords &&
-                    `Mặc dù đang có ${tableData?.TotalErrorsRecords} dữ liệu chưa đọc được`
+              <div
+                className={clsx(
+                  "mt-10 overflow-hidden transition-all mb-20",
+                  {
+                    "h-0 opacity-0": !tableData,
+                  },
+                  {
+                    "h-full opacity-100": !!tableData,
                   }
-                  onConfirm={handlePostPlan}
-                  okText="Có"
-                  cancelText="Không"
-                >
-                  <Button type="primary" size="large">
-                    Cập nhật kế hoạch
-                  </Button>
-                </Popconfirm>
+                )}
+              >
+                <Table
+                  columns={[
+                    {
+                      title: "Loại hạng mục",
+                      dataIndex: "categoryName",
+                      onCell: (record, index) => {
+                        if (mergeImportValue.has(record?.categoryName)) {
+                          return { rowSpan: 0 };
+                        } else {
+                          const rowCount = tableData?.success?.filter(
+                            (data) =>
+                              data?.categoryName === record?.categoryName
+                          ).length;
+                          mergeImportValue.add(record?.categoryName);
+                          return { rowSpan: rowCount };
+                        }
+                      },
+                      width: "12%",
+                    },
+                    {
+                      title: "Hạng mục",
+                      dataIndex: "itemName",
+                      width: "15%",
+                      render: (text) => <p className="line-clamp-2">{text}</p>,
+                    },
+                    {
+                      title: "Diễn giải",
+                      dataIndex: "itemDescription",
+                      width: "25%",
+                      render: (text) => <p className="line-clamp-4">{text}</p>,
+                    },
+                    {
+                      title: "Độ ưu tiên",
+                      dataIndex: "itemPriority",
+                      align: "center",
+                    },
+                    {
+                      title: "Đơn vị tính",
+                      dataIndex: "itemPlannedUnit",
+                      align: "center",
+                    },
+                    {
+                      title: "Số lượng",
+                      dataIndex: "itemPlannedAmount",
+                      align: "center",
+                    },
+                    {
+                      title: "Đơn giá",
+                      dataIndex: "itemPlannedPrice",
+                      render: (text) => (
+                        <p className="line-clamp-4">
+                          {text?.toLocaleString()} VNĐ
+                        </p>
+                      ),
+                      align: "center",
+                    },
+                    {
+                      title: "Tổng cộng",
+                      dataIndex: "",
+                      render: (text, record, index) => (
+                        <p className="line-clamp-4">
+                          {(
+                            record?.itemPlannedAmount * record?.itemPlannedPrice
+                          )?.toLocaleString()}{" "}
+                          VNĐ
+                        </p>
+                      ),
+                      align: "center",
+                    },
+                  ]}
+                  dataSource={tableData?.success}
+                  bordered
+                  pagination={false}
+                />
+
+                {tableData?.TotalErrorsRecords !== 0 && (
+                  <div className="mx-10 mt-5">
+                    <p className="text-xl font-medium">
+                      Đã có {tableData?.TotalErrorsRecords} hàng dữ liệu không
+                      đọc được:
+                    </p>
+                    <div className="ml-5 my-2">
+                      {tableData?.error?.map((item, index) => (
+                        <p
+                          key={index}
+                          className="flex items-center text-base font-normal text-red-500"
+                        >
+                          <span className="mr-2">
+                            <FaCircle className="text-[6px]" />
+                          </span>{" "}
+                          {item}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="my-10 text-center">
+                  <Popconfirm
+                    title="Bạn có chắc chắn với bản kế hoạch này ?"
+                    description={
+                      tableData?.TotalErrorsRecords &&
+                      `Mặc dù đang có ${tableData?.TotalErrorsRecords} dữ liệu chưa đọc được`
+                    }
+                    onConfirm={handlePostPlan}
+                    okText="Có"
+                    cancelText="Không"
+                  >
+                    <Button type="primary" size="large">
+                      Cập nhật kế hoạch
+                    </Button>
+                  </Popconfirm>
+                </div>
               </div>
-            </div>
-          </Spin>
+            </Spin>
+          )}
         </div>
       </motion.div>
 

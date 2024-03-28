@@ -22,7 +22,11 @@ import {
 import dayjs from "dayjs";
 import viVN from "antd/locale/vi_VN";
 import { getEventType } from "../../apis/events";
-import { createContractToCustomer } from "../../apis/contract";
+import {
+  createContractToCustomer,
+  reCreateContract,
+  updateContractToCustomer,
+} from "../../apis/contract";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 
 const { RangePicker } = DatePicker;
@@ -36,6 +40,9 @@ const Title = memo(({ title }) => (
 const ContractPage = () => {
   const location = useLocation();
   const contactId = location.state?.contactId;
+  const hasContract = location.state?.hasContract;
+  console.log("hasContract > ", hasContract);
+  const readOnly = location.state?.readOnly;
 
   const navigate = useNavigate();
 
@@ -76,7 +83,7 @@ const ContractPage = () => {
         onSuccess: (data) => {
           messageApp.open({
             type: "success",
-            content: "Đã tạo hợp đồng thành công",
+            content: "Đã tạo hợp đồng thành công.",
           });
 
           navigate("/manager/customer", {
@@ -93,6 +100,48 @@ const ContractPage = () => {
         },
       }
     );
+
+  const { mutate: updateContractMutate, isLoading: updateContractIsLoading } =
+    useMutation(
+      ({ contractId, contract }) =>
+        updateContractToCustomer({ contractId, contract }),
+      {
+        onSuccess: (data) => {
+          reCreateContractMutate(contactId);
+        },
+        onError: (err) => {
+          console.log("erorr > ", err);
+          messageApi.open({
+            type: "error",
+            content: "Không thể tạo hợp đồng lúc này! Hãy thử lại sau",
+          });
+        },
+      }
+    );
+
+  const {
+    mutate: reCreateContractMutate,
+    isLoading: reCreateContractIsLoading,
+  } = useMutation((customerContactId) => reCreateContract(customerContactId), {
+    onSuccess: (data) => {
+      messageApp.open({
+        type: "success",
+        content: "Đã cập nhật lại hợp đồng thành công.",
+      });
+
+      navigate("/manager/customer", {
+        replace: true,
+        state: { isSuccess: true },
+      });
+    },
+    onError: (err) => {
+      console.log("erorr > ", err);
+      messageApi.open({
+        type: "error",
+        content: "Không thể tạo hợp đồng lúc này! Hãy thử lại sau",
+      });
+    },
+  });
 
   const setupEventValues = (values) => {
     return {
@@ -119,10 +168,17 @@ const ContractPage = () => {
     };
     console.log("contractValues > ", contractValues);
 
-    createContractMutate({
-      customerContactId: contactId,
-      contract: contractValues,
-    });
+    if (!hasContract) {
+      createContractMutate({
+        customerContactId: contactId,
+        contract: contractValues,
+      });
+    } else {
+      updateContractMutate({
+        contractId: hasContract?.id,
+        contract: contractValues,
+      });
+    }
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -152,7 +208,11 @@ const ContractPage = () => {
       {contextHolder}
 
       <LockLoadingModal
-        isModalOpen={createContractIsLoading}
+        isModalOpen={
+          createContractIsLoading ||
+          updateContractIsLoading ||
+          reCreateContractIsLoading
+        }
         label="Đang tạo hợp đồng và gửi cho khách hàng ..."
       />
 
@@ -176,8 +236,11 @@ const ContractPage = () => {
       <motion.div
         initial={{ x: -75 }}
         animate={{ x: 0 }}
-        className="bg-white mt-8 mb-20 px-10 py-5 rounded-2xl"
+        className="bg-white mt-8 mb-20 px-10 py-10 rounded-2xl relative overflow-hidden"
       >
+        {readOnly && (
+          <div className="absolute top-0 bottom-0 right-0 left-0 bg-slate-200/10 z-10" />
+        )}
         <Form
           form={form}
           onFinish={onFinish}
@@ -191,6 +254,8 @@ const ContractPage = () => {
             }
           }}
           initialValues={{
+            eventName: hasContract ? hasContract?.eventName : null,
+            processingDate: hasContract ? hasContract?.processingDate : null,
             location: contactInfo?.address,
             description: contactInfo?.note
               ? {
@@ -538,7 +603,9 @@ const ContractPage = () => {
                     <DatePicker
                       size="large"
                       defaultValue={
-                        form.getFieldValue("processingDate")
+                        hasContract
+                          ? dayjs(hasContract?.processingDate, "YYYY-MM-DD")
+                          : form.getFieldValue("processingDate")
                           ? dayjs(
                               form.getFieldValue("processingDate"),
                               "YYYY-MM-DD"
@@ -602,25 +669,27 @@ const ContractPage = () => {
             </div>
           </>
 
-          <div className="text-center mt-8 mb-6">
-            <Popconfirm
-              title="Bạn đã chắc chắn với các thông tin trên ?"
-              description={
-                <p>
-                  Các thông tin trên sẽ được đưa vào hợp đồng <br /> và gửi cho
-                  khách hàng
-                </p>
-              }
-              onConfirm={() => form.submit()}
-              okText="Có"
-              cancelText="Không"
-              placement="top"
-            >
-              <Button size="large" type="primary">
-                Tạo hợp đồng
-              </Button>
-            </Popconfirm>
-          </div>
+          {!readOnly && (
+            <div className="text-center mt-8 mb-6">
+              <Popconfirm
+                title="Bạn đã chắc chắn với các thông tin trên ?"
+                description={
+                  <p>
+                    Các thông tin trên sẽ được đưa vào hợp đồng <br /> và gửi
+                    cho khách hàng
+                  </p>
+                }
+                onConfirm={() => form.submit()}
+                okText="Có"
+                cancelText="Không"
+                placement="top"
+              >
+                <Button size="large" type="primary">
+                  {hasContract ? "Cập nhật hợp đồng" : "Tạo hợp đồng"}
+                </Button>
+              </Popconfirm>
+            </div>
+          )}
         </Form>
       </motion.div>
 

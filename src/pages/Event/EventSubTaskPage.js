@@ -47,6 +47,7 @@ import { redirectionActions } from "../../store/redirection";
 import moment from "moment";
 import momenttz from "moment-timezone";
 import AssignmentHistoryModal from "../../components/Modal/AssignmentHistoryModal";
+import { socketOnNotification } from "../../utils/socket";
 
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
@@ -57,6 +58,8 @@ const EventSubTaskPage = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { eventName, dateRange } = location.state ?? {};
 
   const dispatch = useDispatch();
   const { redirect } = useSelector((state) => state.redirection);
@@ -69,9 +72,23 @@ const EventSubTaskPage = () => {
 
   const [messageApi, contextHolder] = message.useMessage();
 
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    socketOnNotification(handleRefetchComment);
   }, []);
+
+  const handleRefetchComment = (notification) => {
+    if (notification?.type === "COMMENT") {
+      queryClient.invalidateQueries(["comment", taskId]);
+    }
+
+    if (notification?.type === "TASK") {
+      queryClient.invalidateQueries(["tasks", eventId, taskId]);
+    }
+  };
 
   const resetTaskRedirect = () => {
     if (redirect.task) dispatch(redirectionActions.taskChange(undefined));
@@ -149,7 +166,6 @@ const EventSubTaskPage = () => {
   });
   console.log("comments > ", comments);
 
-  const queryClient = useQueryClient();
   const {
     mutate: updateEventStatusMutate,
     isLoading: updateEventStatusIsLoading,
@@ -181,7 +197,7 @@ const EventSubTaskPage = () => {
     navigate(`/manager/event/${eventId}/task`, {
       state: {
         eventId,
-        eventName: location.state?.eventName,
+        eventName: eventName,
         dateRange: [tasks?.startDate, tasks?.endDate],
 
         isSubTask: true,
@@ -213,10 +229,8 @@ const EventSubTaskPage = () => {
       state: {
         eventId,
         eventName: tasks?.eventDivision?.event?.eventName,
-        dateRange: location.state?.dateRange,
-
+        dateRange,
         isSubTask: false,
-
         updateData,
       },
     });
@@ -365,12 +379,14 @@ const EventSubTaskPage = () => {
   return (
     <Fragment>
       {contextHolder}
-      <FloatButton
-        onClick={goToCreateSubTask}
-        icon={<BsPlus />}
-        type="primary"
-        tooltip={<p>Tạo công việc</p>}
-      />
+      {tasks?.status !== "CONFIRM" && (
+        <FloatButton
+          onClick={goToCreateSubTask}
+          icon={<BsPlus />}
+          type="primary"
+          tooltip={<p>Tạo công việc</p>}
+        />
+      )}
 
       <SubTaskModal
         isOpenModal={isOpenModal}
@@ -396,7 +412,7 @@ const EventSubTaskPage = () => {
           </Link>{" "}
           /{" "}
           <Link to=".." relative="path">
-            {location.state?.eventName ?? "Tên sự kiện"}
+            {eventName ?? "Tên sự kiện"}
           </Link>{" "}
           / {tasks?.title}
         </p>

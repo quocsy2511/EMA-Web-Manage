@@ -60,6 +60,18 @@ const ContactModal = ({
       state: {
         contactId: contact?.id,
         eventType: contact?.eventType?.id,
+        hasContract,
+      },
+    });
+  };
+
+  const goToPlanningPageSent = () => {
+    navigate("planning", {
+      state: {
+        contactId: contact?.id,
+        eventType: contact?.eventType?.id,
+        hasContract,
+        readOnly: true,
       },
     });
   };
@@ -231,6 +243,20 @@ const ContactModal = ({
           {/* button */}
           <div className="w-full flex flex-row justify-end items-center font-semibold text-[#103f6e] mb-2 gap-x-3">
             <div className="w-full bg-gray-200 h-[1px]" />
+            {/* {contact?.status === "WAIT_FOR_SIGN" && (
+              <Popconfirm
+                title="Xác nhận chấp nhận liên hệ"
+                description="Bạn có chắc chắn chấp nhận liên hệ này?"
+                onConfirm={goToPlanningPageSent}
+                okText="Đồng ý"
+                cancelText="Hủy"
+              >
+                <Button type="primary" size="large" icon={<CheckOutlined />}>
+                  Xem chi tiết
+                </Button>
+              </Popconfirm>
+            )} */}
+
             {contact?.status === "PENDING" && (
               <Popconfirm
                 title="Xác nhận chấp nhận liên hệ"
@@ -288,8 +314,7 @@ const ContactModal = ({
                     Lên kế hoạch
                   </Button>
                 </>
-              ) : // ) : hasContract?.status === "SUCCESS" ? (
-              hasContract?.status === "PAID" ? (
+              ) : hasContract?.status === "PAID" ? (
                 <Button
                   onClick={goToCreateEventPage}
                   type="primary"
@@ -297,6 +322,16 @@ const ContactModal = ({
                   icon={<CheckOutlined />}
                 >
                   Tạo sự kiện
+                </Button>
+              ) : hasContract?.status === "WAIT_FOR_SIGN" ||
+                hasContract?.status === "PENDING" ? (
+                <Button
+                  type="primary"
+                  onClick={goToPlanningPageSent}
+                  size="large"
+                  icon={<CheckOutlined />}
+                >
+                  Xem chi tiết
                 </Button>
               ) : (
                 <></>

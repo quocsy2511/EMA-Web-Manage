@@ -17,7 +17,7 @@ export const setSocketToken = (token) => {
   socket.disconnect().connect(); // Reconnect
 };
 
-export const socketListener = (dispatch, notificationAPI) => {
+export const socketListener = (dispatch) => {
   // create connection
   socket.on("connect-success", () => {
     console.log("Successfully connect with socket.io server : ", socket.id);
@@ -26,29 +26,6 @@ export const socketListener = (dispatch, notificationAPI) => {
   // disconnect
   socket.on("disconnect", () => {
     console.log("Disconnect with socket.io server : ", socket.id);
-  });
-
-  // Listen to get notification
-  socket.on("notification", (data) => {
-    console.log(" -------- notification data:", data);
-
-    // queryClient.invalidateQueries(["notifications", "10"]);
-
-    notificationAPI.open({
-      message: <p className="text-base">Đã nhận 1 thông báo</p>,
-      description: (
-        <div className="flex items-center gap-x-3">
-          <Avatar className="w-1/4" src={data?.avatarSender} />
-          <p className="text-sm flex-1">
-            <span className="font-semibold">
-              {data?.content?.split("đã")[0]}{" "}
-            </span>
-            đã {data?.content?.split("đã")[1]}
-          </p>
-        </div>
-      ),
-      duration: 3,
-    });
   });
 
   // Listen to incoming message
@@ -91,9 +68,34 @@ export const socketListener = (dispatch, notificationAPI) => {
   });
 };
 
+export const displayNotification = (notification, queryClient) => {
+  // Listen to get notification
+  socket.on("notification", (data) => {
+    console.log(" -------- displayNotification data:", data);
+
+    queryClient.invalidateQueries(["notifications", "10", 1, "ALL"]);
+
+    notification.open({
+      message: <p className="text-base">Đã nhận 1 thông báo</p>,
+      description: (
+        <div className="flex items-center gap-x-3">
+          <Avatar className="w-10 h-10" src={data?.avatarSender} />
+          <p className="text-sm flex-1">
+            <span className="font-semibold">
+              {data?.content?.split("đã")[0]}{" "}
+            </span>
+            đã {data?.content?.split("đã")[1]}
+          </p>
+        </div>
+      ),
+      duration: 3,
+    });
+  });
+};
+
 export const socketOnNotification = (refetchFunction) => {
   socket.on("notification", (data) => {
-    console.log("Export notification data > ", data);
+    console.log("socketOnNotification data > ", data);
 
     // const data = {
     //   title: "Đã có một comment mới ",
