@@ -1,7 +1,15 @@
 import React, { Fragment, memo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { App, Avatar, Button, Checkbox, Collapse, message } from "antd";
+import {
+  App,
+  Avatar,
+  Button,
+  Checkbox,
+  Collapse,
+  ConfigProvider,
+  message,
+} from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllDivision } from "../../apis/divisions";
 import { defaultAvatar } from "../../constants/global";
@@ -14,7 +22,7 @@ import clsx from "clsx";
 const EventAssignDivisionPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { eventId, eventName, listDivisionId } = location.state;
+  const { eventId, eventName, listDivisionId } = location.state ?? {};
 
   const [selectedDivisions, setSelectedDivisions] = useState(
     listDivisionId ?? []
@@ -79,6 +87,14 @@ const EventAssignDivisionPage = () => {
     mutate({ eventId, divisionId: selectedDivisions });
   };
 
+  const handleSelectAll = () => {
+    if (selectedDivisions?.length === listDivisionId?.length) {
+      setSelectedDivisions([]);
+    } else {
+      setSelectedDivisions(divisions?.map((division) => division?.id));
+    }
+  };
+
   if (divisionsIsLoading) {
     return (
       <div className="h-[calc(100vh-128px)] w-full">
@@ -97,10 +113,6 @@ const EventAssignDivisionPage = () => {
   return (
     <Fragment>
       {contextHolder}
-      {/* <LockLoadingModal
-        isModalOpen={isLoading}
-        label="Đang cập nhật sự kiện ..."
-      /> */}
 
       <motion.div
         initial={{ y: -75 }}
@@ -137,11 +149,31 @@ const EventAssignDivisionPage = () => {
         ) : (
           <div className="mx-10 my-8 space-y-5">
             <div className="flex justify-between">
-              <p className="text-xl font-medium">Chọn bộ phận phù hợp</p>
+              <div className="flex space-x-4">
+                <p className="text-xl font-medium">Chọn bộ phận phù hợp</p>
+                <ConfigProvider
+                  theme={{
+                    token: {
+                      colorPrimaryHover:
+                        selectedDivisions?.length === listDivisionId?.length
+                          ? "#ff4d4f"
+                          : "#1677ff",
+                    },
+                  }}
+                >
+                  <Button type="dashed" onClick={handleSelectAll}>
+                    {selectedDivisions?.length === listDivisionId?.length
+                      ? "Bỏ chọn tất cả"
+                      : "Chọn tất cả"}
+                  </Button>
+                </ConfigProvider>
+              </div>
+
               <Button
                 type="primary"
                 onClick={handleUpdateDivision}
                 loading={isLoading}
+                size="large"
               >
                 Áp dụng
               </Button>

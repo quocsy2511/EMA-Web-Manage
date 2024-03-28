@@ -50,10 +50,10 @@ const DefaultTemplateTask = memo(
     isDefault,
     custom,
     toggleSelectTemplateTasks,
-    messageApi,
     task,
     handleUpdateDesc,
   }) => {
+    console.log("task > ", task);
     const [descText, setDescText] = useState();
 
     useEffect(() => {
@@ -68,6 +68,22 @@ const DefaultTemplateTask = memo(
         identifier && clearTimeout(identifier);
       };
     }, [descText]);
+
+    let renderPriority;
+    switch (task?.itemPriority) {
+      case 1:
+        renderPriority = "THẤP";
+        break;
+      case 2:
+        renderPriority = "VỪA";
+        break;
+      case 3:
+        renderPriority = "CAO";
+        break;
+
+      default:
+        break;
+    }
 
     return (
       <Tooltip title={!isDefault && !custom && "Chọn"}>
@@ -114,7 +130,7 @@ const DefaultTemplateTask = memo(
             )}
           </div>
 
-          <div className="p-5 pt-3 pb-20">
+          <div className="p-5 pt-3 pb-12">
             <div>
               <Title title="Mô tả" />
 
@@ -128,6 +144,13 @@ const DefaultTemplateTask = memo(
                   setDescText(editor.getContents());
                 }}
               />
+            </div>
+          </div>
+
+          <div className="p-5 pt-3 pb-8">
+            <div className="flex space-x-4 items-center">
+              <Title title="Độ ưu tiên" />
+              <p className="border px-2 py-0.5 rounded-lg text-sm">{renderPriority}</p>
             </div>
           </div>
         </div>
@@ -247,6 +270,7 @@ const EventCreationPage = () => {
     },
     refetchOnWindowFocus: false,
   });
+  console.log("planningData > ", planningData);
 
   useEffect(() => {
     planningData && setTaskList(planningData);
@@ -303,6 +327,14 @@ const EventCreationPage = () => {
 
   const toggleSelectTemplateTasks = () => {
     setSelectTemplateTasks((prev) => [...prev, 1]);
+  };
+
+  const handleSelectAllDivision = () => {
+    if (!selectedDivision?.length) {
+      setSelectedDivision(divisions?.map((division) => division?.id));
+    } else {
+      setSelectedDivision([]);
+    }
   };
 
   const setupEventValues = (values) => {
@@ -688,7 +720,25 @@ const EventCreationPage = () => {
           </div>
 
           <div className="mb-10">
-            <Title title="Bộ phận tham gia" />
+            <div className="flex justify-between items-center">
+              <Title title="Bộ phận tham gia" />
+              <ConfigProvider
+                theme={{
+                  token: {
+                    colorPrimaryHover:
+                      selectedDivision?.length === divisions?.length
+                        ? "#ff4d4f"
+                        : "#1677ff",
+                  },
+                }}
+              >
+                <Button onClick={handleSelectAllDivision}>
+                  {selectedDivision?.length === divisions?.length
+                    ? "Bỏ chọn tất cả"
+                    : "Chọn tất cả"}
+                </Button>
+              </ConfigProvider>
+            </div>
             <div className="flex flex-wrap items-center mt-5 gap-x-3 gap-y-5">
               {divisions?.map((division) => (
                 <div

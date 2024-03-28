@@ -22,13 +22,26 @@ import { chatsActions } from "../../store/chats";
 import { closeConnectSocket } from "../../utils/socket";
 import { chatDetailActions } from "../../store/chat_detail";
 
-const NotiLabel = ({ item, manager, staff }) => {
-  console.log("🚀 ~ NotiLabel ~ item:", item);
+const NotiLabel = ({ item, navigate, location, manager, staff }) => {
+  // item = {
+  //   id: "43b440bf-70ae-45a4-b162-55ea71e7e590",
+  //   title: "Đã có một comment mới ",
+  //   content: "Tài Trương đã comment vào Thư mời (dạng PDF)",
+  //   type: "COMMENT",
+  //   status: 1,
+  //   eventID: null,
+  //   commonId: "883dc923-3047-477b-b8a5-ae742e1ba7aa",
+  //   parentTaskId: null,
+  //   contractId: null,
+  //   avatarSender:
+  //     "https://i0.wp.com/www.muscleandfitness.com/wp-content/uploads/2015/03/John_Cena.jpg?quality=86&strip=all",
+  //   createdAt: "2024-03-28T03:05:51.883Z",
+  //   isRead: 0,
+  //   readAt: null,
+  // };
   let time;
-  const location = useLocation();
-  const navigate = useNavigate();
+
   const currentDate = momenttz();
-  const dispatch = useDispatch();
   const targetDate = momenttz(item?.createdAt);
 
   if (currentDate.diff(targetDate, "minutes") < 5) {
@@ -48,100 +61,147 @@ const NotiLabel = ({ item, manager, staff }) => {
   }
 
   const handleNavigate = () => {
-    if (staff) {
-      if (item?.type === "TASK") {
-        console.log("task");
-        dispatch(
-          redirectionActions.taskChange({
-            commonId: item?.commonId,
-            parentTaskId: item?.parentTaskId,
-          })
-        );
+    // if (staff) {
+    //   if (item?.type === "TASK") {
+    //     console.log("task");
+    //     // dispatch(
+    //     //   redirectionActions.taskChange({
+    //     //     commonId: item?.commonId,
+    //     //     parentTaskId: item?.parentTaskId,
+    //     //   })
+    //     // );
 
-        if (item?.parentTaskId) {
-          if (location.pathname !== `/staff/event/${item?.eventID}`) {
-            navigate(`/staff/event/${item?.eventID}`);
-          }
-        } else {
-          if (location.pathname !== `/staff/event/${item?.eventID}`) {
-            navigate(`/staff/event/${item?.eventID}`);
-          }
+    //     if (item?.parentTaskId) {
+    //       if (location.pathname !== `/staff/event/${item?.eventID}`) {
+    //         navigate(`/staff/event/${item?.eventID}`);
+    //       }
+    //     } else {
+    //       if (location.pathname !== `/staff/event/${item?.eventID}`) {
+    //         navigate(`/staff/event/${item?.eventID}`);
+    //       }
+    //     }
+    //   } else if (item?.type === "COMMENT") {
+    //     console.log("comment");
+    //     // dispatch(redirectionActions.commentChange(item?.commonId));
+    //     // dispatch(
+    //     //   redirectionActions.taskChange({
+    //     //     commonId: item?.commonId,
+    //     //     parentTaskId: item?.parentTaskId,
+    //     //   })
+    //     // );
+    //     if (location.pathname !== "/staff/request") {
+    //       navigate(`/staff/event/${item?.eventID}`);
+    //     }
+    //   }
+    // } else if (manager) {
+    //   if (item?.type === "TASK") {
+    //     console.log("task");
+    //     // dispatch(
+    //     //   redirectionActions.taskChange({
+    //     //     commonId: item?.commonId,
+    //     //     parentTaskId: item?.parentTaskId,
+    //     //   })
+    //     // );
+    //     if (item?.parentTaskId) {
+    //       if (
+    //         location.pathname !==
+    //         `/manager/event/${item?.eventID}/${item?.paentTaskId}`
+    //       ) {
+    //         navigate(`/manager/event/${item?.eventID}/${item?.parentTaskId}`);
+    //       }
+    //     } else {
+    //       if (
+    //         location.pathname !==
+    //         `/manager/event/${item?.eventID}/${item?.commonId}`
+    //       ) {
+    //         navigate(`/manager/event/${item?.eventID}/${item?.commonId}`);
+    //       }
+    //     }
+    //   } else if (item?.type === "COMMENT") {
+    //     console.log("comment");
+    //     // dispatch(redirectionActions.commentChange(item?.commonId));
+    //     if (location.pathname !== "/manager/request") {
+    //       navigate(`/manager/event/${item?.eventID}/${item?.commenId}`);
+    //     }
+    //   }
+    // } else {
+    //   if (item?.type === "TASK") {
+    //     console.log("task");
+    //     // dispatch(
+    //     //   redirectionActions.taskChange({
+    //     //     commonId: item?.commonId,
+    //     //     parentTaskId: item?.parentTaskId,
+    //     //   })
+    //     // );
+    //     if (item?.parentTaskId) {
+    //       if (
+    //         location.pathname !==
+    //         `/manager/event/${item?.eventID}/${item?.paentTaskId}`
+    //       ) {
+    //         navigate(`/manager/event/${item?.eventID}/${item?.parentTaskId}`);
+    //       }
+    //     } else {
+    //       if (
+    //         location.pathname !==
+    //         `/manager/event/${item?.eventID}/${item?.commonId}`
+    //       ) {
+    //         navigate(`/manager/event/${item?.eventID}/${item?.commonId}`);
+    //       }
+    //     }
+    //   } else if (item?.type === "COMMENT") {
+    //     console.log("comment");
+    //     // dispatch(redirectionActions.commentChange(item?.commonId));
+    //     if (location.pathname !== "/manager/request") {
+    //       navigate(`/manager/event/${item?.eventID}/${item?.commenId}`);
+    //     }
+    //   }
+    // }
+    switch (item?.type) {
+      case "TASK":
+        if (!!manager) {
         }
-      } else if (item?.type === "COMMENT") {
-        console.log("comment");
-        dispatch(redirectionActions.commentChange(item?.commonId));
-        dispatch(
-          redirectionActions.taskChange({
-            commonId: item?.commonId,
-            parentTaskId: item?.parentTaskId,
-          })
-        );
-        if (location.pathname !== "/staff/request") {
-          navigate(`/staff/event/${item?.eventID}`);
+
+        if (!!staff) {
         }
-      }
-    } else if (manager) {
-      if (item?.type === "TASK") {
-        console.log("task");
-        dispatch(
-          redirectionActions.taskChange({
-            commonId: item?.commonId,
-            parentTaskId: item?.parentTaskId,
-          })
-        );
-        if (item?.parentTaskId) {
-          if (
-            location.pathname !==
-            `/manager/event/${item?.eventID}/${item?.parentTaskId}`
-          ) {
-            navigate(`/manager/event/${item?.eventID}/${item?.parentTaskId}`);
-          }
-        } else {
-          if (
-            location.pathname !==
-            `/manager/event/${item?.eventID}/${item?.commonId}`
-          ) {
-            navigate(`/manager/event/${item?.eventID}/${item?.commonId}`);
-          }
+        break;
+      case "SUBTASK":
+        if (!!manager) {
         }
-      } else if (item?.type === "COMMENT") {
-        console.log("comment");
-        dispatch(redirectionActions.commentChange(item?.commonId));
-        if (location.pathname !== "/manager/request") {
-          navigate(`/manager/event/${item?.eventID}/${item?.commenId}`);
+
+        if (!!staff) {
         }
-      }
-    } else {
-      if (item?.type === "TASK") {
-        console.log("task");
-        dispatch(
-          redirectionActions.taskChange({
-            commonId: item?.commonId,
-            parentTaskId: item?.parentTaskId,
-          })
-        );
-        if (item?.parentTaskId) {
-          if (
-            location.pathname !==
-            `/manager/event/${item?.eventID}/${item?.paentTaskId}`
-          ) {
-            navigate(`/manager/event/${item?.eventID}/${item?.parentTaskId}`);
-          }
-        } else {
-          if (
-            location.pathname !==
-            `/manager/event/${item?.eventID}/${item?.commonId}`
-          ) {
-            navigate(`/manager/event/${item?.eventID}/${item?.commonId}`);
-          }
+        break;
+      case "COMMENT":
+        if (!!manager) {
         }
-      } else if (item?.type === "COMMENT") {
-        console.log("comment");
-        dispatch(redirectionActions.commentChange(item?.commonId));
-        if (location.pathname !== "/manager/request") {
-          navigate(`/manager/event/${item?.eventID}/${item?.commenId}`);
+
+        if (!!staff) {
         }
-      }
+        break;
+      case "CONTRACT":
+        if (!!manager) {
+        }
+
+        if (!!staff) {
+        }
+        break;
+      case "COMMENT_SUBTASK":
+        if (!!manager) {
+        }
+
+        if (!!staff) {
+        }
+        break;
+      case "BUDGET":
+        if (!!manager) {
+        }
+
+        if (!!staff) {
+        }
+        break;
+
+      default:
+        break;
     }
   };
 
@@ -192,7 +252,7 @@ const Header = ({ collapsed, setCollapsed }) => {
       refetchOnWindowFocus: false,
     }
   );
-  // console.log("notifications: ", notifications);
+  console.log("notifications: ", notifications);
 
   const queryClient = useQueryClient();
   // const { mutate: seenNotificationMutate } = useMutation(
@@ -295,66 +355,65 @@ const Header = ({ collapsed, setCollapsed }) => {
 
         <div className="flex items-center">
           <div className="cursor-pointer flex items-center">
-            {!!manager ||
-              (!!staff && (
-                <Dropdown
-                  menu={{
-                    // items: notiItems,
-                    items: [
-                      ...(notifications?.map((noti) => ({
-                        key: noti.id,
-                        label: (
-                          <NotiLabel
-                            item={noti}
-                            navigate={navigate}
-                            location={location}
-                            manager={manager}
-                            staff={staff}
-                          />
-                        ),
-                      })) ?? []),
-                      {
-                        key: "navigate",
-                        label: (
-                          <p
-                            onClick={() =>
-                              !!manager
-                                ? navigate("/manager/notification")
-                                : !!staff && navigate("/staff/notification")
-                            }
-                            className="text-center text-blue-400"
-                          >
-                            Xem tất cả
-                          </p>
-                        ),
-                      },
-                    ],
-                    onClick: onClickNotification,
-                  }}
-                  trigger={["click"]}
-                  placement="bottomRight"
-                  arrow
-                  disabled={notifications?.length === 0}
+            {(!!manager || !!staff) && (
+              <Dropdown
+                menu={{
+                  // items: notiItems,
+                  items: [
+                    ...(notifications?.map((noti) => ({
+                      key: noti.id,
+                      label: (
+                        <NotiLabel
+                          item={noti}
+                          navigate={navigate}
+                          location={location}
+                          manager={manager}
+                          staff={staff}
+                        />
+                      ),
+                    })) ?? []),
+                    {
+                      key: "navigate",
+                      label: (
+                        <p
+                          onClick={() =>
+                            !!manager
+                              ? navigate("/manager/notification")
+                              : !!staff && navigate("/staff/notification")
+                          }
+                          className="text-center text-blue-400"
+                        >
+                          Xem tất cả
+                        </p>
+                      ),
+                    },
+                  ],
+                  onClick: onClickNotification,
+                }}
+                trigger={["click"]}
+                placement="bottomRight"
+                arrow
+                disabled={notifications?.length === 0}
+              >
+                <Badge
+                  size={"default"}
+                  count={
+                    notifications?.length && notifications?.length >= 10
+                      ? "9+"
+                      : notifications?.length ?? 0
+                  }
+                  offset={[-2, 2]}
+                  title={`${notifications?.length ?? 0} thông báo`}
+                  onClick={(e) => e.preventDefault()}
                 >
-                  <Badge
-                    size={"default"}
-                    count={
-                      notifications?.length && notifications?.length >= 10
-                        ? "9+"
-                        : notifications?.length ?? 0
-                    }
-                    offset={[-2, 2]}
-                    title={`${notifications?.length ?? 0} thông báo`}
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    {notifications?.length === 0 ? (
-                      <HiOutlineBell size={25} />
-                    ) : (
-                      <HiOutlineBellAlert size={25} />
-                    )}
-                  </Badge>
-                </Dropdown>
-              ))}
+                  {notifications?.length === 0 ? (
+                    <HiOutlineBell size={25} />
+                  ) : (
+                    <HiOutlineBellAlert size={25} />
+                  )}
+                </Badge>
+              </Dropdown>
+            )}
           </div>
 
           <div className="w-10" />

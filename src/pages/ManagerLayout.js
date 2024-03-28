@@ -1,15 +1,16 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Avatar, Layout, notification } from "antd";
+import { App, Layout } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Outlet, ScrollRestoration } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Header from "../components/Header/Header";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
 
 import {
   cleanUpOnMessage,
   cleanUpOnlineGroupUsersReceived,
+  displayNotification,
   getOnlineGroupUsersSocket,
   socketListener,
 } from "../utils/socket";
@@ -20,11 +21,14 @@ const ManagerLayout = () => {
 
   const [collapsed, setCollapsed] = useState(false);
 
-  const [notificationAPI, contextHolder] = notification.useNotification();
+  const { notification } = App.useApp();
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // create socket connection
-    socketListener(dispatch, notificationAPI);
+    socketListener(dispatch);
+    displayNotification(notification, queryClient);
 
     // get online user
     getOnlineGroupUsersSocket();
@@ -39,7 +43,6 @@ const ManagerLayout = () => {
 
   return (
     <Fragment>
-      {contextHolder}
       <Layout
         style={{
           minHeight: "100vh",
