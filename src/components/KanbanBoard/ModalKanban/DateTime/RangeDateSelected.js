@@ -41,10 +41,18 @@ const RangeDateSelected = ({
   };
 
   const onChangeDate = (value, dateString) => {
-    const isoStartDate = moment(dateString[0]).toISOString();
-    const isoEndDate = moment(dateString[1]).toISOString();
-    setStartDateUpdate(isoStartDate);
-    setEndDateUpdate(isoEndDate);
+    if (dateString?.length > 0) {
+      const formatStart = moment(dateString?.[0], "DD-MM-YYYY").format(
+        "YYYY-MM-DD"
+      );
+      const formatEnd = moment(dateString?.[1], "DD-MM-YYYY").format(
+        "YYYY-MM-DD"
+      );
+      const isoStartDate = moment(formatStart).toISOString();
+      const isoEndDate = moment(formatEnd).toISOString();
+      setStartDateUpdate(isoStartDate);
+      setEndDateUpdate(isoEndDate);
+    }
   };
 
   ///////////////validate Date
@@ -140,7 +148,7 @@ const RangeDateSelected = ({
                   placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
                   disabledDate={disabledDate}
                   onChange={onChangeDate}
-                  format="YYYY/MM/DD"
+                  format="DD-MM-YYYY"
                   onFocus={onFocusRangePicker}
                   allowClear={false}
                 />
@@ -177,7 +185,7 @@ const RangeDateSelected = ({
         </div>
       ) : (
         <div className="flex justify-start items-center mt-4 px-3 cursor-pointer">
-          <RangePicker onChange={onChangeDate} format="YYYY/MM/DD" />
+          <RangePicker onChange={onChangeDate} format="DD-MM-YYYY" />
         </div>
       )}
     </>

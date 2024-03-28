@@ -243,19 +243,6 @@ const ContactModal = ({
           {/* button */}
           <div className="w-full flex flex-row justify-end items-center font-semibold text-[#103f6e] mb-2 gap-x-3">
             <div className="w-full bg-gray-200 h-[1px]" />
-            {/* {contact?.status === "WAIT_FOR_SIGN" && (
-              <Popconfirm
-                title="Xác nhận chấp nhận liên hệ"
-                description="Bạn có chắc chắn chấp nhận liên hệ này?"
-                onConfirm={goToPlanningPageSent}
-                okText="Đồng ý"
-                cancelText="Hủy"
-              >
-                <Button type="primary" size="large" icon={<CheckOutlined />}>
-                  Xem chi tiết
-                </Button>
-              </Popconfirm>
-            )} */}
 
             {contact?.status === "PENDING" && (
               <Popconfirm

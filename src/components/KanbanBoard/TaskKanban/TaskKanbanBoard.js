@@ -21,6 +21,8 @@ const TaskKanbanBoard = ({
   task,
   setTaskSelected,
 }) => {
+  console.log("🚀 ~ task:", task);
+
   const { id, status } = task ?? {};
   const {
     data: subtaskDetails,
@@ -39,8 +41,8 @@ const TaskKanbanBoard = ({
       select: (data) => {
         if (data?.startDate && data?.endDate) {
           const formatDate = data.map(({ ...item }) => {
-            item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
-            item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
+            item.startDate = moment(item?.startDate).format("YYYY-MM-DD");
+            item.endDate = moment(item?.endDate).format("YYYY-MM-DD");
             return {
               ...item,
             };
@@ -70,7 +72,7 @@ const TaskKanbanBoard = ({
   } = useQuery(["comments", id], () => getComment(id), {
     select: (data) => {
       const formatDate = data.map(({ ...item }) => {
-        item.createdAt = moment(item?.createdAt).format("MM/DD ");
+        item.createdAt = moment(item?.createdAt).format("DD-MM");
         return {
           ...item,
         };
@@ -103,7 +105,7 @@ const TaskKanbanBoard = ({
       OVERDUE: { color: "orange", title: "QUÁ HẠN" },
       LOW: { color: "warning", title: "THẤP" },
       HIGH: { color: "red", title: "CAO" },
-      MEDIUM: { color: "processing", title: "TRUNG BÌNH" },
+      MEDIUM: { color: "processing", title: "VỪA" },
     };
     //colorMapping[status] ở đây để truy suất value bằng key
     return colorMapping[value];
@@ -114,7 +116,7 @@ const TaskKanbanBoard = ({
   }, []);
 
   const handleRefetchContact = (noti) => {
-    noti?.type === "COMMENT" && refetchListComment();
+    if (noti?.type === "COMMENT" && noti?.type === "TASK") refetchListComment();
   };
 
   return (

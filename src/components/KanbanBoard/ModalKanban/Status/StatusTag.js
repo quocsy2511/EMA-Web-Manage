@@ -11,7 +11,7 @@ const StatusTag = ({ taskSelected, updateStatus }) => {
       OVERDUE: { color: "orange", title: "QUÁ HẠN" },
       LOW: { color: "warning", title: "THẤP" },
       HIGH: { color: "red", title: "CAO" },
-      MEDIUM: { color: "processing", title: "TRUNG BÌNH" },
+      MEDIUM: { color: "processing", title: "VỪA" },
       CONFIRM: { color: "purple", title: "ĐÃ XÁC NHẬN" },
     };
     //colorMapping[status] ở đây để truy suất value bằng key

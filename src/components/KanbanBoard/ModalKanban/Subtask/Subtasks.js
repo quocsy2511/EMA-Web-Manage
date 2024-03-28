@@ -32,8 +32,8 @@ const Subtasks = ({
       select: (data) => {
         if (data.startDate && data.endDate) {
           const formatDate = data.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format("YYYY/MM/DD");
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD");
+            item.startDate = moment(item.startDate).format("DD-MM-YYYY");
+            item.endDate = moment(item.endDate).format("DD-MM-YYYY");
             return {
               ...item,
             };
@@ -67,7 +67,7 @@ const Subtasks = ({
   };
 
   const formattedDate = (value) => {
-    const date = moment(value).format("DD/MM HH:mm");
+    const date = moment(value).format("DD-MM-YYYY");
     return date;
   };
 
@@ -107,10 +107,10 @@ const Subtasks = ({
           )} */}
 
           <Tag
-            color={getColorStatus(updateStatus).color}
+            color={getColorStatus(updateStatus)?.color}
             className="h-fit mr-5"
           >
-            {getColorStatus(updateStatus).status}
+            {getColorStatus(updateStatus)?.status}
           </Tag>
 
           <EyeOutlined

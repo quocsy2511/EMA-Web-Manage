@@ -200,7 +200,7 @@ const EditRequestModal = ({
               current && current < today.startOf("day")
             }
             onChange={onChangeDate}
-            format="YYYY/MM/DD "
+            format="DD-MM-YYYY"
             allowClear={false}
           />
         </Form.Item>

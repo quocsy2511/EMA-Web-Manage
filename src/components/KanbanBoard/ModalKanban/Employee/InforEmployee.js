@@ -22,9 +22,9 @@ const InforEmployee = ({ taskSelected }) => {
         if (data.startDate && data.endDate) {
           const formatDate = data.map(({ ...item }) => {
             item.startDate = moment(item.startDate).format(
-              "YYYY/MM/DD HH:mm:ss"
+              "DD-MM-YYYY"
             );
-            item.endDate = moment(item.endDate).format("YYYY/MM/DD HH:mm:ss");
+            item.endDate = moment(item.endDate).format("DD-MM-YYYY");
             return {
               ...item,
             };

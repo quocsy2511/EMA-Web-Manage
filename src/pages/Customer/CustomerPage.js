@@ -30,14 +30,16 @@ const CustomerPage = () => {
   }, []);
 
   const handleRefetchContact = (notification) => {
-    notification?.type === "CONTRACT" &&
+    if (notification?.type === "CONTRACT") {
       queryClient.invalidateQueries([
         "contact",
         currentPage,
         sort,
         contactStatus,
         20,
-      ]) & queryClient.invalidateQueries(["contracts"]);
+      ]);
+      queryClient.invalidateQueries(["contracts"]);
+    }
   };
 
   const {
