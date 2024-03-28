@@ -45,7 +45,7 @@ const TaskModalContent = ({
     {
       select: (data) => {
         const formatDate = data.map(({ ...item }) => {
-          item.createdAt = moment(item.createdAt).format("MM/DD HH:mm");
+          item.createdAt = moment(item.createdAt).format("DD-MM");
           return {
             ...item,
           };

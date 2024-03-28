@@ -20,18 +20,17 @@ const Column = ({
   setAddNewTaskTemplate,
   setIsHideHeaderEvent,
 }) => {
-  const colors = [
-    "bg-red-500",
-    "bg-orange-500",
-    "bg-blue-500",
-    "bg-purple-500",
-    "bg-green-500",
-    "bg-indigo-500",
-    "bg-yellow-500",
-    "bg-pink-500",
-    "bg-sky-500",
-  ];
-  const [color, setColor] = useState(null);
+  const getColorStatusPriority = (value) => {
+    const colorMapping = {
+      DONE: { color: "bg-green-500", title: "HOÀN THÀNH" },
+      PENDING: { color: "bg-yellow-500", title: "ĐANG CHUẨN BỊ" },
+      CANCEL: { color: "bg-red-500", title: "ĐÃ HUỶ" },
+      PROCESSING: { color: "bg-blue-500", title: "ĐANG DIỄN RA" },
+      OVERDUE: { color: "bg-red-500", title: "QUÁ HẠN" },
+      CONFIRM: { color: "bg-purple-500", title: "ĐÃ XÁC NHẬN" },
+    };
+    return colorMapping[value];
+  };
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
@@ -81,15 +80,6 @@ const Column = ({
     }
   }, [TaskParent]);
 
-  useEffect(() => {
-    //là nó sẽ trộn random bảng màu của Colors rồi  -> pop() sẽ làm nhiệm vụ xoá thằng đó ra khỏi mảng và trả về cái đó
-    setColor(shuffle(colors).pop());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const startDate = moment(TaskParent?.startDate).format("DD-MM-YYYY");
-  const endDate = moment(TaskParent?.endDate).format("DD-MM-YYYY");
-
   return (
     <>
       <div className="scrollbar-hide mt-5 min-w-[280px]">
@@ -100,11 +90,18 @@ const Column = ({
           w-[250px] mx-auto my-2 rounded-lg cursor-pointer py-4 px-1 hover:opacity-70 shadow-lg shadow-darkShadow"
             onClick={() => openTaskParentModal()}
           >
-            <Tooltip title={TaskParent?.title}>
-              <div className="flex items-start gap-2 w-full px-2">
+            <div className="flex items-start gap-2 w-full px-2">
+              <Tooltip
+                title={getColorStatusPriority(TaskParent?.status)?.title}
+              >
                 <span
-                  className={`rounded-full w-4 h-4 ${color} mt-[2px]`}
+                  className={`rounded-full w-4 h-4 ${
+                    getColorStatusPriority(TaskParent?.status)?.color
+                  } mt-[2px]`}
                 ></span>
+              </Tooltip>
+
+              <Tooltip title={TaskParent?.title}>
                 <div className="flex flex-col gap-y-[2px] w-[90%] overflow-hidden  hover:text-secondary">
                   <div className="overflow-hidden  flex w-full gap-x-1">
                     <div className="overflow-hidden max-w-[80%] ">
@@ -119,13 +116,17 @@ const Column = ({
                   </div>
 
                   <p className="text-xs font-semibold text-white underline underline-offset-2">
-                    {startDate}{" "}
+                    {moment(TaskParent?.startDate, "YYYY-MM-DD").format(
+                      "DD-MM-YYYY"
+                    )}{" "}
                     <SwapRightOutlined className="underline underline-offset-2" />{" "}
-                    {endDate}
+                    {moment(TaskParent?.endDate, "YYYY-MM-DD").format(
+                      "DD-MM-YYYY"
+                    )}
                   </p>
                 </div>
-              </div>
-            </Tooltip>
+              </Tooltip>
+            </div>
           </div>
 
           {/* subtask */}
@@ -141,15 +142,16 @@ const Column = ({
                 />
               ))}
           </AnimatePresence>
-
-          <div
-            className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow"
-            onClick={handleSelectTypeNewTask}
-          >
-            <p className="text-sm font-semibold tracking-tighter">
-              + Thêm công việc mới
-            </p>
-          </div>
+          {TaskParent?.status !== "CONFIRM" && (
+            <div
+              className=" w-[250px] mx-auto mt-5 rounded-lg py-3 px-3 hover:text-secondary  text-gray-400  cursor-pointer bg-white shadow-lg shadow-darkShadow"
+              onClick={handleSelectTypeNewTask}
+            >
+              <p className="text-sm font-semibold tracking-tighter">
+                + Thêm công việc mới
+              </p>
+            </div>
+          )}
         </div>
 
         {isOpenTaskModal && (

@@ -47,8 +47,8 @@ const KanbanBoard = ({
     {
       select: (data) => {
         const taskParent = data.map(({ ...item }) => {
-          item.startDate = moment(item.startDate).format("YYYY/MM/DD");
-          item.endDate = moment(item.endDate).format("YYYY/MM/DD");
+          item.startDate = moment(item.startDate).format("YYYY-MM-DD");
+          item.endDate = moment(item.endDate).format("YYYY-MM-DD");
           return {
             ...item,
           };
@@ -119,7 +119,9 @@ const KanbanBoard = ({
   }, []);
 
   const handleRefetchContact = (noti) => {
-    noti?.type === "COMMENT" && refetch();
+    if (noti?.type === "COMMENT" || noti?.type === "TASK") {
+      refetch();
+    }
   };
 
   return (

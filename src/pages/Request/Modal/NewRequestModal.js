@@ -183,7 +183,7 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
         >
           <RangePicker
             placeholder={["Ngày bắt đầu ", "ngày kết thúc"]}
-            formatDate="YYYY/MM/DD"
+            formatDate="DD-MM-YYYY"
             disabledDate={(current) =>
               current && current < today.startOf("day")
             }

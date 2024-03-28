@@ -45,15 +45,14 @@ const FieldSubtask = ({
   const [updatePriority, setUpdatePriority] = useState(taskSelected?.priority);
   const [assignTasks, setAssignTasks] = useState(taskSelected?.assignTasks);
   const [updateStatus, setUpdateStatus] = useState(taskSelected?.status);
+
   const [updateStartDate, setUpdateStartDate] = useState(
     taskSelected?.startDate
   );
   // console.log("🚀 ~ updateStartDate:", updateStartDate);
   const [updateEndDate, setUpdateEndDate] = useState(taskSelected?.endDate);
+  // console.log("🚀 ~ updateEndDate:", updateEndDate);
   const [isOpenPriority, setIsOpenPriority] = useState(false);
-  const [updateEstimateTime, setUpdateEstimateTime] = useState(
-    taskSelected?.estimationTime
-  );
   const [updateProgress, setUpdateProgress] = useState(taskSelected?.progress);
   const [isModalAssigneeOpen, setIsModalAssigneeOpen] = useState(false);
 

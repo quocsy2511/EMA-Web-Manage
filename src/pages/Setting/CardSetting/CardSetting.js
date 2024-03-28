@@ -160,7 +160,7 @@ const CardSetting = ({ task }) => {
               <Segmented
                 options={[
                   { label: "THẤP", value: "LOW" },
-                  { label: "TRUNG BÌNH", value: "MEDIUM" },
+                  { label: "VỪA", value: "MEDIUM" },
                   { label: "CAO", value: "HIGH" },
                 ]}
                 value={task?.priority}

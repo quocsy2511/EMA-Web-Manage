@@ -23,9 +23,12 @@ import { closeConnectSocket } from "../../utils/socket";
 import { chatDetailActions } from "../../store/chat_detail";
 
 const NotiLabel = ({ item, manager, staff }) => {
+  console.log("🚀 ~ NotiLabel ~ item:", item);
   let time;
-
+  const location = useLocation();
+  const navigate = useNavigate();
   const currentDate = momenttz();
+  const dispatch = useDispatch();
   const targetDate = momenttz(item?.createdAt);
 
   if (currentDate.diff(targetDate, "minutes") < 5) {
@@ -89,7 +92,7 @@ const NotiLabel = ({ item, manager, staff }) => {
         if (item?.parentTaskId) {
           if (
             location.pathname !==
-            `/manager/event/${item?.eventID}/${item?.paentTaskId}`
+            `/manager/event/${item?.eventID}/${item?.parentTaskId}`
           ) {
             navigate(`/manager/event/${item?.eventID}/${item?.parentTaskId}`);
           }
@@ -292,65 +295,66 @@ const Header = ({ collapsed, setCollapsed }) => {
 
         <div className="flex items-center">
           <div className="cursor-pointer flex items-center">
-            {!!manager && !!staff && (
-              <Dropdown
-                menu={{
-                  // items: notiItems,
-                  items: [
-                    ...(notifications?.map((noti) => ({
-                      key: noti.id,
-                      label: (
-                        <NotiLabel
-                          item={noti}
-                          navigate={navigate}
-                          location={location}
-                          manager={manager}
-                          staff={staff}
-                        />
-                      ),
-                    })) ?? []),
-                    {
-                      key: "navigate",
-                      label: (
-                        <p
-                          onClick={() =>
-                            !!manager
-                              ? navigate("/manager/notification")
-                              : !!staff && navigate("/staff/notification")
-                          }
-                          className="text-center text-blue-400"
-                        >
-                          Xem tất cả
-                        </p>
-                      ),
-                    },
-                  ],
-                  onClick: onClickNotification,
-                }}
-                trigger={["click"]}
-                placement="bottomRight"
-                arrow
-                disabled={notifications?.length === 0}
-              >
-                <Badge
-                  size={"default"}
-                  count={
-                    notifications?.length && notifications?.length >= 10
-                      ? "9+"
-                      : notifications?.length ?? 0
-                  }
-                  offset={[-2, 2]}
-                  title={`${notifications?.length ?? 0} thông báo`}
-                  onClick={(e) => e.preventDefault()}
+            {!!manager ||
+              (!!staff && (
+                <Dropdown
+                  menu={{
+                    // items: notiItems,
+                    items: [
+                      ...(notifications?.map((noti) => ({
+                        key: noti.id,
+                        label: (
+                          <NotiLabel
+                            item={noti}
+                            navigate={navigate}
+                            location={location}
+                            manager={manager}
+                            staff={staff}
+                          />
+                        ),
+                      })) ?? []),
+                      {
+                        key: "navigate",
+                        label: (
+                          <p
+                            onClick={() =>
+                              !!manager
+                                ? navigate("/manager/notification")
+                                : !!staff && navigate("/staff/notification")
+                            }
+                            className="text-center text-blue-400"
+                          >
+                            Xem tất cả
+                          </p>
+                        ),
+                      },
+                    ],
+                    onClick: onClickNotification,
+                  }}
+                  trigger={["click"]}
+                  placement="bottomRight"
+                  arrow
+                  disabled={notifications?.length === 0}
                 >
-                  {notifications?.length === 0 ? (
-                    <HiOutlineBell size={25} />
-                  ) : (
-                    <HiOutlineBellAlert size={25} />
-                  )}
-                </Badge>
-              </Dropdown>
-            )}
+                  <Badge
+                    size={"default"}
+                    count={
+                      notifications?.length && notifications?.length >= 10
+                        ? "9+"
+                        : notifications?.length ?? 0
+                    }
+                    offset={[-2, 2]}
+                    title={`${notifications?.length ?? 0} thông báo`}
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    {notifications?.length === 0 ? (
+                      <HiOutlineBell size={25} />
+                    ) : (
+                      <HiOutlineBellAlert size={25} />
+                    )}
+                  </Badge>
+                </Dropdown>
+              ))}
           </div>
 
           <div className="w-10" />

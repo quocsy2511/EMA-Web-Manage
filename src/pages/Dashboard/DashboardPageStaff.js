@@ -19,12 +19,13 @@ const DashboardPageStaff = () => {
     refetch,
     isLoading,
     isError,
-  } = useQuery(["data-statistic"], () => getStatistic({ type }), {
+  } = useQuery(["data-statistic", type], () => getStatistic({ type }), {
     select: (data) => {
       return data;
     },
     refetchOnWindowFocus: false,
   });
+  console.log("🚀 ~ DashboardPageStaff ~ dataStatistic:", dataStatistic);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -135,22 +136,16 @@ const DashboardPageStaff = () => {
       title: "Tên sự kiện",
       dataIndex: "eventName",
       key: "eventName",
-      width: "14%",
+      width: "30%",
       ...getColumnSearchProps("eventName"),
     },
-    // {
-    //   title: "Số người tham gia",
-    //   dataIndex: "description",
-    //   key: "description",
-    //   // width: "12%",
-    //   // sorter: (a, b) => a.estExpense - b.estExpense,
-    // },
+
     {
       title: "Số công việc",
       dataIndex: "tasks",
       key: "total",
       render: (tasks) => tasks.total,
-      // width: "14%",
+      width: "12%",
       sorter: (a, b) => a.tasks.total - b.tasks.total,
     },
     {
@@ -158,31 +153,15 @@ const DashboardPageStaff = () => {
       dataIndex: "tasks",
       key: "done",
       render: (tasks) => tasks.done,
-      // width: "14%",
+      width: "12%",
       sorter: (a, b) => a.tasks.done - b.tasks.done,
     },
-    // {
-    //   title: "Công việc đang diễn ra",
-    //   dataIndex: "tasks",
-    //   key: "processing,
-    //   render: (tasks) => tasks.processing,
-    //   // width: "14%",
-    //   // sorter: (a, b) => a.tasks.processing - b.tasks.processing,
-    // },
-    // {
-    //   title: "Công việc đã xác nhận,
-    //   dataIndex: "tasks",
-    //   key: "processing,
-    //   render: (tasks) => tasks.processing,
-    //   // width: "14%",
-    //   // sorter: (a, b) => a.tasks.processing - b.tasks.processing,
-    // },
     {
       title: "Công việc đã huỷ",
       dataIndex: "tasks",
       key: "cancel",
       render: (tasks) => tasks.cancel,
-      // width: "12%",
+      width: "12%",
       sorter: (a, b) => a.tasks.cancel - b.tasks.cancel,
     },
     {
@@ -190,7 +169,7 @@ const DashboardPageStaff = () => {
       dataIndex: "tasks",
       key: "overdue",
       render: (tasks) => tasks.overdue,
-      // width: "12%",
+      width: "12%",
       sorter: (a, b) => a.tasks.overdue - b.tasks.overdue,
     },
     {
@@ -198,34 +177,40 @@ const DashboardPageStaff = () => {
       dataIndex: "tasks",
       key: "pending",
       render: (tasks) => tasks.pending,
-      // width: "12%",
+      width: "10%",
       sorter: (a, b) => a.tasks.pending - b.tasks.pending,
     },
-    // {
-    //   title: "Chi phí",
-    //   dataIndex: "estExpense",
-    //   key: "estExpense",
-    //   width: "10%",
-    //   // sorter: (a, b) => a.estExpense - b.estExpense,
-    //   render: (text) => (
-    //     <div>
-    //       <p className="text-orange-500">{text.toLocaleString()} VND</p>
-    //     </div>
-    //   ),
-    // },
     {
       title: "Trạng thái",
       dataIndex: "status",
       align: "center",
-      // width: "20%",
+      width: "12%",
       render: (_, record) => (
         <div className="text-center">
           <Tag
             className="mr-0 mx-auto"
-            color={record.status === "PENDING" ? "warning" : "green"}
+            color={
+              record.status === "PENDING"
+                ? "warning"
+                : record.status === "DONE"
+                ? "green"
+                : record.status === "PREPARING"
+                ? "default"
+                : record.status === "PROCESSING"
+                ? "default"
+                : "red"
+            }
             key={record.id}
           >
-            {record.status === "PENDING" ? "ĐANG CHUẨN BỊ" : "HOÀN THÀNH"}
+            {record.status === "PENDING"
+              ? "CHƯA BẮT ĐẦU"
+              : record.status === "DONE"
+              ? "ĐÃ KẾT THÚC"
+              : record.status === "PREPARING"
+              ? "ĐANG CHUẨN BỊ"
+              : record.status === "PROCESSING"
+              ? "DANG DIỄN RA"
+              : "HUỶ BỎ"}
           </Tag>
         </div>
       ),
@@ -247,6 +232,7 @@ const DashboardPageStaff = () => {
         <Radio.Group onChange={onChange} value={type} disabled={isLoading}>
           <Radio value={"ALL"}>Tất cả</Radio>
           <Radio value={"PROCESSING"}>Đang diễn ra</Radio>
+          <Radio value={"PREPARING"}>Đang chuẩn bị</Radio>
         </Radio.Group>
       </div>
       {!isLoading ? (
