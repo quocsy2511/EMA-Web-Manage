@@ -23,21 +23,21 @@ const CustomerPage = () => {
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const queryclient = useQueryClient();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     socketOnNotification(handleRefetchContact);
   }, []);
 
-  const handleRefetchContact = (noti) => {
-    noti?.type === "" &&
-      queryclient.invalidateQueries([
+  const handleRefetchContact = (notification) => {
+    notification?.type === "CONTRACT" &&
+      queryClient.invalidateQueries([
         "contact",
         currentPage,
         sort,
         contactStatus,
-        10,
-      ]);
+        20,
+      ]) & queryClient.invalidateQueries(["contracts"]);
   };
 
   const {

@@ -22,7 +22,7 @@ const EventPage = () => {
 
   const [searchText, setSearchText] = useState();
   const [searchDate, setSearchDate] = useState();
-  const [searchStatus, setSearchStatus] = useState();
+  const [searchStatus, setSearchStatus] = useState("PENDING");
   const [sort, setSort] = useState("DESC");
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
@@ -43,6 +43,14 @@ const EventPage = () => {
       refetchOnWindowFocus: false,
     }
   );
+
+  useEffect(() => {
+    console.log("data > ", data);
+    if (data && searchStatus === "PENDING" && !data?.data?.length)
+      setSearchStatus("PREPARING");
+    else if (data && searchStatus === "PREPARING" && !data?.data?.length)
+      setSearchStatus("PROCESSING");
+  }, [data]);
 
   useEffect(() => {
     refetch();
@@ -218,7 +226,9 @@ const EventPage = () => {
       <div className="mt-6">
         {!isLoading ? (
           isError ? (
-            <AnErrorHasOccured />
+            <div className="min-h-[60vh]">
+              <AnErrorHasOccured />
+            </div>
           ) : (
             <>
               <motion.div
@@ -233,7 +243,7 @@ const EventPage = () => {
                       ))}
                     </AnimatePresence>
                   ) : (
-                    <div className="flex-1 flex flex-col items-center gap-y-4 justify-center bg-white m-auto py-[5%] rounded-2xl">
+                    <div className="flex-1 flex flex-col items-center gap-y-4 justify-center bg-white m-auto py-[5%] rounded-2xl min-h-[60vh]">
                       <img src={emptyEventImg} className="w-64 h-64" />
                       <p className="text-lg font-medium">
                         Không tìm thấy sự kiện nào!

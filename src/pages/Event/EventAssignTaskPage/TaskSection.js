@@ -48,13 +48,6 @@ const StatusRender = memo(({ bg, text }) => (
   </div>
 ));
 
-const PriorityRender = memo(({ icon, text }) => (
-  <div className="flex space-x-2 items-center mr-10">
-    <div className="">{icon}</div>
-    <p className="w-3/4 text-sm font-medium truncate">{text}</p>
-  </div>
-));
-
 const DrawerContainer = memo(
   ({ isDrawerOpen, setIsDrawerOpen, getColor, divisionChecking }) => {
     console.log("divisionChecking > ", divisionChecking);
@@ -80,109 +73,6 @@ const DrawerContainer = memo(
                 </span>
               </p>
             </div>
-
-            {/* <div className="border-2 border-black rounded-md p-1 cursor-pointer">
-              <Dropdown
-                placement="bottomLeft"
-                menu={{
-                  items: [
-                    {
-                      key: "status",
-                      label: "Trạng thái",
-                      type: "group",
-                      children: [
-                        {
-                          key: 1,
-                          label: (
-                            <StatusRender
-                              bg="bg-gray-400"
-                              text="Đang chuẩn bị"
-                            />
-                          ),
-                        },
-                        {
-                          key: 2,
-                          label: (
-                            <StatusRender
-                              bg="bg-blue-400"
-                              text="Đang thực hiện"
-                            />
-                          ),
-                        },
-                        {
-                          key: 3,
-                          label: (
-                            <StatusRender bg="bg-green-500" text="Hoàn thành" />
-                          ),
-                        },
-                        {
-                          key: 4,
-                          label: (
-                            <StatusRender
-                              bg="bg-purple-500"
-                              text="Đã xác thực"
-                            />
-                          ),
-                        },
-                        {
-                          key: 5,
-                          label: <StatusRender bg="bg-red-500" text="Hủy bỏ" />,
-                        },
-                        {
-                          key: 6,
-                          label: (
-                            <StatusRender bg="bg-orange-500" text="Quá hạn" />
-                          ),
-                        },
-                      ],
-                    },
-                    {
-                      key: "priority",
-                      label: "Độ ưu tiên",
-                      type: "group",
-                      children: [
-                        {
-                          key: 7,
-                          label: (
-                            <PriorityRender
-                              icon={
-                                <FaCircleArrowDown className="text-lg text-green-500" />
-                              }
-                              text="Thấp"
-                            />
-                          ),
-                        },
-                        {
-                          key: 8,
-                          label: (
-                            <PriorityRender
-                              icon={
-                                <PiDotsThreeCircleVerticalFill className="text-xl text-orange-400 rotate-90" />
-                              }
-                              text="Trung bình"
-                            />
-                          ),
-                        },
-                        {
-                          key: 9,
-                          label: (
-                            <PriorityRender
-                              icon={
-                                <FaCircleExclamation className="text-lg text-red-500" />
-                              }
-                              text="Cao"
-                            />
-                          ),
-                        },
-                      ],
-                    },
-                  ],
-                }}
-                arrow
-              >
-                <MdCategory className="text-lg" />
-              </Dropdown>
-            </div> */}
           </div>
         }
         placement={"right"}
@@ -364,8 +254,8 @@ const TaskSection = ({
 }) => {
   console.log("updateDataDivision > ", updateDataDivision);
   console.log("isSelectDate > ", isSelectDate);
+  
   const [selectedId, setSelectedId] = useState();
-  console.log("selectedId > ", selectedId);
   const [divisionChecking, setDivisionChecking] = useState();
   const [selectedDate, setSelectedDate] = useState();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

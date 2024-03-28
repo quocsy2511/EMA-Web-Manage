@@ -141,9 +141,6 @@ const EventAssignTaskPage = () => {
     eventName,
     dateRange,
 
-    // Task only
-    listDivision,
-
     // Subtask only
     isSubTask,
     taskId,
@@ -156,7 +153,7 @@ const EventAssignTaskPage = () => {
   } = location.state;
 
   console.log("updateData > ", updateData);
-  console.log("itemId > ", item);
+  console.log("dateRange > ", dateRange);
 
   const [isSelectDate, setIsSelectDate] = useState(false);
   const [chosenFile, setChosenFile] = useState();
@@ -657,8 +654,11 @@ const EventAssignTaskPage = () => {
 
                     if (!isSubTask) {
                       if (now.isBefore(startDate, "days"))
-                        return current && current < startDate;
-                      else return current && current < now;
+                        return (
+                          current && (current < startDate || current > endDate)
+                        );
+                      else
+                        return current && (current < now || current > endDate);
                     } else
                       return (
                         (current && current < startDate) ||
@@ -796,7 +796,6 @@ const EventAssignTaskPage = () => {
               form={form}
               isSelectDate={isSelectDate}
               eventId={eventId}
-              listDivision={listDivision}
               updateDataDivision={
                 updateData ? updateData?.assignee ?? [] : null
               }

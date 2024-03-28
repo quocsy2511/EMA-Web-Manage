@@ -26,13 +26,12 @@ const TaskItem = ({
 
   // Update task
   goToUpdateTask,
-  dateRange, // To navigate to task detail
-  listDivision, // To navigate to task detail
+  goToSubTask,
 
   // Update subtask
   goToUpdateSubtask,
 }) => {
-  console.log("TaskItem > ", task);
+  // console.log("TaskItem > ", task);
   const navigate = useNavigate();
 
   const [isOpenHistoryModal, setIsOpenHistoryModal] = useState(false);
@@ -42,13 +41,6 @@ const TaskItem = ({
         (user) => user?.isLeader && user?.status === "active"
       )?.[0]
     : task?.assignTasks?.find((user) => user?.status === "active");
-
-  const goToSubTask = () => {
-    if (eventName)
-      navigate(`${task?.id}`, {
-        state: { eventName, dateRange, listDivision },
-      });
-  };
 
   const openSubTaskModal = () => {
     setSelectedSubTask(task);
@@ -176,7 +168,7 @@ const TaskItem = ({
               "line-through text-black/30": task?.status === "CONFIRM",
             })}
           >
-           Trạng thái
+            Trạng thái
           </p>
           <div
             className={`text-center flex justify-center items-center px-3 py-1 ${statusColor} border-2 ${statusBorder} rounded-full truncate`}
@@ -271,7 +263,7 @@ const TaskItem = ({
                 onClick={(e) => {
                   e.stopPropagation();
 
-                  goToSubTask();
+                  goToSubTask(task?.id);
                 }}
                 size={30}
                 className="text-slate-400 hover:text-blue-400"

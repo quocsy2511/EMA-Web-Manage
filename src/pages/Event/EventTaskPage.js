@@ -13,11 +13,9 @@ import {
   Dropdown,
   FloatButton,
   Image,
-  Modal,
   Popover,
   Progress,
   Tooltip,
-  Upload,
   message,
 } from "antd";
 import {
@@ -32,7 +30,7 @@ import {
   BsCalendarWeekFill,
   BsMicrosoftTeams,
 } from "react-icons/bs";
-import { RiEditFill, RiAdvertisementFill, RiAddFill } from "react-icons/ri";
+import { RiEditFill, RiAdvertisementFill, RiTeamFill } from "react-icons/ri";
 import { AiOutlinePlus } from "react-icons/ai";
 import {
   PiMicrophoneStageFill,
@@ -263,7 +261,7 @@ const EventTaskPage = () => {
         state: {
           eventId,
           eventName: eventDetail?.eventName,
-          dateRange: [eventDetail?.startDate, eventDetail?.endDate],
+          dateRange: [eventDetail?.processingDate, eventDetail?.endDate],
           isSubTask: false,
         },
       });
@@ -288,10 +286,19 @@ const EventTaskPage = () => {
       state: {
         eventId,
         eventName: eventDetail?.eventName,
-        dateRange: [eventDetail?.startDate, eventDetail?.endDate],
+        dateRange: [eventDetail?.processingDate, eventDetail?.endDate],
         isSubTask: false,
 
         updateData,
+      },
+    });
+  };
+
+  const goToSubTask = (taskId) => {
+    navigate(`${taskId}`, {
+      state: {
+        eventName: eventDetail?.eventName,
+        dateRange: [eventDetail?.processingDate, eventDetail?.endDate],
       },
     });
   };
@@ -301,6 +308,9 @@ const EventTaskPage = () => {
       state: {
         eventId: eventDetail?.id,
         eventName: eventDetail?.eventName,
+        listDivisionId: eventDetail?.listDivision?.map(
+          (division) => division?.divisionId
+        ),
       },
     });
   };
@@ -332,7 +342,7 @@ const EventTaskPage = () => {
     <Fragment>
       {contextHolder}
 
-      <FloatButton
+      {/* <FloatButton
         onClick={goToCreateTask}
         type="primary"
         icon={<RiAddFill />}
@@ -342,7 +352,7 @@ const EventTaskPage = () => {
             : "Chưa có bộ phận đảm nhiệm"
         }
         className="cursor-pointer"
-      />
+      /> */}
 
       <EventUpdateModal
         isModalOpen={isModalOpen}
@@ -605,7 +615,7 @@ const EventTaskPage = () => {
                   className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
                   whileHover={{ y: -4 }}
                 >
-                  <FaFilePdf className="text-lg" />
+                  <FaFilePdf className="text-xl" />
                 </motion.div>
               </Popover>
             </Dropdown>
@@ -616,7 +626,7 @@ const EventTaskPage = () => {
                 whileHover={{ y: -4 }}
                 onClick={goToAssignDivision}
               >
-                <BsMicrosoftTeams className="text-lg" />
+                <RiTeamFill className="text-xl" />
               </motion.div>
             </Popover>
 
@@ -626,7 +636,7 @@ const EventTaskPage = () => {
                 className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
                 onClick={goToBudget}
               >
-                <PiPiggyBankFill className="text-lg" />
+                <PiPiggyBankFill className="text-xl" />
               </motion.div>
             </Popover>
           </div>
@@ -698,7 +708,7 @@ const EventTaskPage = () => {
               <div className="flex items-center gap-x-2">
                 <div className="w-5" />
                 <p className="text-xs text-slate-400">
-                  {new Date(eventDetail?.startDate).toLocaleDateString(
+                  {new Date(eventDetail?.processingDate).toLocaleDateString(
                     "vi-VN",
                     {
                       weekday: "long",
@@ -720,7 +730,7 @@ const EventTaskPage = () => {
                 <div className="w-5" />
                 <p className="text-xs text-slate-400">
                   {/* {moment(data.endDate).format("dddd, D [tháng] M, YYYY")} */}
-                  {new Date(eventDetail?.processingDate).toLocaleDateString(
+                  {new Date(eventDetail?.startDate).toLocaleDateString(
                     "vi-VN",
                     {
                       weekday: "long",
@@ -915,13 +925,7 @@ const EventTaskPage = () => {
                                   eventName={eventDetail?.eventName}
                                   // Go to update task
                                   goToUpdateTask={() => goToUpdateTask(task)}
-                                  dateRange={[
-                                    eventDetail?.startDate,
-                                    eventDetail?.endDate,
-                                  ]}
-                                  listDivision={eventDetail?.listDivision?.map(
-                                    (division) => division?.divisionId
-                                  )}
+                                  goToSubTask={goToSubTask}
                                 />
                               ),
                               children:
@@ -972,7 +976,7 @@ const EventTaskPage = () => {
           )
         }
       </motion.div>
-      <FloatButton.BackTop className="right-24" />
+      <FloatButton.BackTop />
     </Fragment>
   );
 };
