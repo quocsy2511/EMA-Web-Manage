@@ -166,7 +166,7 @@ const NewTaskModalTemplate = ({
                 hideDisabledOptions: true,
               }}
               onChange={onChangeDate}
-              formatDate="YYYY/MM/DD HH:mm:ss"
+              format="DD-MM-YYYY"
               allowClear={false}
             />
           </Form.Item>
@@ -249,7 +249,7 @@ const NewTaskModalTemplate = ({
               // defaultValue="LOW"
               options={[
                 { label: "THẤP", value: "LOW" },
-                { label: "TRUNG BÌNH", value: "MEDIUM" },
+                { label: "VỪA", value: "MEDIUM" },
                 { label: "CAO", value: "HIGH" },
               ]}
               value={priority.value}

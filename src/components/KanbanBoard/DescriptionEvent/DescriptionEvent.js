@@ -31,9 +31,7 @@ const DescriptionEvent = ({ selectEvent }) => {
       transition={{ duration: 0.5 }}
       className={`min-h-[150px] relative group md:w-[100%] w-[45%] bg-bgG cursor-pointer bg-auto bg-center px-10 pt-3 mt-5`}
     >
-      <h2 className="text-4xl font-semibold mb-3">
-        {selectEvent?.eventName}
-      </h2>
+      <h2 className="text-4xl font-semibold mb-3">{selectEvent?.eventName}</h2>
       <div className="flex flex-row  items-center gap-x-6 mt-8 justify-between">
         <Card className="w-1/4">
           <Meta
@@ -41,7 +39,9 @@ const DescriptionEvent = ({ selectEvent }) => {
               <BsCalendarHeart className=" text-orange-500 mt-1" size={20} />
             }
             title="Thời gian sự kiện"
-            description={`${selectEvent?.startDate} - ${selectEvent?.endDate}`}
+            description={`${moment(selectEvent?.startDate).format(
+              "DD-MM-YYYY"
+            )} / ${moment(selectEvent?.endDate).format("DD-MM-YYYY")}`}
           />
         </Card>
         <Card className="w-1/4 overflow-hidden ">

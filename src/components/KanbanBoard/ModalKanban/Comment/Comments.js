@@ -152,7 +152,7 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
         <h3 className="text-sm font-semibold text-black">
           {user?.profile?.fullName}{" "}
           <span className="font-normal text-xs text-gray-500">
-            at {createdAt}
+            vào lúc {createdAt}
           </span>
         </h3>
         {disableUpdate ? (

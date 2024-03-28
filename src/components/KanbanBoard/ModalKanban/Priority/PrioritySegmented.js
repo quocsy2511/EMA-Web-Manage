@@ -18,7 +18,7 @@ const PrioritySegmented = ({
   const parentTask = taskSelected?.parent?.id;
   const optionsPriority = [
     { label: "THẤP", value: "LOW" },
-    { label: "TRUNG BÌNH", value: "MEDIUM" },
+    { label: "VỪA", value: "MEDIUM" },
     { label: "CAO", value: "HIGH" },
   ];
   const [prioritySelected, setPrioritySelected] = useState("");

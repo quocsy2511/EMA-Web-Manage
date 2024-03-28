@@ -64,8 +64,8 @@ const EventStaffPage = () => {
           const taskParents = data?.filter((task) => task?.parent === null);
           const formatDate = taskParents?.map((item) => ({
             ...item,
-            startDate: moment(item?.startDate).format("YYYY/MM/DD"),
-            endDate: moment(item?.endDate).format("YYYY/MM/DD"),
+            startDate: moment(item?.startDate).format("YYYY-MM-DD"),
+            endDate: moment(item?.endDate).format("YYYY-MM-DD"),
             subTask: item?.subTask
               .filter((task) => task.status !== "CANCEL")
               .sort((a, b) => {
@@ -110,8 +110,8 @@ const EventStaffPage = () => {
           const taskParents = data?.filter((task) => task?.parent !== null);
           // console.log("🚀 ~ EventStaffPage ~ taskParents:", taskParents);
           const formatDate = taskParents?.map(({ ...item }) => {
-            item.startDate = moment(item?.startDate).format("YYYY/MM/DD");
-            item.endDate = moment(item?.endDate).format("YYYY/MM/DD");
+            item.startDate = moment(item?.startDate).format("YYYY-MM-DD");
+            item.endDate = moment(item?.endDate).format("YYYY-MM-DD");
             if (item?.subTask && Array.isArray(item.subTask)) {
               item.subTask.sort((a, b) => {
                 return (

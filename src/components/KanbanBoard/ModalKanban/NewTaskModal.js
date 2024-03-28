@@ -23,6 +23,7 @@ import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
 import { createTask, getTasks } from "../../../apis/tasks";
 import { uploadFile } from "../../../apis/files";
+import locale from "antd/es/date-picker/locale/vi_VN";
 import {
   TeamOutlined,
   UploadOutlined,
@@ -263,11 +264,20 @@ const NewTaskModal = ({
   };
 
   const onChangeDate = (value, dateString) => {
-    // Chuyển đổi thành định dạng ISO 8601
-    const isoStartDate = moment(dateString?.[0]).toISOString();
-    const isoEndDate = moment(dateString?.[1]).toISOString();
-    setStartDate(isoStartDate);
-    setEndDate(isoEndDate);
+    console.log("🚀 ~ onChangeDate ~ dateString:", dateString);
+    if (dateString?.length > 0) {
+      // Chuyển đổi thành định dạng ISO 8601
+      const formatStart = moment(dateString?.[0], "DD-MM-YYYY").format(
+        "YYYY-MM-DD"
+      );
+      const formatEnd = moment(dateString?.[1], "DD-MM-YYYY").format(
+        "YYYY-MM-DD"
+      );
+      const isoStartDate = moment(formatStart).toISOString();
+      const isoEndDate = moment(formatEnd).toISOString();
+      setStartDate(isoStartDate);
+      setEndDate(isoEndDate);
+    }
   };
 
   const handleCloseNewTask = () => {
@@ -491,10 +501,11 @@ const NewTaskModal = ({
                 hasFeedback
               >
                 <RangePicker
+                  // locale={locale}
                   placeholder={["Ngày bắt đầu  ", "Ngày kết thúc "]}
                   disabledDate={disabledDate}
                   onChange={onChangeDate}
-                  formatDate="YYYY/MM/DD HH:mm:ss"
+                  format="DD-MM-YYYY"
                   className="w-full"
                 />
               </Form.Item>

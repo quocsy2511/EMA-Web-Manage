@@ -173,7 +173,6 @@ const NotiLabel = ({ item, navigate, location, manager, staff }) => {
         break;
       case "COMMENT":
         if (!!manager) {
-          
         }
 
         if (!!staff) {

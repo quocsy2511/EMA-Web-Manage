@@ -27,7 +27,7 @@ const BudgetTask = ({
       OVERDUE: { color: "orange", title: "QUÁ HẠN" },
       LOW: { color: "warning", title: "THẤP" },
       HIGH: { color: "red", title: "CAO" },
-      MEDIUM: { color: "processing", title: "TRUNG BÌNH" },
+      MEDIUM: { color: "processing", title: "VỪA" },
     };
     return colorMapping[value];
   };
