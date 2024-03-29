@@ -466,7 +466,9 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
               ]}
             >
               <Upload
-                defaultFileList={nationalImagesDefault}
+                defaultFileList={
+                  data?.nationalImages ? nationalImagesDefault : null
+                }
                 maxCount={1}
                 listType="picture-card"
                 action=""
