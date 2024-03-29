@@ -19,9 +19,10 @@ export const getOwnTransactionBudget = ({
   sortProperty,
   sort,
   status,
+  taskId,
 }) =>
   http({
-    url: `/budget/own-transaction?sizePage=${sizePage}&currentPage=${currentPage}&sortProperty=${sortProperty}&sort=${sort}&status=${status}`,
+    url: `/budget/own-transaction?sizePage=${sizePage}&currentPage=${currentPage}&sortProperty=${sortProperty}&sort=${sort}&status=${status}&taskId=${taskId}`,
   });
 
 export const getBudgetItem = (itemId) =>

@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import { App, Button, Form, Input } from "antd";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../../apis/auths";
@@ -48,7 +48,9 @@ const LoginPage = () => {
   const onFinish = (values) => {
     mutate(values);
   };
-
+  useEffect(() => {
+    document.title = "Trang đăng nhập";
+  }, []);
   return (
     <Fragment>
       <div className="flex flex-shrink flex-grow h-[100vh] order-3 scroll-smooth scrollbar-hide p-[3rem] py-2 bg-white justify-center overflow-y-auto">

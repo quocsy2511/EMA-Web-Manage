@@ -232,6 +232,9 @@ const EventStaffPage = () => {
   const handleRefetchContact = (noti) => {
     noti?.type === "TASK" && refetch();
   };
+  useEffect(() => {
+    document.title = "Trang quản lí công việc và ngân sách";
+  }, []);
 
   return (
     <div className="flex flex-col">

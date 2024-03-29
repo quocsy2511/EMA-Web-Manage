@@ -1,4 +1,4 @@
-import { CaretRightOutlined } from "@ant-design/icons";
+import { CaretRightOutlined, SwapRightOutlined } from "@ant-design/icons";
 import { Card, Collapse, Tag, Tooltip } from "antd";
 import Meta from "antd/es/card/Meta";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
@@ -39,9 +39,13 @@ const DescriptionEvent = ({ selectEvent }) => {
               <BsCalendarHeart className=" text-orange-500 mt-1" size={20} />
             }
             title="Thời gian sự kiện"
-            description={`${moment(selectEvent?.startDate).format(
-              "DD-MM-YYYY"
-            )} / ${moment(selectEvent?.endDate).format("DD-MM-YYYY")}`}
+            description={
+              <p>
+                {moment(selectEvent?.startDate).format("DD-MM-YYYY")}{" "}
+                <SwapRightOutlined />{" "}
+                {moment(selectEvent?.endDate).format("DD-MM-YYYY")}
+              </p>
+            }
           />
         </Card>
         <Card className="w-1/4 overflow-hidden ">
