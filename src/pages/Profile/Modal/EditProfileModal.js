@@ -6,6 +6,7 @@ import {
   Input,
   InputNumber,
   Modal,
+  Select,
   Upload,
   message,
 } from "antd";
@@ -18,25 +19,41 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateProfile } from "../../../apis/users";
 
 const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
-  const oldAvatar = data.avatar;
+  console.log("🚀 ~ EditProfileModal ~ data:", data);
+  const [formEdited, setFormEdited] = useState(false);
+  const { Option } = Select;
+  const oldAvatar = data?.avatar;
   const [newDob, setNewDob] = useState(data?.dob);
+  const [form] = Form.useForm();
   const [fileList, setFileList] = useState();
-  //   const [avatar, setAvatar] = useState([
-  //     {
-  //       uid: "-1",
-  //       status: "done",
-  //       name: "image.png",
-  //       url: `${data?.avatar}`,
-  //     },
-  //   ]);
+  const [fileListNationalIdImage, setFileListNationalIdImage] = useState();
+  const [isMultiFile, setIsMultiFile] = useState(false);
+  const [fileTemp, setFileTemp] = useState();
   const avatarDefault = [
     {
       uid: "-1",
       status: "done",
       name: "image.png",
-      url: `${data?.avatar}`,
+      url: `${data?.avatar ? data?.avatar : ""}`,
     },
   ];
+  const nationalImagesDefault = [
+    {
+      uid: "-1",
+      status: "done",
+      name: "nationalImages.png",
+      url: `${data?.nationalImages ? data?.nationalImages : ""}`,
+    },
+  ];
+
+  const handleFormChange = () => {
+    if (form.isFieldsTouched()) {
+      setFormEdited(true);
+    } else {
+      setFormEdited(false);
+    }
+  };
+
   const queryClient = useQueryClient();
   const uploadButton = (
     <div>
@@ -46,7 +63,7 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
           marginTop: 8,
         }}
       >
-        Upload
+        Thêm ảnh
       </div>
     </div>
   );
@@ -55,7 +72,10 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
     return current && current >= dayjs().endOf("day");
   };
   const onChange = (date, dateString) => {
-    const isoStartDate = moment(dateString).toISOString();
+    const formatStart = moment(dateString, "DD-MM-YYYY").format("YYYY-MM-DD");
+    // console.log("🚀 ~ onChange ~ formatStart:", formatStart);
+    const isoStartDate = moment(formatStart).toISOString();
+    // console.log("🚀 ~ onChange ~ isoStartDate:", isoStartDate);
     setNewDob(isoStartDate);
   };
 
@@ -78,6 +98,29 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
       },
     }
   );
+  const {
+    mutate: uploadFileNationalIdMutate,
+    isLoading: isLoadingUploadFileNationalId,
+  } = useMutation(({ formData2, user }) => uploadFile(formData2), {
+    onSuccess: (data, variables) => {
+      const user = variables.user;
+      variables.user = {
+        nationalIdImage: data?.downloadUrl,
+        ...user,
+      };
+      console.log(
+        "🚀 ~ file: EditProfileModal.js:89 ~ useMutation ~ variables.user:",
+        variables.user
+      );
+      updateProfileMutate(variables.user);
+    },
+    onError: () => {
+      message.open({
+        type: "error",
+        content: "Ko thể tải ảnh căn cước công dân lên! Hãy thử lại sau",
+      });
+    },
+  });
 
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
     useMutation(({ formData, user }) => uploadFile(formData), {
@@ -91,7 +134,15 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
           "🚀 ~ file: EditProfileModal.js:89 ~ useMutation ~ variables.user:",
           variables.user
         );
-        updateProfileMutate(variables.user);
+        if (isMultiFile) {
+          console.log("zo day");
+          uploadFileNationalIdMutate({
+            formData2: fileTemp,
+            user: variables.user,
+          });
+        } else {
+          updateProfileMutate(variables.user);
+        }
       },
       onError: () => {
         message.open({
@@ -102,22 +153,56 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
     });
 
   const onFinish = (values) => {
-    const { dob, urlImage, ...data } = values;
+    const { dob, urlImage, nationalImg, ...data } = values;
     const user = { dob: newDob, ...data };
+    user.phoneNumber = "0" + user.phoneNumber.toString();
+
     if (values.urlImage === undefined || values.urlImage?.length === 0) {
+      setIsMultiFile(false);
       console.log("NOOO FILE");
-      const newProfile = { avatar: oldAvatar, ...user };
-      updateProfileMutate(newProfile);
-      //   console.log(
-      //     "🚀 ~ file: EditProfileModal.js:106 ~ onFinish ~ newProfile:",
-      //     newProfile
-      //   );
+      const newProfile = {
+        avatar: oldAvatar,
+        ...user,
+      };
+      if (
+        values.nationalImg === undefined ||
+        values.nationalImg?.length === 0
+      ) {
+        console.log(" FILE avatar ko null , no nationID");
+        console.log("🚀 ~ onFinish ~ newProfile:", newProfile);
+        updateProfileMutate(newProfile);
+      } else {
+        console.log("HAS FILE nationalImg , avatar");
+        const formData2 = new FormData();
+        formData2.append("file", fileListNationalIdImage);
+        formData2.append("folderName", "nationalCard");
+        uploadFileNationalIdMutate({ formData2, user: newProfile });
+      }
     } else {
       console.log("HAS FILE");
-      const formData = new FormData();
-      formData.append("file", fileList);
-      formData.append("folderName", "avatar");
-      uploadFileMutate({ formData, user });
+      if (
+        values.nationalImg === undefined ||
+        values.nationalImg?.length === 0
+      ) {
+        console.log("HAS FILE avatar , no nationID");
+        const formData = new FormData();
+        formData.append("file", fileList);
+        formData.append("folderName", "avatar");
+        uploadFileMutate({ formData, user });
+      } else {
+        console.log("HAS FILE nationalImg + avatar");
+        setIsMultiFile(true);
+        const formData = new FormData();
+        formData.append("file", fileList);
+        formData.append("folderName", "avatar");
+
+        const formData2 = new FormData();
+        formData2.append("file", fileListNationalIdImage);
+        formData2.append("folderName", "nationalCard");
+        setFileTemp(formData2);
+
+        uploadFileMutate({ formData, user });
+      }
     }
   };
   return (
@@ -130,6 +215,7 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
     >
       <div className="mt-4 p-4">
         <Form
+          form={form}
           onFinish={onFinish}
           size="large"
           labelCol={{
@@ -140,6 +226,7 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
           }}
           layout="horizontal"
           autoComplete="off"
+          onValuesChange={handleFormChange}
         >
           <Form.Item
             label="Họ và tên"
@@ -158,54 +245,9 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
                 message: "Họ và tên tối thiểu 5 tới 200 kí tự!",
               },
             ]}
-            hasFeedback
             initialValue={data?.fullName}
           >
             <Input />
-          </Form.Item>
-          <Form.Item
-            label="Số điện thoại"
-            name="phoneNumber"
-            className="text-sm font-medium "
-            rules={[
-              {
-                required: true,
-                type: "number",
-                message: "Hãy nhập  số điện thoại!",
-              },
-              {
-                validator: async (rule, value) => {
-                  if (value && !/^\d{9}$/.test(value)) {
-                    throw new Error("Số điện thoại phải có đúng 9 số!");
-                  }
-                },
-              },
-            ]}
-            hasFeedback
-            initialValue={parseInt(data?.phoneNumber, 10)}
-          >
-            <InputNumber className="w-2/3" />
-          </Form.Item>
-          <Form.Item
-            label="Năm sinh"
-            name="dob"
-            className="text-sm font-medium "
-            rules={[
-              {
-                type: "date",
-                required: true,
-                message: "Hãy chọn thời gian!",
-              },
-            ]}
-            hasFeedback
-            initialValue={dayjs(data?.dob)}
-          >
-            <DatePicker
-              onChange={onChange}
-              className="w-2/3"
-              disabledDate={disabledDate}
-              format="YYYY-MM-DD"
-            />
           </Form.Item>
           <Form.Item
             label="Địa chỉ"
@@ -224,67 +266,244 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
                 message: "Địa chỉ tối thiểu 5 tới 200 kí tự!",
               },
             ]}
-            hasFeedback
             initialValue={data?.address}
           >
             <Input />
           </Form.Item>
-          <Form.Item
-            label="Ảnh đại diện"
-            className="text-sm font-medium mb-1"
-            name="urlImage"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => e?.fileList}
-            rules={[
-              {
-                validator(_, fileList) {
+          <div className="flex flex-row gap-x-2 justify-start items-center w-full">
+            <Form.Item
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              label="Giới tính"
+              name="gender"
+              className="text-sm font-medium w-1/2"
+              initialValue={data?.gender}
+            >
+              <Select
+                placeholder="Giới tính "
+                options={[
+                  {
+                    value: "MALE",
+                    label: "Nam",
+                  },
+                  {
+                    value: "FEMALE",
+                    label: "Nữ",
+                  },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 6,
+              }}
+              wrapperCol={{
+                span: 18,
+              }}
+              name="nationalId"
+              label="Số CCCD"
+              className="w-1/2"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng nhập số CCCD",
+                },
+                {
+                  pattern: /^[0-9]{12}$/,
+                  message: "Số CCCD cần bao gồm 12 số!",
+                },
+              ]}
+              initialValue={data?.nationalId}
+            >
+              <Input pattern="[0-9]*" maxLength={12} />
+            </Form.Item>
+          </div>
+          <div className="flex flex-row gap-x-2 justify-start items-center w-full">
+            <Form.Item
+              label="Số điện thoại"
+              name="phoneNumber"
+              className="text-sm font-medium w-1/2"
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              rules={[
+                {
+                  required: true,
+                  type: "number",
+                  message: "Hãy nhập  số điện thoại!",
+                },
+                {
+                  validator: async (rule, value) => {
+                    if (value && !/^\d{9}$/.test(value)) {
+                      throw new Error("Số điện thoại phải có đúng 9 số!");
+                    }
+                  },
+                },
+              ]}
+              initialValue={parseInt(data?.phoneNumber, 10)}
+            >
+              <InputNumber
+                prefix={<p>+84</p>}
+                className="w-full"
+                controls={false}
+              />
+            </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 6,
+              }}
+              wrapperCol={{
+                span: 18,
+              }}
+              label="Ngày sinh"
+              name="dob"
+              className="text-sm font-medium w-1/2 "
+              rules={[
+                {
+                  type: "date",
+                  required: true,
+                  message: "Hãy chọn thời gian!",
+                },
+              ]}
+              initialValue={dayjs(data?.dob, "YYYY-MM-DD")}
+            >
+              <DatePicker
+                onChange={onChange}
+                className="w-full"
+                disabledDate={disabledDate}
+                format="DD-MM-YYYY"
+              />
+            </Form.Item>
+          </div>
+          <div className="flex flex-row gap-x-2 justify-start items-center w-full">
+            <Form.Item
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              label="Ảnh đại diện"
+              className="text-sm font-medium w-1/2"
+              name="urlImage"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList}
+              rules={[
+                {
+                  validator(_, fileList) {
+                    return new Promise((resolve, reject) => {
+                      if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                        reject("File quá lớn ( dung lượng < 10MB )");
+                      } else {
+                        resolve();
+                      }
+                    });
+                  },
+                },
+              ]}
+            >
+              <Upload
+                accept=".png,.jpg,.jpeg"
+                defaultFileList={avatarDefault}
+                maxCount={1}
+                listType="picture-card"
+                action=""
+                customRequest={({ file, onSuccess }) => {
+                  setTimeout(() => {
+                    onSuccess("ok");
+                  }, 0);
+                }}
+                showUploadList={{
+                  showPreviewIcon: false,
+                }}
+                beforeUpload={(file) => {
                   return new Promise((resolve, reject) => {
-                    if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
-                      reject("File quá lớn ( dung lượng < 10MB )");
+                    if (file && file?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( <10MB )");
+                      return false;
                     } else {
+                      setFileList(file);
                       resolve();
+                      return true;
                     }
                   });
+                }}
+              >
+                {uploadButton}
+              </Upload>
+            </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 6,
+              }}
+              wrapperCol={{
+                span: 18,
+              }}
+              label="Ảnh CCCD"
+              className="text-sm font-medium w-1/2"
+              name="nationalImg"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList}
+              rules={[
+                {
+                  validator(_, fileList) {
+                    return new Promise((resolve, reject) => {
+                      if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
+                        reject("File quá lớn ( dung lượng < 10MB )");
+                      } else {
+                        resolve();
+                      }
+                    });
+                  },
                 },
-              },
-            ]}
-          >
-            <Upload
-              //   className="upload-list-inline"
-              defaultFileList={avatarDefault}
-              maxCount={1}
-              listType="picture-card"
-              action=""
-              customRequest={({ file, onSuccess }) => {
-                setTimeout(() => {
-                  onSuccess("ok");
-                }, 0);
-              }}
-              showUploadList={{
-                showPreviewIcon: false,
-              }}
-              beforeUpload={(file) => {
-                return new Promise((resolve, reject) => {
-                  if (file && file?.size > 10 * 1024 * 1024) {
-                    reject("File quá lớn ( <10MB )");
-                    return false;
-                  } else {
-                    setFileList(file);
-                    resolve();
-                    return true;
-                  }
-                });
-              }}
+              ]}
             >
-              {uploadButton}
-            </Upload>
-          </Form.Item>
+              <Upload
+                defaultFileList={
+                  data?.nationalImages ? nationalImagesDefault : null
+                }
+                maxCount={1}
+                listType="picture-card"
+                action=""
+                customRequest={({ file, onSuccess }) => {
+                  setTimeout(() => {
+                    onSuccess("ok");
+                  }, 0);
+                }}
+                showUploadList={{
+                  showPreviewIcon: false,
+                }}
+                accept=".png,.jpg,.jpeg"
+                beforeUpload={(file) => {
+                  return new Promise((resolve, reject) => {
+                    if (file && file?.size > 10 * 1024 * 1024) {
+                      reject("File quá lớn ( <10MB )");
+                      return false;
+                    } else {
+                      setFileListNationalIdImage(file);
+                      resolve();
+                      return true;
+                    }
+                  });
+                }}
+              >
+                {uploadButton}
+              </Upload>
+            </Form.Item>
+          </div>
           <Form.Item
             labelCol={{
               span: 4,
             }}
             wrapperCol={{
-              span: 18,
+              span: 20,
             }}
             label=" "
             colon={false}
@@ -292,9 +511,11 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
             <Button
               type="primary"
               htmlType="submit"
-              loading={isLoading || isLoadingUploadFile}
+              loading={isLoading}
+              disabled={!formEdited}
+              className="w-full"
             >
-              Gửi cập nhật
+              Cập nhật
             </Button>
           </Form.Item>
         </Form>

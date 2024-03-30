@@ -63,9 +63,6 @@ const BudgetTask = ({
                 Số tiền tiêu dùng
               </p>
               <h3 className="text-blueBudget font-bold text-xl">
-                {/* {calculateBudgetRemainingParentTask(
-                  budgetItem
-                )?.toLocaleString()}{" "} */}
                 {usedBudget.toLocaleString()} VND
               </h3>
             </div>
@@ -125,19 +122,14 @@ const BudgetTask = ({
                     </Tooltip>
                   </div>
 
-                  {/* <div className="w-full p-3 flex flex-row gap-x-2 justify-start items-center  overflow-hidden bg-[#F7F7FF]">
-                  <p className="font-semibold text-base">
-                    Số giao dịch : {subTask?.transactions?.length}
-                  </p>
-                </div> */}
                   <div className="w-full px-3  h-fit">
                     <Badge.Ribbon
                       text={
                         subTask?.transactions?.length > 0
                           ? filterSub?.length > 0
-                            ? `mới ${filterSub?.length}`
+                            ? `Mới ${filterSub?.length}`
                             : "Hoàn thành"
-                          : "chưa có"
+                          : "Chưa có"
                       }
                       color={
                         subTask?.transactions?.length > 0
@@ -161,10 +153,9 @@ const BudgetTask = ({
                   </div>
 
                   <div className="w-full p-5 flex flex-row gap-x-2 justify-between items-center overflow-hidden ">
-                    <div className="flex flex-col justify-start items-start w-[65%]">
+                    <div className="flex flex-col justify-start items-start w-[55%]">
                       <p className="flex flex-row gap-x-1  text-blueSecondBudget text-sm font-semibold text-start">
-                        <DollarOutlined />
-                        <span>Ngân sách (VND)</span>
+                        <span>Đã chi (VND)</span>
                       </p>
                       <Tooltip
                         title={calculateTotalAmountTask(
@@ -172,18 +163,19 @@ const BudgetTask = ({
                         )?.toLocaleString()}
                       >
                         <h3 className="text-blueBudget text-base font-bold w-[95%]  truncate">
-                          {calculateTotalAmountTask(subTask)?.toLocaleString()}
+                          {calculateTotalAmountTask(subTask)?.toLocaleString()}{" "}
                         </h3>
                       </Tooltip>
                     </div>
 
-                    <div className="flex flex-col justify-end items-end w-[35%] text-end">
-                      <p className="flex flex-row gap-x-1  text-blueSecondBudget text-sm font-semibold  text-end">
-                        <CalendarOutlined />
-                        <span>Hết hạn</span>
+                    <div className="flex flex-col justify-end items-end w-[45%] text-end">
+                      <p className="flex flex-row gap-x-1  text-blueSecondBudget text-sm font-semibold  text-end ">
+                        <span className="">Kết thúc công việc</span>
                       </p>
                       <p className="text-blueBudget  font-bold text-sm">
-                        {moment(subTask?.endDate).format("DD-MM-YYYY")}
+                        {subTask?.endDate
+                          ? moment(subTask?.endDate).format("DD-MM-YYYY")
+                          : "Đang cập nhật"}
                       </p>
                     </div>
                   </div>

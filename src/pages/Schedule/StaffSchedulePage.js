@@ -44,7 +44,9 @@ const ScheduleDrawer = memo(
         }
       }
     });
-
+    useEffect(() => {
+      document.title = "Trang lịch trình công việc";
+    }, []);
     return (
       <Drawer
         placement={"right"}
@@ -217,7 +219,7 @@ const StaffSchedulePage = () => {
   const [selectedDate, setSelectedDate] = useState();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [checkedDateData, setCheckedDateData] = useState([]);
-  
+
   console.log("checkedDateData > ", checkedDateData);
 
   const [messageApi, contextHolder] = message.useMessage();

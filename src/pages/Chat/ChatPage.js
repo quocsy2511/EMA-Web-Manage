@@ -373,7 +373,9 @@ const ChatPage = () => {
 
   // Handle open new room chat / call video
   const handleOpenNewRoom = (isAudioOnly) => {};
-
+  useEffect(() => {
+    document.title = "Trang liên lạc";
+  }, []);
   return (
     <Fragment>
       <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-10 pb-0 pl-10 pr-14 flex space-x- ">

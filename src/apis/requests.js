@@ -69,3 +69,8 @@ export const getAnnualLeave = () =>
   http({
     url: `/annual-leave`,
   });
+export const deleteRequestBudget = (id) =>
+  http({
+    url: `/budget/${id}`,
+    method: "delete",
+  });

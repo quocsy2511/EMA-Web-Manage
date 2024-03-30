@@ -1,5 +1,5 @@
-import { Avatar, Button, Image } from "antd";
-import React, { Fragment, useState } from "react";
+import { Avatar, Button, Empty, Image, Spin } from "antd";
+import React, { Fragment, useEffect, useState } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUser, getProfile } from "../../apis/users";
@@ -7,28 +7,28 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import moment from "moment";
 import { getEventDivisions, getFilterEvent } from "../../apis/events";
-import { SettingOutlined } from "@ant-design/icons";
+import { SettingOutlined, SwapRightOutlined } from "@ant-design/icons";
 import EditProfileModal from "./Modal/EditProfileModal";
 import { defaultAvatar } from "../../constants/global";
+import { useRouteLoaderData } from "react-router-dom";
+import { filter } from "lodash";
 
 const ProfilePage = () => {
   const { data, isLoading, isError } = useQuery(["profile"], getProfile);
-  // console.log("🚀 ~ file: ProfilePage.js:16 ~ ProfilePage ~ data:", data);
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
-
   const divisionId = data?.divisionId;
   const {
     data: employees,
     isError: isErrorEmployees,
     isLoading: isLoadingEmployees,
   } = useQuery(
-    ["employees"],
+    ["employees", divisionId],
     () =>
       getAllUser({
         divisionId,
         pageSize: 10,
         currentPage: 1,
-        role: "EMPLOYEE",
+        role: "Nhân Viên",
       }),
     {
       select: (data) => {
@@ -53,8 +53,8 @@ const ProfilePage = () => {
     select: (data) => {
       const filteredEvents = data.filter((item) => item.status !== "DONE");
       const event = filteredEvents?.map(({ ...item }) => {
-        item.startDate = moment(item.startDate).format("DD/MM/YYYY");
-        item.endDate = moment(item.endDate).format("DD/MM/YYYY");
+        item.startDate = moment(item.startDate).format("DD-MM-YYYY");
+        item.endDate = moment(item.endDate).format("DD-MM-YYYY");
         return {
           ...item,
         };
@@ -63,6 +63,7 @@ const ProfilePage = () => {
     },
     enabled: !!divisionId,
   });
+  console.log("🚀 ~ ProfilePage ~ listEvent:", listEvent);
 
   //manager
   const {
@@ -71,14 +72,13 @@ const ProfilePage = () => {
     isError: staffsIssError,
   } = useQuery(
     ["staffs"],
-    () => getAllUser({ role: "STAFF", pageSize: 100, currentPage: 1 }),
+    () => getAllUser({ role: "Trưởng Nhóm", pageSize: 100, currentPage: 1 }),
     {
       select: (data) => {
         return data.data;
       },
     }
   );
-
   const {
     data: events,
     isLoading: eventsIsLoading,
@@ -98,19 +98,18 @@ const ProfilePage = () => {
       },
     }
   );
+  useEffect(() => {
+    document.title = "Trang thông tin cá nhân";
+  }, []);
 
-  if (
-    isLoading ||
-    staffsIsLoading
-    //  || eventsIsLoading || isLoadingEvent
-  )
+  if (isLoading || staffsIsLoading)
     return (
       <div className="w-full h-[calc(100vh-128px)]">
         <LoadingComponentIndicator />;
       </div>
     );
 
-  if (isError || staffsIssError || eventsIsError || isErrorEvent)
+  if (isError || staffsIssError || eventsIsError)
     return (
       <div className="w-full h-[calc(100vh-128px)]">
         <AnErrorHasOccured />;
@@ -119,7 +118,7 @@ const ProfilePage = () => {
 
   return (
     <Fragment>
-      <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-4 flex space-x-5">
+      <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-4 flex space-x-5 ">
         <div className="flex flex-col items-center bg-white w-1/4 p-6 rounded-2xl h-full">
           <div
             className="border-[#ED2590] rounded-full bg-white"
@@ -176,8 +175,10 @@ const ProfilePage = () => {
           </div>
 
           <div className="mt-5">
-            <p className="text-2xl font-bold">Quản lý</p>
-            {data.role === "STAFF" ? (
+            <p className="text-2xl font-bold">
+              {data.role === "Trưởng Nhóm" ? "Trưởng phòng" : "Quản lý"}{" "}
+            </p>
+            {data.role === "Trưởng Nhóm" ? (
               <p className="text-sm bg-[#F0F6FF] py-2 px-4 mt-2 rounded-xl">
                 Bạn đã giữ chức vụ trưởng bộ trong 4 năm
               </p>
@@ -189,38 +190,97 @@ const ProfilePage = () => {
           </div>
 
           <div className="mt-12">
-            {data.role === "STAFF" ? (
-              <>
-                <p className="text-lg font-semibold">
-                  Đang làm việc với các nhân viên
-                </p>
-                <div className="flex flex-wrap pt-8 gap-y-10">
-                  {!isLoadingEmployees ? (
-                    !isErrorEmployees ? (
-                      <>
-                        {employees?.map((employee, index) => (
-                          <div
-                            className="flex flex-col items-center w-[calc(100%/3)]"
-                            key={index}
-                          >
-                            <Avatar size={70} src={employee?.avatar} />
-                            <p className="text-base font-medium mt-2">
-                              {employee?.fullName}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              {employee?.divisionName}
-                            </p>
-                          </div>
-                        ))}
-                      </>
+            {data.role === "Trưởng Nhóm" ? (
+              <div className="w-full flex flex-col">
+                <div className="w-full mb-8 border-b border-b-gray-300 pb-4">
+                  <p className="text-lg font-semibold">
+                    Danh sách các nhân viên chính thức
+                  </p>
+                  <div className="flex flex-wrap pt-8 gap-y-10 overflow-y-auto h-[320px]">
+                    {!isLoadingEmployees ? (
+                      !isErrorEmployees ? (
+                        <>
+                          {employees
+                            ?.filter(
+                              (employee) =>
+                                employee?.typeEmployee === "FULL_TIME"
+                            )
+                            ?.map((employee, index) => (
+                              <div
+                                className="flex flex-col items-center w-[calc(100%/3)]"
+                                key={index}
+                              >
+                                <Avatar size={70} src={employee?.avatar} />
+                                <p className="text-base font-medium mt-2">
+                                  {employee?.fullName}
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                  {employee?.divisionName}
+                                </p>
+                              </div>
+                            ))}
+                        </>
+                      ) : (
+                        <AnErrorHasOccured />
+                      )
                     ) : (
-                      <AnErrorHasOccured />
-                    )
-                  ) : (
-                    <LoadingComponentIndicator />
-                  )}
+                      <LoadingComponentIndicator />
+                    )}
+                  </div>
                 </div>
-              </>
+                <div className="w-full mb-2 pb-4">
+                  <p className="text-lg font-semibold">
+                    Danh sách các nhân viên bán thời gian
+                  </p>
+                  <div className="flex flex-wrap pt-8 gap-y-10 overflow-y-auto h-[320px]">
+                    {!isLoadingEmployees ? (
+                      !isErrorEmployees ? (
+                        <>
+                          {employees?.filter(
+                            (employee) => employee?.typeEmployee !== "FULL_TIME"
+                          ).length > 0 ? (
+                            <>
+                              {employees
+                                ?.filter(
+                                  (employee) =>
+                                    employee?.typeEmployee !== "FULL_TIME"
+                                )
+                                ?.map((employee, index) => (
+                                  <div
+                                    className="flex flex-col items-center w-[calc(100%/3)]"
+                                    key={index}
+                                  >
+                                    <Avatar size={70} src={employee?.avatar} />
+                                    <p className="text-base font-medium mt-2">
+                                      {employee?.fullName}
+                                    </p>
+                                    <p className="text-xs text-slate-500">
+                                      {employee?.divisionName}
+                                    </p>
+                                  </div>
+                                ))}
+                            </>
+                          ) : (
+                            <div className="w-full flex justify-center items-center">
+                              <Empty
+                                description={
+                                  <span>
+                                    Hiện tại chưa có nhận viên bán thời gian
+                                  </span>
+                                }
+                              />
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <AnErrorHasOccured />
+                      )
+                    ) : (
+                      <LoadingComponentIndicator />
+                    )}
+                  </div>
+                </div>
+              </div>
             ) : (
               <>
                 <p className="text-lg font-semibold">
@@ -247,88 +307,99 @@ const ProfilePage = () => {
           </div>
         </div>
         <div className="bg-white flex-1 p-6 rounded-2xl h-full">
-          <p className="text-lg font-semibold">Sự kiện tham gia gần đây (5)</p>
-          {data.role === "STAFF" ? (
-            <div className="mt-5 space-y-3">
-              {listEvent?.map((event, index) => {
-                return (
-                  <div
-                    className="flex border rounded-lg gap-x-2 p-2"
-                    key={index}
-                  >
-                    <Image
-                      src={event.coverUrl}
-                      fallback="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
-                      width={50}
-                      height={50}
-                    />
-                    <div className="flex-1 flex flex-col justify-center">
-                      <p className="text-base font-medium truncate">
-                        {event.eventName}
-                      </p>
-                      <div className="flex justify-between">
-                        <p className="text-xs text-slate-400">
-                          {moment(event.startDate).format("DD-MM-YYYY")}
+          {data.role === "Trưởng Nhóm" ? (
+            <Spin spinning={isLoadingEvent}>
+              <p className="text-lg font-semibold">
+                Sự kiện tham gia gần đây ({listEvent?.length})
+              </p>
+              <div className="mt-5 space-y-3">
+                {listEvent?.map((event, index) => {
+                  return (
+                    <div
+                      className="flex border rounded-lg gap-x-2 p-2"
+                      key={index}
+                    >
+                      <Image
+                        src={event.coverUrl}
+                        fallback="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
+                        width={50}
+                        height={50}
+                      />
+                      <div className="flex-1 flex flex-col justify-center">
+                        <p className="text-base font-medium truncate">
+                          {event.eventName}
                         </p>
+                        <div className="flex justify-between">
+                          <p className="text-xs text-slate-400 flex flex-row gap-x-1 font-bold">
+                            {event.startDate}
+                            <SwapRightOutlined />
+                            {event.endDate}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            </Spin>
           ) : (
-            <div className="mt-5 space-y-3">
-              {events?.map((event, index) => {
-                let status, statusColor, statusBgColor;
-                switch (event.status) {
-                  case "PENDING":
-                    status = "Đang chuẩn bị";
-                    statusColor = "text-slate-500";
-                    statusBgColor = "bg-slate-100";
-                    break;
-                  case "PROCESSING":
-                    status = "Đang diễn ra";
-                    statusColor = "text-orange-500";
-                    statusBgColor = "bg-orange-100";
-                    break;
-                  case "DONE":
-                    status = "Đã kết thúc";
-                    statusColor = "text-green-500";
-                    statusBgColor = "bg-green-100";
-                    break;
-                  case "CANCEL":
-                    status = "Hủy bỏ";
-                    statusColor = "text-red-500";
-                    statusBgColor = "bg-red-100";
-                    break;
-                  default:
-                    break;
-                }
-                return (
-                  <div
-                    className="flex border rounded-lg gap-x-2 p-2"
-                    key={index}
-                  >
-                    <Image
-                      src={event.coverUrl}
-                      fallback="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
-                      width={50}
-                      height={50}
-                    />
-                    <div className="flex-1 flex flex-col justify-center">
-                      <p className="text-base font-medium truncate">
-                        {event.eventName}
-                      </p>
-                      <div className="flex justify-between">
-                        <p className="text-xs text-slate-400">
-                          {moment(event.startDate).format("DD-MM-YYYY")}
+            <Spin spinning={eventsIsLoading}>
+              <p className="text-lg font-semibold">
+                Sự kiện tham gia gần đây ({events?.length})
+              </p>
+              <div className="mt-5 space-y-3">
+                {events?.map((event, index) => {
+                  let status, statusColor, statusBgColor;
+                  switch (event.status) {
+                    case "PENDING":
+                      status = "Đang chuẩn bị";
+                      statusColor = "text-slate-500";
+                      statusBgColor = "bg-slate-100";
+                      break;
+                    case "PROCESSING":
+                      status = "Đang diễn ra";
+                      statusColor = "text-orange-500";
+                      statusBgColor = "bg-orange-100";
+                      break;
+                    case "DONE":
+                      status = "Đã kết thúc";
+                      statusColor = "text-green-500";
+                      statusBgColor = "bg-green-100";
+                      break;
+                    case "CANCEL":
+                      status = "Hủy bỏ";
+                      statusColor = "text-red-500";
+                      statusBgColor = "bg-red-100";
+                      break;
+                    default:
+                      break;
+                  }
+                  return (
+                    <div
+                      className="flex border rounded-lg gap-x-2 p-2"
+                      key={index}
+                    >
+                      <Image
+                        src={event.coverUrl}
+                        fallback="https://png.pngtree.com/thumb_back/fh260/background/20210902/pngtree-stars-background-for-award-ceremony-event-image_786253.jpg"
+                        width={50}
+                        height={50}
+                      />
+                      <div className="flex-1 flex flex-col justify-center">
+                        <p className="text-base font-medium truncate">
+                          {event.eventName}
                         </p>
+                        <div className="flex justify-between">
+                          <p className="text-xs text-slate-400">
+                            {moment(event.startDate).format("DD-MM-YYYY")}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            </Spin>
           )}
         </div>
         {isOpenEditModal && (

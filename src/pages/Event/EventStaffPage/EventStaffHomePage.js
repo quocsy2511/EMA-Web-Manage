@@ -1,4 +1,4 @@
-import React, { Fragment, memo, useState } from "react";
+import React, { Fragment, memo, useEffect, useState } from "react";
 import { Avatar, Empty, Image, Input, Popover, Progress, Tooltip } from "antd";
 import { FiSearch } from "react-icons/fi";
 import clsx from "clsx";
@@ -55,7 +55,9 @@ const EventItem = memo(({ event, gotoEventPage }) => {
     default:
       break;
   }
-
+  useEffect(() => {
+    document.title = "Trang danh sách sự kiện";
+  }, []);
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
@@ -121,7 +123,9 @@ const EventItem = memo(({ event, gotoEventPage }) => {
             <div className="flex-1">
               <LabelItem
                 icon={<FaRegClock className="text-xl" />}
-                text={`${event?.totalTimeRemaining} ${
+                text={`${
+                  event?.totalTimeRemaining > 0 ? event?.totalTimeRemaining : 0
+                } ${
                   event?.typeTimeRemaining === 1
                     ? "ngày"
                     : event?.typeTimeRemaining === 2
@@ -169,7 +173,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
 const EventStaffHomePage = () => {
   const navigate = useNavigate();
   const staff = useRouteLoaderData("staff");
-
+  const [listEventFilter, setListEventFilter] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("ALL");
 
   const {
@@ -186,7 +190,6 @@ const EventStaffHomePage = () => {
     },
     refetchOnWindowFocus: false,
   });
-  console.log("listEvent > ", listEvent);
 
   const {
     data: listUsers,
@@ -210,14 +213,29 @@ const EventStaffHomePage = () => {
     }
   );
   // console.log("listUsers > ", listUsers);
+  const handleFilterEvent = (type) => {
+    if (!listEventIsLoading && !listEventIsError) {
+      if (type === "ALL") {
+        setListEventFilter(listEvent);
+      } else {
+        const filterEvent = listEvent?.filter((event) => event.status === type);
+        setListEventFilter(filterEvent);
+      }
+    }
+  };
 
   const handleSelectStatus = (status) => {
     setSelectedStatus(status);
+    handleFilterEvent(status);
   };
 
   const gotoEventPage = (event) => {
     navigate(`${event?.id}`, { state: { event, listEvent } });
   };
+  useEffect(() => {
+    // handleFilterEvent("ALL");
+    handleSelectStatus("ALL");
+  }, [listEvent]);
 
   return (
     <Fragment>
@@ -227,7 +245,7 @@ const EventStaffHomePage = () => {
           animate={{ x: 0, opacity: 1 }}
           className="flex justify-between"
         >
-          <div className="w-1/3 bg-white rounded-md shadow-lg flex items-center justify-center space-x-3 px-5">
+          {/* <div className="w-1/3 bg-white rounded-md shadow-lg flex items-center justify-center space-x-3 px-5">
             <FiSearch className="text-lg" />
             <Input
               className="text-base"
@@ -235,8 +253,8 @@ const EventStaffHomePage = () => {
               bordered={false}
               placeholder="Tìm kiếm tên sự kiện"
             />
-          </div>
-          <div className="">
+          </div> */}
+          <div className="flex w-full justify-end">
             {listUserIsLoading ? (
               <></>
             ) : listUserIsError ? (
@@ -320,8 +338,8 @@ const EventStaffHomePage = () => {
             </div>
           ) : (
             <AnimatePresence>
-              {listEvent?.length > 0 ? (
-                listEvent?.map((event) => (
+              {listEventFilter?.length > 0 ? (
+                listEventFilter?.map((event) => (
                   <EventItem
                     key={event?.id}
                     event={event}

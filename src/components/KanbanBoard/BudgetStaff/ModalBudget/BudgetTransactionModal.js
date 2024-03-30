@@ -20,6 +20,7 @@ const BudgetTransactionModal = ({
   setSelectTransactionTask = { setSelectTransactionTask },
 }) => {
   const { transactions } = selectItemTask;
+  console.log("🚀 ~ selectItemTask:", selectItemTask);
   const queryClient = useQueryClient();
   const [isRejectRequest, setIsRejectRequest] = useState(false);
   const [selectRequest, setSelectRequest] = useState("");
@@ -196,7 +197,7 @@ const BudgetTransactionModal = ({
                     <div className="w-[50%] flex flex-col justify-start items-start gap-y-2 ">
                       {transaction?.status === "PENDING" ? (
                         <p className="text-base text-yellow-500 border border-yellow-400 rounded-lg px-2 py-1">
-                          Đang chờ
+                          Đang chờ duyệt
                         </p>
                       ) : transaction?.status === "ACCEPTED" ? (
                         <div className="w-full flex flex-row items-center gap-x-2">
@@ -219,7 +220,7 @@ const BudgetTransactionModal = ({
                       )}
                     </div>
                     {transaction?.status === "PENDING" &&
-                      transaction?.amount < remainingBudget && (
+                      transaction?.amount <= remainingBudget && (
                         <div className="w-[50%] flex flex-row justify-end items-start gap-x-2">
                           <Popconfirm
                             title="Duyệt yêu cầu"
