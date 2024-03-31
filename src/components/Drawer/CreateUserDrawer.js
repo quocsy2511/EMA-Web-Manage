@@ -11,7 +11,7 @@ import {
   Upload,
   message,
 } from "antd";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createUser, getRoles } from "../../apis/users";
 import { getAllDivision } from "../../apis/divisions";
 import viVN from "antd/locale/vi_VN";
@@ -20,16 +20,21 @@ import dayjs from "dayjs";
 import { uploadFile } from "../../apis/files";
 import { useRouteLoaderData } from "react-router-dom";
 import TEXT from "../../constants/string";
+import { defaultAvatarFireBase } from "../../constants/global";
 
 const Label = ({ label }) => <p className="text-lg font-medium">{label}</p>;
 
 const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
-  const [divisionMode, setDivisionMode] = useState(1);
-  const [fileList, setFileList] = useState();
+  const [divisionMode, setDivisionMode] = useState(2);
+  const [fileList, setFileList] = useState({ url: defaultAvatarFireBase });
   const admin = useRouteLoaderData("administrator");
   const staff = useRouteLoaderData("staff");
-  const divisionId = useRouteLoaderData("staff")?.divisionID;
+
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [showDrawer]);
 
   const { mutate: createUserMutate, isLoading } = useMutation(
     (user) => createUser(user),
@@ -40,6 +45,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
 
         form.resetFields();
         setDivisionMode(1);
+        setFileList({ url: defaultAvatarFireBase });
         setShowDrawer(false);
 
         messageApi.open({
@@ -53,7 +59,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
             type: "error",
             content: "Email đã được sử dụng! Hãy thử lại sau",
           });
-        } else if (error.response?.data?.message.includes("Duplicate entry ")) {
+        } else if (error.response?.data?.message.includes("Duplicate entry")) {
           messageApi.open({
             type: "error",
             content: "Số điện thoại đã được sử dụng! Hãy thử lại sau",
@@ -73,7 +79,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
     {
       onSuccess: (data, variables) => {
         const user = variables.user;
-        variables.user = { avatar: data.downloadUrl, ...user };
+        variables.user = { ...user, avatar: data.downloadUrl };
         createUserMutate(variables.user);
         console.log("🚀 ~ CreateUserDrawer ~ variables.user :", variables.user);
       },
@@ -161,20 +167,36 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = (values) => {
-    // console.log("FORM DATA: ", values);
-    const { avatar, ...user } = values;
-    const formData = new FormData();
-    formData.append("file", fileList);
-    formData.append("folderName", "avatar");
+    console.log("FORM DATA: ", values);
+    console.log("fileList: ", fileList);
+    // const { avatar, ...user } = values;
+    // const formData = new FormData();
+    // formData.append("file", fileList);
+    // formData.append("folderName", "avatar");
 
-    console.log("User: ", user);
-    if (staff) {
-      user.roleId = roleEmployee?.id;
-      user.divisionId = divisionId;
-      // console.log("🚀 ~ onFinish ~ employee:", user);
-      uploadFileMutate({ formData, user });
+    if (fileList?.url) {
+      if (staff) {
+        values.roleId = roleEmployee?.id;
+        values.divisionId = staff?.divisionId;
+        values.typeEmployee = "PART_TIME";
+      }
+      values.avatar = fileList?.url;
+      console.log("values > ", values);
+
+      createUserMutate(values);
     } else {
-      uploadFileMutate({ formData, user });
+      const formData = new FormData();
+      formData.append("file", fileList);
+      formData.append("folderName", "avatar");
+
+      if (staff) {
+        values.roleId = roleEmployee?.id;
+        values.divisionId = staff?.divisionId;
+        values.typeEmployee = "PART_TIME";
+      }
+      console.log("values > ", values);
+
+      uploadFileMutate({ formData, user: values });
     }
   };
 
@@ -182,7 +204,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
     <div>
       {contextHolder}
       <Drawer
-        title="Khởi tạo 1 nhân viên"
+        title={staff ? "Quản lý nhân sự" : "Tạo mới nhân viên"}
         width={580}
         onClose={() => setShowDrawer(false)}
         open={showDrawer}
@@ -211,10 +233,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
             getValueFromEvent={(e) => e?.fileList}
             rules={[
               {
-                required: true,
-                message: "Chưa chọn ảnh đại diện",
-              },
-              {
                 validator(_, fileList) {
                   return new Promise((resolve, reject) => {
                     if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
@@ -228,7 +246,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
             ]}
           >
             <Upload
-              className="flex items-center gap-x-3"
+              className="flex items-center gap-x-3 flex-row-reverse space-x-reverse"
               maxCount={1}
               listType="picture-circle"
               customRequest={({ file, onSuccess }) => {
@@ -238,7 +256,8 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
               }}
               showUploadList={{
                 showPreviewIcon: false,
-                // showRemoveIcon: false,
+                showRemoveIcon: false,
+                removeIcon: false,
               }}
               // accept=".png,.jpg,.pdf"
               beforeUpload={(file) => {
@@ -253,6 +272,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
                   }
                 });
               }}
+              defaultFileList={[{ url: defaultAvatarFireBase }]}
             >
               Ảnh dại diện
             </Upload>
@@ -289,9 +309,14 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
                 required: true,
                 message: `Chưa nhập thông tin!`,
               },
+              {
+                pattern: /^[0-9]{10}$/,
+                message: "Số điện thoại bao gồm 12 số!",
+              },
             ]}
           >
-            <Input type="" placeholder="090*******" />
+            <Input type="" placeholder="090*******" pattern="[0-9]*"
+              maxLength={10}/>
           </Form.Item>
           <Form.Item
             name="nationalId"
@@ -350,6 +375,7 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
                     const today = moment();
                     return current && current > today;
                   }}
+                  format={"DD-MM-YYYY"}
                 />
               </ConfigProvider>
             </Form.Item>
@@ -411,54 +437,56 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
                     options={roles ?? []}
                   />
                 </Form.Item>
-                <Form.Item
-                  className="w-[45%]"
-                  name="divisionId"
-                  label={
-                    <div className="md:flex md:items-center md:gap-x-1">
-                      <Label label="Bộ phận" />
-                      <p className="text-sm text-slate-400">(tùy chọn)</p>
-                    </div>
-                  }
-                  rules={[
-                    {
-                      required: true,
-                      message: `Chưa chọn bộ phận!`,
-                    },
-                  ]}
-                >
-                  <Select
-                    placeholder="Bộ phận"
-                    onChange={(value) => {
-                      form.setFieldsValue({ divisionId: value });
-                    }}
-                    loading={
-                      divisionLoading ||
-                      divisionsWithoutStaffIsLoading ||
-                      divisionIsError ||
-                      divisionsWithoutStaffIsError
+                {
+                  <Form.Item
+                    className="w-[45%]"
+                    name="divisionId"
+                    label={
+                      <div className="md:flex md:items-center md:gap-x-1">
+                        <Label label="Bộ phận" />
+                        <p className="text-sm text-slate-400">(tùy chọn)</p>
+                      </div>
                     }
-                    options={
-                      !divisionLoading && !divisionsWithoutStaffIsLoading
-                        ? divisionMode === 1
+                    rules={[
+                      {
+                        required: true,
+                        message: `Chưa chọn bộ phận!`,
+                      },
+                    ]}
+                  >
+                    <Select
+                      placeholder="Bộ phận"
+                      onChange={(value) => {
+                        form.setFieldsValue({ divisionId: value });
+                      }}
+                      loading={
+                        divisionLoading ||
+                        divisionsWithoutStaffIsLoading ||
+                        divisionIsError ||
+                        divisionsWithoutStaffIsError
+                      }
+                      options={
+                        divisionMode === 1
                           ? divisionData
                           : divisionsWithoutStaff
-                        : []
-                    }
-                  />
-                </Form.Item>
+                      }
+                    />
+                  </Form.Item>
+                }
               </>
             )}
           </div>
 
-          <Form.Item name="typeEmployee">
-            {divisionMode === 1 && (
-              <Radio.Group>
-                <Radio value="FULL_TIME">Toàn thời gian</Radio>
-                <Radio value="PART_TIME">Bán thời gian</Radio>
-              </Radio.Group>
-            )}
-          </Form.Item>
+          {!staff && (
+            <Form.Item name="typeEmployee">
+              {divisionMode === 1 && (
+                <Radio.Group>
+                  <Radio value="FULL_TIME">Toàn thời gian</Radio>
+                  <Radio value="PART_TIME">Bán thời gian</Radio>
+                </Radio.Group>
+              )}
+            </Form.Item>
+          )}
 
           <div className="text-center">
             <Form.Item>

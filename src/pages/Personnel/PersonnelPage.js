@@ -235,7 +235,6 @@ const PersonnelPage = () => {
   };
 
   //  =========================================================================
-
   const onCancelEditing = () => {
     setEditingRowKey("");
   };
@@ -257,7 +256,6 @@ const PersonnelPage = () => {
     // Specify which row is being edited
     setEditingRowKey(record.key);
   };
-
   //  =========================================================================
 
   //  =========================================================================
@@ -431,7 +429,15 @@ const PersonnelPage = () => {
       editTable: true,
       filteredValue: null,
       align: "center",
-      render: (_, record) => <p>{record?.dob ? record?.dob : <Tag />}</p>,
+      render: (_, record) => (
+        <p>
+          {record?.dob ? (
+            moment(record?.dob, "YYYY-MM-DD").format("DD-MM-YYYY")
+          ) : (
+            <Tag />
+          )}
+        </p>
+      ),
     },
     {
       title: "Giới tính",
@@ -492,12 +498,10 @@ const PersonnelPage = () => {
       width: 150,
       editTable: true,
       filters:
-        divisionsData
-          ?.filter((division) => division?.status === true)
-          .map((division) => ({
-            text: division?.divisionName,
-            value: division?.id,
-          })) ?? [],
+        divisionsData?.map((division) => ({
+          text: division?.divisionName,
+          value: division?.id,
+        })) ?? [],
       filteredValue: filteredInfo?.divisionName || null,
       onFilter: (value, record) => {
         return record?.divisionId === value;
@@ -652,19 +656,11 @@ const PersonnelPage = () => {
     ...restProps
   }) => {
     // Setup input field type
-    // console.log("dataIndex > ", dataIndex);
-    // console.log("record > ", record);
-
-    // form.setFieldsValue({
-    //   role: record?.roleId,
-    // });
-    // console.log("form.getFieldValue(role) > ", form.getFieldValue("role"));
     const role = roles?.find(
       (role) =>
         role?.value === form.getFieldValue("role") ||
         role?.label === form.getFieldValue("role")
     );
-    // console.log("role > ", role);
 
     setDivisionMode(role?.label === TEXT.STAFF ? 2 : 1);
 
@@ -687,8 +683,8 @@ const PersonnelPage = () => {
         break;
       case "status":
         options = [
-          { value: "ACTIVE", label: "kích hoạt" },
-          { value: "INACTIVE", label: "vô hiệu" },
+          { value: "ACTIVE", label: "Kích hoạt" },
+          { value: "INACTIVE", label: "Vô hiệu" },
         ];
         break;
       case "gender":
@@ -727,6 +723,7 @@ const PersonnelPage = () => {
               form.setFieldsValue({ [dataIndex]: formattedDate });
             }}
             size="small"
+            format={"DD-MM-YYYY"}
           />
         </ConfigProvider>
       ) : (

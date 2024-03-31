@@ -9,7 +9,6 @@ import {
   Drawer,
   FloatButton,
   Form,
-  Input,
   InputNumber,
   Popconfirm,
   Select,
@@ -18,6 +17,7 @@ import {
   Tooltip,
   Upload,
   message,
+  Input,
 } from "antd";
 import viVN from "antd/locale/vi_VN";
 import moment from "moment";
@@ -36,6 +36,7 @@ import { FaPlus } from "react-icons/fa6";
 import { getPlanByContact } from "../../apis/planning";
 import { BsPiggyBank } from "react-icons/bs";
 import { FaUserFriends } from "react-icons/fa";
+import { LuPercent } from "react-icons/lu";
 
 const { RangePicker } = DatePicker;
 
@@ -52,8 +53,9 @@ const DefaultTemplateTask = memo(
     toggleSelectTemplateTasks,
     task,
     handleUpdateDesc,
+    handleUpdatePercentage,
   }) => {
-    console.log("task > ", task);
+    // console.log("task > ", task);
     const [descText, setDescText] = useState();
 
     useEffect(() => {
@@ -147,10 +149,49 @@ const DefaultTemplateTask = memo(
             </div>
           </div>
 
-          <div className="p-5 pt-3 pb-8">
+          <div className="p-5 pt-3 pb-8 flex justify-between">
             <div className="flex space-x-4 items-center">
               <Title title="Độ ưu tiên" />
-              <p className="border px-2 py-0.5 rounded-lg text-sm">{renderPriority}</p>
+              <p
+                className={clsx(
+                  "border px-2 py-0.5 rounded-lg text-sm font-medium",
+                  {
+                    "border-green-500 text-green-600": task?.itemPriority === 1,
+                    "border-orange-400 text-orange-500":
+                      task?.itemPriority === 2,
+                    "border-red-400 text-red-500": task?.itemPriority === 3,
+                  }
+                )}
+              >
+                {renderPriority}
+              </p>
+            </div>
+
+            <div className="w-1/5">
+              <ConfigProvider
+                theme={{
+                  token: {
+                    fontSize: 16,
+                  },
+                }}
+              >
+                <InputNumber
+                  defaultValue={task?.itemPercentage}
+                  placeholder="Outlined"
+                  addonAfter={<LuPercent />}
+                  onChange={(value) => {
+                    console.log("change > ", value);
+                    handleUpdatePercentage(task?.itemId, value);
+                  }}
+                  min={70}
+                  max={90}
+                  step={5}
+                  onStep={(value) => {
+                    console.log("step > ", value);
+                    handleUpdatePercentage(task?.itemId, value);
+                  }}
+                />
+              </ConfigProvider>
             </div>
           </div>
         </div>
@@ -206,6 +247,7 @@ const EventCreationPage = () => {
   const [selectTemplateTasks, setSelectTemplateTasks] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [taskList, setTaskList] = useState([]);
+  console.log("taskList > ", taskList);
   const [selectedDivision, setSelectedDivision] = useState([]);
 
   const [form] = Form.useForm();
@@ -246,7 +288,7 @@ const EventCreationPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("divisions > ", divisions);
+  // console.log("divisions > ", divisions);
 
   const {
     data: planningData,
@@ -264,13 +306,14 @@ const EventCreationPage = () => {
             itemPlannedUnit: item?.plannedUnit,
             itemPlannedAmount: item?.plannedAmount,
             itemPlannedPrice: item?.plannedPrice,
+            itemPercentage: 80,
           }))
         )
         .flat();
     },
     refetchOnWindowFocus: false,
   });
-  console.log("planningData > ", planningData);
+  // console.log("planningData > ", planningData);
 
   useEffect(() => {
     planningData && setTaskList(planningData);
@@ -309,7 +352,7 @@ const EventCreationPage = () => {
             desc: JSON.stringify(item?.itemDescription?.ops),
             priority: item?.itemPriority,
             itemId: item?.itemId,
-            itemPercentage: 80, // Tiền lơi
+            itemPercentage: item?.itemPercentage,
           })),
           listDivision: selectedDivision,
           contactId,
@@ -382,6 +425,14 @@ const EventCreationPage = () => {
           return item;
         }
       })
+    );
+  };
+
+  const handleUpdatePercentage = (itemId, percentage) => {
+    setTaskList((prev) =>
+      prev?.map((task) =>
+        task?.itemId === itemId ? { ...task, itemPercentage: percentage } : task
+      )
     );
   };
 
@@ -801,6 +852,7 @@ const EventCreationPage = () => {
                   isDefault
                   task={item}
                   handleUpdateDesc={handleUpdateDesc}
+                  handleUpdatePercentage={handleUpdatePercentage}
                 />
               ))}
             </div>

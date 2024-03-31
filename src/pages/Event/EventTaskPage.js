@@ -95,6 +95,7 @@ const EventTaskPage = () => {
   const eventId = useParams()?.eventId;
   const manager = useRouteLoaderData("manager");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [assigneeSelection, setAssigneeSelection] = useState();
   const [prioritySelection, setPrioritySelection] = useState();
@@ -107,6 +108,19 @@ const EventTaskPage = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
+
+  useEffect(() => {
+    if (location.state?.isNavigate && !!location.state?.parentTaskId) {
+      if (location.state?.subtaskId) {
+        goToSubTask(location.state?.parentTaskId, location.state?.subtaskId);
+      } else {
+        goToSubTask(location.state?.parentTaskId);
+      }
+    }
+    if (location.state?.isNavigate && location.state?.isBudget) {
+      goToBudget();
+    }
+  }, [location]);
 
   const {
     data: eventDetail,
@@ -294,11 +308,12 @@ const EventTaskPage = () => {
     });
   };
 
-  const goToSubTask = (taskId) => {
+  const goToSubTask = (taskId, subtaskId) => {
     navigate(`${taskId}`, {
       state: {
         eventName: eventDetail?.eventName,
         dateRange: [eventDetail?.processingDate, eventDetail?.endDate],
+        subtaskId,
       },
     });
   };

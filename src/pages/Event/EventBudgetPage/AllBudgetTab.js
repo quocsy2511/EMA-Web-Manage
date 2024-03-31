@@ -192,7 +192,7 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
                 <div
                   className={`absolute z-10 w-1 h-1/2 bg-black/20 top-0 mx-5 cursor-pointer`}
                   style={{
-                    left: `calc(${selectBudget?.itemExisted?.percentage}% - 2rem)`,
+                    left: `calc(${selectBudget?.itemExisted?.percentage - 6}%)`,
                   }}
                 />
               </Tooltip>
@@ -286,7 +286,9 @@ const AllBudgetTab = ({ allBudget, allBudgetIsLoading, allBudgetIsError }) => {
                   // width: "25%",
                   align: "center",
                   render: (text) => (
-                    <p className="">{momenttz(text).format("DD-MM-YYYY")}</p>
+                    <p className="">
+                      {momenttz(text).format("DD-MM-YYYY HH:ss")}
+                    </p>
                   ),
                 },
                 {
