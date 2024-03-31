@@ -244,8 +244,10 @@ const OwnBudgetTab = ({
 
           <div className="bg-white p-5 rounded-md space-y-2">
             <div className="flex justify-between items-center">
-              <p className="text-base text-slate-400 font-normal">Đã sử dụng</p>
-              <p className="text-base text-slate-400 font-normal">Hạn mức</p>
+              <p className="text-base text-slate-400 font-normal">
+                Đã chi tiêu
+              </p>
+              <p className="text-base text-slate-400 font-normal">Khả dụng</p>
             </div>
 
             <div className="flex justify-between items-center">
@@ -317,7 +319,7 @@ const OwnBudgetTab = ({
                 <div
                   className={`absolute z-10 w-1 h-1/2 bg-black/20 top-0 mx-5 cursor-pointer`}
                   style={{
-                    left: `calc(${selectBudget?.itemExisted?.percentage-6}%)`,
+                    left: `calc(${selectBudget?.itemExisted?.percentage - 6}%)`,
                   }}
                 />
               </Tooltip>
@@ -381,10 +383,6 @@ const OwnBudgetTab = ({
                       )
                       .flat();
 
-                    // if (hasFilter) {
-                    //   tableData?.filter((data) => data?.status === hasFilter);
-                    // }
-
                     if (mergeValue?.has(record?.title)) {
                       return { rowSpan: 0 };
                     } else {
@@ -415,7 +413,7 @@ const OwnBudgetTab = ({
                   // width: "25%",
                   align: "center",
                   render: (text) => (
-                    <p className="">{momenttz(text).format("DD-MM-YYYY")}</p>
+                    <p className="">{momenttz(text).format("DD-MM-YYYY HH:ss")}</p>
                   ),
                 },
                 {

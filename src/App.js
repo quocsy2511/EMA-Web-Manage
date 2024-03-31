@@ -9,6 +9,7 @@ import LoadingPageIndicator from "./components/Indicator/LoadingPageIndicator";
 import LoginPage from "./pages/Login/LoginPage";
 import ErrorPage from "./pages/Error/ErrorPage";
 import DepartmentStaffPage from "./components/KanbanBoard/Department/DepartmentStaffPage";
+import ManagerPersonnelPage from "./pages/Personnel/ManagerPersonnelPage.js";
 
 const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
 
@@ -166,7 +167,7 @@ const router = createBrowserRouter([
       {
         path: "chat",
         element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
+          <Suspense fallback={<LoadingPageIndicator title="dữ liệu" />}>
             <ChatPage />
           </Suspense>
         ),
@@ -174,7 +175,7 @@ const router = createBrowserRouter([
       {
         path: "timekeeping",
         element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
+          <Suspense fallback={<LoadingPageIndicator title="dữ liệu" />}>
             <TimekeepingPage />
           </Suspense>
         ),
@@ -182,7 +183,7 @@ const router = createBrowserRouter([
       {
         path: "request",
         element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
+          <Suspense fallback={<LoadingPageIndicator title="dữ liệu" />}>
             <RequestPage />
           </Suspense>
         ),
@@ -190,7 +191,7 @@ const router = createBrowserRouter([
       {
         path: "profile",
         element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
+          <Suspense fallback={<LoadingPageIndicator title="dữ liệu" />}>
             <ProfilePage />
           </Suspense>
         ),
@@ -198,8 +199,16 @@ const router = createBrowserRouter([
       {
         path: "notification",
         element: (
-          <Suspense fallback={<LoadingPageIndicator />}>
+          <Suspense fallback={<LoadingPageIndicator title="dữ liệu" />}>
             <NotificationPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "personnel",
+        element: (
+          <Suspense fallback={<LoadingPageIndicator title="dữ liệu" />}>
+            <ManagerPersonnelPage />
           </Suspense>
         ),
       },

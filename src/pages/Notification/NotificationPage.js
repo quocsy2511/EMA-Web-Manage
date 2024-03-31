@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Dropdown, message } from "antd";
+import { Avatar, Badge, Dropdown, message } from "antd";
 import { Fragment } from "react";
 import { BsCheck2, BsThreeDots } from "react-icons/bs";
 import {
@@ -13,11 +13,14 @@ import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import { motion } from "framer-motion";
 import moment from "moment";
 import { defaultAvatar } from "../../constants/global";
-import { useRouteLoaderData } from "react-router-dom";
+import { useNavigate, useRouteLoaderData } from "react-router-dom";
+import clsx from "clsx";
 
 const NotificationPage = () => {
   const manager = useRouteLoaderData("manager");
   const staff = useRouteLoaderData("staff");
+
+  const navigate = useNavigate();
 
   const [isSeeAll, setIsSeeAll] = useState(true);
   const [messageApi, contextHolder] = message.useMessage();
@@ -32,7 +35,7 @@ const NotificationPage = () => {
     isError,
     refetch,
   } = useQuery(
-    ["notifications"],
+    ["notifications", 10, currentPage, isSeeAll ? "ALL" : "UNREAD"],
     () => getAllNotification(10, currentPage, isSeeAll ? "ALL" : "UNREAD"),
     {
       refetchOnWindowFocus: false,
@@ -50,10 +53,10 @@ const NotificationPage = () => {
 
   useEffect(() => {
     notifications?.currentPage === 1
-      ? setRenderNotifications(notifications?.data ?? [])
+      ? setRenderNotifications(notifications?.data?.notifications ?? [])
       : setRenderNotifications((prev) => [
           ...prev,
-          ...(notifications?.data ?? []),
+          ...(notifications?.data?.notifications ?? []),
         ]);
   }, [notifications]);
 
@@ -76,18 +79,26 @@ const NotificationPage = () => {
   const { mutate: seenNotificationMutate } = useMutation(
     (notificationId) => seenNotification(notificationId),
     {
-      onSuccess: (data, variables) => {
-        queryClient.setQueryData(["notifications"], (oldValue) => {
-          console.log("oldValue: ", oldValue);
-          const updatedOldData = oldValue.data.map((item) => {
-            if (item.id === variables.notificationId) {
-              return { ...item, readFlag: 1 };
-            }
-            return item;
-          });
-          return updatedOldData;
-        });
-      },
+      // onSuccess: (data, variables) => {
+      //   queryClient.setQueryData(["notifications"], (oldValue) => {
+      //     console.log("oldValue: ", oldValue);
+      //     const updatedOldData = {
+      //       ...oldValue,
+
+      //       data: {
+      //         totalUnreadNotifications:
+      //           oldValue?.data?.totalUnreadNotifications - 1,
+      //         notifications: oldValue?.data?.notifications?.map((item) => {
+      //           if (item?.id === variables) {
+      //             return { ...item, isRead: 1 };
+      //           }
+      //           return item;
+      //         }),
+      //       },
+      //     };
+      //     return updatedOldData;
+      //   });
+      // },
       onError: (error) => {
         messageApi.open({
           type: "error",
@@ -100,6 +111,59 @@ const NotificationPage = () => {
   const hanleClickNotification = (notification) => {
     notification?.isRead === 0 && seenNotificationMutate(notification?.id);
 
+    switch (item?.type) {
+      case "TASK":
+        if (!!manager) {
+          // Navigate to event -> entry task
+          navigate(`/manager/event/${notification?.eventID}`, {
+            replace: true,
+            state: { fromNotification: tru },
+          });
+        }
+
+        if (!!staff) {
+        }
+        break;
+      case "SUBTASK":
+        if (!!manager) {
+        }
+
+        if (!!staff) {
+        }
+        break;
+      case "COMMENT":
+        if (!!manager) {
+        }
+
+        if (!!staff) {
+        }
+        break;
+      case "CONTRACT":
+        if (!!manager) {
+        }
+
+        if (!!staff) {
+        }
+        break;
+      case "COMMENT_SUBTASK":
+        if (!!manager) {
+        }
+
+        if (!!staff) {
+        }
+        break;
+      case "BUDGET":
+        if (!!manager) {
+        }
+
+        if (!!staff) {
+        }
+        break;
+
+      default:
+        break;
+    }
+
     if (manager) {
     } else if (staff) {
     }
@@ -109,12 +173,12 @@ const NotificationPage = () => {
     setIsSeeAll((prev) => !prev);
   };
 
-  if (isLoading)
-    return (
-      <div className="w-full min-h-[calc(100vh-64px)]">
-        <LoadingComponentIndicator />
-      </div>
-    );
+  // if (isLoading)
+  //   return (
+  //     <div className="w-full min-h-[calc(100vh-64px)]">
+  //       <LoadingComponentIndicator />
+  //     </div>
+  //   );
 
   if (isError)
     return (
@@ -166,21 +230,37 @@ const NotificationPage = () => {
 
           <div className="flex mt-1 px-2 space-x-2">
             <div
-              className={`cursor-pointer px-2 py-1 rounded-full font-medium border-2 border-transparent ${
+              className={`cursor-pointer px-5 py-1.5 rounded-full font-medium border-2 border-transparent ${
                 isSeeAll && "bg-blue-100/50 border-blue-500 text-blue-600"
               }`}
               onClick={changeMode}
             >
-              Tất cả
+              <p>Tất cả</p>
             </div>
+            {/* <Badge
+              size={"default"}
+              count={
+                notifications?.data?.totalUnreadNotifications
+              }
+              title={`${
+                notifications?.totalUnreadNotifications ?? 0
+              } thông báo`}
+              onClick={(e) => e.preventDefault()}
+            > */}
             <div
-              className={`cursor-pointer px-2 py-1 rounded-full font-medium border-2 border-transparent ${
+              className={`cursor-pointer px-5 py-1.5 rounded-full font-medium border-2 border-transparent relative ${
                 !isSeeAll && "bg-blue-100/50 border-blue-500 text-blue-600"
               }`}
               onClick={changeMode}
             >
-              Chưa đọc
+              <p>Chưa đọc</p>
+              <div className="absolute -top-3 right-2">
+                <p className="h-5 w-5 bg-red-500 text-xs text-white rounded-full flex items-center justify-center">
+                  {notifications?.data?.totalUnreadNotifications}
+                </p>
+              </div>
             </div>
+            {/* </Badge> */}
           </div>
 
           <div className="mt-3 space-y-1 min-h-[50vh] relative">
@@ -243,6 +323,22 @@ const NotificationPage = () => {
                   </motion.div>
                 );
               })
+            )}
+
+            {isLoading && (
+              <div
+                className={clsx(
+                  "w-full",
+                  {
+                    "min-h-[calc(100vh-64px)]": !notifications,
+                  },
+                  {
+                    "mt-10": notifications,
+                  }
+                )}
+              >
+                <LoadingComponentIndicator />
+              </div>
             )}
           </div>
 

@@ -95,6 +95,7 @@ const EventTaskPage = () => {
   const eventId = useParams()?.eventId;
   const manager = useRouteLoaderData("manager");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [assigneeSelection, setAssigneeSelection] = useState();
   const [prioritySelection, setPrioritySelection] = useState();
@@ -107,6 +108,10 @@ const EventTaskPage = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
+
+  useEffect(() => {
+    // if(location?.state)
+  }, [location]);
 
   const {
     data: eventDetail,

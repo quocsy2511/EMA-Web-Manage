@@ -6,6 +6,7 @@ import useDarkMode from "../../hooks/useDarkMode";
 import { HiOutlineHome, HiOutlineCalendarDays } from "react-icons/hi2";
 import { IoMailOutline } from "react-icons/io5";
 import { IoChatboxOutline } from "react-icons/io5";
+import { RiTeamLine } from "react-icons/ri";
 import logo from "../../assets/images/logo.png";
 import logo_domain from "../../assets/images/logo_domain.png";
 
@@ -63,14 +64,14 @@ const Sidebar = ({ collapsed }) => {
     //     <BsJournalCheck className="text-[#333333]" size={24} />
     //   </p>
     // ),
-    // getItem(
-    //   <LabelText text="Yêu cầu" />,
-    //   "Yêu cầu",
-    //   "/manager/request",
-    //   <p>
-    //     <BsMailbox className="text-[#FF5722]" size={24} />
-    //   </p>
-    // ),
+    getItem(
+      <LabelText text="Nhân sự" />,
+      "Nhân sự",
+      "/manager/personnel",
+      <p>
+        <RiTeamLine className="text-[#333333]" size={24} />
+      </p>
+    ),
     getItem(
       <LabelText text="Tin nhắn" />,
       "Tin nhắn",

@@ -6,11 +6,12 @@ import {
   SwapRightOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, ConfigProvider, Modal, Popconfirm } from "antd";
+import { Button, ConfigProvider, Modal, Popconfirm, Popover } from "antd";
 import moment from "moment";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import React, { memo } from "react";
 import { FaPlus } from "react-icons/fa6";
+import { IoInformationCircleOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
@@ -243,6 +244,19 @@ const ContactModal = ({
           {/* button */}
           <div className="w-full flex flex-row justify-end items-center font-semibold text-[#103f6e] mb-2 gap-x-3">
             <div className="w-full bg-gray-200 h-[1px]" />
+
+            {hasContract &&
+              !!hasContract?.files?.length &&
+              hasContract?.files?.[0]?.status === "REJECTED" && (
+                <div>
+                  <Popover
+                    content={hasContract?.files?.[0]?.rejectNote}
+                    title="Lý do từ chối"
+                  >
+                    <IoInformationCircleOutline className="text-xl hover:scale-105 hover:text-red-500 transition-all" />
+                  </Popover>
+                </div>
+              )}
 
             {contact?.status === "PENDING" && (
               <Popconfirm

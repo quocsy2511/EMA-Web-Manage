@@ -80,6 +80,10 @@ const EventSubTaskPage = () => {
     socketOnNotification(handleRefetchComment);
   }, []);
 
+  useEffect(() => {
+    console.log("location nef")
+  }, [location]);
+
   const handleRefetchComment = (notification) => {
     if (notification?.type === "COMMENT") {
       queryClient.invalidateQueries(["comment", taskId]);

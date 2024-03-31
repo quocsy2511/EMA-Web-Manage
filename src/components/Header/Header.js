@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar, Badge, Button, Dropdown, message } from "antd";
+import { App, Avatar, Badge, Button, Dropdown, message } from "antd";
 import { Header as HeaderLayout } from "antd/es/layout/layout";
 import { HiOutlineBell, HiOutlineBellAlert } from "react-icons/hi2";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
@@ -11,8 +11,8 @@ import {
   useNavigate,
   useRouteLoaderData,
 } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllNotification } from "../../apis/notifications";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getAllNotification, seenNotification } from "../../apis/notifications";
 import { useDispatch } from "react-redux";
 import momenttz from "moment-timezone";
 import { redirectionActions } from "../../store/redirection";
@@ -21,8 +21,16 @@ import { defaultAvatar } from "../../constants/global";
 import { chatsActions } from "../../store/chats";
 import { closeConnectSocket } from "../../utils/socket";
 import { chatDetailActions } from "../../store/chat_detail";
+import clsx from "clsx";
 
-const NotiLabel = ({ item, navigate, location, manager, staff }) => {
+const NotiLabel = ({
+  item,
+  navigate,
+  location,
+  manager,
+  staff,
+  seenNotificationMutate,
+}) => {
   // item = {
   //   id: "43b440bf-70ae-45a4-b162-55ea71e7e590",
   //   title: "Đã có một comment mới ",
@@ -61,6 +69,7 @@ const NotiLabel = ({ item, navigate, location, manager, staff }) => {
   }
 
   const handleNavigate = () => {
+    if (item?.isRead === 0) seenNotificationMutate(item?.id);
     // if (staff) {
     //   if (item?.type === "TASK") {
     //     console.log("task");
@@ -219,11 +228,17 @@ const NotiLabel = ({ item, navigate, location, manager, staff }) => {
         <p className="text-blue-400">{time}</p>
       </div>
       <div>
-        {item?.readFlag === 0 ? (
-          <div className="w-[8px] h-[8px] bg-blue-500 rounded-full" />
-        ) : (
-          <div className="w-[8px] h-[8px] bg-transparent" />
-        )}
+        <div
+          className={clsx(
+            "w-[8px] h-[8px] rounded-full",
+            {
+              "bg-blue-500": item?.isRead === 0,
+            },
+            {
+              "bg-transparent": item?.isRead === 1,
+            }
+          )}
+        />
       </div>
     </div>
   );
@@ -236,6 +251,8 @@ const Header = ({ collapsed, setCollapsed }) => {
   const staff = useRouteLoaderData("staff");
   const administrator = useRouteLoaderData("administrator");
 
+  const { message } = App.useApp();
+
   const dispatch = useDispatch();
 
   const {
@@ -243,40 +260,52 @@ const Header = ({ collapsed, setCollapsed }) => {
     isLoading,
     isError,
   } = useQuery(
-    ["notifications", "10", 1, "ALL"],
+    ["notifications", 10, 1, "ALL"],
     () => getAllNotification(10, 1, "ALL"),
     {
       select: (data) => {
         return data?.data;
       },
       refetchOnWindowFocus: false,
+      enabled: !administrator,
     }
   );
   console.log("notifications: ", notifications);
 
   const queryClient = useQueryClient();
-  // const { mutate: seenNotificationMutate } = useMutation(
-  //   (notificationId) => seenNotification(notificationId),
-  //   {
-  //     onSuccess: (data, variables) => {
-  //       queryClient.setQueryData(["notifications", "10"], (oldValue) => {
-  //         const updatedOldData = oldValue.map((item) => {
-  //           if (item.id === variables.notificationId) {
-  //             return { ...item, readFlag: 1 };
-  //           }
-  //           return item;
-  //         });
-  //         return updatedOldData;
-  //       });
-  //     },
-  //     onError: (error) => {
-  //       messageApi.open({
-  //         type: "error",
-  //         content: "1 lỗi bất ngờ đã xảy ra! Hãy thử lại sau",
-  //       });
-  //     },
-  //   }
-  // );
+  const { mutate: seenNotificationMutate } = useMutation(
+    (notificationId) => seenNotification(notificationId),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.setQueryData(
+          ["notifications", 10, 1, "ALL"],
+          (oldValue) => {
+            const updatedOldData = {
+              ...oldValue,
+
+              data: {
+                totalUnreadNotifications:
+                  oldValue?.data?.totalUnreadNotifications - 1,
+                notifications: oldValue?.data?.notifications?.map((item) => {
+                  if (item?.id === variables) {
+                    return { ...item, isRead: 1 };
+                  }
+                  return item;
+                }),
+              },
+            };
+            return updatedOldData;
+          }
+        );
+      },
+      onError: (error) => {
+        message.open({
+          type: "error",
+          content: "1 lỗi bất ngờ đã xảy ra!",
+        });
+      },
+    }
+  );
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -310,26 +339,6 @@ const Header = ({ collapsed, setCollapsed }) => {
     },
   ];
 
-  const onClickNotification = (key) => {
-    // if (
-    //   key.key === "navigate" &&
-    //   location.pathname !== "/manager/notification"
-    // ) {
-    //   if (manager) {
-    //     navigate("/manager/notification");
-    //   } else {
-    //     navigate("/staff/notification");
-    //   }
-    // }
-    // const findNoti = notifications.find((noti) => noti.id === key.key);
-    // dispatch(addNotification(findNoti));
-    // if (findNoti?.type === "REQUEST" && staff) {
-    //   navigate("/staff/request");
-    // } else if (findNoti?.type === "TASK" && staff) {
-    //   navigate("/staff");
-    // }
-  };
-
   return (
     <HeaderLayout
       className={`${
@@ -360,7 +369,7 @@ const Header = ({ collapsed, setCollapsed }) => {
                 menu={{
                   // items: notiItems,
                   items: [
-                    ...(notifications?.map((noti) => ({
+                    ...(notifications?.notifications?.map((noti) => ({
                       key: noti.id,
                       label: (
                         <NotiLabel
@@ -369,6 +378,7 @@ const Header = ({ collapsed, setCollapsed }) => {
                           location={location}
                           manager={manager}
                           staff={staff}
+                          seenNotificationMutate={seenNotificationMutate}
                         />
                       ),
                     })) ?? []),
@@ -388,25 +398,26 @@ const Header = ({ collapsed, setCollapsed }) => {
                       ),
                     },
                   ],
-                  onClick: onClickNotification,
                 }}
                 trigger={["click"]}
                 placement="bottomRight"
                 arrow
-                disabled={notifications?.length === 0}
               >
                 <Badge
                   size={"default"}
                   count={
-                    notifications?.length && notifications?.length >= 10
+                    notifications?.totalUnreadNotifications &&
+                    notifications?.totalUnreadNotifications >= 10
                       ? "9+"
-                      : notifications?.length ?? 0
+                      : notifications?.totalUnreadNotifications ?? 0
                   }
                   offset={[-2, 2]}
-                  title={`${notifications?.length ?? 0} thông báo`}
+                  title={`${
+                    notifications?.totalUnreadNotifications ?? 0
+                  } thông báo`}
                   onClick={(e) => e.preventDefault()}
                 >
-                  {notifications?.length === 0 ? (
+                  {notifications?.totalUnreadNotifications === 0 ? (
                     <HiOutlineBell size={25} />
                   ) : (
                     <HiOutlineBellAlert size={25} />
