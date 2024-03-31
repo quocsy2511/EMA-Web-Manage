@@ -168,41 +168,118 @@ const NotiLabel = ({
     switch (item?.type) {
       case "TASK":
         if (!!manager) {
+          if (
+            location?.pathname !==
+            `/manager/event/${item?.eventID}/${item?.commonId}`
+          ) {
+            // Navigate to event -> entry task
+            navigate(`/manager/event/${item?.eventID}`, {
+              state: {
+                isNavigate: true,
+                parentTaskId: item?.commonId,
+              },
+              replace: true,
+            });
+          }
         }
 
         if (!!staff) {
         }
         break;
+
       case "SUBTASK":
         if (!!manager) {
+          if (
+            location?.pathname !==
+            `/manager/event/${item?.eventID}/${item?.parentTaskId}`
+          ) {
+            // Navigate to event -> entry task -> open subtask
+            navigate(`/manager/event/${item?.eventID}`, {
+              state: {
+                isNavigate: true,
+                parentTaskId: item?.parentTaskId,
+                subtaskId: item?.commonId,
+              },
+              replace: true,
+            });
+          }
         }
 
         if (!!staff) {
         }
         break;
+
       case "COMMENT":
         if (!!manager) {
+          if (
+            location?.pathname !==
+            `/manager/event/${item?.eventID}/${item?.commonId}`
+          ) {
+            // Navigate to event -> entry task -> show comment
+            navigate(`/manager/event/${item?.eventID}`, {
+              state: {
+                isNavigate: true,
+                parentTaskId: item?.commonId,
+              },
+              replace: true,
+            });
+          }
         }
 
         if (!!staff) {
         }
         break;
-      case "CONTRACT":
-        if (!!manager) {
-        }
 
-        if (!!staff) {
-        }
-        break;
       case "COMMENT_SUBTASK":
         if (!!manager) {
+          if (
+            location?.pathname !==
+            `/manager/event/${item?.eventID}/${item?.parentTaskId}`
+          ) {
+            // Navigate to event -> entry task -> open subtask -> show comment
+            navigate(`/manager/event/${item?.eventID}`, {
+              state: {
+                isNavigate: true,
+                parentTaskId: item?.parentTaskId,
+                subtaskId: item?.commonId,
+              },
+              replace: true,
+            });
+          }
         }
 
         if (!!staff) {
         }
         break;
+
+      case "CONTRACT":
+        if (!!manager) {
+          if (location?.pathname !== `/manager/customer`) {
+            navigate(`/manager/customer`, {
+              state: {
+                isNavigate: true,
+                contractId: item?.commonId,
+              },
+              replace: true,
+            });
+          }
+        }
+
+        if (!!staff) {
+        }
+        break;
+
       case "BUDGET":
         if (!!manager) {
+          if (location?.pathname !== `/manager/event/${item?.eventID}/budget`) {
+            navigate(`/manager/event/${item?.eventID}`, {
+              state: {
+                isNavigate: true,
+                isBudget: true,
+              },
+              replace: true,
+            });
+          }
         }
 
         if (!!staff) {
@@ -247,6 +324,7 @@ const NotiLabel = ({
 const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  console.log("location > ", location);
   const manager = useRouteLoaderData("manager");
   const staff = useRouteLoaderData("staff");
   const administrator = useRouteLoaderData("administrator");

@@ -111,49 +111,97 @@ const NotificationPage = () => {
   const hanleClickNotification = (notification) => {
     notification?.isRead === 0 && seenNotificationMutate(notification?.id);
 
-    switch (item?.type) {
+    switch (notification?.type) {
       case "TASK":
         if (!!manager) {
           // Navigate to event -> entry task
           navigate(`/manager/event/${notification?.eventID}`, {
+            state: {
+              isNavigate: true,
+              parentTaskId: notification?.commonId,
+            },
             replace: true,
-            state: { fromNotification: tru },
           });
         }
 
         if (!!staff) {
         }
         break;
+
       case "SUBTASK":
         if (!!manager) {
+          // Navigate to event -> entry task -> open subtask
+          navigate(`/manager/event/${notification?.eventID}`, {
+            state: {
+              isNavigate: true,
+              parentTaskId: notification?.parentTaskId,
+              subtaskId: notification?.commonId,
+            },
+            replace: true,
+          });
         }
 
         if (!!staff) {
         }
         break;
+
       case "COMMENT":
         if (!!manager) {
+          // Navigate to event -> entry task -> show comment
+          navigate(`/manager/event/${notification?.eventID}`, {
+            state: {
+              isNavigate: true,
+              parentTaskId: notification?.commonId,
+            },
+            replace: true,
+          });
         }
 
         if (!!staff) {
         }
         break;
-      case "CONTRACT":
-        if (!!manager) {
-        }
 
-        if (!!staff) {
-        }
-        break;
       case "COMMENT_SUBTASK":
         if (!!manager) {
+          // Navigate to event -> entry task -> open subtask -> show comment
+          navigate(`/manager/event/${notification?.eventID}`, {
+            state: {
+              isNavigate: true,
+              parentTaskId: notification?.parentTaskId,
+              subtaskId: notification?.commonId,
+            },
+            replace: true,
+          });
         }
 
         if (!!staff) {
         }
         break;
+
+      case "CONTRACT":
+        if (!!manager) {
+          navigate(`/manager/customer`, {
+            state: {
+              isNavigate: true,
+              contractId: notification?.commonId,
+            },
+            replace: true,
+          });
+        }
+
+        if (!!staff) {
+        }
+        break;
+
       case "BUDGET":
         if (!!manager) {
+          navigate(`/manager/event/${notification?.eventID}`, {
+            state: {
+              isNavigate: true,
+              isBudget: true,
+            },
+            replace: true,
+          });
         }
 
         if (!!staff) {
@@ -162,10 +210,6 @@ const NotificationPage = () => {
 
       default:
         break;
-    }
-
-    if (manager) {
-    } else if (staff) {
     }
   };
 

@@ -59,7 +59,7 @@ const EventSubTaskPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { eventName, dateRange } = location.state ?? {};
+  const { eventName, dateRange, subtaskId } = location.state ?? {};
 
   const dispatch = useDispatch();
   const { redirect } = useSelector((state) => state.redirection);
@@ -79,10 +79,6 @@ const EventSubTaskPage = () => {
 
     socketOnNotification(handleRefetchComment);
   }, []);
-
-  useEffect(() => {
-    console.log("location nef")
-  }, [location]);
 
   const handleRefetchComment = (notification) => {
     if (notification?.type === "COMMENT") {
@@ -151,6 +147,18 @@ const EventSubTaskPage = () => {
     }
   );
   console.log("big task: ", tasks);
+
+  useEffect(() => {
+    console.log("location nef");
+    if (subtaskId) {
+      if (tasks) {
+        setSelectedSubTask(
+          tasks?.subTask?.find((subtask) => subtask?.id === subtaskId)
+        );
+        setIsOpenModal(true);
+      }
+    }
+  }, [location, tasks]);
 
   const {
     data: comments,

@@ -1,4 +1,4 @@
-import React, { Fragment, memo, useState } from "react";
+import React, { Fragment, memo, useEffect, useState } from "react";
 import {
   Button,
   Empty,
@@ -29,7 +29,7 @@ import { IoRemoveOutline } from "react-icons/io5";
 import { BsImages } from "react-icons/bs";
 import ContactModal from "../../components/Modal/ContactModal";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const ContactTab = ({
   currentPage,
@@ -53,10 +53,25 @@ const ContactTab = ({
   console.log("contracts > ", contracts);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [selectedContact, setSelectedContact] = useState();
   const [isOpenRejectConfirm, setisOpenRejectConfirm] = useState(false);
   const [isOpenContactModal, setIsOpenContactModal] = useState(false);
+
+  useEffect(() => {
+    if (contracts && contacts && location.state?.contractId) {
+      const findContract = contracts?.find(
+        (contract) => contract?.id === location.state?.contractId
+      );
+
+      const findContact = contacts?.find(
+        (contact) => contact?.id === findContract?.customerContactId
+      );
+
+      handleOpenContactModal(findContact);
+    }
+  }, [location, contracts, contacts]);
 
   const queryClient = useQueryClient();
   const {

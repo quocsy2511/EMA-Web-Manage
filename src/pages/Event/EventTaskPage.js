@@ -110,7 +110,16 @@ const EventTaskPage = () => {
   }, []);
 
   useEffect(() => {
-    // if(location?.state)
+    if (location.state?.isNavigate && !!location.state?.parentTaskId) {
+      if (location.state?.subtaskId) {
+        goToSubTask(location.state?.parentTaskId, location.state?.subtaskId);
+      } else {
+        goToSubTask(location.state?.parentTaskId);
+      }
+    }
+    if (location.state?.isNavigate && location.state?.isBudget) {
+      goToBudget();
+    }
   }, [location]);
 
   const {
@@ -299,11 +308,12 @@ const EventTaskPage = () => {
     });
   };
 
-  const goToSubTask = (taskId) => {
+  const goToSubTask = (taskId, subtaskId) => {
     navigate(`${taskId}`, {
       state: {
         eventName: eventDetail?.eventName,
         dateRange: [eventDetail?.processingDate, eventDetail?.endDate],
+        subtaskId,
       },
     });
   };

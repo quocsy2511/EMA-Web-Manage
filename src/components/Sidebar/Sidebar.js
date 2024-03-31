@@ -6,7 +6,7 @@ import useDarkMode from "../../hooks/useDarkMode";
 import { HiOutlineHome, HiOutlineCalendarDays } from "react-icons/hi2";
 import { IoMailOutline } from "react-icons/io5";
 import { IoChatboxOutline } from "react-icons/io5";
-import { RiTeamLine } from "react-icons/ri";
+import { BsPerson } from "react-icons/bs";
 import logo from "../../assets/images/logo.png";
 import logo_domain from "../../assets/images/logo_domain.png";
 
@@ -56,20 +56,12 @@ const Sidebar = ({ collapsed }) => {
         <HiOutlineCalendarDays className="text-[#9c27b0]" size={24} />
       </p>
     ),
-    // getItem(
-    //   <LabelText text="Chấm công" />,
-    //   "Chấm công",
-    //   "/manager/timekeeping",
-    //   <p>
-    //     <BsJournalCheck className="text-[#333333]" size={24} />
-    //   </p>
-    // ),
     getItem(
       <LabelText text="Nhân sự" />,
       "Nhân sự",
       "/manager/personnel",
       <p>
-        <RiTeamLine className="text-[#333333]" size={24} />
+        <BsPerson className="text-[#333333]" size={24} />
       </p>
     ),
     getItem(

@@ -18,7 +18,11 @@ const CustomerPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sort, setSort] = useState("DESC");
   const [contactStatus, setContactStatus] = useState(
-    location.state?.isSuccess ? "ACCEPTED" : "PENDING"
+    location.state?.isNavigate
+      ? "ALL"
+      : location.state?.isSuccess
+      ? "ACCEPTED"
+      : "PENDING"
   );
 
   const [messageApi, contextHolder] = message.useMessage();
