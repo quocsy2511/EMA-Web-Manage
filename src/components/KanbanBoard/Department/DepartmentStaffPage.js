@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouteLoaderData } from "react-router-dom";
 import {
   getAllUser,
@@ -643,6 +643,10 @@ const DepartmentStaffPage = () => {
       </td>
     );
   };
+
+  useEffect(() => {
+    document.title = "Trang quản lí nhân sự";
+  }, []);
 
   return (
     <>
