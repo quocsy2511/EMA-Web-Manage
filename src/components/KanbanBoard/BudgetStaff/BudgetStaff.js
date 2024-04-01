@@ -3,7 +3,7 @@ import React, { memo, useEffect, useState } from "react";
 import { BulbOutlined, DoubleRightOutlined } from "@ant-design/icons";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
-import { useRouteLoaderData } from "react-router-dom";
+import { useLocation, useRouteLoaderData } from "react-router-dom";
 import { getBudget, getBudgetItem } from "../../../apis/budgets";
 import BudgetTransactionModal from "./ModalBudget/BudgetTransactionModal";
 import BudgetTask from "./BudgetTask";
@@ -13,10 +13,13 @@ import BudgetRequestModal from "./ModalBudget/BudgetRequestModal";
 const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
   const [selectItemBudgetId, setSelectItemBudgetId] = useState("");
   const [selectBudget, setSelectBudget] = useState("");
-
+  const location = useLocation();
+  const { parentTaskId, contractId } = location.state ?? {};
+  console.log("🚀 ~ BudgetStaff ~ contractId:", contractId);
   const staffId = useRouteLoaderData("staff")?.id;
   const [isOpenTransactionModal, setIsOpenTransactionModal] = useState(false);
   const [selectItemTask, setSelectItemTask] = useState("");
+  console.log("🚀 ~ BudgetStaff ~ selectItemTask:", selectItemTask);
   const [isOpenRequestModal, setIsOpenRequestModal] = useState(false);
   const [selectTransactionTask, setSelectTransactionTask] = useState("");
   const [activeKey, setActiveKey] = useState("task");
@@ -58,6 +61,8 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
       enabled: !!selectItemBudgetId,
     }
   );
+
+  // console.log("budgetItem", budgetItem);
 
   useEffect(() => {
     if (!isLoadingBudgets && !isErrorBudgets) {
@@ -126,6 +131,14 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
   const onChangeTabs = (key) => {
     setActiveKey(key);
   };
+
+  useEffect(() => {
+    if (parentTaskId) {
+      const findBudget = budgets?.find((budget) => budget.id === parentTaskId);
+      handleSelect(findBudget);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parentTaskId, contractId]);
 
   return (
     <>

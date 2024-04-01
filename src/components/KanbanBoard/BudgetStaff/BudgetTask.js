@@ -168,7 +168,7 @@ const BudgetTask = ({
                       </Tooltip>
                     </div>
 
-                    <div className="flex flex-col justify-end items-end w-[45%] text-end">
+                    <div className="flex flex-col justify-end items-end w-[48%] text-end">
                       <p className="flex flex-row gap-x-1  text-blueSecondBudget text-sm font-semibold  text-end ">
                         <span className="">Kết thúc công việc</span>
                       </p>

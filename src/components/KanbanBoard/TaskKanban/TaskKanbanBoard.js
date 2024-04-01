@@ -21,8 +21,6 @@ const TaskKanbanBoard = ({
   task,
   setTaskSelected,
 }) => {
-  console.log("🚀 ~ task:", task);
-
   const { id, status } = task ?? {};
   const {
     data: subtaskDetails,

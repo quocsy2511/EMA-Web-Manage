@@ -25,6 +25,8 @@ const EventStaffPage = () => {
   ];
 
   const location = useLocation();
+  const { isBudget, parentTaskId } = location.state ?? {};
+
   const [isBoardTask, setIsBoardTask] = useState(true);
   const [searchText, setSearchText] = useState(null);
   const [sort, setSort] = useState("DESC");
@@ -235,6 +237,15 @@ const EventStaffPage = () => {
   useEffect(() => {
     document.title = "Trang quản lí công việc và ngân sách";
   }, []);
+
+  useEffect(() => {
+    if (isBudget) {
+      setIsBoardTask(false);
+    } else {
+      setIsBoardTask(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBudget, parentTaskId]);
 
   return (
     <div className="flex flex-col">
