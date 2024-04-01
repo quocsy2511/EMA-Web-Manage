@@ -11,6 +11,7 @@ import { redirectionActions } from "../../store/redirection.js";
 import NewTaskModal from "./ModalKanban/NewTaskModal.js";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { socketOnNotification } from "../../utils/socket.js";
+import { useLocation } from "react-router-dom";
 
 const KanbanBoard = ({
   selectEvent,
@@ -18,10 +19,13 @@ const KanbanBoard = ({
   selectedStatus,
   setIsHideHeaderEvent,
 }) => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
+  const location = useLocation();
+  const { taskId } = location.state ?? {};
+  console.log("🚀 ~ taskId:", taskId);
 
-  const notification = useSelector((state) => state.redirection);
-  console.log("🚀 ~ notification:", notification);
+  // const notification = useSelector((state) => state.redirection);
+  // console.log("🚀 ~ notification:", notification);
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);
@@ -36,11 +40,11 @@ const KanbanBoard = ({
     isLoading: isLoadingParentTaskDetail,
     refetch,
   } = useQuery(
-    ["parentTaskDetail", notification?.redirect?.comment],
+    ["parentTaskDetail", taskId],
     () =>
       getTasks({
         fieldName: "id",
-        conValue: notification?.redirect?.comment,
+        conValue: taskId,
         pageSize: 10,
         currentPage: 1,
       }),
@@ -57,7 +61,7 @@ const KanbanBoard = ({
       },
 
       refetchOnWindowFocus: false,
-      enabled: !!notification?.redirect?.comment,
+      enabled: !!taskId,
     }
   );
   const {
@@ -85,20 +89,15 @@ const KanbanBoard = ({
   );
 
   useEffect(() => {
-    if (notification?.redirect?.comment) {
+    if (taskId) {
       if (!isErrorParentTaskDetail && !isLoadingParentTaskDetail) {
         setIsOpenTaskModal(true);
         setIsTaskParent(true);
         setTaskSelected(parentTaskDetail?.[0]);
-        dispatch(redirectionActions.commentChange(""));
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    notification?.redirect?.comment,
-    isErrorParentTaskDetail,
-    isLoadingParentTaskDetail,
-  ]);
+  }, [taskId, isErrorParentTaskDetail, isLoadingParentTaskDetail]);
 
   let completed = 0;
   let subTask = taskSelected?.subTask;

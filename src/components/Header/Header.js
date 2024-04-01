@@ -31,6 +31,7 @@ const NotiLabel = ({
   staff,
   seenNotificationMutate,
 }) => {
+  console.log("🚀 ~ item:", item);
   // item = {
   //   id: "43b440bf-70ae-45a4-b162-55ea71e7e590",
   //   title: "Đã có một comment mới ",
@@ -184,6 +185,16 @@ const NotiLabel = ({
         }
 
         if (!!staff) {
+          if (location?.pathname !== `/staff/event/${item?.eventID}`) {
+            // Navigate to event -> entry task
+            navigate(`/staff/event/${item?.eventID}`, {
+              state: {
+                isNavigate: true,
+                parentTaskId: item?.commonId,
+              },
+              replace: true,
+            });
+          }
         }
         break;
 
@@ -206,6 +217,13 @@ const NotiLabel = ({
         }
 
         if (!!staff) {
+          navigate(`/staff/event/${item?.eventID}`, {
+            state: {
+              isNavigate: true,
+              taskId: item?.commonId,
+            },
+            replace: true,
+          });
         }
         break;
 
@@ -227,6 +245,13 @@ const NotiLabel = ({
         }
 
         if (!!staff) {
+          navigate(`/staff/event/${item?.eventID}`, {
+            state: {
+              isNavigate: true,
+              taskId: item?.commonId,
+            },
+            replace: true,
+          });
         }
         break;
 
@@ -249,6 +274,14 @@ const NotiLabel = ({
         }
 
         if (!!staff) {
+          navigate(`/staff/event/${item?.eventID}`, {
+            state: {
+              isNavigate: true,
+              taskId: item?.commonId,
+              parentTaskId: item?.parentTaskId,
+            },
+            replace: true,
+          });
         }
         break;
 
@@ -283,6 +316,15 @@ const NotiLabel = ({
         }
 
         if (!!staff) {
+          navigate(`/staff/event/${item?.eventID}`, {
+            state: {
+              isNavigate: true,
+              isBudget: true,
+              parentTaskId: item?.parentTaskId,
+              contractId: item?.contractId,
+            },
+            replace: true,
+          });
         }
         break;
 
