@@ -59,7 +59,7 @@ const HeaderEvent = ({
     () =>
       getAllUser({
         divisionId,
-        pageSize: 10,
+        pageSize: 50,
         currentPage: 1,
         role: "Nhân Viên",
       }),
