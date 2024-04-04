@@ -38,10 +38,10 @@ const DescriptionEvent = ({ selectEvent }) => {
             avatar={
               <BsCalendarHeart className=" text-orange-500 mt-1" size={20} />
             }
-            title="Thời gian sự kiện"
+            title="Thời gian diễn ra dự án"
             description={
               <p>
-                {moment(selectEvent?.startDate).format("DD-MM-YYYY")}{" "}
+                {moment(selectEvent?.processingDate).format("DD-MM-YYYY")}{" "}
                 <SwapRightOutlined />{" "}
                 {moment(selectEvent?.endDate).format("DD-MM-YYYY")}
               </p>

@@ -94,7 +94,7 @@ const SidebarStaff = ({ collapsed }) => {
       </p>
     ),
     getItem(
-      <LabelText text="Chat" />,
+      <LabelText text="Tin nhắn" />,
       "/staff/chat",
       <p>
         <IoChatboxOutline className="text-[#9c27b0]" size={24} />

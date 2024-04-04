@@ -38,3 +38,9 @@ export const getEmployee = ({ divisionId }) =>
   http({ url: `/division/${divisionId}` });
 
 export const getRoles = () => http({ url: "/roles" });
+
+export const changePassword = (data) =>
+  http({ url: `/auth/change-password`, method: "put", data: data });
+
+export const forgotPassword = (data) =>
+  http({ url: `/auth/forget-password`, method: "put", data: data });
