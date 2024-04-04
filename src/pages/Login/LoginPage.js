@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { App, Button, Form, Input } from "antd";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../../apis/auths";
@@ -8,10 +8,12 @@ import TEXT from "../../constants/string";
 import loginBg from "../../assets/images/login-Bg-svg.svg";
 import { setSocketToken } from "../../utils/socket";
 import logo from "../../assets/images/logo.png";
+import ForgotPassWordModal from "../../components/Modal/ForgotPassWordModal";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
+  const [isOpenForgotPasswordModal, setIsOpenForgotPasswordModal] =
+    useState(false);
   const { notification } = App.useApp();
 
   const { mutate, isLoading } = useMutation(login, {
@@ -102,6 +104,9 @@ const LoginPage = () => {
                           required: true,
                           message: "Hãy nhập email!",
                         },
+                        {
+                          type: "email",
+                        },
                       ]}
                       className="mt-1"
                     >
@@ -145,18 +150,24 @@ const LoginPage = () => {
                     </Form.Item>
                   </Form>
                   <div className="mt-5 text-xs border-t border-white py-4 text-white">
-                    <a
-                      href="#"
+                    <p
+                      onClick={() => setIsOpenForgotPasswordModal(true)}
                       className="text-base hover:text-blue-300 text-orange-300"
                     >
                       Quên mật khẩu ?
-                    </a>
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        {isOpenForgotPasswordModal && (
+          <ForgotPassWordModal
+            isOpenForgotPasswordModal={isOpenForgotPasswordModal}
+            setIsOpenForgotPasswordModal={setIsOpenForgotPasswordModal}
+          />
+        )}
       </div>
     </Fragment>
   );

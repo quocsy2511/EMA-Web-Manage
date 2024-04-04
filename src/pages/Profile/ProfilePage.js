@@ -12,10 +12,12 @@ import EditProfileModal from "./Modal/EditProfileModal";
 import { defaultAvatar } from "../../constants/global";
 import { useRouteLoaderData } from "react-router-dom";
 import { filter } from "lodash";
+import ChangePasswordModal from "./Modal/ChangePasswordModal";
 
 const ProfilePage = () => {
   const { data, isLoading, isError } = useQuery(["profile"], getProfile);
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
+  const [isOpenChangePasswordModal, setIsOpenPasswordModal] = useState(false);
   const divisionId = data?.divisionId;
   const {
     data: employees,
@@ -164,6 +166,16 @@ const ProfilePage = () => {
             >
               <SettingOutlined />
               <p>Cập nhật thông tin</p>
+            </Button>
+          </div>
+          <div className="w-full flex justify-center mt-3">
+            <Button
+              type="link"
+              className="flex justify-center items-center gap-x-3 flex-row"
+              onClick={() => setIsOpenPasswordModal(true)}
+            >
+              <SettingOutlined />
+              <p>Thay đổi mật khẩu</p>
             </Button>
           </div>
         </div>
@@ -407,6 +419,12 @@ const ProfilePage = () => {
             isOpenEditModal={isOpenEditModal}
             setIsOpenEditModal={setIsOpenEditModal}
             data={data}
+          />
+        )}
+        {isOpenChangePasswordModal && (
+          <ChangePasswordModal
+            isOpenChangePasswordModal={isOpenChangePasswordModal}
+            setIsOpenPasswordModal={setIsOpenPasswordModal}
           />
         )}
       </div>

@@ -26,6 +26,7 @@ const TaskKanbanBoard = ({
     data: subtaskDetails,
     isError: isErrorSubtaskDetails,
     isLoading: isLoadingSubtaskDetails,
+    refetch: refetchSubtaskDetails,
   } = useQuery(
     ["subtaskDetails", id],
     () =>
@@ -114,7 +115,15 @@ const TaskKanbanBoard = ({
   }, []);
 
   const handleRefetchContact = (noti) => {
-    if (noti?.type === "COMMENT" && noti?.type === "TASK") refetchListComment();
+    if (
+      noti?.type === "COMMENT" ||
+      noti?.type === "TASK" ||
+      noti?.type === "SUBTASK" ||
+      noti?.type === "COMMENT_SUBTASK"
+    ) {
+      refetchListComment();
+      refetchSubtaskDetails();
+    }
   };
 
   return (

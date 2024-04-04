@@ -89,7 +89,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
                 icon={<LuCalendarClock className="text-xl text-orange-500" />}
                 text={
                   <p>
-                    {momenttz(event?.startDate, "DD/MM/YYYY").format(
+                    {momenttz(event?.processingDate, "YYYY-MM-DD").format(
                       "DD-MM-YYYY"
                     )}
                   </p>
@@ -120,7 +120,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
                 tooltip="Trạng thái"
               />
             </div>
-            <div className="flex-1">
+            {/* <div className="flex-1">
               <LabelItem
                 icon={<FaRegClock className="text-xl" />}
                 text={`${
@@ -134,13 +134,13 @@ const EventItem = memo(({ event, gotoEventPage }) => {
                 }`}
                 tooltip="Thời gian còn lại trước khi kết thúc sự kiện"
               />
-            </div>
+            </div> */}
           </div>
         </div>
 
         <div className="h-[2px] bg-slate-300 mb-3" />
 
-        <div>
+        {/* <div>
           <div className="flex justify-between items-center">
             <p className="text=xs font-medium">Tiến độ</p>
             <p className="text-sm">
@@ -154,7 +154,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
           </div>
 
           <Progress percent={percentage} type="line" />
-        </div>
+        </div> */}
       </div>
 
       <div className="absolute -top-2 right-0 left-0 flex justify-center overflow-hidden">

@@ -118,7 +118,12 @@ const KanbanBoard = ({
   }, []);
 
   const handleRefetchContact = (noti) => {
-    if (noti?.type === "COMMENT" || noti?.type === "TASK") {
+    if (
+      noti?.type === "COMMENT" ||
+      noti?.type === "TASK" ||
+      noti?.type === "SUBTASK" ||
+      noti?.type === "COMMENT_SUBTASK"
+    ) {
       refetch();
     }
   };
