@@ -23,7 +23,7 @@ const FileInput = ({ taskSelected, setUpdateFileList }) => {
         setDisableSendButton(true);
         message.open({
           type: "success",
-          content: "Cập nhật file  thành công",
+          content: "Cập nhật tài liệu  thành công",
         });
       },
       onError: () => {
