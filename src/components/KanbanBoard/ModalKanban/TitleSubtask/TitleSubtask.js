@@ -2,7 +2,7 @@ import { ThunderboltOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Form, Input, message } from "antd";
 import { debounce } from "lodash";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { getTasks, updateTask } from "../../../../apis/tasks";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
@@ -19,6 +19,17 @@ const TitleSubtask = ({
   const taskID = taskSelected?.id;
   const eventId = taskSelected?.eventDivision?.event?.id;
   const staff = useRouteLoaderData("staff");
+  const [submittable, setSubmittable] = useState(false);
+  const [form] = Form.useForm();
+  const values = Form.useWatch([], form);
+  React.useEffect(() => {
+    form
+      .validateFields({
+        validateOnly: true,
+      })
+      .then(() => setSubmittable(true))
+      .catch(() => setSubmittable(false));
+  }, [form, values]);
 
   const titleDebounced = debounce((value) => {
     setTitle(value);
@@ -26,9 +37,14 @@ const TitleSubtask = ({
 
   const onPressEnter = (e) => {
     // Kiểm tra nếu người dùng nhấn phím "Enter"
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && submittable) {
       e.preventDefault();
       onFinish(title);
+    } else {
+      message.open({
+        type: "error",
+        content: "Không được để trống tên công việc",
+      });
     }
   };
 
@@ -127,7 +143,7 @@ const TitleSubtask = ({
         <>
           {!isLoading ? (
             !isError ? (
-              <Form onFinish={onFinish} className="w-full">
+              <Form onFinish={onFinish} className="w-full" form={form}>
                 <Form.Item
                   name="title"
                   initialValue={subtaskDetails?.[0].title}
