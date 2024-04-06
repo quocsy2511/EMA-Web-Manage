@@ -144,7 +144,7 @@ const CommentInput = ({ staff, taskSelected }) => {
                 >
                   <Input
                     id="warning"
-                    placeholder="Viết bình luận ..."
+                    placeholder="Nhập bình luận ..."
                     className="placeholder:italic"
                     allowClear
                   />

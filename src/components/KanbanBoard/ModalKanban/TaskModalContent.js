@@ -167,7 +167,7 @@ const TaskModalContent = ({
               </div>
               <div className="w-full flex flex-col">
                 <h3 className="text-lg font-bold">
-                  Công việc ({completed}/{subTasks.length})
+                  Công việc con ({completed}/{subTasks.length})
                 </h3>
                 <div
                   className={

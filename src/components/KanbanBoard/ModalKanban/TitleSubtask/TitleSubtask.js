@@ -132,6 +132,12 @@ const TitleSubtask = ({
                   name="title"
                   initialValue={subtaskDetails?.[0].title}
                   className="w-full mb-2"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng nhập tên công việc",
+                    },
+                  ]}
                 >
                   <Input
                     onPressEnter={onPressEnter}

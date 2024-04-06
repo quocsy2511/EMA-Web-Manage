@@ -8,7 +8,7 @@ import {
   UsergroupAddOutlined,
   VerticalAlignTopOutlined,
 } from "@ant-design/icons";
-import { Avatar, Modal, Popover, Progress, Tooltip } from "antd";
+import { Avatar, Modal, Popover, Progress, Tag, Tooltip } from "antd";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import utc from "dayjs/plugin/utc";
@@ -42,6 +42,7 @@ const FieldSubtask = ({
 }) => {
   // console.log("🚀 ~ file: FieldSubtask.js:42 ~ taskSelected:", taskSelected);
   const [updateFileList, setUpdateFileList] = useState(taskSelected?.taskFiles);
+  console.log("🚀 ~ updateFileList:", updateFileList);
   const [updatePriority, setUpdatePriority] = useState(taskSelected?.priority);
   const [assignTasks, setAssignTasks] = useState(taskSelected?.assignTasks);
   const [updateStatus, setUpdateStatus] = useState(taskSelected?.status);
@@ -100,8 +101,7 @@ const FieldSubtask = ({
               <FolderOutlined />
               Tài liệu
             </h4>
-            {updateFileList &&
-              updateFileList?.length > 0 &&
+            {updateFileList && updateFileList?.length > 0 ? (
               updateFileList.map((file, index) => (
                 <ListFile
                   key={index}
@@ -111,7 +111,16 @@ const FieldSubtask = ({
                   taskParent={taskParent}
                   taskSelected={taskSelected}
                 />
-              ))}
+              ))
+            ) : (
+              <>
+                {taskParent && (
+                  <div className="flex justify-start items-center mt-4 px-3">
+                    <Tag>Không có tài liệu</Tag>
+                  </div>
+                )}
+              </>
+            )}
             {!taskParent && !disableUpdate && (
               <div className="flex justify-start items-center mt-4">
                 <FileInput
