@@ -209,8 +209,9 @@ const EventTaskPage = () => {
   const { mutate: updateStatusMutate, isLoading: updateStatusIsLoading } =
     useMutation((status) => updateStatusEvent(eventId, status), {
       onSuccess: (data, variables) => {
+        console.log("data, variables > ", data, variables);
         let status;
-        switch (variables?.status) {
+        switch (variables) {
           case "PENDING":
             status = "CHƯA BẮT ĐẦU";
             break;
@@ -218,7 +219,7 @@ const EventTaskPage = () => {
             status = "ĐANG CHUẨN BỊ";
             break;
           case "PROCESSING":
-            status = "DANG DIỄN RA";
+            status = "ĐANG DIỄN RA";
             break;
           case "DONE":
             status = "ĐÃ KẾT THÚC";
@@ -230,6 +231,7 @@ const EventTaskPage = () => {
           default:
             break;
         }
+        console.log(status);
 
         messageApi.open({
           type: "success",
@@ -244,7 +246,10 @@ const EventTaskPage = () => {
         });
 
         queryClient.setQueryData(["event-detail", eventId], (oldValue) => {
-          return { ...oldValue, status: variables?.status };
+          console.log("oldValue > ", oldValue);
+          console.log("oldValue > ", variables);
+          oldValue.status = variables;
+          return oldValue;
         });
       },
       onError: (error) => {
@@ -488,38 +493,46 @@ const EventTaskPage = () => {
                     </p>
                   ),
                   children: [
-                    {
-                      key: "PROCESSING",
-                      label: (
-                        <p
-                          className="text-sm text-blue-500"
-                          onClick={() => updateStatusMutate("PROCESSING")}
-                        >
-                          Đang diễn ra
-                        </p>
-                      ),
-                    },
+                    // {
+                    //   key: "PROCESSING",
+                    //   label: (
+                    //     <p
+                    //       className="text-sm text-blue-500"
+                    //       onClick={() => updateStatusMutate("PROCESSING")}
+                    //     >
+                    //       Đang diễn ra
+                    //     </p>
+                    //   ),
+                    // },
                     {
                       key: "DONE",
                       label: (
                         <p
                           className="text-sm text-green-500"
-                          onClick={() => updateStatusMutate("DONE")}
+                          onClick={() =>
+                            eventDetail?.status !== "CANCEL" &&
+                            updateStatusMutate("DONE")
+                          }
                         >
-                          Đã kết thúc
+                          Kết thúc
                         </p>
                       ),
+                      disabled: eventDetail?.status === "CANCEL",
                     },
                     {
                       key: "CANCEL",
                       label: (
                         <p
                           className="text-sm text-red-500"
-                          onClick={() => updateStatusMutate("CANCEL")}
+                          onClick={() =>
+                            eventDetail?.status !== "DONE" &&
+                            updateStatusMutate("CANCEL")
+                          }
                         >
                           Hủy bỏ
                         </p>
                       ),
+                      disabled: eventDetail?.status === "DONE",
                     },
                   ],
                 },

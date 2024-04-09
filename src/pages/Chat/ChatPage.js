@@ -1,4 +1,4 @@
-import { Avatar, Input, Popover } from "antd";
+import { Avatar, Input, Popover, Tooltip } from "antd";
 import React, { Fragment, useState, memo, useEffect } from "react";
 import { FiSearch } from "react-icons/fi";
 import { IoVideocam, IoCall } from "react-icons/io5";
@@ -28,32 +28,37 @@ import {
 
 const now = momenttz().tz("Asia/Bangkok");
 
-const SingleMessage = memo(({ isMe, index, length, content }) => {
+const SingleMessage = memo(({ isMe, index, length, content, time }) => {
   return (
-    <p
-      className={clsx(
-        "text-sm font-medium px-5 py-3.5 rounded-3xl w-auto mt-1.5 border-2",
-        { " text-black bg-white": isMe },
-        { " text-white bg-blue-500 border-transparent": !isMe },
-
-        { "rounded-tl-md": index === 0 && !isMe },
-        { "rounded-tr-md ": index === 0 && isMe },
-
-        { "rounded-bl-md": index === length && !isMe },
-        { "rounded-br-md": index === length && isMe },
-
-        {
-          "rounded-bl-md rounded-tl-md":
-            index !== length && index !== 0 && !isMe,
-        },
-        {
-          "rounded-br-md rounded-tr-md":
-            index !== length && index !== 0 && isMe,
-        }
-      )}
+    <Tooltip
+      title={momenttz(time).format("DD-MM-YYYY HH:ss")}
+      placement={isMe ? "left" : "right"}
     >
-      {content}
-    </p>
+      <p
+        className={clsx(
+          "text-sm font-medium px-5 py-3.5 rounded-3xl w-auto mt-1.5 border-2",
+          { " text-black bg-white": isMe },
+          { " text-white bg-blue-500 border-transparent": !isMe },
+
+          { "rounded-tl-md": index === 0 && !isMe },
+          { "rounded-tr-md ": index === 0 && isMe },
+
+          { "rounded-bl-md": index === length && !isMe },
+          { "rounded-br-md": index === length && isMe },
+
+          {
+            "rounded-bl-md rounded-tl-md":
+              index !== length && index !== 0 && !isMe,
+          },
+          {
+            "rounded-br-md rounded-tr-md":
+              index !== length && index !== 0 && isMe,
+          }
+        )}
+      >
+        {content}
+      </p>
+    </Tooltip>
   );
 });
 
@@ -91,7 +96,8 @@ const MessageItem = memo(({ isMe, messageList }) => {
                 isMe={isMe}
                 index={index}
                 length={messageList?.length - 1}
-                content={message.content}
+                content={message?.content}
+                time={message?.createdAt}
               />
             </div>
           ))}

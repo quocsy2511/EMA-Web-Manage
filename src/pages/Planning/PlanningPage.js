@@ -29,7 +29,6 @@ const PlanningPage = () => {
   const contactId = location.state?.contactId;
   const eventType = location.state?.eventType;
   const hasContract = location.state?.hasContract;
-  console.log("hasContract > ", hasContract);
   const readOnly = location.state?.readOnly;
 
   const navigate = useNavigate();
@@ -38,6 +37,7 @@ const PlanningPage = () => {
 
   const [chosenImportCSV, setChosenImportCSV] = useState();
   const [tableData, setTableData] = useState();
+  console.log("tableData > ", tableData);
 
   const mergeValue = new Set();
   const mergeImportValue = new Set();
@@ -411,6 +411,20 @@ const PlanningPage = () => {
                 bordered
                 pagination={false}
               />
+
+              <p className="text-right text-lg mt-5">
+                Tổng cộng :{" "}
+                <span className="text-4xl font-semibold">
+                  {planningData
+                    ?.reduce((total, item) => {
+                      return (
+                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
+                      );
+                    }, 0)
+                    .toLocaleString()}{" "}
+                  VNĐ
+                </span>
+              </p>
             </div>
 
             {!planningIsLoading &&
@@ -539,7 +553,20 @@ const PlanningPage = () => {
                   bordered
                   pagination={false}
                 />
-
+                <p className="text-right text-lg mt-5">
+                  Tổng cộng :{" "}
+                  <span className="text-4xl font-semibold">
+                    {tableData?.success
+                      ?.reduce((total, item) => {
+                        return (
+                          total +
+                          item?.itemPlannedAmount * item?.itemPlannedPrice
+                        );
+                      }, 0)
+                      ?.toLocaleString() || 0}{" "}
+                    VNĐ
+                  </span>
+                </p>
                 {tableData?.TotalErrorsRecords !== 0 && (
                   <div className="mx-10 mt-5">
                     <p className="text-xl font-medium">
@@ -561,7 +588,6 @@ const PlanningPage = () => {
                     </div>
                   </div>
                 )}
-
                 <div className="my-10 text-center">
                   <Popconfirm
                     title="Bạn có chắc chắn với bản kế hoạch này ?"
