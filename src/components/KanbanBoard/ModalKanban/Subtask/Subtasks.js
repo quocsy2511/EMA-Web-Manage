@@ -1,12 +1,11 @@
 import { EyeOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Select, Tag, Tooltip, message } from "antd";
-import React, { useState } from "react";
-import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
+import { Avatar, Tag, Tooltip } from "antd";
+import moment from "moment";
+import React, { useState } from "react";
 import { getTasks } from "../../../../apis/tasks";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
-import StatusSelected from "../Status/StatusSelected";
 
 const Subtasks = ({
   onChangeSubtask,

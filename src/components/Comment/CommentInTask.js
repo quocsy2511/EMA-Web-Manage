@@ -1,22 +1,21 @@
-import { Avatar, Button, Form, Input, Spin, Upload, message } from "antd";
-import React, { useState } from "react";
-import { IoMdAttach } from "react-icons/io";
-import { GiCancel } from "react-icons/gi";
-import { BsSendFill, BsCheckCircle } from "react-icons/bs";
-import { FaFile } from "react-icons/fa6";
-import { AnimatePresence, motion } from "framer-motion";
-import EmptyComment from "../Error/EmptyComment";
-import moment from "moment";
-import momenttz from "moment-timezone";
-import { useRouteLoaderData, useLoaderData } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { uploadFile } from "../../apis/files";
+import { Avatar, Button, Form, Input, Spin, Upload, message } from "antd";
+import { AnimatePresence, motion } from "framer-motion";
+import momenttz from "moment-timezone";
+import React, { useState } from "react";
+import { BsCheckCircle, BsSendFill } from "react-icons/bs";
+import { FaFile } from "react-icons/fa6";
+import { GiCancel } from "react-icons/gi";
+import { IoMdAttach } from "react-icons/io";
+import { useRouteLoaderData } from "react-router-dom";
 import {
   createCommentFile,
   postComment,
   removeComment,
   updateComment,
 } from "../../apis/comments";
+import { uploadFile } from "../../apis/files";
+import EmptyComment from "../Error/EmptyComment";
 
 const CommentInTask = ({ comments, taskId, isSubtask }) => {
   const manager = useRouteLoaderData("manager");
@@ -167,7 +166,6 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
     const { fileUrl, ...restValue } = value;
 
     if (!value.fileUrl || value.fileUrl?.length === 0) {
-
       mutate(restValue);
     } else {
       const formData = new FormData();
@@ -179,7 +177,6 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
   };
 
   const onUpdateFormFinish = (value) => {
-
     const newComment = {
       content: value.content,
       file: listSelectedCommentFiles?.map((item) => {

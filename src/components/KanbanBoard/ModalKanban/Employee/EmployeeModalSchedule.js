@@ -1,8 +1,8 @@
-import { Button, Drawer, Modal } from "antd";
+import { Modal } from "antd";
 import React, { useState } from "react";
-import EmployeeSelected from "./EmployeeSelected";
-import ScheduleEmloyees from "../../Schedule/ScheduleEmloyees";
 import DrawerTimeLine from "../../Drawer/DrawerTimeLine";
+import ScheduleEmloyees from "../../Schedule/ScheduleEmloyees";
+import EmployeeSelected from "./EmployeeSelected";
 
 const EmployeeModalSchedule = ({
   isModalAssigneeOpen,

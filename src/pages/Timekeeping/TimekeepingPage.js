@@ -1,16 +1,15 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { Avatar, ConfigProvider, Input, Select, Table, Tag } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import { Avatar, ConfigProvider, Input, Select, Table } from "antd";
+import { AnimatePresence, motion } from "framer-motion";
 import moment from "moment";
+import React, { Fragment, useEffect, useState } from "react";
 import { FcCalendar } from "react-icons/fc";
 import { FiSearch } from "react-icons/fi";
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { TbCalendarCog, TbCalendarEvent, TbCalendarX } from "react-icons/tb";
-import { AnimatePresence, motion } from "framer-motion";
-import EmptyTimeKeeping from "../../components/Error/EmptyTimeKeeping";
-import { useQuery } from "@tanstack/react-query";
 import { getEventParticipant, getFilterEvent } from "../../apis/events";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import EmptyTimeKeeping from "../../components/Error/EmptyTimeKeeping";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 
 import "moment/locale/vi";
 import { getTimekeeping } from "../../apis/timekeepings";

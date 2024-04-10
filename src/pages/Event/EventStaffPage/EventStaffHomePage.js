@@ -1,20 +1,17 @@
-import React, { Fragment, memo, useEffect, useState } from "react";
-import { Avatar, Empty, Image, Input, Popover, Progress, Tooltip } from "antd";
-import { FiSearch } from "react-icons/fi";
-import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
-import { getEventDivisions } from "../../../apis/events";
+import { Avatar, Empty, Image, Popover, Tooltip } from "antd";
+import clsx from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
+import momenttz from "moment-timezone";
+import React, { Fragment, memo, useEffect, useState } from "react";
+import { GrStatusInfo } from "react-icons/gr";
 import { IoLocationSharp } from "react-icons/io5";
 import { LuCalendarClock, LuCalendarX2 } from "react-icons/lu";
-import { GrStatusInfo } from "react-icons/gr";
-import { FaRegClock } from "react-icons/fa";
-import { defaultAvatar } from "../../../constants/global";
-import defaultBanner from "../../../assets/images/default_banner_images.png";
-import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate, useRouteLoaderData } from "react-router-dom";
 import { getDivisionDetail } from "../../../apis/divisions";
+import { getEventDivisions } from "../../../apis/events";
+import defaultBanner from "../../../assets/images/default_banner_images.png";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
-import momenttz from "moment-timezone";
 
 const EventItem = memo(({ event, gotoEventPage }) => {
   const LabelItem = memo(({ icon, text, tooltip }) => (

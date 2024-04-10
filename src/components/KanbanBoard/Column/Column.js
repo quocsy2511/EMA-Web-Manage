@@ -1,15 +1,10 @@
-import React, { memo, useEffect, useState } from "react";
-import TaskKanbanBoard from "../TaskKanban/TaskKanbanBoard";
-import TaskModal from "../ModalKanban/TaskModal";
-import NewTaskModal from "../ModalKanban/NewTaskModal";
-import { shuffle } from "lodash";
+import { SwapRightOutlined } from "@ant-design/icons";
+import { Tooltip } from "antd";
 import { AnimatePresence } from "framer-motion";
 import moment from "moment";
-import { Dropdown, Spin, Tooltip } from "antd";
-import { SwapRightOutlined } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
-import { getTemplateEvent } from "../../../apis/events";
-import { getTasks } from "../../../apis/tasks";
+import React, { memo, useEffect, useState } from "react";
+import TaskModal from "../ModalKanban/TaskModal";
+import TaskKanbanBoard from "../TaskKanban/TaskKanbanBoard";
 
 const Column = ({
   TaskParent,

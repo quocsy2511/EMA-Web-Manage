@@ -3,28 +3,25 @@ import {
   FieldTimeOutlined,
   FolderOutlined,
   PercentageOutlined,
-  TagOutlined,
   UserOutlined,
   UsergroupAddOutlined,
   VerticalAlignTopOutlined,
 } from "@ant-design/icons";
-import { Avatar, Modal, Popover, Progress, Tag, Tooltip } from "antd";
+import { Avatar, Progress, Tag, Tooltip } from "antd";
 import dayjs from "dayjs";
-import React, { useEffect, useState } from "react";
-import utc from "dayjs/plugin/utc";
 import "dayjs/locale/vi";
-import ListFile from "../File/ListFile";
-import FileInput from "../File/FileInput";
-import PrioritySegmented from "../Priority/PrioritySegmented";
-import EmployeeSelected from "../Employee/EmployeeSelected";
-import InforEmployee from "../Employee/InforEmployee";
-import StatusSelected from "../Status/StatusSelected";
-import StatusTag from "../Status/StatusTag";
-import PriorityTag from "../Priority/PriorityTag";
+import utc from "dayjs/plugin/utc";
+import React, { useState } from "react";
 import RangeDate from "../DateTime/RangeDate";
 import RangeDateSelected from "../DateTime/RangeDateSelected";
-import EstimateTime from "../EstimateTime/EstimateTime";
 import EmployeeModalSchedule from "../Employee/EmployeeModalSchedule";
+import InforEmployee from "../Employee/InforEmployee";
+import FileInput from "../File/FileInput";
+import ListFile from "../File/ListFile";
+import PrioritySegmented from "../Priority/PrioritySegmented";
+import PriorityTag from "../Priority/PriorityTag";
+import StatusSelected from "../Status/StatusSelected";
+import StatusTag from "../Status/StatusTag";
 dayjs.locale("vi");
 dayjs.extend(utc);
 dayjs.utc();

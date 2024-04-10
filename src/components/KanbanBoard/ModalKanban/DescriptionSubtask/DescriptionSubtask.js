@@ -1,18 +1,14 @@
-import {
-  AlignLeftOutlined,
-  CloseOutlined,
-  SendOutlined,
-} from "@ant-design/icons";
+import { AlignLeftOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, message } from "antd";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useRouteLoaderData } from "react-router-dom";
 import { getTasks, updateTask } from "../../../../apis/tasks";
 import AnErrorHasOccured from "../../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../../Indicator/LoadingComponentIndicator";
-import { useRouteLoaderData } from "react-router-dom";
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 const DescriptionSubtask = ({
   description,

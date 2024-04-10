@@ -11,16 +11,16 @@ import {
   message,
 } from "antd";
 import React, { Fragment, useState } from "react";
+import { MdOutlineCancel, MdOutlineSave } from "react-icons/md";
+import { PiNotePencilBold, PiTrash } from "react-icons/pi";
 import {
   getAllDivision,
   updateDivision,
   updateStatusDivision,
 } from "../../apis/divisions";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
-import { MdOutlineCancel, MdOutlineSave } from "react-icons/md";
-import { PiNotePencilBold, PiTrash } from "react-icons/pi";
-import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import CreateDivisionDrawer from "../../components/Drawer/CreateDivisionDrawer";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 
 const DivisionPage = () => {
   const [page, setPage] = useState(1);

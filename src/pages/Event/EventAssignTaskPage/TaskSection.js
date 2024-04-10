@@ -1,40 +1,26 @@
+import { useQuery } from "@tanstack/react-query";
+import { Calendar, ConfigProvider, Drawer, Form, Spin, Tooltip } from "antd";
+import clsx from "clsx";
+import { motion } from "framer-motion";
+import momenttz from "moment-timezone";
 import React, { Fragment, memo, useEffect, useState } from "react";
-import {
-  Calendar,
-  ConfigProvider,
-  Drawer,
-  Dropdown,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
+import { BsExclamationCircle } from "react-icons/bs";
 import {
   FaCheck,
   FaCircleArrowDown,
   FaCircleExclamation,
 } from "react-icons/fa6";
-import { MdArrowForwardIos, MdCategory, MdEmojiEvents } from "react-icons/md";
-import { IoClose } from "react-icons/io5";
-import momenttz from "moment-timezone";
-import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
-import {
-  getAllDivision,
-  getDivisionFreeUser,
-  getFreeDivision,
-} from "../../../apis/divisions";
-import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
-import clsx from "clsx";
+import { GoDotFill } from "react-icons/go";
 import {
   IoArrowForwardCircleOutline,
   IoEllipsisHorizontalCircle,
 } from "react-icons/io5";
-import { BsExclamationCircle } from "react-icons/bs";
-import { GoDotFill } from "react-icons/go";
+import { MdEmojiEvents } from "react-icons/md";
+import { getFreeDivision } from "../../../apis/divisions";
 
+import vi_VN from "antd/locale/vi_VN";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
-import vi_VN from "antd/locale/vi_VN";
 import { PiDotsThreeCircleVerticalFill } from "react-icons/pi";
 
 const now = momenttz();

@@ -1,5 +1,5 @@
-import React, { Fragment, memo, useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { UploadOutlined } from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   App,
   Button,
@@ -16,13 +16,17 @@ import {
   message,
 } from "antd";
 import viVN from "antd/locale/vi_VN";
-import { Link, useLocation, useNavigate } from "react-router-dom";
 import clsx from "clsx";
+import dayjs from "dayjs";
+import { motion } from "framer-motion";
 import momenttz from "moment-timezone";
+import React, { Fragment, memo, useEffect, useState } from "react";
+import { BsExclamationOctagon } from "react-icons/bs";
+import { FaRegCircleCheck } from "react-icons/fa6";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import TaskSection from "./TaskSection";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { uploadFile, uploadFileTask } from "../../../apis/files";
 import {
   assignMember,
   createTask,
@@ -30,11 +34,7 @@ import {
   updateTask,
 } from "../../../apis/tasks";
 import SubTaskSection from "./SubTaskSection";
-import dayjs from "dayjs";
-import { UploadOutlined } from "@ant-design/icons";
-import { uploadFile, uploadFileTask } from "../../../apis/files";
-import { BsExclamationOctagon } from "react-icons/bs";
-import { FaRegCircleCheck } from "react-icons/fa6";
+import TaskSection from "./TaskSection";
 
 const { RangePicker } = DatePicker;
 

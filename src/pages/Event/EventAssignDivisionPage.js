@@ -1,23 +1,14 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { App, Avatar, Button, Checkbox, Collapse, message } from "antd";
+import clsx from "clsx";
+import { motion } from "framer-motion";
 import React, { Fragment, memo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import {
-  App,
-  Avatar,
-  Button,
-  Checkbox,
-  Collapse,
-  ConfigProvider,
-  message,
-} from "antd";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllDivision } from "../../apis/divisions";
-import { defaultAvatar } from "../../constants/global";
-import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 import { updateAssignDivisionToEvent } from "../../apis/events";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
-import clsx from "clsx";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
+import { defaultAvatar } from "../../constants/global";
 
 const EventAssignDivisionPage = () => {
   const location = useLocation();

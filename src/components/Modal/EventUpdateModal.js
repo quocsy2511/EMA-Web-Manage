@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ConfigProvider,
   DatePicker,
@@ -6,20 +6,17 @@ import {
   Input,
   InputNumber,
   Modal,
-  Select,
   Upload,
   message,
 } from "antd";
 import viVN from "antd/locale/vi_VN";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllUser } from "../../apis/users";
-import { updateDetailEvent } from "../../apis/events";
 import dayjs from "dayjs";
 import moment from "moment";
+import React, { memo } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { updateDetailEvent } from "../../apis/events";
 import { uploadFile } from "../../apis/files";
-import TEXT from "../../constants/string";
 
 const { RangePicker } = DatePicker;
 

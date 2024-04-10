@@ -1,14 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
-import { getEventTemplate, getEventType } from "../../apis/events";
-import { Button, Empty, Select, Spin } from "antd";
 import {
   LoadingOutlined,
   PlusOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import { getTasks } from "../../apis/tasks";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Empty, Select, Spin } from "antd";
+import React, { useEffect, useState } from "react";
 import "react-quill/dist/quill.snow.css";
+import { getEventTemplate, getEventType } from "../../apis/events";
+import { getTasks } from "../../apis/tasks";
 import SettingModal from "../../components/Modal/SettingModal";
 import CardSetting from "./CardSetting/CardSetting";
 

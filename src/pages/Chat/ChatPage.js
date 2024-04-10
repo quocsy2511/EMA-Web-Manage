@@ -1,21 +1,18 @@
-import { Avatar, Input, Popover, Tooltip } from "antd";
-import React, { Fragment, useState, memo, useEffect } from "react";
-import { FiSearch } from "react-icons/fi";
-import { IoVideocam, IoCall } from "react-icons/io5";
-import { HiOutlineDotsVertical } from "react-icons/hi";
-import { BsSendFill } from "react-icons/bs";
-import { FaArrowUp, FaArrowLeft } from "react-icons/fa";
-import { AnimatePresence, motion } from "framer-motion";
-import clsx from "clsx";
-import { useDispatch, useSelector } from "react-redux";
-import { ClipLoader, SyncLoader } from "react-spinners";
-import momenttz from "moment-timezone";
-import { defaultAvatar } from "../../constants/global";
-import { FaCircle } from "react-icons/fa";
-import { fetchChatDetail } from "../../store/chat_detail";
-import { useRouteLoaderData } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
+import { Avatar, Input, Popover, Tooltip } from "antd";
+import clsx from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
+import momenttz from "moment-timezone";
+import React, { Fragment, memo, useEffect, useState } from "react";
+import { BsSendFill } from "react-icons/bs";
+import { FaArrowLeft, FaArrowUp, FaCircle } from "react-icons/fa";
+import { FiSearch } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouteLoaderData } from "react-router-dom";
+import { ClipLoader, SyncLoader } from "react-spinners";
 import { createConversation, createMessage } from "../../apis/chats";
+import { defaultAvatar } from "../../constants/global";
+import { fetchChatDetail } from "../../store/chat_detail";
 import { getChatsList } from "../../store/chats";
 import {
   getOnlineGroupUsersSocket,

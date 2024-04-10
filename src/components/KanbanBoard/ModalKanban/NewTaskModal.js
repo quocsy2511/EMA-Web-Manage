@@ -1,3 +1,9 @@
+import {
+  TeamOutlined,
+  UploadOutlined,
+  UserOutlined,
+  WalletOutlined,
+} from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -13,26 +19,19 @@ import {
   Upload,
   message,
 } from "antd";
+import clsx from "clsx";
+import moment from "moment";
 import React, { memo, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRouteLoaderData } from "react-router-dom";
+import { uploadFile } from "../../../apis/files";
+import { createTask, getTasks } from "../../../apis/tasks";
 import { getEmployee } from "../../../apis/users";
-import moment from "moment";
 import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
-import { createTask, getTasks } from "../../../apis/tasks";
-import { uploadFile } from "../../../apis/files";
-import locale from "antd/es/date-picker/locale/vi_VN";
-import {
-  TeamOutlined,
-  UploadOutlined,
-  UserOutlined,
-  WalletOutlined,
-} from "@ant-design/icons";
-import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
 import DrawerTimeLine from "../Drawer/DrawerTimeLine";
-import clsx from "clsx";
+import ScheduleEmloyees from "../Schedule/ScheduleEmloyees";
 
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 

@@ -1,21 +1,17 @@
-import { Avatar, Layout, notification } from "antd";
+import { Layout, notification } from "antd";
 import React, { Fragment, useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
-import SidebarStaff from "../components/Sidebar/SidebarStaff";
-import Header from "../components/Header/Header";
 import { useDispatch, useSelector } from "react-redux";
-import { useQueryClient } from "@tanstack/react-query";
+import { Outlet } from "react-router-dom";
+import Header from "../components/Header/Header";
+import SidebarStaff from "../components/Sidebar/SidebarStaff";
 
-import { io } from "socket.io-client";
-import { URL_SOCKET } from "../constants/api";
-import { socketActions } from "../store/socket";
+import { getChatsList } from "../store/chats";
 import {
   cleanUpOnMessage,
   cleanUpOnlineGroupUsersReceived,
   getOnlineGroupUsersSocket,
   socketListener,
 } from "../utils/socket";
-import { getChatsList } from "../store/chats";
 
 const { Content } = Layout;
 

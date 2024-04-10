@@ -1,20 +1,20 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { BsMailbox, BsTrash3 } from "react-icons/bs";
-import RequestsList from "../../components/RequestItem/RequestsList";
-import RequestDetail from "../../components/RequestItem/RequestDetail";
-import { AnimatePresence, motion } from "framer-motion";
-import { Button } from "antd";
-import NewRequestModal from "./Modal/NewRequestModal";
 import { useQuery } from "@tanstack/react-query";
-import { getAllRequests, getAnnualLeave } from "../../apis/requests";
+import { Button } from "antd";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { Fragment, useEffect, useState } from "react";
+import { BsMailbox } from "react-icons/bs";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouteLoaderData } from "react-router-dom";
 import { MoonLoader } from "react-spinners";
-import EditRequestModal from "./Modal/EditRequestModal";
+import { getAllRequests, getAnnualLeave } from "../../apis/requests";
 import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
-import { useDispatch, useSelector } from "react-redux";
+import RequestDetail from "../../components/RequestItem/RequestDetail";
+import RequestsList from "../../components/RequestItem/RequestsList";
 import { addNotification } from "../../store/Slice/notificationsSlice";
 import { redirectionActions } from "../../store/redirection";
+import EditRequestModal from "./Modal/EditRequestModal";
+import NewRequestModal from "./Modal/NewRequestModal";
 
 const RequestPage = () => {
   const staff = useRouteLoaderData("staff");
@@ -71,7 +71,7 @@ const RequestPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notification?.id, requests]);
-  
+
   const {
     data: annualLeave,
     isLoading: isLoadingAnnualLeave,

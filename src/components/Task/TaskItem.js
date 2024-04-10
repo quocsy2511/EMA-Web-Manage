@@ -1,19 +1,19 @@
+import { Avatar, Badge, Popover } from "antd";
+import clsx from "clsx";
+import { motion } from "framer-motion";
+import momenttz from "moment-timezone";
 import React, { memo, useState } from "react";
-import { Avatar, Badge, Popover, Tooltip } from "antd";
+import { AiOutlineEye } from "react-icons/ai";
 import { BsHourglassBottom, BsHourglassSplit } from "react-icons/bs";
+import { FaUser } from "react-icons/fa";
 import {
   FcHighPriority,
   FcLowPriority,
   FcMediumPriority,
 } from "react-icons/fc";
-import { AiOutlineEye, AiOutlineHistory } from "react-icons/ai";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import momenttz from "moment-timezone";
-import { defaultAvatar } from "../../constants/global";
 import { HiMiniPencilSquare } from "react-icons/hi2";
-import clsx from "clsx";
-import { FaUser } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { defaultAvatar } from "../../constants/global";
 import AssignmentHistoryModal from "../Modal/AssignmentHistoryModal";
 
 const TaskItem = ({

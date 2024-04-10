@@ -8,26 +8,15 @@ import {
   StarFilled,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Avatar,
-  Button,
-  Dropdown,
-  Input,
-  Select,
-  Spin,
-  Tag,
-  Tooltip,
-} from "antd";
+import { Avatar, Dropdown, Input, Spin, Tag, Tooltip } from "antd";
+import { AnimatePresence, motion } from "framer-motion";
+import { debounce } from "lodash";
+import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
+import { HiSortAscending, HiSortDescending } from "react-icons/hi";
+import { useSelector } from "react-redux";
 import { useNavigate, useRouteLoaderData } from "react-router-dom";
 import { getAllUser } from "../../apis/users";
-import moment from "moment";
-import AnErrorHasOccured from "../Error/AnErrorHasOccured";
-import LoadingComponentIndicator from "../Indicator/LoadingComponentIndicator";
-import { debounce } from "lodash";
-import { HiSortAscending, HiSortDescending } from "react-icons/hi";
-import { AnimatePresence, motion } from "framer-motion";
-import { useSelector } from "react-redux";
 import { defaultAvatar } from "../../constants/global";
 
 const HeaderEvent = ({

@@ -1,13 +1,4 @@
-import React, { Fragment, memo, useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getPlanByContact,
-  importCSV,
-  postPlan,
-  replacePlan,
-} from "../../apis/planning";
 import {
   Button,
   FloatButton,
@@ -18,11 +9,20 @@ import {
   message,
 } from "antd";
 import axios from "axios";
-import { URL } from "../../constants/api";
-import { FiPlus } from "react-icons/fi";
-import { FaCircle } from "react-icons/fa";
 import clsx from "clsx";
+import { motion } from "framer-motion";
+import React, { Fragment, memo, useEffect, useState } from "react";
+import { FaCircle } from "react-icons/fa";
+import { FiPlus } from "react-icons/fi";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  getPlanByContact,
+  importCSV,
+  postPlan,
+  replacePlan,
+} from "../../apis/planning";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
+import { URL } from "../../constants/api";
 
 const PlanningPage = () => {
   const location = useLocation();

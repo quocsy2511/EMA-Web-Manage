@@ -1,13 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
-import { useRouteLoaderData } from "react-router-dom";
-import {
-  getAllUser,
-  getRoles,
-  updateStatusUser,
-  updateUser,
-} from "../../../apis/users";
-import moment from "moment";
 import {
   Avatar,
   Button,
@@ -22,19 +13,28 @@ import {
   Tag,
   message,
 } from "antd";
-import { BsSearch } from "react-icons/bs";
+import viVN from "antd/locale/vi_VN";
+import clsx from "clsx";
+import dayjs from "dayjs";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
 import Highlighter from "react-highlight-words";
-import { PiNotePencilBold, PiTrash } from "react-icons/pi";
-import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
-import CreateUserDrawer from "../../Drawer/CreateUserDrawer";
+import { BsSearch } from "react-icons/bs";
 import {
   MdOutlineKeyboardArrowLeft,
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
-import clsx from "clsx";
+import { PiNotePencilBold, PiTrash } from "react-icons/pi";
+import { useRouteLoaderData } from "react-router-dom";
+import {
+  getAllUser,
+  getRoles,
+  updateStatusUser,
+  updateUser,
+} from "../../../apis/users";
+import CreateUserDrawer from "../../Drawer/CreateUserDrawer";
+import AnErrorHasOccured from "../../Error/AnErrorHasOccured";
 import LoadingComponentIndicator from "../../Indicator/LoadingComponentIndicator";
-import viVN from "antd/locale/vi_VN";
-import dayjs from "dayjs";
 
 const DepartmentStaffPage = () => {
   const [page, setPage] = useState(1);
@@ -587,7 +587,7 @@ const DepartmentStaffPage = () => {
       ) : inputType === "date" ? (
         <ConfigProvider locale={viVN}>
           <DatePicker
-            defaultValue={dayjs(record?.dob,)}
+            defaultValue={dayjs(record?.dob)}
             onChange={(value) => {
               const formattedDate = value
                 ? dayjs(value).format("YYYY-MM-DD")

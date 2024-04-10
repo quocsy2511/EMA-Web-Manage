@@ -1,12 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
-import {
-  getListAssigneeEmployee,
-  getTaskFilterByDate,
-} from "../../../apis/tasks";
-import momenttz from "moment-timezone";
-import vi_VN from "antd/locale/vi_VN";
-import { useRouteLoaderData } from "react-router-dom";
 import {
   Avatar,
   Calendar,
@@ -16,7 +8,12 @@ import {
   Tooltip,
   message,
 } from "antd";
+import vi_VN from "antd/locale/vi_VN";
+import momenttz from "moment-timezone";
+import React, { useEffect, useState } from "react";
 import { BsDot } from "react-icons/bs";
+import { useRouteLoaderData } from "react-router-dom";
+import { getListAssigneeEmployee } from "../../../apis/tasks";
 
 const ScheduleEmloyees = ({
   setChildrenDrawer,

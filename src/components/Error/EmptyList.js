@@ -1,6 +1,6 @@
+import { motion } from "framer-motion";
 import React from "react";
 import emptyItem from "../../assets/images/empty_item.jpg";
-import { motion } from "framer-motion";
 
 const EmptyList = ({ title }) => {
   return (

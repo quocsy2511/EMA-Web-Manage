@@ -1,9 +1,9 @@
-import { StarFilled, UserOutlined } from "@ant-design/icons";
+import { StarFilled } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Badge, Tooltip } from "antd";
+import moment from "moment";
 import React from "react";
 import { getTasks } from "../../../../apis/tasks";
-import moment from "moment";
 
 const InforEmployee = ({ taskSelected }) => {
   let taskID = taskSelected?.id;
@@ -21,9 +21,7 @@ const InforEmployee = ({ taskSelected }) => {
       select: (data) => {
         if (data.startDate && data.endDate) {
           const formatDate = data.map(({ ...item }) => {
-            item.startDate = moment(item.startDate).format(
-              "DD-MM-YYYY"
-            );
+            item.startDate = moment(item.startDate).format("DD-MM-YYYY");
             item.endDate = moment(item.endDate).format("DD-MM-YYYY");
             return {
               ...item,

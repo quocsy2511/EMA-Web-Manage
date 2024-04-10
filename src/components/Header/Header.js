@@ -1,27 +1,26 @@
-import React from "react";
-import { App, Avatar, Badge, Button, Dropdown, message } from "antd";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { App, Avatar, Badge, Button, Dropdown } from "antd";
 import { Header as HeaderLayout } from "antd/es/layout/layout";
-import { HiOutlineBell, HiOutlineBellAlert } from "react-icons/hi2";
+import clsx from "clsx";
+import momenttz from "moment-timezone";
+import React from "react";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
-import { IoLogOutOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
+import { HiOutlineBell, HiOutlineBellAlert } from "react-icons/hi2";
+import { IoLogOutOutline } from "react-icons/io5";
+import { useDispatch } from "react-redux";
 import {
   Link,
   useLocation,
   useNavigate,
   useRouteLoaderData,
 } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllNotification, seenNotification } from "../../apis/notifications";
-import { useDispatch } from "react-redux";
-import momenttz from "moment-timezone";
-import { redirectionActions } from "../../store/redirection";
-import TEXT from "../../constants/string";
 import { defaultAvatar } from "../../constants/global";
+import TEXT from "../../constants/string";
+import { chatDetailActions } from "../../store/chat_detail";
 import { chatsActions } from "../../store/chats";
 import { closeConnectSocket } from "../../utils/socket";
-import { chatDetailActions } from "../../store/chat_detail";
-import clsx from "clsx";
 
 const NotiLabel = ({
   item,

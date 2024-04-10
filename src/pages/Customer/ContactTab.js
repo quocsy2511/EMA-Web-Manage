@@ -1,18 +1,3 @@
-import React, { Fragment, memo, useEffect, useState } from "react";
-import {
-  Button,
-  Empty,
-  Image,
-  Segmented,
-  Spin,
-  Table,
-  Tag,
-  Tooltip,
-} from "antd";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateCustomerContacts } from "../../apis/contact";
-import ContactUpdateModal from "../../components/Modal/ContactUpdateModal";
-import moment from "moment/moment";
 import {
   BarsOutlined,
   BookOutlined,
@@ -25,11 +10,17 @@ import {
   SortDescendingOutlined,
   SwapRightOutlined,
 } from "@ant-design/icons";
-import { IoRemoveOutline } from "react-icons/io5";
-import { BsImages } from "react-icons/bs";
-import ContactModal from "../../components/Modal/ContactModal";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button, Empty, Image, Segmented, Spin, Table, Tooltip } from "antd";
 import { motion } from "framer-motion";
+import moment from "moment/moment";
+import React, { Fragment, memo, useEffect, useState } from "react";
+import { BsImages } from "react-icons/bs";
+import { IoRemoveOutline } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
+import { updateCustomerContacts } from "../../apis/contact";
+import ContactModal from "../../components/Modal/ContactModal";
+import ContactUpdateModal from "../../components/Modal/ContactUpdateModal";
 
 const ContactTab = ({
   currentPage,

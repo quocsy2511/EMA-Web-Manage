@@ -1,39 +1,32 @@
-import React, { Fragment, memo, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
   Calendar,
   ConfigProvider,
   Drawer,
-  Dropdown,
   Form,
   Select,
   Spin,
   Tooltip,
 } from "antd";
+import vi_VN from "antd/locale/vi_VN";
+import clsx from "clsx";
+import dayjs from "dayjs";
+import { motion } from "framer-motion";
 import momenttz from "moment-timezone";
-import { useQuery } from "@tanstack/react-query";
-import { getDivisionFreeUser } from "../../../apis/divisions";
-import { MdEmojiEvents, MdCategory } from "react-icons/md";
+import React, { Fragment, memo, useEffect, useState } from "react";
 import {
   FaCheck,
   FaCircleArrowDown,
   FaCircleExclamation,
 } from "react-icons/fa6";
-import { PiMedal } from "react-icons/pi";
-import { BsExclamationCircle } from "react-icons/bs";
-import {
-  IoEllipsisHorizontalCircle,
-  IoArrowForwardCircleOutline,
-} from "react-icons/io5";
 import { GoDotFill } from "react-icons/go";
 import { IoIosCheckbox } from "react-icons/io";
-import { PiDotsThreeCircleVerticalFill } from "react-icons/pi";
-import { motion } from "framer-motion";
-import clsx from "clsx";
+import { MdEmojiEvents } from "react-icons/md";
+import { PiDotsThreeCircleVerticalFill, PiMedal } from "react-icons/pi";
+import { getDivisionFreeUser } from "../../../apis/divisions";
 import TEXT from "../../../constants/string";
-import dayjs from "dayjs";
-import vi_VN from "antd/locale/vi_VN";
 
 const now = momenttz();
 

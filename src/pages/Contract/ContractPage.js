@@ -1,10 +1,4 @@
-import React, { Fragment, memo, useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import momenttz from "moment-timezone";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getCustomerContactDetail } from "../../apis/contact";
-import { MdOutlineRemoveRedEye } from "react-icons/md";
 import {
   App,
   Button,
@@ -19,14 +13,20 @@ import {
   Spin,
   message,
 } from "antd";
-import dayjs from "dayjs";
 import viVN from "antd/locale/vi_VN";
-import { getEventType } from "../../apis/events";
+import dayjs from "dayjs";
+import { motion } from "framer-motion";
+import momenttz from "moment-timezone";
+import React, { Fragment, memo, useEffect } from "react";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getCustomerContactDetail } from "../../apis/contact";
 import {
   createContractToCustomer,
   reCreateContract,
   updateContractToCustomer,
 } from "../../apis/contract";
+import { getEventType } from "../../apis/events";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 
 const { RangePicker } = DatePicker;

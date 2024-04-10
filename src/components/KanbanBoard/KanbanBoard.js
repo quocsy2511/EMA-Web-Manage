@@ -1,17 +1,15 @@
+import { ArrowLeftOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import { Empty, Spin } from "antd";
+import moment from "moment";
 import React, { Fragment, memo, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { getTasks } from "../../apis/tasks.js";
+import { socketOnNotification } from "../../utils/socket.js";
 import Column from "../KanbanBoard/Column/Column.js";
 import DescriptionEvent from "./DescriptionEvent/DescriptionEvent.js";
-import { useQuery } from "@tanstack/react-query";
-import { getTasks } from "../../apis/tasks.js";
-import moment from "moment";
-import { useDispatch, useSelector } from "react-redux";
-import TaskModal from "./ModalKanban/TaskModal.js";
-import { Empty, Spin } from "antd";
-import { redirectionActions } from "../../store/redirection.js";
 import NewTaskModal from "./ModalKanban/NewTaskModal.js";
-import { ArrowLeftOutlined } from "@ant-design/icons";
-import { socketOnNotification } from "../../utils/socket.js";
-import { useLocation } from "react-router-dom";
+import TaskModal from "./ModalKanban/TaskModal.js";
 
 const KanbanBoard = ({
   selectEvent,

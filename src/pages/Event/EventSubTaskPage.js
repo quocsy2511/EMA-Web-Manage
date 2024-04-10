@@ -1,4 +1,36 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Avatar,
+  Card,
+  Dropdown,
+  FloatButton,
+  Popconfirm,
+  Popover,
+  Progress,
+  Tooltip,
+  message,
+} from "antd";
+import { AnimatePresence, motion } from "framer-motion";
+import moment from "moment";
+import momenttz from "moment-timezone";
+import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import React, { Fragment, memo, useEffect, useState } from "react";
+import { AiOutlineHistory } from "react-icons/ai";
+import { BiRightArrowAlt } from "react-icons/bi";
+import {
+  BsExclamationOctagonFill,
+  BsHourglassBottom,
+  BsHourglassSplit,
+  BsPlus,
+} from "react-icons/bs";
+import { CiFileOn } from "react-icons/ci";
+import {
+  FcHighPriority,
+  FcLowPriority,
+  FcMediumPriority,
+} from "react-icons/fc";
+import { LuSettings } from "react-icons/lu";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Link,
   useLocation,
@@ -6,47 +38,15 @@ import {
   useParams,
   useRouteLoaderData,
 } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  FcHighPriority,
-  FcLowPriority,
-  FcMediumPriority,
-} from "react-icons/fc";
-import {
-  BsHourglassBottom,
-  BsHourglassSplit,
-  BsPlus,
-  BsExclamationOctagonFill,
-} from "react-icons/bs";
-import { BiRightArrowAlt } from "react-icons/bi";
-import { LuSettings } from "react-icons/lu";
-import { AiOutlineHistory } from "react-icons/ai";
-import { CiFileOn } from "react-icons/ci";
-import {
-  Avatar,
-  Card,
-  Dropdown,
-  FloatButton,
-  message,
-  Popconfirm,
-  Popover,
-  Progress,
-  Tooltip,
-} from "antd";
-import TaskItem from "../../components/Task/TaskItem";
-import CommentInTask from "../../components/Comment/CommentInTask";
-import SubTaskModal from "../../components/Modal/SubTaskModal";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getTasks, updateTaskStatus } from "../../apis/tasks";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
-import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
 import { getComment } from "../../apis/comments";
-import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
-import { useDispatch, useSelector } from "react-redux";
-import { redirectionActions } from "../../store/redirection";
-import moment from "moment";
-import momenttz from "moment-timezone";
+import { getTasks, updateTaskStatus } from "../../apis/tasks";
+import CommentInTask from "../../components/Comment/CommentInTask";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import AssignmentHistoryModal from "../../components/Modal/AssignmentHistoryModal";
+import SubTaskModal from "../../components/Modal/SubTaskModal";
+import TaskItem from "../../components/Task/TaskItem";
+import { redirectionActions } from "../../store/redirection";
 import { socketOnNotification } from "../../utils/socket";
 
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);

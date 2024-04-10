@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Modal, Popconfirm, Select, Tag, message } from "antd";
-import React, { useState } from "react";
-import { updateTaskStatus } from "../../../../apis/tasks";
-import { useRouteLoaderData } from "react-router-dom";
+import { Button, Modal, Select, Tag, message } from "antd";
 import moment from "moment";
+import React, { useState } from "react";
+import { useRouteLoaderData } from "react-router-dom";
+import { updateTaskStatus } from "../../../../apis/tasks";
 
 const StatusSelected = ({
   taskSelected,

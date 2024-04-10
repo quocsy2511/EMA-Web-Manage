@@ -1,21 +1,21 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { ConfigProvider, DatePicker, Input, Select } from "antd";
-import { BsSearch } from "react-icons/bs";
-import viVN from "antd/locale/vi_VN";
-import EventItem from "../../components/Event/EventItem";
-import { AnimatePresence, motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getFilterEvent } from "../../apis/events";
+import { ConfigProvider, DatePicker, Input, Select } from "antd";
+import viVN from "antd/locale/vi_VN";
+import { AnimatePresence, motion } from "framer-motion";
+import moment from "moment/moment";
+import React, { Fragment, useEffect, useState } from "react";
+import { BsSearch } from "react-icons/bs";
 import {
   MdOutlineKeyboardArrowLeft,
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
 import { PiSortAscending, PiSortDescending } from "react-icons/pi";
-import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
-import moment from "moment/moment";
+import { useNavigate } from "react-router-dom";
+import { getFilterEvent } from "../../apis/events";
 import emptyEventImg from "../../assets/images/empty_event.png";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import EventItem from "../../components/Event/EventItem";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 
 const EventPage = () => {
   const navigate = useNavigate();

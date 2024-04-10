@@ -1,18 +1,16 @@
+import { SettingOutlined, SwapRightOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import { Avatar, Button, Empty, Image, Spin } from "antd";
+import moment from "moment";
 import React, { Fragment, useEffect, useState } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
-import { useQuery } from "@tanstack/react-query";
-import { getAllUser, getProfile } from "../../apis/users";
-import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
-import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
-import moment from "moment";
 import { getEventDivisions, getFilterEvent } from "../../apis/events";
-import { SettingOutlined, SwapRightOutlined } from "@ant-design/icons";
-import EditProfileModal from "./Modal/EditProfileModal";
+import { getAllUser, getProfile } from "../../apis/users";
+import AnErrorHasOccured from "../../components/Error/AnErrorHasOccured";
+import LoadingComponentIndicator from "../../components/Indicator/LoadingComponentIndicator";
 import { defaultAvatar } from "../../constants/global";
-import { useRouteLoaderData } from "react-router-dom";
-import { filter } from "lodash";
 import ChangePasswordModal from "./Modal/ChangePasswordModal";
+import EditProfileModal from "./Modal/EditProfileModal";
 
 const ProfilePage = () => {
   const { data, isLoading, isError } = useQuery(["profile"], getProfile);

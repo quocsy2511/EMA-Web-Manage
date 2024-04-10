@@ -2,9 +2,9 @@ import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, Segmented, Switch, Tooltip, message } from "antd";
 import React from "react";
-import { updateTask, updateTaskStatus } from "../../../apis/tasks";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { updateTask, updateTaskStatus } from "../../../apis/tasks";
 
 const CardSetting = ({ task }) => {
   const [form] = Form.useForm();

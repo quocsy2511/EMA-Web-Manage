@@ -1,9 +1,5 @@
-import {
-  CalendarOutlined,
-  CheckCircleFilled,
-  DollarOutlined,
-} from "@ant-design/icons";
-import { Badge, Card, Empty, Modal, Progress, Tag, Tooltip } from "antd";
+import { CheckCircleFilled } from "@ant-design/icons";
+import { Badge, Card, Empty, Progress, Tag, Tooltip } from "antd";
 import moment from "moment";
 import React from "react";
 

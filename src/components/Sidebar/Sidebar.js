@@ -1,14 +1,13 @@
 import { ConfigProvider, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import useDarkMode from "../../hooks/useDarkMode";
-import { HiOutlineHome, HiOutlineCalendarDays } from "react-icons/hi2";
-import { IoMailOutline } from "react-icons/io5";
-import { IoChatboxOutline } from "react-icons/io5";
 import { BsPerson } from "react-icons/bs";
+import { HiOutlineCalendarDays, HiOutlineHome } from "react-icons/hi2";
+import { IoChatboxOutline, IoMailOutline } from "react-icons/io5";
+import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import logo_domain from "../../assets/images/logo_domain.png";
+import useDarkMode from "../../hooks/useDarkMode";
 
 //label cho than side bar
 const LabelText = ({ text }) => (

@@ -1,14 +1,13 @@
-import { Avatar, ConfigProvider, Menu } from "antd";
+import { ConfigProvider, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import useDarkMode from "../../hooks/useDarkMode";
 import { AnimatePresence, motion } from "framer-motion";
-import { HiOutlineUserGroup, HiOutlineUser } from "react-icons/hi2";
+import React, { useState } from "react";
+import { HiOutlineUser, HiOutlineUserGroup } from "react-icons/hi2";
 import { IoSettingsOutline } from "react-icons/io5";
-import { BsPersonVcard } from "react-icons/bs";
+import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import logo_domain from "../../assets/images/logo_domain.png";
+import useDarkMode from "../../hooks/useDarkMode";
 
 //label cho than side bar
 const LabelText = ({ text }) => (

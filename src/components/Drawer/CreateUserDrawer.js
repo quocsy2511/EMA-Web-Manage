@@ -11,16 +11,16 @@ import {
   Upload,
   message,
 } from "antd";
-import React, { useEffect, useState } from "react";
-import { createUser, getRoles } from "../../apis/users";
-import { getAllDivision } from "../../apis/divisions";
 import viVN from "antd/locale/vi_VN";
-import moment from "moment";
 import dayjs from "dayjs";
-import { uploadFile } from "../../apis/files";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
 import { useRouteLoaderData } from "react-router-dom";
-import TEXT from "../../constants/string";
+import { getAllDivision } from "../../apis/divisions";
+import { uploadFile } from "../../apis/files";
+import { createUser, getRoles } from "../../apis/users";
 import { defaultAvatarFireBase } from "../../constants/global";
+import TEXT from "../../constants/string";
 
 const Label = ({ label }) => <p className="text-lg font-medium">{label}</p>;
 
