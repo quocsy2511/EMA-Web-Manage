@@ -30,8 +30,6 @@ const Title = memo(({ title }) => (
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
 const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
-  console.log("UPDATE MODAL: ", event);
-
   const queryClient = useQueryClient();
   const { mutate: updateEventMutate, isLoading: updateEventIsLoading } =
     useMutation((event) => updateDetailEvent(event), {
@@ -75,8 +73,6 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = (values) => {
-    console.log("Success:", values);
-
     const payload = {
       eventId: event?.id,
       eventName: values?.eventName,
@@ -90,28 +86,18 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
       divisionId: event?.listDivision?.map((item) => item?.divisionId),
     };
 
-    console.log("PAYLOAD: ", payload);
-
     if (values?.fileChosen) {
-      console.log("HAS FILE");
-      console.log("HAS FILE", values?.fileChosen?.file);
-
       const formData = new FormData();
       formData.append("file", values?.fileChosen?.file?.originFileObj);
       formData.append("folderName", "event");
-      console.log("formData > ", formData);
       uploadFileMutate({ formData, event: payload });
     } else {
-      console.log("NO FILE");
       payload.coverUrl = event?.coverUrl;
-      console.log(payload);
       updateEventMutate(payload);
     }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("errorInfo:", errorInfo);
-  };
+  const onFinishFailed = (errorInfo) => {};
 
   const handleOk = () => {
     form.submit();

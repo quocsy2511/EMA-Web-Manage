@@ -45,14 +45,12 @@ const ContractCreatePage = ({
 
   // on form submit success
   const onFinish = (values) => {
-    console.log("values > ", values);
-
     const contractPayload = {
       ...values,
       paymentDate: momenttz().format("YYYY-MM-DD"),
     };
 
-    createContractMutate()
+    createContractMutate();
   };
 
   // on form submit fail

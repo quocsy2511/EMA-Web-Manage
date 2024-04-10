@@ -29,7 +29,6 @@ const ScheduleEmloyees = ({
   const staff = useRouteLoaderData("staff");
   const [messageApi, contextHolder] = message.useMessage();
   const [selectedEmployee, setSelectedEmployee] = useState("");
-  console.log("selectedEmployee > ", selectedEmployee);
   const {
     data: employeeAssignees,
     isLoading: isLoadingEmployees,
@@ -148,7 +147,6 @@ const ScheduleEmloyees = ({
             <Calendar
               className="rounded-lg border border-gray-300 overflow-hidden px-2"
               onPanelChange={(value, mode) => {
-                // console.log("onPanelChange > ", value, mode);
                 const numOfDaysInCurrentMonth = value
                   .clone()
                   .month(value.clone().month() + 1)
@@ -168,7 +166,6 @@ const ScheduleEmloyees = ({
                 ]);
               }}
               // onSelect={(value) => {
-              //   // console.log("value > ", value);
               //   let list = [];
               //   const currentMoment = momenttz(value?.$d).format("YYYY-MM-DD");
               //   setSelectedDateSchedule(currentMoment);
@@ -213,7 +210,6 @@ const ScheduleEmloyees = ({
                             currentMoment <= task?.endDate
                         )
                       ) {
-                        // console.log("🚀 ~ employeeAssignees?.map ~ user:", user);
                         renderList = [...renderList, user];
                       }
                     }

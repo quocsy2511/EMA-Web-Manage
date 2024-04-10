@@ -11,7 +11,6 @@ import { PiNewspaperFill } from "react-icons/pi";
 
 const EventBudgetPage = () => {
   const eventId = useParams().eventId;
-  // console.log("eventId: ", eventId);
 
   const location = useLocation();
   const { eventName } = location.state ?? {};

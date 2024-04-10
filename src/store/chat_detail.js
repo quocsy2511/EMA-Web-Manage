@@ -5,7 +5,6 @@ export const fetchChatDetail = createAsyncThunk(
   "chatDetail/fetchChatDetail",
   async (params, thunkAPI) => {
     const response = await getConversation(params.id, params.startKey);
-    console.log("single conversation > ", response);
 
     /*
       2 case 

@@ -41,7 +41,6 @@ const ContractPage = () => {
   const location = useLocation();
   const contactId = location.state?.contactId;
   const hasContract = location.state?.hasContract;
-  console.log("hasContract > ", hasContract);
   const readOnly = location.state?.readOnly;
 
   const navigate = useNavigate();
@@ -68,7 +67,6 @@ const ContractPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("contactInfo > ", contactInfo);
 
   const { data: eventType, isLoading: eventTypeIsLoading } = useQuery(
     ["event-type"],
@@ -92,7 +90,6 @@ const ContractPage = () => {
           });
         },
         onError: (err) => {
-          console.log("erorr > ", err);
           messageApi.open({
             type: "error",
             content: "Không thể tạo hợp đồng lúc này! Hãy thử lại sau",
@@ -110,7 +107,6 @@ const ContractPage = () => {
           reCreateContractMutate(contactId);
         },
         onError: (err) => {
-          console.log("erorr > ", err);
           messageApi.open({
             type: "error",
             content: "Không thể tạo hợp đồng lúc này! Hãy thử lại sau",
@@ -135,7 +131,6 @@ const ContractPage = () => {
       });
     },
     onError: (err) => {
-      console.log("erorr > ", err);
       messageApi.open({
         type: "error",
         content: "Không thể tạo hợp đồng lúc này! Hãy thử lại sau",
@@ -157,8 +152,6 @@ const ContractPage = () => {
   };
 
   const onFinish = (values) => {
-    console.log("Success:", values);
-
     const eventValues = setupEventValues(values);
 
     const contractValues = {
@@ -166,7 +159,6 @@ const ContractPage = () => {
       ...eventValues,
       paymentDate: momenttz().format("YYYY-MM-DD"),
     };
-    console.log("contractValues > ", contractValues);
 
     if (!hasContract) {
       createContractMutate({
@@ -182,7 +174,6 @@ const ContractPage = () => {
   };
 
   const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
     window.scrollTo({ top: window.innerHeight * 0.5, behavior: "smooth" });
 
     errorInfo?.errorFields?.map((item) =>

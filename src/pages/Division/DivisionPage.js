@@ -40,7 +40,6 @@ const DivisionPage = () => {
       },
     }
   );
-  console.log("data > ", data);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading: updateDivisionIsLoading } = useMutation(
@@ -116,8 +115,6 @@ const DivisionPage = () => {
   };
 
   const onFinish = (values) => {
-    console.log("Success:", values);
-
     const divisionId = form.getFieldValue("id");
     values = {
       ...values,

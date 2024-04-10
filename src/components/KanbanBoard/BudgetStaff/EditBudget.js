@@ -18,7 +18,6 @@ const EditBudget = ({
   const [fileList, setFileList] = useState();
 
   const onCloseModal = () => {
-    console.log("Close");
     setIsOpenEditBudget(false);
     setIsConfirmedBudget(false);
   };
@@ -79,10 +78,8 @@ const EditBudget = ({
       budgetsId: budgetsId,
     };
     if (values.urlImage === undefined || values.urlImage?.length === 0) {
-      console.log("NOOO FILE");
       updateBudgetMutate(budget);
     } else {
-      console.log("HAS FILE");
       const formData = new FormData();
       formData.append("file", fileList);
       formData.append("folderName", "event");

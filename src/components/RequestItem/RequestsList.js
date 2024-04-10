@@ -86,9 +86,7 @@ const RequestsList = ({
       onOk() {
         requestDeleteMutate(id);
       },
-      onCancel() {
-        console.log("Cancel");
-      },
+      onCancel() {},
     });
   };
 

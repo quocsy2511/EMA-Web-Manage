@@ -212,7 +212,7 @@ const EventStaffHomePage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  // console.log("listUsers > ", listUsers);
+
   const handleFilterEvent = (type) => {
     if (!listEventIsLoading && !listEventIsError) {
       if (type === "ALL") {

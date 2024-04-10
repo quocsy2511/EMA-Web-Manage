@@ -37,7 +37,6 @@ const PlanningPage = () => {
 
   const [chosenImportCSV, setChosenImportCSV] = useState();
   const [tableData, setTableData] = useState();
-  console.log("tableData > ", tableData);
 
   const mergeValue = new Set();
   const mergeImportValue = new Set();
@@ -82,7 +81,6 @@ const PlanningPage = () => {
     },
     refetchOnWindowFocus: false,
   });
-  console.log("planningData > ", planningData);
 
   const { mutate: importFileMutate, isLoading: importFileIsLoading } =
     useMutation((formData) => importCSV(formData), {
@@ -173,7 +171,6 @@ const PlanningPage = () => {
           },
         }
       );
-      console.log("response > ", response);
 
       const a = document.createElement("a");
       a.href = response?.data?.result;
@@ -189,7 +186,6 @@ const PlanningPage = () => {
         content: "Không thể tải tệp tin lúc này! Hãy thử lại sau",
       });
     } finally {
-      console.log("Finissh");
     }
   };
 
@@ -204,7 +200,6 @@ const PlanningPage = () => {
           responseType: "blob",
         }
       );
-      console.log("response > ", response);
 
       const url = window.URL.createObjectURL(response.data);
       const a = document.createElement("a");
@@ -221,16 +216,13 @@ const PlanningPage = () => {
         content: "Không thể tải tệp tin lúc này! Hãy thử lại sau",
       });
     } finally {
-      console.log("Finissh");
     }
   };
 
   const handlePostPlan = () => {
     if (!planningData?.length) {
-      console.log("postPlanMutate");
       postPlanMutate(tableData?.payload);
     } else {
-      console.log("replacePlanMutate");
       replacePlanMutate(tableData?.payload);
     }
   };

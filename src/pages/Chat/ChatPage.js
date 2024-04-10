@@ -192,13 +192,10 @@ const GroupChatItem = memo(
 const ChatPage = () => {
   const dispatch = useDispatch();
   const chats = useSelector((state) => state.chats);
-  console.log("chats > ", chats);
   const chatDetail = useSelector((state) => state.chatDetail);
-  console.log("chatDetail > ", chatDetail);
   const { onlineUsers, offlineUsers } = useSelector(
     (state) => state.onlineUser
   );
-  // console.log("onlineUsers > ", onlineUsers);
 
   const { email: managerEmail, id: managerId } =
     useRouteLoaderData("manager") || {};
@@ -606,10 +603,9 @@ const ChatPage = () => {
                   </div>
 
                   {/* Header Option */}
-                  <div className="flex items-center space-x-3">
+                  {/* <div className="flex items-center space-x-3">
                     <motion.div
                       onClick={() => {
-                        console.log("Video call");
                         // handleOpenNewRoom(true);
                       }}
                       whileHover={{ scale: 1.1 }}
@@ -619,7 +615,6 @@ const ChatPage = () => {
                     </motion.div>
                     <motion.div
                       onClick={() => {
-                        console.log("Call");
                         handleOpenNewRoom(false);
                       }}
                       whileHover={{ scale: 1.1 }}
@@ -628,15 +623,13 @@ const ChatPage = () => {
                       <IoCall className="text-xl text-slate-500" />
                     </motion.div>
                     <motion.div
-                      onClick={() => {
-                        console.log("Hamburger");
-                      }}
+                      onClick={() => {}}
                       whileHover={{ scale: 1.1 }}
                       className="flex justify-center items-center bg-white w-10 h-10 rounded-full shadow-md hover:shadow-lg transition-shadow shadow-black/20 hover:shadow-black/25 cursor-pointer"
                     >
                       <HiOutlineDotsVertical className="text-xl text-slate-500" />
                     </motion.div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 

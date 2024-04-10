@@ -146,12 +146,13 @@ const EventSubTaskPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("big task: ", tasks);
 
   useEffect(() => {
-    console.log("location nef");
     if (subtaskId) {
-      if (tasks) {
+      if (
+        tasks &&
+        tasks?.subTask?.find((subtask) => subtask?.id === subtaskId)
+      ) {
         setSelectedSubTask(
           tasks?.subTask?.find((subtask) => subtask?.id === subtaskId)
         );
@@ -176,7 +177,6 @@ const EventSubTaskPage = () => {
       });
     },
   });
-  console.log("comments > ", comments);
 
   const {
     mutate: updateEventStatusMutate,
@@ -215,7 +215,10 @@ const EventSubTaskPage = () => {
         isSubTask: true,
         taskId: tasks?.id,
         taskName: tasks?.title,
-        taskResponsorId: tasks?.assignTasks?.[0]?.user?.id,
+        // taskResponsorId: tasks?.assignTasks?.[0]?.user?.id,
+        taskResponsorId: tasks?.assignTasks?.find(
+          (user) => user?.status === "active"
+        )?.user?.id,
         item: {
           itemId: tasks?.item?.id,
           itemPercentage: tasks?.item?.percentage,
@@ -234,7 +237,10 @@ const EventSubTaskPage = () => {
       ],
       priority: tasks?.priority,
       desc: tasks?.description,
-      assignee: tasks?.assignTasks?.map((user) => user?.user?.id),
+      // assignee: tasks?.assignTasks?.map((user) => user?.user?.id),
+      assignee: [
+        tasks?.assignTasks?.find((user) => user?.status === "active")?.user?.id,
+      ],
     };
 
     navigate(`/manager/event/${eventId}/task`, {
@@ -445,7 +451,6 @@ const EventSubTaskPage = () => {
               <p className="text-sm">
                 Chịu trách nhiệm bởi{" "}
                 <span className="font-semibold">
-                  {/* {tasks?.assignTasks?.[0]?.user?.profile?.fullName} */}
                   {
                     tasks?.assignTasks?.find(
                       (user) => user?.isLeader && user?.status === "active"
@@ -464,7 +469,6 @@ const EventSubTaskPage = () => {
 
           <div className="flex-1 flex justify-end space-x-8">
             <motion.div
-              // whileHover={{ y: -2 }}
               className={`flex items-center px-3 ${statusColor} border-2 ${statusBorder} rounded-full truncate cursor-pointer`}
             >
               <Dropdown
@@ -478,19 +482,19 @@ const EventSubTaskPage = () => {
                       type: "group",
                       label: "Cập Nhật Trạng Thái",
                       children: [
-                        {
-                          key: "PENDING",
-                          label: (
-                            <p
-                              className="text-gray-400"
-                              onClick={() => handleCheckUpdateStatus("PENDING")}
-                            >
-                              Đang chuẩn bị
-                            </p>
-                          ),
-                          disabled: tasks?.status === "PENDING",
-                        },
-                        {
+                        // {
+                        //   key: "PENDING",
+                        //   label: (
+                        //     <p
+                        //       className="text-gray-400"
+                        //       onClick={() => handleCheckUpdateStatus("PENDING")}
+                        //     >
+                        //       Đang chuẩn bị
+                        //     </p>
+                        //   ),
+                        //   disabled: tasks?.status === "PENDING",
+                        // },
+                        tasks?.status === "CANCEL" && {
                           key: "PROCESSING",
                           label: (
                             <p
@@ -504,18 +508,18 @@ const EventSubTaskPage = () => {
                           ),
                           disabled: tasks?.status === "PROCESSING",
                         },
-                        {
-                          key: "DONE",
-                          label: (
-                            <p
-                              className="text-green-500"
-                              onClick={() => handleCheckUpdateStatus("DONE")}
-                            >
-                              Hoàn thành
-                            </p>
-                          ),
-                          disabled: tasks?.status === "DONE",
-                        },
+                        // {
+                        //   key: "DONE",
+                        //   label: (
+                        //     <p
+                        //       className="text-green-500"
+                        //       onClick={() => handleCheckUpdateStatus("DONE")}
+                        //     >
+                        //       Hoàn thành
+                        //     </p>
+                        //   ),
+                        //   disabled: tasks?.status === "DONE",
+                        // },
                         {
                           key: "CONFIRM",
                           label: (
@@ -533,25 +537,28 @@ const EventSubTaskPage = () => {
                           label: (
                             <p
                               className="text-red-500"
-                              onClick={() => handleCheckUpdateStatus("CANCEL")}
+                              onClick={() =>
+                                tasks?.status !== "CANCEL" &&
+                                handleCheckUpdateStatus("CANCEL")
+                              }
                             >
                               Hủy bỏ
                             </p>
                           ),
                           disabled: tasks?.status === "CANCEL",
                         },
-                        {
-                          key: "OVERDUE",
-                          label: (
-                            <p
-                              className="text-orange-500"
-                              onClick={() => handleCheckUpdateStatus("OVERDUE")}
-                            >
-                              Quá hạn
-                            </p>
-                          ),
-                          disabled: tasks?.status === "OVERDUE",
-                        },
+                        // {
+                        //   key: "OVERDUE",
+                        //   label: (
+                        //     <p
+                        //       className="text-orange-500"
+                        //       onClick={() => handleCheckUpdateStatus("OVERDUE")}
+                        //     >
+                        //       Quá hạn
+                        //     </p>
+                        //   ),
+                        //   disabled: tasks?.status === "OVERDUE",
+                        // },
                       ],
                     },
                   ],
@@ -573,7 +580,6 @@ const EventSubTaskPage = () => {
                   </Tooltip>
                 </Popconfirm>
               </Dropdown>
-              {/* <p className="text-base font-medium">{status}</p> */}
             </motion.div>
 
             {moment(tasks?.startDate).isSame(moment(tasks?.endDate), "day") ? (
@@ -638,7 +644,10 @@ const EventSubTaskPage = () => {
           <motion.div whileHover={{ y: -5 }}>
             <Avatar
               size={40}
-              src={tasks?.assignTasks?.[0]?.user?.profile?.avatar}
+              src={
+                tasks?.assignTasks?.find((user) => user?.status === "active")
+                  ?.user?.profile?.avatar
+              }
             />
           </motion.div>
 

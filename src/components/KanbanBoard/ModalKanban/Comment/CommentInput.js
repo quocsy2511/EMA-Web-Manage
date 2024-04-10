@@ -77,10 +77,7 @@ const CommentInput = ({ staff, taskSelected }) => {
           ],
           ...comment,
         };
-        console.log(
-          "🚀 ~ file: CommentInput.js:73 ~ CommentInput ~ variables.comment:",
-          variables.comment
-        );
+
         mutate(variables.comment);
       },
       onError: () => {
@@ -93,15 +90,11 @@ const CommentInput = ({ staff, taskSelected }) => {
   );
 
   const onFinish = (values) => {
-    console.log("🚀 ~ onFinish ~ values:", values);
     values = { ...values, taskID: taskId };
     if (!values.fileUrl || values.fileUrl?.length === 0) {
-      console.log("NOOO FILE");
       const { fileUrl, ...restValue } = values;
-      console.log("🚀 ~ onFinish ~ restValue:", restValue);
       mutate(restValue);
     } else {
-      console.log("HAS FILE");
       const formData = new FormData();
       formData.append("file", fileList);
       formData.append("folderName", "comment");

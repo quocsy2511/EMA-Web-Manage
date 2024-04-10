@@ -14,14 +14,12 @@ const EmployeeSelected = ({
   taskSelected,
   setIsModalAssigneeOpen,
 }) => {
-  // console.log("🚀 ~ EmployeeSelected ~ assignTasks:", assignTasks);
   const taskID = taskSelected?.id;
   const [selectedLeader, setSelectedLeader] = useState("");
   const queryClient = useQueryClient();
   const [assignee, setAssignee] = useState(
     assignTasks?.map((item) => item.user?.id)
   );
-  // console.log("🚀 ~ EmployeeSelected ~ assignee:", assignee);
   const membersInTask = assignTasks
     ?.filter((user) => user.status === "active")
     ?.map((item) => item.user?.id);
@@ -34,9 +32,7 @@ const EmployeeSelected = ({
     (option?.label?.props?.label ?? "")
       .toLowerCase()
       .includes(input.toLowerCase());
-  const onSearch = (value) => {
-    console.log("search:", value);
-  };
+  const onSearch = (value) => {};
 
   const {
     data: employees,
@@ -73,7 +69,6 @@ const EmployeeSelected = ({
     };
 
     const handlerCloseTag = (value) => {
-      // console.log("🚀 ~ handlerCloseTag ~ value:", value);
       if (value && value === selectedLeader?.id) {
         setSelectedLeader("");
       }
@@ -155,7 +150,6 @@ const EmployeeSelected = ({
   });
 
   const handleChangeMember = (value) => {
-    // console.log("🚀 ~ handleChangeMember ~ value:", value);
     setAssignee(value);
   };
 

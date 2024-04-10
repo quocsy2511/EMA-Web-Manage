@@ -49,8 +49,6 @@ const CardSetting = ({ task }) => {
   );
 
   const onChangeChecked = (checked, value) => {
-    // console.log("🚀 ~ onChangeChecked ~ task:", value);
-    // console.log(`switch to ${checked}`);
     if (checked === false && value) {
       UpdateStatusMutate({ taskID: value?.id, status: "CANCEL" });
     } else {
@@ -58,7 +56,6 @@ const CardSetting = ({ task }) => {
     }
   };
   const onFinish = (values) => {
-    // console.log("🚀 ~ onFinish ~ values:", values);
     const data = {
       title: values?.taskName,
       eventID: null,
@@ -71,7 +68,6 @@ const CardSetting = ({ task }) => {
       effort: null,
       taskID: task?.id,
     };
-    console.log("🚀 ~ onFinish ~ data:", data);
     updateTemp(data);
   };
 

@@ -12,7 +12,6 @@ const BudgetRequestModal = ({
   selectTransactionTask,
   setActiveKey,
 }) => {
-  console.log("🚀 ~ title:", title);
   const onCloseModal = () => {
     setIsOpenRequestModal(false);
   };

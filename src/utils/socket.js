@@ -57,7 +57,6 @@ export const socketListener = (dispatch) => {
 
   // Get online / offline user
   socket.on("onlineGroupUsersReceived", (data) => {
-    // console.log("online user > ", data);
 
     dispatch(
       handleUpdateUsers({

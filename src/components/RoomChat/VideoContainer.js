@@ -27,7 +27,6 @@ const Video = ({ stream, isLocalStream }) => {
 
 const VideoContainer = () => {
   const room = useSelector((state) => state.room);
-  console.log("room >> ", room);
 
   return (
     <div className="h-[85%] w-full flex flex-wrap">

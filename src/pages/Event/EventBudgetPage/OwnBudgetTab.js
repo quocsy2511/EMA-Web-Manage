@@ -97,7 +97,6 @@ const OwnBudgetTab = ({
   ownBudgetIsError,
   messageApi,
 }) => {
-  console.log("ownBudget > ", ownBudget);
   const eventId = useParams().eventId;
 
   const mergeValue = new Set();
@@ -413,7 +412,9 @@ const OwnBudgetTab = ({
                   // width: "25%",
                   align: "center",
                   render: (text) => (
-                    <p className="">{momenttz(text).format("DD-MM-YYYY HH:ss")}</p>
+                    <p className="">
+                      {momenttz(text).format("DD-MM-YYYY HH:ss")}
+                    </p>
                   ),
                 },
                 {

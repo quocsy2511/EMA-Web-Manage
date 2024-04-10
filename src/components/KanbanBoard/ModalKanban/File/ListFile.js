@@ -66,9 +66,7 @@ const ListFile = ({
         setUpdateFileList(newListFile);
         deleteFileTaskMutate({ taskId: taskID, data });
       },
-      onCancel() {
-        console.log("Cancel");
-      },
+      onCancel() {},
     });
   };
 

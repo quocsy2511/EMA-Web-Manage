@@ -20,7 +20,6 @@ const ContractTab = ({ contracts, contractsIsLoading, contractsIsError }) => {
   const navigate = useNavigate();
 
   const handleSelectContract = (value) => {
-    console.log("🚀 ~ handleSelectContract ~ value:", value);
     setIsContract(true);
     setSelectContract(value);
   };

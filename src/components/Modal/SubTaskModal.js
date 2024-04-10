@@ -32,12 +32,9 @@ const SubTaskModal = ({
   selectedSubTask,
   resetTaskRedirect,
 }) => {
-  console.log("selectedSubTask > ", selectedSubTask);
-
   const assignUser = selectedSubTask?.assignTasks?.filter(
     (user) => user?.status === "active"
   );
-  console.log("assignUser > ", assignUser);
 
   const {
     data: comments,

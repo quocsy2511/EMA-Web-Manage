@@ -58,7 +58,6 @@ const PersonnelPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("DATA: ", data);
 
   const {
     data: divisionsData,
@@ -72,7 +71,6 @@ const PersonnelPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("divisionsData: ", divisionsData);
 
   const {
     data: divisionsWithoutStaff,
@@ -86,11 +84,9 @@ const PersonnelPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("divisionsWithoutStaff: ", divisionsWithoutStaff);
 
   const { data: roles } = useQuery(["roles"], getRoles, {
     select: (data) => {
-      console.log("🚀 ~ PersonnelPage ~ data:", data);
       return data
         ?.map((role) => ({
           value: role?.id,
@@ -100,7 +96,6 @@ const PersonnelPage = () => {
     },
     refetchOnWindowFocus: false,
   });
-  console.log("🚀 ~ PersonnelPage ~ roles:", roles);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading: updateUserIsLoading } = useMutation(
@@ -177,7 +172,6 @@ const PersonnelPage = () => {
 
   // Submit form
   const onFinish = (values) => {
-    console.log("Success:", values);
     const userId = form.getFieldValue("id");
     const avatar = form.getFieldValue("avatar");
 
@@ -200,7 +194,6 @@ const PersonnelPage = () => {
       roleId: values?.roleId,
     };
     const { divisionName, role, ...payload } = tranformValues;
-    console.log("payload: ", payload);
 
     mutate(payload);
   };

@@ -108,9 +108,7 @@ const EventStaffPage = () => {
     {
       select: (data) => {
         if (data && Array.isArray(data)) {
-          // console.log("🚀 ~ EventStaffPage ~ data:", data);
           const taskParents = data?.filter((task) => task?.parent !== null);
-          // console.log("🚀 ~ EventStaffPage ~ taskParents:", taskParents);
           const formatDate = taskParents?.map(({ ...item }) => {
             item.startDate = moment(item?.startDate).format("YYYY-MM-DD");
             item.endDate = moment(item?.endDate).format("YYYY-MM-DD");
@@ -163,10 +161,6 @@ const EventStaffPage = () => {
         })
         .filter((task) => task !== null);
 
-      console.log(
-        "🚀 ~ updateListTaskParents ~ filteredTaskParents:",
-        filteredTaskParents
-      );
       return filteredTaskParents;
     }
 

@@ -46,10 +46,6 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
         setIsOpenNewRequest(false);
       },
       onError: (data) => {
-        console.log(
-          "🚀 ~ file: NewRequestModal.js:49 ~ useMutation ~ data:",
-          data.response.data.message
-        );
         if (data?.response?.data?.message === "Not enough vacation days") {
           message.open({
             type: "error",
@@ -77,20 +73,14 @@ const NewRequestModal = ({ isOpenNewRequest, setIsOpenNewRequest }) => {
         ...request,
         isFull: "false",
       };
-      console.log(
-        "🚀 ~ file: NewRequestModal.js:69 ~ onFinish ~ newRequest 1:",
-        newRequest
-      );
+
       submitFormRequest(newRequest);
     } else {
       const newRequest = {
         ...request,
         isPM: "false",
       };
-      console.log(
-        "🚀 ~ file: NewRequestModal.js:77 ~ onFinish ~ newRequest 2:",
-        newRequest
-      );
+
       submitFormRequest(newRequest);
     }
   };

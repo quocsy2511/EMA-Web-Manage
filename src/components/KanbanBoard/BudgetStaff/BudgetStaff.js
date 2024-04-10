@@ -15,11 +15,9 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
   const [selectBudget, setSelectBudget] = useState("");
   const location = useLocation();
   const { parentTaskId, contractId } = location.state ?? {};
-  console.log("🚀 ~ BudgetStaff ~ contractId:", contractId);
   const staffId = useRouteLoaderData("staff")?.id;
   const [isOpenTransactionModal, setIsOpenTransactionModal] = useState(false);
   const [selectItemTask, setSelectItemTask] = useState("");
-  console.log("🚀 ~ BudgetStaff ~ selectItemTask:", selectItemTask);
   const [isOpenRequestModal, setIsOpenRequestModal] = useState(false);
   const [selectTransactionTask, setSelectTransactionTask] = useState("");
   const [activeKey, setActiveKey] = useState("task");
@@ -35,10 +33,6 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
         eventID: selectEvent?.id,
       }),
     {
-      select: (data) => {
-        // console.log("🚀 ~ BudgetStaff ~ data:", data);
-        return data;
-      },
       refetchOnWindowFocus: false,
       enabled: !!selectEvent?.id,
     }
@@ -53,16 +47,10 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
     ["budgetItem", selectItemBudgetId],
     () => getBudgetItem(selectItemBudgetId),
     {
-      select: (data) => {
-        // console.log("🚀 ~ BudgetStaff ~ data:", data);
-        return data;
-      },
       refetchOnWindowFocus: false,
       enabled: !!selectItemBudgetId,
     }
   );
-
-  // console.log("budgetItem", budgetItem);
 
   useEffect(() => {
     if (!isLoadingBudgets && !isErrorBudgets) {

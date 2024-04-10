@@ -60,7 +60,6 @@ const DrawerContainer = memo(
         refetchOnWindowFocus: false,
       }
     );
-    console.log("templateTask > ", templateTask);
 
     return (
       <Drawer
@@ -131,7 +130,6 @@ const NewTaskModal = ({
   setAddNewTaskTemplate,
   setIsHideHeaderEvent,
 }) => {
-  console.log("🚀 ~ TaskParent:", TaskParent);
   const eventID = TaskParent?.eventDivision?.event?.id;
   const itemId = TaskParent?.item?.id;
   const { RangePicker } = DatePicker;
@@ -154,7 +152,6 @@ const NewTaskModal = ({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
-    console.log("selectedTaskTemplate > ", selectedTaskTemplate);
     if (selectedTaskTemplate) {
       const parseDes =
         selectedTaskTemplate?.description?.ops?.[0].insert.replace(".\n", "");
@@ -247,7 +244,6 @@ const NewTaskModal = ({
           ...task,
         };
 
-        console.log("🚀 ~ useMutation ~ variables.task:", variables.task);
         submitFormTask(variables.task);
       },
       onError: () => {
@@ -264,7 +260,6 @@ const NewTaskModal = ({
   };
 
   const onChangeDate = (value, dateString) => {
-    console.log("🚀 ~ onChangeDate ~ dateString:", dateString);
     if (dateString?.length > 0) {
       // Chuyển đổi thành định dạng ISO 8601
       const formatStart = moment(dateString?.[0], "DD-MM-YYYY").format(
@@ -304,7 +299,6 @@ const NewTaskModal = ({
     const { closable, onClose } = props;
 
     const handlerCloseTag = (value) => {
-      console.log("🚀 ~ handlerCloseTag ~ value:", value);
       if (value && value === selectedLeader?.id) {
         setSelectedLeader("");
       }
@@ -317,7 +311,6 @@ const NewTaskModal = ({
 
     let matchedUsers;
     if (!isLoadingEmployees && !selectedLeader) {
-      // console.log("1");
       matchedUsers = assignee.map((id, index) => {
         const user = employees.find((employee) => employee.id === id);
         const isLeader = index === 0; //xem có phải index đầu không thì true
@@ -326,7 +319,6 @@ const NewTaskModal = ({
       });
     } else {
       matchedUsers = assignee.map((id, index) => {
-        // console.log("2");
         const user = employees.find((employee) => employee.id === id);
         const isLeader = id === selectedLeader?.id; //xem có phải id giống không thì true
         const data = { ...user, isLeader };
@@ -396,12 +388,9 @@ const NewTaskModal = ({
       desc: JSON.stringify(values.desc.ops),
     };
 
-    console.log("🚀 ~ onFinish ~ task:", task);
     if (values.fileUrl === undefined || values.fileUrl?.length === 0) {
-      console.log("NOOO FILE");
       submitFormTask(task);
     } else {
-      console.log("HAS FILE");
       const formData = new FormData();
       formData.append("file", fileList);
       formData.append("folderName", "task");

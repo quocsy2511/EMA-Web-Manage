@@ -72,7 +72,6 @@ const DepartmentStaffPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  // console.log("🚀 ~ DepartmentStaffPage ~ users:", data);
 
   const {
     data: roleEmployee,
@@ -154,7 +153,6 @@ const DepartmentStaffPage = () => {
   });
 
   const handleDeleteAction = (record) => {
-    // console.log("🚀 ~ handleDeleteAction ~ record:", record);
     updateUserStatusMutate({ userId: record?.id, status: "INACTIVE" });
   };
 
@@ -194,7 +192,6 @@ const DepartmentStaffPage = () => {
     }
   );
   const onFinish = (values) => {
-    // console.log("Success:", values);
     const userId = form.getFieldValue("id");
     const avatar = form.getFieldValue("avatar");
     const { role, ...data } = values;
@@ -206,7 +203,6 @@ const DepartmentStaffPage = () => {
       divisionId,
       roleId: roleEmployee?.id,
     };
-    // console.log("🚀 ~ onFinish ~ updateData:", updateData);
     mutate(updateData);
   };
   const getColumnSearchProps = (dataIndex) => ({

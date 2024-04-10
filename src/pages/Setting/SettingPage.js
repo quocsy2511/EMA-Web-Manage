@@ -34,7 +34,6 @@ const SettingPage = () => {
     },
     refetchOnWindowFocus: false,
   });
-  console.log("🚀 ~ SettingPage ~ templateEvent:", templateEvent);
 
   const {
     data: templateTask,
@@ -59,7 +58,6 @@ const SettingPage = () => {
   );
 
   const handleChangeEventType = (value) => {
-    // console.log("🚀 ~ handleChangeEventType ~ value:", value);
     if (value) {
       const eventTypeFind = eventType?.find((item) => item?.id === value);
       setSelectTypeEvent(eventTypeFind?.typeName);

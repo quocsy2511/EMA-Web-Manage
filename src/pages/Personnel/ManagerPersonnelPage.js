@@ -58,7 +58,6 @@ const ManagerPersonnelPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("DATA: ", data);
 
   const {
     data: divisionsData,
@@ -72,7 +71,6 @@ const ManagerPersonnelPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("divisionsData: ", divisionsData);
 
   const {
     data: divisionsWithoutStaff,
@@ -86,11 +84,9 @@ const ManagerPersonnelPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("divisionsWithoutStaff: ", divisionsWithoutStaff);
 
   const { data: roles } = useQuery(["roles"], getRoles, {
     select: (data) => {
-      console.log("🚀 ~ PersonnelPage ~ data:", data);
       return data
         ?.map((role) => ({
           value: role?.id,
@@ -105,7 +101,6 @@ const ManagerPersonnelPage = () => {
     },
     refetchOnWindowFocus: false,
   });
-  console.log("🚀 ~ PersonnelPage ~ roles:", roles);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading: updateUserIsLoading } = useMutation(
@@ -180,12 +175,9 @@ const ManagerPersonnelPage = () => {
   };
 
   const onFinish = (values) => {
-    console.log("Success:", values);
     // const userId = form.getFieldValue("id");
     // const avatar = form.getFieldValue("avatar");
-
     // const dataDivisionForm = form.getFieldValue("divisionName");
-
     // const divisionId = divisionsData?.filter((item) => {
     //   if (
     //     dataDivisionForm === item?.id ||
@@ -194,7 +186,6 @@ const ManagerPersonnelPage = () => {
     //     return item;
     //   }
     // })[0].id;
-
     // const tranformValues = {
     //   ...values,
     //   userId,
@@ -203,8 +194,6 @@ const ManagerPersonnelPage = () => {
     //   roleId: values?.roleId,
     // };
     // const { divisionName, role, ...payload } = tranformValues;
-    // console.log("payload: ", payload);
-
     // mutate(payload);
   };
 
@@ -652,20 +641,11 @@ const ManagerPersonnelPage = () => {
     children,
     ...restProps
   }) => {
-    // Setup input field type
-    // console.log("dataIndex > ", dataIndex);
-    // console.log("record > ", record);
-
-    // form.setFieldsValue({
-    //   role: record?.roleId,
-    // });
-    // console.log("form.getFieldValue(role) > ", form.getFieldValue("role"));
     const role = roles?.find(
       (role) =>
         role?.value === form.getFieldValue("role") ||
         role?.label === form.getFieldValue("role")
     );
-    // console.log("role > ", role);
 
     setDivisionMode(role?.label === TEXT.STAFF ? 2 : 1);
 

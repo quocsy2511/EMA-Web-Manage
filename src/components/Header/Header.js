@@ -31,23 +31,6 @@ const NotiLabel = ({
   staff,
   seenNotificationMutate,
 }) => {
-  console.log("🚀 ~ item:", item);
-  // item = {
-  //   id: "43b440bf-70ae-45a4-b162-55ea71e7e590",
-  //   title: "Đã có một comment mới ",
-  //   content: "Tài Trương đã comment vào Thư mời (dạng PDF)",
-  //   type: "COMMENT",
-  //   status: 1,
-  //   eventID: null,
-  //   commonId: "883dc923-3047-477b-b8a5-ae742e1ba7aa",
-  //   parentTaskId: null,
-  //   contractId: null,
-  //   avatarSender:
-  //     "https://i0.wp.com/www.muscleandfitness.com/wp-content/uploads/2015/03/John_Cena.jpg?quality=86&strip=all",
-  //   createdAt: "2024-03-28T03:05:51.883Z",
-  //   isRead: 0,
-  //   readAt: null,
-  // };
   let time;
 
   const currentDate = momenttz();
@@ -272,7 +255,6 @@ const NotiLabel = ({
 const Header = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("location > ", location);
   const manager = useRouteLoaderData("manager");
   const staff = useRouteLoaderData("staff");
   const administrator = useRouteLoaderData("administrator");
@@ -296,7 +278,6 @@ const Header = ({ collapsed, setCollapsed }) => {
       enabled: !administrator,
     }
   );
-  console.log("notifications: ", notifications);
 
   const queryClient = useQueryClient();
   const { mutate: seenNotificationMutate } = useMutation(

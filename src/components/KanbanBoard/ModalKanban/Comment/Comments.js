@@ -87,7 +87,6 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
 
   const onFinish = (values) => {
     if (!values.fileUrl || values.fileUrl?.length === 0) {
-      console.log("NOOO FILE");
       const oldFile = commentFiles?.map((item) => {
         return {
           fileName: item.fileName,
@@ -101,7 +100,6 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
       };
       updateCommentMutate(data);
     } else {
-      console.log("HAS FILE");
       const formData = new FormData();
       formData.append("file", fileList);
       formData.append("folderName", "comment");
@@ -134,9 +132,7 @@ const Comments = ({ comment, taskSelected, disableUpdate }) => {
           setCommentFiles([]);
         }
       },
-      onCancel() {
-        console.log("Cancel");
-      },
+      onCancel() {},
     });
   };
 

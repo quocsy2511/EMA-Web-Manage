@@ -22,10 +22,7 @@ const KanbanBoard = ({
   // const dispatch = useDispatch();
   const location = useLocation();
   const { taskId } = location.state ?? {};
-  console.log("🚀 ~ taskId:", taskId);
 
-  // const notification = useSelector((state) => state.redirection);
-  // console.log("🚀 ~ notification:", notification);
   const [isTaskParent, setIsTaskParent] = useState(false);
   const [isOpenTaskModal, setIsOpenTaskModal] = useState(false);
   const [taskSelected, setTaskSelected] = useState(null);

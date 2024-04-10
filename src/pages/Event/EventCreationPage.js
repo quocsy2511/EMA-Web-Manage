@@ -55,7 +55,6 @@ const DefaultTemplateTask = memo(
     handleUpdateDesc,
     handleUpdatePercentage,
   }) => {
-    // console.log("task > ", task);
     const [descText, setDescText] = useState();
 
     useEffect(() => {
@@ -180,14 +179,12 @@ const DefaultTemplateTask = memo(
                   placeholder="Outlined"
                   addonAfter={<LuPercent />}
                   onChange={(value) => {
-                    console.log("change > ", value);
                     handleUpdatePercentage(task?.itemId, value);
                   }}
                   min={70}
                   max={90}
                   step={5}
                   onStep={(value) => {
-                    console.log("step > ", value);
                     handleUpdatePercentage(task?.itemId, value);
                   }}
                 />
@@ -247,7 +244,6 @@ const EventCreationPage = () => {
   const [selectTemplateTasks, setSelectTemplateTasks] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [taskList, setTaskList] = useState([]);
-  console.log("taskList > ", taskList);
   const [selectedDivision, setSelectedDivision] = useState([]);
 
   const [form] = Form.useForm();
@@ -288,7 +284,6 @@ const EventCreationPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  // console.log("divisions > ", divisions);
 
   const {
     data: planningData,
@@ -313,7 +308,6 @@ const EventCreationPage = () => {
     },
     refetchOnWindowFocus: false,
   });
-  // console.log("planningData > ", planningData);
 
   useEffect(() => {
     planningData && setTaskList(planningData);
@@ -396,8 +390,6 @@ const EventCreationPage = () => {
   };
 
   const onFinish = (values) => {
-    console.log("Success:", values);
-
     if (current === 0) {
       setCurrent((prev) => prev + 1);
     } else {
@@ -412,9 +404,7 @@ const EventCreationPage = () => {
     }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
-  };
+  const onFinishFailed = (errorInfo) => {};
 
   const handleUpdateDesc = (itemId, desc) => {
     setTaskList((prev) =>

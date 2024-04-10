@@ -29,7 +29,6 @@ const ForgotPassWordModal = ({
   );
 
   const onFinish = (values) => {
-    console.log("🚀 ~ onFinish ~ values:", values);
     forgotPasswordMutate(values);
   };
   return (

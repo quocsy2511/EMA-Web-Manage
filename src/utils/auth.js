@@ -17,7 +17,6 @@ export function getAuthToken() {
   const decodedToken = jwt(token);
   const expTime = decodedToken.exp;
   const remainedTime = calcExpirationTime(expTime);
-  // console.log("remainedTime: ", remainedTime);
 
   if (remainedTime < 0) {
     localStorage.removeItem("token");
@@ -29,7 +28,6 @@ export function getAuthToken() {
 
 export function loginLoader() {
   const token = getAuthToken();
-  console.log("loginLoader token: ", token);
 
   if (!token || token === "EXPIRED") return null;
   else if (token.role === TEXT.MANAGER) return redirect("/manager");
@@ -43,7 +41,6 @@ export function checkAuthLoader(params) {
   const token = getAuthToken();
 
   const pathRole = params.request.url.split(HOST)[1].split("/")[1];
-  // console.log("🚀 ~ checkAuthLoader ~ pathRole:", pathRole);
   const role =
     token.role === TEXT.MANAGER
       ? "manager"

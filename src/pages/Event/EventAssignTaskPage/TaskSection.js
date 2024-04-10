@@ -50,7 +50,6 @@ const StatusRender = memo(({ bg, text }) => (
 
 const DrawerContainer = memo(
   ({ isDrawerOpen, setIsDrawerOpen, getColor, divisionChecking }) => {
-    console.log("divisionChecking > ", divisionChecking);
     const mapPriory = {
       HIGH: 1,
       MEDIUM: 2,
@@ -252,9 +251,6 @@ const TaskSection = ({
   updateDataDivision,
   setHasBusyUser,
 }) => {
-  console.log("updateDataDivision > ", updateDataDivision);
-  console.log("isSelectDate > ", isSelectDate);
-  
   const [selectedId, setSelectedId] = useState();
   const [divisionChecking, setDivisionChecking] = useState();
   const [selectedDate, setSelectedDate] = useState();
@@ -301,7 +297,6 @@ const TaskSection = ({
       enabled: !!selectedDate,
     }
   );
-  console.log("divisions > ", divisions);
 
   const handleSelectDivision = (division) => {
     if (
@@ -534,8 +529,6 @@ const TaskSection = ({
                         }
                       }
                     });
-
-                    // console.log("renderList > ", renderList);
 
                     if (selectedId)
                       renderList = renderList?.filter(

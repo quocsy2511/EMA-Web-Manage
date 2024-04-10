@@ -77,7 +77,6 @@ const NewTaskModalTemplate = ({
   };
 
   const onCloseModal = () => {
-    console.log("Close");
     setAddNewTaskTemplate(false);
   };
   const onChangeDate = (value, dateString) => {
@@ -87,12 +86,7 @@ const NewTaskModalTemplate = ({
     setStartDate(isoStartDate);
     setEndDate(isoEndDate);
   };
-  const onFinish = (values) => {
-    console.log(
-      "🚀 ~ file: NewTaskModalTemplate.js:16 ~ onFinish ~ values:",
-      values
-    );
-  };
+  const onFinish = (values) => {};
   return (
     <Modal
       title={`Danh sách công việc - ${title}`}

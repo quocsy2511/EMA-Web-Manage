@@ -20,14 +20,12 @@ const BudgetTransactionModal = ({
   setSelectTransactionTask = { setSelectTransactionTask },
 }) => {
   const { transactions } = selectItemTask;
-  console.log("🚀 ~ selectItemTask:", selectItemTask);
   const queryClient = useQueryClient();
   const [isRejectRequest, setIsRejectRequest] = useState(false);
   const [selectRequest, setSelectRequest] = useState("");
   const listStatus = ["PENDING", "ACCEPTED", "SUCCESS", "REJECTED"];
 
   const onCloseModal = () => {
-    console.log("Click");
     setIsOpenTransactionModal(false);
   };
   const sortTransactions = (transactions, listStatus) => {
@@ -40,7 +38,6 @@ const BudgetTransactionModal = ({
     });
   };
   const sortedTransactions = sortTransactions(transactions, listStatus);
-  // console.log("🚀 ~ sortedTransactions:", sortedTransactions);
   const handleSelectRequest = (value) => {
     setSelectRequest(value);
     setIsRejectRequest(true);
@@ -102,7 +99,6 @@ const BudgetTransactionModal = ({
   );
 
   const confirm = (value, type) => {
-    // console.log("🚀 ~ confirm ~ type:", type);
     acceptMutate({ transactionId: value?.id, status: type });
   };
 
@@ -115,7 +111,6 @@ const BudgetTransactionModal = ({
   };
 
   const onFinish = (value) => {
-    // console.log("🚀 ~ onFinish ~ value:", value);
     rejectMutate({
       transactionId: selectRequest?.id,
       status: "REJECTED",

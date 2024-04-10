@@ -10,52 +10,7 @@ const AssignmentHistoryModal = ({
   setIsModalOpen,
   assignTasks,
 }) => {
-  console.log("assignTasks > ", assignTasks);
-
-  // const renderTimeline = assignTasks?.reduce((result, item) => {
-  //   console.log("resultresult > ", result);
-  //   if (!result?.length) {
-  //     console.log("Add first", [
-  //       {
-  //         label: momenttz(item?.createdAt).format("DD-MM-YYYY"),
-  //         contentList: [item],
-  //       },
-  //     ]);
-  //     return [
-  //       {
-  //         label: momenttz(item?.createdAt).format("DD-MM-YYYY"),
-  //         contentList: [item],
-  //       },
-  //     ];
-  //   } else {
-  //     console.log("find last label  > ", result?.[result?.length - 1]?.label);
-  //     if (
-  //       momenttz(item?.createdAt).format("DD-MM-YYYY") ===
-  //       result?.[result?.length - 1]?.label
-  //     ) {
-  //       console.log("same > ", result);
-  //       return result?.map((subItem) => {
-  //         if (subItem?.label === item?.createdAt) {
-  //           return {
-  //             ...subItem,
-  //             contentList: [...subItem?.contentList, subItem],
-  //           };
-  //         }
-  //       });
-  //     } else {
-  //       console.log("diff > ", {
-  //         label: momenttz(item?.createdAt).format("DD-MM-YYYY"),
-  //         contentList: [item],
-  //       });
-  //       return result.push({
-  //         label: momenttz(item?.createdAt).format("DD-MM-YYYY"),
-  //         contentList: [item],
-  //       });
-  //     }
-  //   }
-  // }, []);
   const renderTimeline = assignTasks;
-  console.log("renderTimeline > ", renderTimeline);
 
   return (
     <Modal

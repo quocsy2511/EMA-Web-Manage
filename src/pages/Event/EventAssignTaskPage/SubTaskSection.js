@@ -48,8 +48,6 @@ const StatusRender = memo(({ bg, text }) => (
 
 const DrawerContainer = memo(
   ({ isDrawerOpen, setIsDrawerOpen, getColor, userChecking }) => {
-    console.log("userChecking> ", userChecking);
-
     const mapPriory = {
       HIGH: 1,
       MEDIUM: 2,
@@ -359,10 +357,8 @@ const SubTaskSection = ({
       enabled: !!selectedDate,
     }
   );
-  console.log("users > ", users);
 
   const handleSelectUser = (employee) => {
-    console.log("employee > ", employee);
     if (selectedEmployees?.length === 0) {
       setLeader(employee?.id);
     }
@@ -566,8 +562,6 @@ const SubTaskSection = ({
                   //   !!userChecking && setIsDrawerOpen(true);
                   // }}
                   onPanelChange={(value, mode) => {
-                    console.log("onPanelChange > ", value, mode);
-
                     const numOfDaysInCurrentMonth = value
                       .clone()
                       .month(value.clone().month() + 1)
@@ -612,7 +606,6 @@ const SubTaskSection = ({
                       }
                     });
 
-                    // console.log("renderList > ", renderList);
                     if (filterUser)
                       renderList = renderList?.filter(
                         (item) => item?.id === filterUser

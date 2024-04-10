@@ -48,7 +48,6 @@ const HeaderEvent = ({
   const dropdownRef = useRef(null);
   const listRole = ["STAFF", "EMPLOYEE"];
   const notification = useSelector((state) => state.notification);
-  // console.log("🚀 ~ notification:", notification);
   const navigate = useNavigate();
   const {
     data: users,

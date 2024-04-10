@@ -49,9 +49,6 @@ const ContactTab = ({
 
   messageApi,
 }) => {
-  console.log("contacts > ", contacts);
-  console.log("contracts > ", contracts);
-
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -133,12 +130,10 @@ const ContactTab = ({
   };
 
   const handleChangeStatus = (value) => {
-    console.log("🚀 ~ handleChangeStatus ~ value:", value);
     setContactStatus(value);
   };
 
   const handleSort = (value) => {
-    console.log("🚀 ~ handleSort ~ value:", value);
     setSort(value);
   };
 
@@ -243,11 +238,9 @@ const ContactTab = ({
       width: "15%",
       align: "center",
       render: (_, record) => {
-        // console.log("record > ", record);
         const hasContract = contracts?.find(
           (item) => item?.customerContactId === record?.id
         );
-        console.log("hasContract > ", hasContract);
 
         if (record?.status === "ACCEPTED") {
           if (hasContract) {

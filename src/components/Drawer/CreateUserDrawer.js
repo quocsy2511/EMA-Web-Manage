@@ -81,7 +81,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
         const user = variables.user;
         variables.user = { ...user, avatar: data.downloadUrl };
         createUserMutate(variables.user);
-        console.log("🚀 ~ CreateUserDrawer ~ variables.user :", variables.user);
       },
       onError: () => {
         messageApi.open({
@@ -110,7 +109,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
       refetchOnWindowFocus: false,
     }
   );
-  // console.log("divisionData: ", divisionData);
 
   const {
     data: divisionsWithoutStaff,
@@ -130,7 +128,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
       refetchOnWindowFocus: false,
     }
   );
-  // console.log("divisionsWithoutStaff >", divisionsWithoutStaff);
 
   const {
     data: roles,
@@ -148,7 +145,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
     refetchOnWindowFocus: false,
     enabled: !!admin,
   });
-  console.log("roles > ", roles);
 
   const {
     data: roleEmployee,
@@ -167,13 +163,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = (values) => {
-    console.log("FORM DATA: ", values);
-    console.log("fileList: ", fileList);
-    // const { avatar, ...user } = values;
-    // const formData = new FormData();
-    // formData.append("file", fileList);
-    // formData.append("folderName", "avatar");
-
     if (fileList?.url) {
       if (staff) {
         values.roleId = roleEmployee?.id;
@@ -181,7 +170,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
         values.typeEmployee = "PART_TIME";
       }
       values.avatar = fileList?.url;
-      console.log("values > ", values);
 
       createUserMutate(values);
     } else {
@@ -194,7 +182,6 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
         values.divisionId = staff?.divisionId;
         values.typeEmployee = "PART_TIME";
       }
-      console.log("values > ", values);
 
       uploadFileMutate({ formData, user: values });
     }
@@ -315,8 +302,12 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
               },
             ]}
           >
-            <Input type="" placeholder="090*******" pattern="[0-9]*"
-              maxLength={10}/>
+            <Input
+              type=""
+              placeholder="090*******"
+              pattern="[0-9]*"
+              maxLength={10}
+            />
           </Form.Item>
           <Form.Item
             name="nationalId"

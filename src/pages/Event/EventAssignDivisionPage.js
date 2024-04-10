@@ -27,7 +27,6 @@ const EventAssignDivisionPage = () => {
   const [selectedDivisions, setSelectedDivisions] = useState(
     listDivisionId ?? []
   );
-  console.log("selectedDivisions > ", selectedDivisions);
 
   const [messageApi, contextHolder] = message.useMessage();
   const { notification } = App.useApp();
@@ -46,7 +45,6 @@ const EventAssignDivisionPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("divisions > ", divisions);
 
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation(
@@ -151,7 +149,7 @@ const EventAssignDivisionPage = () => {
             <div className="flex justify-between">
               <div className="flex space-x-4">
                 <p className="text-xl font-medium">Chọn bộ phận phù hợp</p>
-                <ConfigProvider
+                {/* <ConfigProvider
                   theme={{
                     token: {
                       colorPrimaryHover:
@@ -166,7 +164,7 @@ const EventAssignDivisionPage = () => {
                       ? "Bỏ chọn tất cả"
                       : "Chọn tất cả"}
                   </Button>
-                </ConfigProvider>
+                </ConfigProvider> */}
               </div>
 
               <Button
@@ -205,7 +203,10 @@ const EventAssignDivisionPage = () => {
                 children: (
                   <div className="flex flex-wrap items-center content-center space-y-2">
                     {division?.users?.map((user) => (
-                      <div className="flex space-x-5 items-center w-1/3">
+                      <div
+                        key={user?.id}
+                        className="flex space-x-5 items-center w-1/3"
+                      >
                         <Avatar
                           src={user?.profile?.avatar || defaultAvatar}
                           size={45}
@@ -225,9 +226,7 @@ const EventAssignDivisionPage = () => {
                 ),
               }))}
               // defaultActiveKey={["1"]}
-              onChange={(key) => {
-                console.log(key);
-              }}
+              onChange={(key) => {}}
             />
           </div>
         )}

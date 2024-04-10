@@ -25,7 +25,7 @@ import TEXT from "../../constants/string";
 const { RangePicker } = DatePicker;
 
 const Title = ({ title }) => <p className="text-base font-medium">{title}</p>;
-const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 const TaskAdditionModal = ({
   isModalOpen,
   setIsModalOpen,
@@ -62,7 +62,6 @@ const TaskAdditionModal = ({
       }),
     {
       select: (data) => {
-        console.log("emploee > ", data);
         return data.data.map((employee) => ({
           label: employee.fullName,
           value: employee.id,
@@ -125,7 +124,13 @@ const TaskAdditionModal = ({
     if (selectedTemplateTask) {
       form.setFieldsValue({
         title: selectedTemplateTask.title,
-        desc: { ops: JSON.parse(selectedTemplateTask.description?.startsWith(`[{"`) ? selectedTemplateTask.description : parseJson(selectedTemplateTask.description)) },
+        desc: {
+          ops: JSON.parse(
+            selectedTemplateTask.description?.startsWith(`[{"`)
+              ? selectedTemplateTask.description
+              : parseJson(selectedTemplateTask.description)
+          ),
+        },
       });
     } else {
       form.resetFields();
@@ -144,8 +149,6 @@ const TaskAdditionModal = ({
   };
 
   const onFinish = (values) => {
-    console.log("Success:", values);
-
     values = {
       ...values,
       startDate: moment(values.date[0].$d).format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
@@ -167,26 +170,19 @@ const TaskAdditionModal = ({
     const { fileUrl, date, ...restValue } = values;
 
     if (!values.fileUrl || values.fileUrl?.length === 0) {
-      console.log("NOOO FILE");
-
-      console.log("Transform data: ", restValue);
-
       // call api
       mutate(restValue);
     } else {
-      console.log("HAS FILE");
       const formData = new FormData();
       formData.append("file", fileList);
       formData.append("folderName", "task");
-
-      console.log("Transform data: ", restValue);
 
       //call api
       uploadFileMutate({ formData, task: restValue });
     }
   };
 
-  const onFinishFailed = (errorInfo) => { };
+  const onFinishFailed = (errorInfo) => {};
 
   const handleValuesChange = (changedValues) => {
     const formFieldName = Object.keys(changedValues)[0];
@@ -352,7 +348,6 @@ const TaskAdditionModal = ({
                       allowClear
                       options={employees}
                       onChange={(value) => {
-                        console.log("Chọn employee group : ", value);
                         form.setFieldsValue({ assignee: value });
                         form.resetFields(["leader"]);
                       }}
@@ -374,8 +369,8 @@ const TaskAdditionModal = ({
                       options={
                         selectedEmployeesId
                           ? employees?.filter((employee) =>
-                            selectedEmployeesId.includes(employee.value)
-                          )
+                              selectedEmployeesId.includes(employee.value)
+                            )
                           : []
                       }
                       onChange={(value) => {
@@ -434,7 +429,6 @@ const TaskAdditionModal = ({
                 <Select
                   placeholder="Bộ phận"
                   onChange={(value) => {
-                    console.log("Chọn staff - division : ", value);
                     form.setFieldsValue({ assignee: value });
                   }}
                   options={staffs.map((staff) => ({

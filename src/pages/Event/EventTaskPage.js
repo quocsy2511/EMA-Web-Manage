@@ -129,7 +129,6 @@ const EventTaskPage = () => {
   } = useQuery(["event-detail", eventId], () => getDetailEvent(eventId), {
     refetchOnWindowFocus: false,
   });
-  console.log("Event : ", eventDetail);
 
   const {
     data: contract,
@@ -151,7 +150,6 @@ const EventTaskPage = () => {
       enabled: !!contract?.id,
     }
   );
-  console.log("contractEvidence > ", contractEvidence);
 
   const {
     data: filterTasks,
@@ -203,13 +201,11 @@ const EventTaskPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("filterTasks > ", filterTasks);
 
   const queryClient = useQueryClient();
   const { mutate: updateStatusMutate, isLoading: updateStatusIsLoading } =
     useMutation((status) => updateStatusEvent(eventId, status), {
       onSuccess: (data, variables) => {
-        console.log("data, variables > ", data, variables);
         let status;
         switch (variables) {
           case "PENDING":
@@ -231,7 +227,6 @@ const EventTaskPage = () => {
           default:
             break;
         }
-        console.log(status);
 
         messageApi.open({
           type: "success",
@@ -246,8 +241,6 @@ const EventTaskPage = () => {
         });
 
         queryClient.setQueryData(["event-detail", eventId], (oldValue) => {
-          console.log("oldValue > ", oldValue);
-          console.log("oldValue > ", variables);
           oldValue.status = variables;
           return oldValue;
         });

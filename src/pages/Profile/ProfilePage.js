@@ -65,7 +65,6 @@ const ProfilePage = () => {
     },
     enabled: !!divisionId,
   });
-  console.log("🚀 ~ ProfilePage ~ listEvent:", listEvent);
 
   //manager
   const {

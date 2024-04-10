@@ -17,9 +17,7 @@ const TimekeepingStaffPage = () => {
     },
   ];
 
-  const onChangeTable = (key) => {
-    // console.log(key);
-  };
+  const onChangeTable = (key) => {};
 
   return (
     <>

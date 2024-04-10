@@ -6,7 +6,6 @@ import { useNavigate, useRouteError } from "react-router-dom";
 const ErrorPage = () => {
   const navigate = useNavigate();
   const error = useRouteError();
-  // console.log(error)
 
   return (
     <div className="w-screen h-screen flex justify-center items-center">

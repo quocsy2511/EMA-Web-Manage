@@ -16,7 +16,6 @@ const BudgetTask = ({
   percent,
   remainingBudget,
 }) => {
-  // console.log("🚀 ~ budgetItem:", budgetItem);
   const getColorStatusPriority = (value) => {
     const colorMapping = {
       DONE: { color: "green", title: "HOÀN THÀNH" },

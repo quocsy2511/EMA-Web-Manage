@@ -67,9 +67,7 @@ const RequestDetail = ({
   });
 
   const onFinish = (value) => {
-    console.log("Success: ", value);
     value = { ...value, requestID: selectedRequest.id };
-    console.log("TRANSFORM: ", value);
     mutate(value);
   };
 

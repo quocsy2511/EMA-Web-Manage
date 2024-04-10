@@ -21,10 +21,6 @@ const EditRequestModal = ({
   setIsOpenEditRequest,
   requestSelected,
 }) => {
-  console.log(
-    "🚀 ~ file: EditRequestModal.js:24 ~ requestSelected:",
-    requestSelected
-  );
   const handleCancel = () => {
     setIsOpenEditRequest(false);
   };
@@ -70,10 +66,6 @@ const EditRequestModal = ({
       startDate: startDate,
       endDate: endDate,
     };
-    console.log(
-      "🚀 ~ file: EditRequestModal.js:65 ~ onFinish ~ request:",
-      request
-    );
 
     if (!request.isFull && request.isPM === "AM") {
       const newRequest = {
@@ -82,10 +74,7 @@ const EditRequestModal = ({
         isFull: "false",
         id: idRequestSelected,
       };
-      console.log(
-        "🚀 ~ file: EditRequestModal.js:72 ~ onFinish ~ newRequest 1:",
-        newRequest
-      );
+
       submitFormRequest(newRequest);
     } else if (request.isFull === true) {
       const newRequest = {
@@ -93,10 +82,7 @@ const EditRequestModal = ({
         isPM: "false",
         id: idRequestSelected,
       };
-      console.log(
-        "🚀 ~ file: EditRequestModal.js:72 ~ onFinish ~ newRequest 3:",
-        newRequest
-      );
+
       submitFormRequest(newRequest);
     } else {
       const newRequest = {
@@ -105,10 +91,7 @@ const EditRequestModal = ({
         isFull: "false",
         id: idRequestSelected,
       };
-      console.log(
-        "🚀 ~ file: EditRequestModal.js:76 ~ onFinish ~ newRequest 2:",
-        newRequest
-      );
+
       submitFormRequest(newRequest);
     }
   };

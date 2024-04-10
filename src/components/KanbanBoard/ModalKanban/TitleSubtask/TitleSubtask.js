@@ -115,8 +115,6 @@ const TitleSubtask = ({
       parentTask: parentTask,
       taskID: taskID,
     };
-    console.log("🚀 ~ file: TitleSubtask.js:89 ~ onFinish ~ data:", data);
-    // updateTitle({ taskID, task: data });
     updateTitle(data);
   };
 

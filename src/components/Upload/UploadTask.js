@@ -8,17 +8,13 @@ const UploadTask = () => {
 
   const handleBeforeFileUpload = ({ file }) => {
     // Check file size
-
-
     // If pass
     // return true
-
     // If not pass
     // return false;
   };
 
   const handleFileUpload = ({ file }) => {
-    console.log("File: " + file);
     setFiles((prev) => ({ ...prev, [file.uid]: file }));
 
     // Add field progress to object file in state
@@ -34,8 +30,6 @@ const UploadTask = () => {
     // Call api to upload file to firebase
     axios.post("url", file, {
       onUploadProgress: (event) => {
-        console.log("Upload event: " + event);
-
         // Add field progress to object file in state
         setFiles((prev) => {
           return {

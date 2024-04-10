@@ -36,7 +36,7 @@ const Title = ({ title }) => (
   <p className="text-base font-medium truncate">{title}</p>
 );
 
-const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }])
+const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
 const TaskUpdateModal = ({
   isModalOpen,
@@ -48,7 +48,6 @@ const TaskUpdateModal = ({
   staffId,
   parentTaskId,
 }) => {
-  console.log("TaskUpdateModal: ", task);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -62,7 +61,13 @@ const TaskUpdateModal = ({
       date:
         task.startDate && task.endDate ? [task.startDate, task.endDate] : null,
       description: task.description
-        ? { ops: JSON.parse(task?.description?.startsWith(`[{"`) ? task?.description : parseJson(task?.description)) }
+        ? {
+            ops: JSON.parse(
+              task?.description?.startsWith(`[{"`)
+                ? task?.description
+                : parseJson(task?.description)
+            ),
+          }
         : null,
       priority: task.priority ?? null,
       estimationTime: task.estimationTime ?? null,
@@ -70,12 +75,12 @@ const TaskUpdateModal = ({
       assignee: !isSubTask
         ? task.assignTasks?.[0]?.user.id
         : divisionIdOfStaff === leader?.divisionId
-          ? task.assignTasks?.map((item) => item.user.id)
-          : undefined,
+        ? task.assignTasks?.map((item) => item.user.id)
+        : undefined,
       leader:
         divisionIdOfStaff === leader?.divisionId
           ? task.assignTasks?.filter((item) => item.isLeader === true)[0]?.user
-            .id
+              .id
           : null,
     });
 
@@ -106,7 +111,6 @@ const TaskUpdateModal = ({
   let divisionIdOfStaff = staffs?.find(
     (staff) => staff.userId === staffId
   )?.divisionId;
-  console.log("divisionIdOfStaff: ", divisionIdOfStaff);
 
   // Get employees from divisionId
   const {
@@ -150,10 +154,7 @@ const TaskUpdateModal = ({
         !!task.assignTasks.find((item) => item.isLeader === true)?.user.id,
     }
   );
-  console.log(
-    "Check division is the same or not: ",
-    divisionIdOfStaff === leader?.divisionId
-  );
+
   //============================================================
 
   const queryClient = useQueryClient();
@@ -198,7 +199,7 @@ const TaskUpdateModal = ({
   const { mutate: updateTaskFileMutate } = useMutation(
     (updateFileList) => updateTaskFile(updateFileList),
     {
-      onSuccess: (data, variables) => { },
+      onSuccess: (data, variables) => {},
       onError: (error) => {
         messageApi.open({
           type: "error",
@@ -255,8 +256,6 @@ const TaskUpdateModal = ({
   };
 
   const onFinish = (values) => {
-    console.log("Success: ", values);
-
     values = {
       ...values,
       startDate: values.date[0],
@@ -270,9 +269,7 @@ const TaskUpdateModal = ({
 
     // Update new file
     if (!values.fileUrl || values.fileUrl?.length === 0) {
-      console.log("NOOO FILE");
     } else {
-      console.log("HAS FILE");
       const formData = new FormData();
       formData.append("file", fileList);
       formData.append("folderName", "task");
@@ -285,7 +282,6 @@ const TaskUpdateModal = ({
       task.taskFiles.length !== 0 &&
       task.taskFiles.length !== updateFileList.length
     ) {
-      console.log("Update new file list");
       updateTaskFileMutate({
         taskId: task.id,
         files: updateFileList.map((file) => ({
@@ -296,17 +292,13 @@ const TaskUpdateModal = ({
     }
 
     if (!isSubTask) {
-      console.log("Update task");
       // update Task
       if (task.assignTasks?.[0]?.user.id === values.assignee) {
-        console.log("Same asignee");
         const { assignee, date, ...updatedTask } = values;
 
         // Not update assignee
-        console.log(updatedTask);
         mutate(updatedTask);
       } else {
-        console.log("Diff asignee");
         const { assignee, date, ...task } = values;
 
         const updatedTask = {
@@ -319,11 +311,9 @@ const TaskUpdateModal = ({
         };
 
         // Update assignee
-        console.log(updatedTask);
         assignMemberMutate(updatedTask);
       }
     } else {
-      console.log("Update subtask");
       // update Subtask
       const { assignee, leader, date, ...task } = values;
 
@@ -335,14 +325,11 @@ const TaskUpdateModal = ({
         },
         updateTask: task,
       };
-      console.log(updatedTask);
       assignMemberMutate(updatedTask);
     }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("errorInfo: ", errorInfo);
-  };
+  const onFinishFailed = (errorInfo) => {};
 
   const handleValuesChange = (changedValues) => {
     const formFieldName = Object.keys(changedValues)[0];
@@ -398,7 +385,13 @@ const TaskUpdateModal = ({
               ? [task.startDate, task.endDate]
               : null,
           description: task.description
-            ? { ops: JSON.parse(task.description?.startsWith(`[{"`) ? task.description : parseJson(task.description)) }
+            ? {
+                ops: JSON.parse(
+                  task.description?.startsWith(`[{"`)
+                    ? task.description
+                    : parseJson(task.description)
+                ),
+              }
             : null,
           priority: task.priority ?? null,
           estimationTime: task.estimationTime ?? null,
@@ -406,12 +399,12 @@ const TaskUpdateModal = ({
           assignee: !isSubTask
             ? task.assignTasks?.[0]?.user.id
             : divisionIdOfStaff === leader?.divisionId
-              ? task.assignTasks?.map((item) => item.user.id)
-              : undefined,
+            ? task.assignTasks?.map((item) => item.user.id)
+            : undefined,
           leader:
             divisionIdOfStaff === leader?.divisionId
               ? task.assignTasks?.filter((item) => item.isLeader === true)[0]
-                ?.user.id
+                  ?.user.id
               : null,
         }}
       >
@@ -641,8 +634,8 @@ const TaskUpdateModal = ({
                 options={
                   selectedEmployeesId
                     ? employees?.filter((employee) =>
-                      selectedEmployeesId.includes(employee.value)
-                    )
+                        selectedEmployeesId.includes(employee.value)
+                      )
                     : []
                 }
               />
@@ -653,9 +646,10 @@ const TaskUpdateModal = ({
           {task?.taskFiles.length > 0 &&
             task?.taskFiles.map((file) => (
               <div
-                className={`flex items-center gap-x-3 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg ${!updateFileList.some((item) => item.id === file.id) &&
+                className={`flex items-center gap-x-3 px-2 py-1 cursor-pointer border border-blue-500 hover:border-blue-300 rounded-lg ${
+                  !updateFileList.some((item) => item.id === file.id) &&
                   "opacity-50"
-                  }`}
+                }`}
                 onClick={() => modifyFileList(file)}
               >
                 <a

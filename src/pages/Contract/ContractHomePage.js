@@ -26,14 +26,12 @@ const ContractHomePage = () => {
     isError,
   } = useQuery(["contracts"], () => getContractFile(), {
     select: (data) => {
-      // console.log("🚀 ~ ContractHomePage ~ data:", data);
       return data;
     },
     refetchOnWindowFocus: false,
   });
 
   const handleSelectContract = (value) => {
-    console.log("🚀 ~ handleSelectContract ~ value:", value);
     setIsContract(true);
     setSelectContract(value);
   };

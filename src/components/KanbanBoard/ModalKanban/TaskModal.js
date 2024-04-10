@@ -18,7 +18,6 @@ const TaskModal = ({
   const [selectedSubTask, setSelectedSubTask] = useState(null);
 
   const onCloseModal = () => {
-    console.log("Click");
     setIsOpenTaskModal(false);
   };
 

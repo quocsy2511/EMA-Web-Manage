@@ -10,15 +10,12 @@ import moment from "moment";
 import React, { useEffect, useState } from "react";
 
 const HistoryAssignee = ({ taskSelected }) => {
-  // console.log("🚀 ~ HistoryAssignee ~ taskSelected:", taskSelected);
 
   const startDate = moment(taskSelected?.startDate).format("DD-MM-YYYY");
   const endDate = moment(taskSelected?.endDate).format("DD-MM-YYYY");
   const status = taskSelected?.status;
   let assignTaskSelected = taskSelected?.assignTasks ?? [];
-  // console.log("🚀 ~ HistoryAssignee ~ assignTaskSelected:", assignTaskSelected);
   const [assignTasks, setAssignTasks] = useState([]);
-  console.log("🚀 ~ HistoryAssignee ~ assignTasks:", assignTasks);
 
   useEffect(() => {
     if (assignTaskSelected?.length > 0) {
@@ -31,7 +28,6 @@ const HistoryAssignee = ({ taskSelected }) => {
         }
         return task;
       });
-      // console.log("🚀 ~ processedTasks ~ processedTasks:", processedTasks);
 
       processedTasks.sort((a, b) => moment(a.newAt).diff(moment(b.newAt)));
       setAssignTasks(processedTasks);

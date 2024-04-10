@@ -41,7 +41,6 @@ const RolePage = () => {
       },
     }
   );
-  console.log("userData: ", data);
 
   const { data: divisionsData, isLoading: divisionsIsLoading } = useQuery(
     ["divisions", 1],
@@ -51,7 +50,6 @@ const RolePage = () => {
         data.data.result.data.filter((division) => division.status === 1),
     }
   );
-  console.log("divisionsData: ", divisionsData);
 
   const [editingRowKey, setEditingRowKey] = useState("");
   const [sortedInfo, setSortedInfo] = useState({});
@@ -68,9 +66,7 @@ const RolePage = () => {
     return record.key === editingRowKey;
   };
 
-  const onFinish = (values) => {
-    console.log("Success:", values);
-  };
+  const onFinish = (values) => {};
 
   const handleDeleteAction = (record) => {
     // record : whole data of 1 selected row

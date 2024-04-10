@@ -5,17 +5,11 @@ let socket = null;
 
 // Listen to server side
 export const connectWithSocket = (token, dispatch) => {
-  console.log("dispatch>> ", dispatch);
-
   socket = io(URL_SOCKET, {
     auth: {
       access_token: token,
     },
   });
 
-  socket.on("connect", () => {
-    console.log("Successfully connect with socket.io server : ", socket.id);
-  });
+  socket.on("connect", () => {});
 };
-
-// Emit to server side

@@ -12,7 +12,6 @@ const ContactUpdateModal = ({
 }) => {
   const [selectReason, setSelectReason] = useState();
   const [text, setText] = useState("");
-  console.log("text > ", text);
 
   const handleCancel = () => {
     setIsModalOpen(false);

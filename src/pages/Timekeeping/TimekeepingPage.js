@@ -45,7 +45,6 @@ const listDatesInRange = (startDate, endDate) => {
 
 const TimekeepingPage = () => {
   const [selectedEvent, setSelectedEvent] = useState();
-  console.log("selectedEvent: ", selectedEvent);
   const [columns, setColumns] = useState([]);
   const [searchText, setSearchText] = useState();
 
@@ -201,8 +200,6 @@ const TimekeepingPage = () => {
       refetchOnWindowFocus: false,
     }
   );
-  console.log("timekeepings: ", timekeepings);
-  console.log("timekeepingsIsFetching: ", timekeepingsIsFetching);
 
   let renderItem = eventParticipant ?? [];
   if (!!eventParticipant && !!timekeepings) {
@@ -218,7 +215,6 @@ const TimekeepingPage = () => {
       return user;
     });
   }
-  console.log("renderItem: ", renderItem);
 
   const onChange = (value) => {
     const selectedEvent = events.find((event) => {

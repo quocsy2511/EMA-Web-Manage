@@ -163,16 +163,13 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
   };
 
   const onFinish = (value) => {
-    console.log("Success: ", value);
     value = { ...value, taskID: taskId };
     const { fileUrl, ...restValue } = value;
 
     if (!value.fileUrl || value.fileUrl?.length === 0) {
-      console.log("NOOO FILE");
 
       mutate(restValue);
     } else {
-      console.log("HAS FILE");
       const formData = new FormData();
       formData.append("file", fileList);
       formData.append("folderName", "comment");
@@ -182,7 +179,6 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
   };
 
   const onUpdateFormFinish = (value) => {
-    console.log("Success: ", value);
 
     const newComment = {
       content: value.content,
@@ -191,10 +187,8 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
         return restItem;
       }),
     };
-    console.log(newComment);
 
     if (updatedFileList) {
-      console.log("Update có file");
       const formData = new FormData();
       formData.append("file", updatedFileList);
       formData.append("folderName", "comment");
@@ -205,7 +199,6 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
         newComment,
       });
     } else {
-      console.log("Update ko file");
       updateCommentMutate({
         commentId: value.commentId,
         ...newComment,

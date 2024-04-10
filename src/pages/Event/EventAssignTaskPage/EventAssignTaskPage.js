@@ -70,7 +70,24 @@ const DrawerContainer = memo(
       }
     );
 
-    console.log("templateTask > ", templateTask);
+    const renderPriority = (task) => {
+      let text;
+      switch (task?.priority) {
+        case "HIGH":
+          text = "CAO";
+          break;
+        case "MEDIUM":
+          text = "VỪA";
+          break;
+        case "LOW":
+          text = "THẤP";
+          break;
+
+        default:
+          break;
+      }
+      return text;
+    };
 
     return (
       <Drawer
@@ -102,7 +119,13 @@ const DrawerContainer = memo(
                   </p>
 
                   <div className="p-5 pt-3 pb-14">
-                    <Title title="Mô tả" />
+                    <div className="flex justify-between items-center">
+                      <Title title="Mô tả" />
+
+                      <p className="font-semibold border border-black rounded px-2 py-1">
+                        {renderPriority(task)}
+                      </p>
+                    </div>
 
                     <ReactQuill
                       // defaultValue={task?.description}
@@ -152,9 +175,6 @@ const EventAssignTaskPage = () => {
     updateData,
   } = location.state;
 
-  console.log("updateData > ", updateData);
-  console.log("dateRange > ", dateRange);
-
   const [isSelectDate, setIsSelectDate] = useState(false);
   const [chosenFile, setChosenFile] = useState();
   const [hasBusyUser, setHasBusyUser] = useState([]);
@@ -189,6 +209,8 @@ const EventAssignTaskPage = () => {
         },
         priority: chosenTemplateTask?.priority,
       });
+
+      setIsDrawerOpen(false);
     }
   }, [chosenTemplateTask]);
 
@@ -270,7 +292,6 @@ const EventAssignTaskPage = () => {
   const { mutate: uploadFileMutate, isLoading: isLoadingUploadFile } =
     useMutation(({ formData, task, totalTrue }) => uploadFile(formData), {
       onSuccess: (data, variables) => {
-        console.log("file > ", data);
         if (!variables?.totalTrue) {
           const taskPayload = {
             ...variables.task,
@@ -330,8 +351,6 @@ const EventAssignTaskPage = () => {
     longArr?.filter((item) => !shortArr?.includes(item));
 
   const onFinish = (values) => {
-    console.log("Success:", values);
-
     // Create new task
     if (!updateData) {
       const taskPayload = {
@@ -394,32 +413,24 @@ const EventAssignTaskPage = () => {
       // Update assign task
       if (!isSubTask) {
         if (updateData?.assignee?.[0] !== values?.assignee?.[0]) {
-          console.log("assign task again");
-
           checkAssignTask = true;
           listUpdateRequest.push(checkAssignTask);
         }
       } else {
         // check assign subtask
         if (values?.leader !== updateData?.assignee?.[0]) {
-          console.log("change leader");
-
           checkAssignTask = true;
           listUpdateRequest.push(checkAssignTask);
         } else if (updateData?.assignee?.length === values?.assignee?.length) {
-          console.log("same length");
           if (!!checkArrayDiff(updateData?.assignee, values?.assignee).length) {
             checkAssignTask = true;
             listUpdateRequest.push(checkAssignTask);
           }
         } else {
-          console.log("diff length");
           if (updateData?.assignee?.length > values?.assignee?.length) {
             if (
               !!checkArrayDiff(updateData?.assignee, values?.assignee).length
             ) {
-              console.log("change less");
-
               checkAssignTask = true;
               listUpdateRequest.push(checkAssignTask);
             }
@@ -427,8 +438,6 @@ const EventAssignTaskPage = () => {
             if (
               !!checkArrayDiff(values?.assignee, updateData?.assignee).length
             ) {
-              console.log("change more");
-
               checkAssignTask = true;
               listUpdateRequest.push(checkAssignTask);
             }
@@ -449,7 +458,6 @@ const EventAssignTaskPage = () => {
         (result, item) => (item ? result + 1 : result),
         0
       );
-      console.log("totalTrue > ", totalTrue);
 
       if (checkUpdateTask) {
         // update task
@@ -470,7 +478,6 @@ const EventAssignTaskPage = () => {
 
           taskID: updateData?.id,
         };
-        console.log("change > ", updatedValue);
         updateTaskMutate({
           updatedTask: updatedValue,
           totalTrue,
@@ -494,7 +501,6 @@ const EventAssignTaskPage = () => {
   };
 
   const onFinishFailed = (errorInfo) => {
-    console.log(errorInfo);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -513,7 +519,6 @@ const EventAssignTaskPage = () => {
         <FloatButton
           onClick={() => setIsDrawerOpen(true)}
           type="primary"
-          // icon={<RiAddFill />}
           tooltip={"Công việc mẫu"}
           className="cursor-pointer"
         />
@@ -542,7 +547,16 @@ const EventAssignTaskPage = () => {
           ) : (
             <>
               Tạo công việc cho hạng mục [{" "}
-              <Link to={`/manager/event/${eventId}/${taskId}`} relative="path">
+              <Link
+                to={`/manager/event/${eventId}/${taskId}`}
+                state={{
+                  eventName: eventName,
+                  dateRange: dateRange,
+                  subtaskId: taskId,
+                }}
+                relative="path"
+                replace
+              >
                 {taskName ?? "Công việc"}
               </Link>
               ]

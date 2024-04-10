@@ -33,7 +33,6 @@ const TaskModalContent = ({
   disableDoneTaskParent,
   onCloseModal,
 }) => {
-  // console.log("🚀 ~ taskParent:", taskParent);
   const {
     data: listComments,
     isError: isErrorListComments,

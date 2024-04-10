@@ -45,7 +45,6 @@ const EventPage = () => {
   );
 
   useEffect(() => {
-    console.log("data > ", data);
     if (data && searchStatus === "PENDING" && !data?.data?.length)
       setSearchStatus("PREPARING");
     else if (data && searchStatus === "PREPARING" && !data?.data?.length)

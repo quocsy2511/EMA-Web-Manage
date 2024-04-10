@@ -25,11 +25,9 @@ const ContactModal = ({
   updateContactStatusIsLoading,
   contracts,
 }) => {
-  console.log("🚀 ~ ContactModal ~ contact:", contact);
   const hasContract = contracts?.find(
     (item) => item?.customerContactId === contact?.id
   );
-  console.log("hasContract > ", hasContract);
   const navigate = useNavigate();
 
   const confirmReject = () => {

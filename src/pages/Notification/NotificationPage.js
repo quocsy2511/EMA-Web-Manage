@@ -27,7 +27,6 @@ const NotificationPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [renderNotifications, setRenderNotifications] = useState([]);
-  console.log("renderNotifications > ", renderNotifications);
 
   const {
     data: notifications,
@@ -79,26 +78,6 @@ const NotificationPage = () => {
   const { mutate: seenNotificationMutate } = useMutation(
     (notificationId) => seenNotification(notificationId),
     {
-      // onSuccess: (data, variables) => {
-      //   queryClient.setQueryData(["notifications"], (oldValue) => {
-      //     console.log("oldValue: ", oldValue);
-      //     const updatedOldData = {
-      //       ...oldValue,
-
-      //       data: {
-      //         totalUnreadNotifications:
-      //           oldValue?.data?.totalUnreadNotifications - 1,
-      //         notifications: oldValue?.data?.notifications?.map((item) => {
-      //           if (item?.id === variables) {
-      //             return { ...item, isRead: 1 };
-      //           }
-      //           return item;
-      //         }),
-      //       },
-      //     };
-      //     return updatedOldData;
-      //   });
-      // },
       onError: (error) => {
         messageApi.open({
           type: "error",

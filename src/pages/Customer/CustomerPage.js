@@ -13,7 +13,6 @@ import { useLocation } from "react-router-dom";
 
 const CustomerPage = () => {
   const location = useLocation();
-  console.log(location);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [sort, setSort] = useState("DESC");
@@ -138,9 +137,7 @@ const CustomerPage = () => {
             //   ),
             // },
           ]}
-          onChange={(key) => {
-            console.log(key);
-          }}
+          onChange={(key) => {}}
         />
       </motion.div>
     </Fragment>

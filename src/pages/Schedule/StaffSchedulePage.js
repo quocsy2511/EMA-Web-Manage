@@ -220,7 +220,6 @@ const StaffSchedulePage = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [checkedDateData, setCheckedDateData] = useState([]);
 
-  console.log("checkedDateData > ", checkedDateData);
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -264,7 +263,6 @@ const StaffSchedulePage = () => {
       enabled: !!selectedDate,
     }
   );
-  console.log("tasks > ", tasks);
 
   if (tasksIsError) {
     messageApi.open({
@@ -299,7 +297,6 @@ const StaffSchedulePage = () => {
           <Spin spinning={tasksIsLoading}>
             <Calendar
               onPanelChange={(value, mode) => {
-                console.log("onPanelChange > ", value, mode);
 
                 const numOfDaysInCurrentMonth = value
                   .clone()
@@ -320,7 +317,6 @@ const StaffSchedulePage = () => {
                 ]);
               }}
               onSelect={(value) => {
-                console.log("value > ", value);
                 const list = [];
                 const currentString = momenttz(value?.$d).format("YYYY-MM-DD");
 

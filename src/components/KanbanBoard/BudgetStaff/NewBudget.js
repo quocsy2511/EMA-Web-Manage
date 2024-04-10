@@ -58,13 +58,6 @@ const NewBudget = ({
         eventID: id,
       };
     });
-    data.forEach((budget) => {
-      console.log(
-        "🚀 ~ file: NewBudget.js:51 ~ data.forEach ~ budget:",
-        budget
-      );
-      // postListBudget(budget);
-    });
   };
 
   return (

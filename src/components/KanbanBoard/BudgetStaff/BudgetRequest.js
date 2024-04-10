@@ -8,7 +8,6 @@ import BudgetRequestModal from "./ModalBudget/BudgetRequestModal";
 import { deleteRequestBudget } from "../../../apis/requests";
 
 const BudgetRequest = ({ selectBudget }) => {
-  // console.log("🚀 ~ BudgetRequest ~ selectBudget:", selectBudget);
   const taskParentId = selectBudget?.id;
   const [sizePage, setSizePage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,7 +42,6 @@ const BudgetRequest = ({ selectBudget }) => {
       enabled: !!taskParentId,
     }
   );
-  console.log("🚀 ~ BudgetRequest ~ requests:", requests);
   const queryClient = useQueryClient();
   const { mutate: deleteRequest, isLoading: isLoadingDeleteRequest } =
     useMutation((id) => deleteRequestBudget(id), {

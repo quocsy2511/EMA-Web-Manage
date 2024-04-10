@@ -25,7 +25,6 @@ const DashboardPageStaff = () => {
     },
     refetchOnWindowFocus: false,
   });
-  console.log("🚀 ~ DashboardPageStaff ~ dataStatistic:", dataStatistic);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();

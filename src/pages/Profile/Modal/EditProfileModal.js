@@ -19,7 +19,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateProfile } from "../../../apis/users";
 
 const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
-  console.log("🚀 ~ EditProfileModal ~ data:", data);
   const [formEdited, setFormEdited] = useState(false);
   const { Option } = Select;
   const oldAvatar = data?.avatar;
@@ -73,9 +72,7 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
   };
   const onChange = (date, dateString) => {
     const formatStart = moment(dateString, "DD-MM-YYYY").format("YYYY-MM-DD");
-    // console.log("🚀 ~ onChange ~ formatStart:", formatStart);
     const isoStartDate = moment(formatStart).toISOString();
-    // console.log("🚀 ~ onChange ~ isoStartDate:", isoStartDate);
     setNewDob(isoStartDate);
   };
 
@@ -108,10 +105,7 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
         nationalIdImage: data?.downloadUrl,
         ...user,
       };
-      console.log(
-        "🚀 ~ file: EditProfileModal.js:89 ~ useMutation ~ variables.user:",
-        variables.user
-      );
+
       updateProfileMutate(variables.user);
     },
     onError: () => {
@@ -130,12 +124,8 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
           avatar: data?.downloadUrl,
           ...user,
         };
-        console.log(
-          "🚀 ~ file: EditProfileModal.js:89 ~ useMutation ~ variables.user:",
-          variables.user
-        );
+
         if (isMultiFile) {
-          console.log("zo day");
           uploadFileNationalIdMutate({
             formData2: fileTemp,
             user: variables.user,
@@ -159,7 +149,6 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
 
     if (values.urlImage === undefined || values.urlImage?.length === 0) {
       setIsMultiFile(false);
-      console.log("NOOO FILE");
       const newProfile = {
         avatar: oldAvatar,
         ...user,
@@ -168,29 +157,24 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
         values.nationalImg === undefined ||
         values.nationalImg?.length === 0
       ) {
-        console.log(" FILE avatar ko null , no nationID");
-        console.log("🚀 ~ onFinish ~ newProfile:", newProfile);
+        
         updateProfileMutate(newProfile);
       } else {
-        console.log("HAS FILE nationalImg , avatar");
         const formData2 = new FormData();
         formData2.append("file", fileListNationalIdImage);
         formData2.append("folderName", "nationalCard");
         uploadFileNationalIdMutate({ formData2, user: newProfile });
       }
     } else {
-      console.log("HAS FILE");
       if (
         values.nationalImg === undefined ||
         values.nationalImg?.length === 0
       ) {
-        console.log("HAS FILE avatar , no nationID");
         const formData = new FormData();
         formData.append("file", fileList);
         formData.append("folderName", "avatar");
         uploadFileMutate({ formData, user });
       } else {
-        console.log("HAS FILE nationalImg + avatar");
         setIsMultiFile(true);
         const formData = new FormData();
         formData.append("file", fileList);

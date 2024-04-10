@@ -11,7 +11,6 @@ const SettingModal = ({
   templateEvent,
   selectTypeEvent,
 }) => {
-  console.log("🚀 ~ selectTypeEvent:", selectTypeEvent);
   const [form] = Form.useForm();
   const eventID = templateEvent?.id;
   const [priority, setPriority] = useState({ label: "THẤP", value: "LOW" });
@@ -41,7 +40,6 @@ const SettingModal = ({
   );
 
   const onFinish = (values) => {
-    console.log("🚀 ~ onFinish ~ values:", values);
     const task = {
       ...values,
       eventID: eventID,
@@ -53,7 +51,6 @@ const SettingModal = ({
       desc: JSON.stringify(values.desc.ops),
     };
 
-    console.log("🚀 ~ onFinish ~ task:", task);
     submitFormTask(task);
   };
 

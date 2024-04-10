@@ -31,7 +31,6 @@ const TaskItem = ({
   // Update subtask
   goToUpdateSubtask,
 }) => {
-  // console.log("TaskItem > ", task);
   const navigate = useNavigate();
 
   const [isOpenHistoryModal, setIsOpenHistoryModal] = useState(false);
