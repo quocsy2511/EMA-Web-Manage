@@ -129,6 +129,7 @@ const EventTaskPage = () => {
   } = useQuery(["event-detail", eventId], () => getDetailEvent(eventId), {
     refetchOnWindowFocus: false,
   });
+  console.log("eventDetail > ", eventDetail);
 
   const {
     data: contract,

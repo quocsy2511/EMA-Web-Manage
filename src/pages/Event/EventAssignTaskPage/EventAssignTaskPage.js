@@ -672,7 +672,11 @@ const EventAssignTaskPage = () => {
                           current && (current < startDate || current > endDate)
                         );
                       else
-                        return current && (current < now || current > endDate);
+                        return (
+                          current &&
+                          (current < now.clone().subtract(1, "day") ||
+                            current > endDate)
+                        );
                     } else
                       return (
                         (current && current < startDate) ||

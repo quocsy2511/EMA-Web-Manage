@@ -12,7 +12,7 @@ import { Avatar, Dropdown, Input, Spin, Tag, Tooltip } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import { debounce } from "lodash";
 import moment from "moment";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { HiSortAscending, HiSortDescending } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { useNavigate, useRouteLoaderData } from "react-router-dom";
@@ -34,7 +34,7 @@ const HeaderEvent = ({
   const divisionId = useRouteLoaderData("staff").divisionID;
   const staffID = useRouteLoaderData("staff").id;
   const [visible, setVisible] = useState(false);
-  const dropdownRef = useRef(null);
+  // const dropdownRef = useRef(null);
   const listRole = ["STAFF", "EMPLOYEE"];
   const notification = useSelector((state) => state.notification);
   const navigate = useNavigate();
@@ -202,26 +202,11 @@ const HeaderEvent = ({
       setFilterMember(key);
     } else if (isKeyInListStatus === false && key === "clear") {
       setStatusSelected(key);
-      // setFilterMember(staffUsers?.id);
       setFilterMember(staffID);
     } else {
       setStatusSelected(key);
     }
-    // setFilterMember(key);
   };
-
-  // tắt dropdown khi nó click ra ngoài vùng menu
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setVisible(false);
-    }
-  };
-  useEffect(() => {
-    window.addEventListener("click", handleClickOutside);
-    return () => {
-      window.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
 
   return (
     <div className="p-4 left-0 z-40 right-0 bg-bgBoard">
@@ -312,10 +297,7 @@ const HeaderEvent = ({
                               </span>
                             )}
                           </div>
-                          <div
-                            className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 "
-                            ref={dropdownRef}
-                          >
+                          <div className="hidden md:block border-l-[1px] border-r-solid border-gray-400 pl-2 cursor-pointer hover:text-blue-500 ">
                             <Dropdown
                               menu={{
                                 items: filterUser,

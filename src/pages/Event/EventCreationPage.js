@@ -475,7 +475,7 @@ const EventCreationPage = () => {
                 form.setFieldsValue({ location: value.target.value });
               }}
             >
-              <Input placeholder="Nhập địa điểm" size="large" />
+              <Input placeholder="Nhập địa điểm" size="large" disabled />
             </Form.Item>
           </div>
 
