@@ -79,8 +79,18 @@ const DrawerContainer = memo(
           <div className="flex space-x-5">
             <p className="text-base font-medium">Độ ưu tiên :</p>
             <div className="flex items-center space-x-4">
-              <StatusRender bg="bg-gray-400" text="Đang chuẩn bị" />
-              <StatusRender bg="bg-blue-500" text="Đang thực hiện" />
+              <div className="flex items-center gap-x-1">
+                <FaCircleArrowDown className="text-lg text-green-500" />
+                <p className="font-semibold">THẤP</p>
+              </div>
+              <div className="flex items-center gap-x-1">
+                <PiDotsThreeCircleVerticalFill className="text-2xl text-orange-400 rotate-90" />
+                <p className="font-semibold">VỪA</p>
+              </div>
+              <div className="flex items-center gap-x-1">
+                <FaCircleExclamation className="text-lg text-red-500" />
+                <p className="font-semibold">CAO</p>
+              </div>
             </div>
           </div>
 
