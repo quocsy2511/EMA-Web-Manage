@@ -68,7 +68,11 @@ const RangeDateSelected = ({
         current.isAfter(disableEndDate, "day")
       );
     } else {
-      return current.isBefore(today) || current.isAfter(disableEndDate, "day");
+      console.log("1: ", current.isBefore(today));
+      return (
+        (current.isBefore(today) && !current.isSame(today, "day")) ||
+        current.isAfter(disableEndDate, "day")
+      );
     }
   };
 
