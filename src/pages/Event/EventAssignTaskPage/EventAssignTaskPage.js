@@ -669,7 +669,9 @@ const EventAssignTaskPage = () => {
                     if (!isSubTask) {
                       if (now.isBefore(startDate, "days"))
                         return (
-                          current && (current < startDate || current > endDate)
+                          current &&
+                          (current < startDate.clone().subtract(1, "day") ||
+                            current > endDate)
                         );
                       else
                         return (
@@ -828,7 +830,7 @@ const EventAssignTaskPage = () => {
                 title={
                   !!hasBusyUser?.length && hasBusyUser?.includes(true)
                     ? `${
-                        isSubTask ? "Có 1 nhân viên" : "Bộ phận được chọn"
+                        isSubTask ? "Có 1 nhân viên" : "Nhóm được chọn"
                       } đang tham gia nhiều ${
                         isSubTask ? "công việc" : "hạng mục"
                       }`
@@ -877,7 +879,7 @@ const EventAssignTaskPage = () => {
                 title={
                   !!hasBusyUser?.length && hasBusyUser?.includes(true)
                     ? `${
-                        isSubTask ? "Có 1 nhân viên" : "Bộ phận được chọn"
+                        isSubTask ? "Có 1 nhân viên" : "Nhóm được chọn"
                       } đang tham gia nhiều ${
                         isSubTask ? "công việc" : "hạng mục"
                       }`

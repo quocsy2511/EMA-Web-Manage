@@ -228,7 +228,16 @@ const PlanningPage = () => {
   };
 
   const goToCreateContractPage = () => {
-    navigate("contract", { state: { contactId, hasContract, readOnly } });
+    navigate("contract", {
+      state: {
+        contactId,
+        hasContract,
+        readOnly,
+        totalContract: planningData?.reduce((total, item) => {
+          return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
+        }, 0),
+      },
+    });
   };
 
   return (

@@ -407,7 +407,7 @@ const TaskSection = ({
       />
 
       {/* <div className="flex space-x-10">
-        <p className="w-1/4 text-lg font-medium">Bộ phận chịu trách nhiệm</p>
+        <p className="w-1/4 text-lg font-medium">Nhóm chịu trách nhiệm</p>
         <p className="flex-1 text-black text-lg font-medium">
           {isSelectDate
             ? `Lịch trình bắt đầu từ ngày ${isSelectDate?.[0].format(
@@ -421,7 +421,7 @@ const TaskSection = ({
         <div className="">
           {/* Division list */}
           <div className="h-full max-h-screen overflow-scroll scrollbar-hide">
-            <p className="text-lg font-medium">Bộ phận chịu trách nhiệm</p>
+            <p className="text-lg font-medium">Nhóm chịu trách nhiệm</p>
             <Form.Item name="assignee">
               <div className="flex overflow-x-scroll space-x-5 px-3 py-5">
                 {divisionsIsError ? (

@@ -417,7 +417,7 @@ const EventTaskPage = () => {
               {eventDetail?.listDivision?.map((division, index) => (
                 <Tooltip
                   key={division?.divisionId ?? index}
-                  title={`${division?.fullName} - bộ phận ${division?.divisionName}`}
+                  title={`${division?.fullName} - ${division?.divisionName}`}
                   placement="top"
                 >
                   <Avatar
@@ -642,7 +642,7 @@ const EventTaskPage = () => {
               </Popover>
             </Dropdown>
 
-            <Popover content={<p className="text-base">Điều chỉnh bộ phận</p>}>
+            <Popover content={<p className="text-base">Điều chỉnh nhóm</p>}>
               <motion.div
                 className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
                 whileHover={{ y: -4 }}
@@ -699,7 +699,7 @@ const EventTaskPage = () => {
           </div>
 
           <div className="mt-6">
-            <p className="font-medium">Bộ phận chịu trách nhiệm</p>
+            <p className="font-medium">Các nhóm chịu trách nhiệm</p>
             <div className="flex items-center flex-wrap gap-x-4 gap-y-3 mt-3">
               {eventDetail?.listDivision &&
               eventDetail?.listDivision?.length > 0 ? (
@@ -712,7 +712,7 @@ const EventTaskPage = () => {
                   />
                 ))
               ) : (
-                <p className="">Chưa có bộ phận chịu trách nhiệm</p>
+                <p className="">Chưa có nhóm chịu trách nhiệm</p>
               )}
             </div>
           </div>

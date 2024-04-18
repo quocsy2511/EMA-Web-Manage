@@ -8,8 +8,10 @@ import {
   Form,
   Image,
   Input,
+  InputNumber,
   Popconfirm,
   Select,
+  Space,
   Spin,
   message,
 } from "antd";
@@ -17,7 +19,7 @@ import viVN from "antd/locale/vi_VN";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
 import momenttz from "moment-timezone";
-import React, { Fragment, memo, useEffect } from "react";
+import React, { Fragment, memo, useEffect, useState } from "react";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getCustomerContactDetail } from "../../apis/contact";
@@ -28,6 +30,7 @@ import {
 } from "../../apis/contract";
 import { getEventType } from "../../apis/events";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
+import { IoClose } from "react-icons/io5";
 
 const { RangePicker } = DatePicker;
 
@@ -39,19 +42,26 @@ const Title = memo(({ title }) => (
 
 const ContractPage = () => {
   const location = useLocation();
-  const contactId = location.state?.contactId;
-  const hasContract = location.state?.hasContract;
-  const readOnly = location.state?.readOnly;
+  // const contactId = location.state?.contactId;
+  // const hasContract = location.state?.hasContract;
+  // const readOnly = location.state?.readOnly;
+  // const totalContract = location.state?.totalContract;
+  const { contactId, hasContract, readOnly, totalContract } =
+    location.state ?? {};
 
   const navigate = useNavigate();
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const { message: messageApp } = App.useApp();
+  const [totalContractValue] = useState(totalContract ?? 0);
+  const [usedTotalContractValue, setUsedTotalContractValue] = useState(0);
+  console.log("usedTotalContractValue > ", usedTotalContractValue);
+  const [numOfContractValue, setNumOfContractValue] = useState(0);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  // useEffect(() => {
+  //   window.scrollTo({ top: 0, behavior: "smooth" });
+  // }, []);
 
   const { data: contactInfo, isLoading: contactInfoIsLoading } = useQuery(
     ["contact", contactId],
@@ -148,10 +158,18 @@ const ContractPage = () => {
       // ===========================================
       location: values?.location,
       eventTypeId: values?.eventTypeId,
+
+      paymentMilestone: values?.["payment-rules"]?.map((item) => ({
+        name: item?.title,
+        startDate: item?.date?.[0],
+        endDate: item?.date?.[1],
+        amount: item?.value,
+      })),
     };
   };
 
   const onFinish = (values) => {
+    console.log("Onfinish > ", values);
     const eventValues = setupEventValues(values);
 
     const contractValues = {
@@ -159,6 +177,7 @@ const ContractPage = () => {
       ...eventValues,
       paymentDate: momenttz().format("YYYY-MM-DD"),
     };
+    console.log(contractValues);
 
     if (!hasContract) {
       createContractMutate({
@@ -472,7 +491,7 @@ const ContractPage = () => {
           </>
 
           <>
-            <div className="flex items-center space-x-5 py-7 mt-14">
+            <div className="flex items-center space-x-5 py-7 mt-8">
               <div className="w-[3%] h-[0.5px] bg-black/10" />
               <p className="text-3xl font-medium">Thông tin sự kiện</p>
               <div className="flex-1 h-[0.5px] bg-black/10" />
@@ -513,7 +532,7 @@ const ContractPage = () => {
                     form.setFieldsValue({ location: value.target.value });
                   }}
                 >
-                  <Input placeholder="Nhập địa điểm" size="large" />
+                  <Input placeholder="Nhập địa điểm" size="large" disabled />
                 </Form.Item>
               </div>
 
@@ -660,6 +679,538 @@ const ContractPage = () => {
             </div>
           </>
 
+          <>
+            <div className="flex items-center space-x-5 pb-5 mt-14">
+              <div className="w-[3%] h-[0.5px] bg-black/10" />
+              <p className="text-3xl font-medium">Điều khoản thanh toán</p>
+              <div className="flex-1 h-[0.5px] bg-black/10" />
+            </div>
+
+            <p className="text-lg mb-4">
+              Tổng :{" "}
+              <span className="text-2xl font-semibold">
+                {/* {(
+                  (totalContractValue ?? 0) -
+                  (form.getFieldValue(["payment-rules", 0, "value"]) ?? 0) -
+                  (form.getFieldValue(["payment-rules", 1, "value"]) ?? 0) -
+                  (form.getFieldValue(["payment-rules", 2, "value"]) ?? 0)
+                ).toLocaleString()}{" "} */}
+                {(usedTotalContractValue ?? 0).toLocaleString()} /{" "}
+                {(totalContractValue ?? 0).toLocaleString()} VNĐ
+              </span>
+            </p>
+
+            <Form.List name="payment-rules" className="w-1/2">
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }) => {
+                    return (
+                      <Space
+                        key={key}
+                        style={{
+                          display: "flex",
+                          marginBottom: 8,
+                        }}
+                        align="baseline"
+                      >
+                        <Form.Item
+                          {...restField}
+                          name={[name, "title"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Chưa điền tên thời hạn",
+                            },
+                          ]}
+                        >
+                          <Input placeholder="Tên thời hạn" size="large" />
+                        </Form.Item>
+                        <Form.Item
+                          className=""
+                          {...restField}
+                          name={[name, "date"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Chọn ngày thực hiện và kết thúc !",
+                            },
+                            {
+                              validator: (_, value) => {
+                                if (value && value?.[0] && value?.[1]) {
+                                  return Promise.resolve();
+                                }
+                                return Promise.reject(
+                                  "Vui lòng chọn khoảng thời gian thực hiện."
+                                );
+                              },
+                            },
+                          ]}
+                        >
+                          <ConfigProvider locale={viVN}>
+                            <RangePicker
+                              size="large"
+                              onChange={(value) => {
+                                const dates =
+                                  form.getFieldValue("payment-rules");
+                                if (
+                                  dates &&
+                                  dates?.length > 0 &&
+                                  dates?.[0] !== undefined
+                                ) {
+                                  if (dates?.[key]) {
+                                    dates[key].date = value?.map((item) =>
+                                      momenttz(item?.$d).format("YYYY-MM-DD")
+                                    );
+
+                                    form.setFieldsValue({
+                                      ["payment-rules"]: dates,
+                                    });
+                                  } else {
+                                    dates[key] = {
+                                      date: [
+                                        {
+                                          date: value?.map((item) =>
+                                            momenttz(item?.$d).format(
+                                              "YYYY-MM-DD"
+                                            )
+                                          ),
+                                        },
+                                      ],
+                                    };
+
+                                    form.setFieldsValue({
+                                      ["payment-rules"]: dates,
+                                    });
+                                  }
+                                } else {
+                                  form.setFieldsValue({
+                                    ["payment-rules"]: [
+                                      {
+                                        date: value?.map((item) =>
+                                          momenttz(item?.$d).format(
+                                            "YYYY-MM-DD"
+                                          )
+                                        ),
+                                      },
+                                    ],
+                                  });
+                                }
+
+                                const currentMaxNum = numOfContractValue - 1;
+
+                                switch (key) {
+                                  case 0:
+                                    if (key + 1 <= currentMaxNum) {
+                                      const tem = currentMaxNum - key;
+                                      if (tem === 1) {
+                                        form.resetFields([
+                                          ["payment-rules", 1, "date"],
+                                        ]);
+                                      }
+                                      if (tem === 2) {
+                                        form.resetFields([
+                                          ["payment-rules", 1, "date"],
+                                        ]);
+                                        form.resetFields([
+                                          ["payment-rules", 2, "date"],
+                                        ]);
+                                      }
+                                    }
+                                    break;
+                                  case 1:
+                                    if (key + 1 <= currentMaxNum) {
+                                      form.resetFields([
+                                        ["payment-rules", 2, "date"],
+                                      ]);
+                                    }
+                                    break;
+
+                                  default:
+                                    break;
+                                }
+                              }}
+                              disabledDate={(current) => {
+                                switch (key) {
+                                  case 0:
+                                    return (
+                                      current &&
+                                      current < momenttz().subtract(1, "day")
+                                    );
+
+                                  case 1:
+                                    const endDate1 = form.getFieldValue([
+                                      "payment-rules",
+                                      0,
+                                      "date",
+                                    ]);
+                                    return (
+                                      current &&
+                                      current <=
+                                        momenttz(
+                                          endDate1?.[1],
+                                          "YYYY-MM-DD"
+                                        ).add(1, "day")
+                                    );
+
+                                  case 2:
+                                    const endDate2 = form.getFieldValue([
+                                      "payment-rules",
+                                      1,
+                                      "date",
+                                    ]);
+                                    return (
+                                      current &&
+                                      current <=
+                                        momenttz(
+                                          endDate2?.[1],
+                                          "YYYY-MM-DD"
+                                        ).add(1, "day")
+                                    );
+
+                                  default:
+                                    return (
+                                      current &&
+                                      current < momenttz().subtract(1, "day")
+                                    );
+                                }
+                              }}
+                              format={"DD/MM/YYYY"}
+                              className="w-full"
+                            />
+                          </ConfigProvider>
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, "value"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Chưa nhập giá trị hợp đồng!",
+                            },
+                            {
+                              type: "number",
+                              min: 1,
+                              message: "Giá trị không hợp lệ!",
+                            },
+                          ]}
+                        >
+                          <InputNumber
+                            size="large"
+                            // value={form.getFieldValue([
+                            //   "payment-rules",
+                            //   key,
+                            //   "value",
+                            // ])}
+                            className="w-full"
+                            placeholder="Nhập giá trị hợp đồng"
+                            min={0}
+                            max={
+                              key === 0
+                                ? totalContractValue -
+                                  (form.getFieldValue([
+                                    "payment-rules",
+                                    1,
+                                    "value",
+                                  ]) ?? 0) -
+                                  (form.getFieldValue([
+                                    "payment-rules",
+                                    2,
+                                    "value",
+                                  ]) ?? 0)
+                                : key === 1
+                                ? totalContractValue -
+                                  (form.getFieldValue([
+                                    "payment-rules",
+                                    0,
+                                    "value",
+                                  ]) ?? 0) -
+                                  (form.getFieldValue([
+                                    "payment-rules",
+                                    2,
+                                    "value",
+                                  ]) ?? 0)
+                                : key === 2
+                                ? totalContractValue -
+                                  (form.getFieldValue([
+                                    "payment-rules",
+                                    0,
+                                    "value",
+                                  ]) ?? 0) -
+                                  (form.getFieldValue([
+                                    "payment-rules",
+                                    1,
+                                    "value",
+                                  ]) ?? 0)
+                                : null
+                            }
+                            step={100000}
+                            defaultValue={
+                              key === 0
+                                ? totalContractValue
+                                : key === 1
+                                ? totalContractValue -
+                                  (form.getFieldValue([
+                                    "payment-rules",
+                                    0,
+                                    "value",
+                                  ]) ?? 0)
+                                : key === 2
+                                ? totalContractValue -
+                                  (form.getFieldValue([
+                                    "payment-rules",
+                                    0,
+                                    "value",
+                                  ]) ?? 0) -
+                                  (form.getFieldValue([
+                                    "payment-rules",
+                                    1,
+                                    "value",
+                                  ]) ?? 0)
+                                : undefined
+                            }
+                            onChange={(value) => {
+                              form.setFieldsValue({
+                                [["payment-rules", key, "value"]]: value,
+                              });
+
+                              switch (key) {
+                                case 0:
+                                  setUsedTotalContractValue(value ?? 0);
+
+                                  if (numOfContractValue === 2)
+                                    form.resetFields([
+                                      ["payment-rules", 1, "value"],
+                                    ]);
+                                  if (numOfContractValue === 3) {
+                                    form.resetFields([
+                                      ["payment-rules", 1, "value"],
+                                    ]);
+                                    form.resetFields([
+                                      ["payment-rules", 2, "value"],
+                                    ]);
+                                  }
+                                  break;
+                                case 1:
+                                  setUsedTotalContractValue(
+                                    (value ?? 0) +
+                                      (form.getFieldValue([
+                                        "payment-rules",
+                                        0,
+                                        "value",
+                                      ]) ?? 0)
+                                  );
+                                  if (numOfContractValue === 3)
+                                    form.resetFields([
+                                      ["payment-rules", 2, "value"],
+                                    ]);
+                                  break;
+                                case 2:
+                                  setUsedTotalContractValue(
+                                    (value ?? 0) +
+                                      (form.getFieldValue([
+                                        "payment-rules",
+                                        0,
+                                        "value",
+                                      ]) ?? 0) +
+                                      (form.getFieldValue([
+                                        "payment-rules",
+                                        1,
+                                        "value",
+                                      ]) ?? 0)
+                                  );
+                                  break;
+
+                                default:
+                                  break;
+                              }
+                            }}
+                            formatter={(value) =>
+                              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            }
+                            parser={(value) => {
+                              form.setFieldsValue({
+                                contract: {
+                                  contractValue: +value.replace(/,/g, ""),
+                                },
+                              });
+                              return `${value}`.replace(/,/g, "");
+                            }}
+                            onStep={(value) => {
+                              form.setFieldsValue({
+                                contractValue: +value,
+                              });
+                            }}
+                          />
+                        </Form.Item>
+                        {/* <IoClose
+                          className="text-red-500 cursor-pointer"
+                          onClick={() => {
+                            remove(name);
+                            setNumOfContractValue((prev) => prev - 1);
+                            console.log("key > ", key);
+                            console.log(
+                              form.getFieldValue([
+                                "payment-rules",
+                                key,
+                                "value",
+                              ])
+                            );
+                            console.log(
+                              form.getFieldValue(["payment-rules", key, "date"])
+                            );
+                            if (
+                              form.getFieldValue([
+                                "payment-rules",
+                                key,
+                                "value",
+                              ])
+                            ) {
+                              form.resetFields([
+                                ["payment-rules", key, "value"],
+                              ]);
+                            }
+                            if (
+                              form.getFieldValue(["payment-rules", key, "date"])
+                            ) {
+                              form.resetFields([
+                                ["payment-rules", key, "date"],
+                              ]);
+                            }
+
+                            setUsedTotalContractValue(
+                              (form.getFieldValue([
+                                "payment-rules",
+                                0,
+                                "value",
+                              ]) ?? 0) +
+                                (form.getFieldValue([
+                                  "payment-rules",
+                                  1,
+                                  "value",
+                                ]) ?? 0) +
+                                (form.getFieldValue([
+                                  "payment-rules",
+                                  2,
+                                  "value",
+                                ]) ?? 0)
+                            );
+                          }}
+                        /> */}
+                      </Space>
+                    );
+                  })}
+                  {numOfContractValue < 3 && (
+                    <Form.Item className="w-fit">
+                      <Button
+                        type="default"
+                        onClick={() => {
+                          const formValue = form.getFieldValue("payment-rules");
+
+                          if (numOfContractValue === 0) {
+                            if (
+                              totalContractValue - usedTotalContractValue ===
+                              0
+                            ) {
+                              messageApi.open({
+                                type: "error",
+                                content: "Đã sử dụng hết khoản chi !",
+                              });
+                            } else {
+                              add();
+                              setNumOfContractValue((prev) => prev + 1);
+                              form.setFieldsValue({
+                                [["payment-rules", 0, "value"]]:
+                                  totalContractValue,
+                              });
+                              setUsedTotalContractValue(totalContractValue);
+                            }
+                          } else if (numOfContractValue === 1) {
+                            if (
+                              formValue?.[0]?.title &&
+                              formValue?.[0]?.date &&
+                              formValue?.[0]?.value &&
+                              totalContractValue - usedTotalContractValue !== 0
+                            ) {
+                              add();
+                              setNumOfContractValue((prev) => prev + 1);
+                              form.setFieldsValue({
+                                [["payment-rules", 1, "value"]]:
+                                  totalContractValue -
+                                  form.getFieldValue([
+                                    "payment-rules",
+                                    0,
+                                    "value",
+                                  ]),
+                              });
+                              setUsedTotalContractValue(totalContractValue);
+                            } else if (
+                              totalContractValue - usedTotalContractValue ===
+                              0
+                            ) {
+                              messageApi.open({
+                                type: "error",
+                                content: "Đã sử dụng hết khoản chi !",
+                              });
+                            } else {
+                              messageApi.open({
+                                type: "error",
+                                content: "Hãy điền đủ thông tin trước !",
+                              });
+                            }
+                          } else if (numOfContractValue === 2) {
+                            if (
+                              formValue?.[0]?.title &&
+                              formValue?.[0]?.date &&
+                              formValue?.[0]?.value &&
+                              formValue?.[1]?.title &&
+                              formValue?.[1]?.date &&
+                              formValue?.[1]?.value &&
+                              totalContractValue - usedTotalContractValue !== 0
+                            ) {
+                              add();
+                              setNumOfContractValue((prev) => prev + 1);
+                              form.setFieldsValue({
+                                [["payment-rules", 2, "value"]]:
+                                  totalContractValue -
+                                  form.getFieldValue([
+                                    "payment-rules",
+                                    0,
+                                    "value",
+                                  ]) -
+                                  form.getFieldValue([
+                                    "payment-rules",
+                                    1,
+                                    "value",
+                                  ]),
+                              });
+                              setUsedTotalContractValue(totalContractValue);
+                            } else if (
+                              totalContractValue - usedTotalContractValue ===
+                              0
+                            ) {
+                              messageApi.open({
+                                type: "error",
+                                content: "Đã sử dụng hết khoản chi !",
+                              });
+                            } else {
+                              messageApi.open({
+                                type: "error",
+                                content: "Hãy điền đủ thông tin trước !",
+                              });
+                            }
+                          }
+                        }}
+                        block
+                      >
+                        Thêm đợt
+                      </Button>
+                    </Form.Item>
+                  )}
+                </>
+              )}
+            </Form.List>
+          </>
+
           {!readOnly && (
             <div className="text-center mt-8 mb-6">
               <Popconfirm
@@ -675,7 +1226,19 @@ const ContractPage = () => {
                 cancelText="Không"
                 placement="top"
               >
-                <Button size="large" type="primary">
+                <Button
+                  size="large"
+                  type={
+                    usedTotalContractValue !== totalContractValue ||
+                    numOfContractValue === 0
+                      ? "default"
+                      : "primary"
+                  }
+                  disabled={
+                    usedTotalContractValue !== totalContractValue ||
+                    numOfContractValue === 0
+                  }
+                >
                   {hasContract ? "Cập nhật hợp đồng" : "Tạo hợp đồng"}
                 </Button>
               </Popconfirm>

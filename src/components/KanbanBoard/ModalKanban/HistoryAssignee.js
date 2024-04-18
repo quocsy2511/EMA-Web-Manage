@@ -8,9 +8,9 @@ import {
 import { Avatar, Empty, Timeline, Tooltip } from "antd";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
+import { FaCrown } from "react-icons/fa";
 
 const HistoryAssignee = ({ taskSelected }) => {
-
   const startDate = moment(taskSelected?.startDate).format("DD-MM-YYYY");
   const endDate = moment(taskSelected?.endDate).format("DD-MM-YYYY");
   const status = taskSelected?.status;
@@ -28,7 +28,6 @@ const HistoryAssignee = ({ taskSelected }) => {
         }
         return task;
       });
-
       processedTasks.sort((a, b) => moment(a.newAt).diff(moment(b.newAt)));
       setAssignTasks(processedTasks);
     }
@@ -94,6 +93,11 @@ const HistoryAssignee = ({ taskSelected }) => {
                           >
                             {user?.user?.profile?.fullName}
                           </p>
+                          {user?.isLeader && (
+                            <div>
+                              <FaCrown className="text-orange-500" />
+                            </div>
+                          )}
                         </div>
                         <Tooltip title="note">
                           {user?.status === "inactive" ? (
