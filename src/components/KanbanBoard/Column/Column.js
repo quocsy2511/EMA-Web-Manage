@@ -1,5 +1,5 @@
 import { SwapRightOutlined } from "@ant-design/icons";
-import { Tooltip } from "antd";
+import { Progress, Tooltip } from "antd";
 import { AnimatePresence } from "framer-motion";
 import moment from "moment";
 import React, { memo, useEffect, useState } from "react";
@@ -41,7 +41,7 @@ const Column = ({
   };
 
   let completed = 0;
-
+  let completionPercentage = 0;
   let subTask = TaskParent?.subTask;
 
   subTask?.forEach((task) => {
@@ -49,6 +49,12 @@ const Column = ({
       completed++;
     }
   });
+
+  if (TaskParent && subTask?.length > 0) {
+    completionPercentage = ((completed / subTask?.length) * 100).toFixed(0);
+  } else {
+    completionPercentage = 0;
+  }
 
   const filteredSubTask = subTask?.filter((task) => {
     if (selectedStatus === "clear") {
@@ -119,6 +125,14 @@ const Column = ({
                       "DD-MM-YYYY"
                     )}
                   </p>
+                  <div className="pr-1 text-white">
+                    <Progress
+                      percent={completionPercentage}
+                      size="small"
+                      className="m-0 text-gray-50"
+                      trailColor="white"
+                    />
+                  </div>
                 </div>
               </Tooltip>
             </div>

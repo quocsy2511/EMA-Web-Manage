@@ -210,14 +210,38 @@ const BudgetTransactionModal = ({
                         </div>
                       )}
                     </div>
+                    {transaction?.status === "ACCEPTED" && (
+                      <div className="w-[50%] flex flex-row justify-end items-start gap-x-2">
+                        <Popconfirm
+                          title="Duyệt yêu cầu"
+                          description="Bạn có chắc chắn xác nhận yêu cầu này ?"
+                          onConfirm={() => confirm(transaction, "SUCCESS")}
+                          okText="Xác nhận"
+                          cancelText="Huỷ"
+                          key={transaction?.id}
+                          okButtonProps={{
+                            loading: isLoadingAccept,
+                          }}
+                        >
+                          <Button
+                            type="primary"
+                            // loading={isLoadingAccept}
+                            key={transaction?.id}
+                          >
+                            Xác nhận yêu cầu
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    )}
+
                     {transaction?.status === "PENDING" &&
                       transaction?.amount <= remainingBudget && (
                         <div className="w-[50%] flex flex-row justify-end items-start gap-x-2">
                           <Popconfirm
                             title="Duyệt yêu cầu"
                             description="Bạn có chắc chắn xác nhận yêu cầu này ?"
-                            onConfirm={() => confirm(transaction, "SUCCESS")}
-                            okText="Xác nhận"
+                            onConfirm={() => confirm(transaction, "ACCEPTED")}
+                            okText="Chấp nhận"
                             cancelText="Huỷ"
                             key={transaction?.id}
                             okButtonProps={{

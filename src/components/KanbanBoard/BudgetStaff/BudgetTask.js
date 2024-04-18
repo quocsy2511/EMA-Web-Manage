@@ -97,10 +97,16 @@ const BudgetTask = ({
         {budgetItem?.itemExisted?.tasks?.length > 0 ? (
           budgetItem?.itemExisted?.tasks?.map((subTask, index) => {
             let filterSub = [];
-            if (subTask?.transactions?.length > 0)
+            let filterSubAccepted = [];
+            if (subTask?.transactions?.length > 0) {
               filterSub = subTask?.transactions?.filter(
                 (item) => item?.status === "PENDING"
               );
+
+              filterSubAccepted = subTask?.transactions?.filter(
+                (item) => item?.status === "ACCEPTED"
+              );
+            }
 
             return (
               <div
@@ -123,6 +129,8 @@ const BudgetTask = ({
                         subTask?.transactions?.length > 0
                           ? filterSub?.length > 0
                             ? `Mới ${filterSub?.length}`
+                            : filterSubAccepted?.length > 0
+                            ? `Đã duyệt ${filterSubAccepted?.length}`
                             : "Hoàn thành"
                           : "Chưa có"
                       }
@@ -130,8 +138,10 @@ const BudgetTask = ({
                         subTask?.transactions?.length > 0
                           ? filterSub?.length > 0
                             ? "gold"
+                            : filterSubAccepted?.length > 0
+                            ? "green"
                             : ""
-                          : "lime"
+                          : "cyan"
                       }
                     >
                       <Card
