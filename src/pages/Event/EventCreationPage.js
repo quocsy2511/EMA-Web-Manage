@@ -55,7 +55,10 @@ const DefaultTemplateTask = memo(
     handleUpdateDesc,
     handleUpdatePercentage,
   }) => {
+    // console.log("🚀 ~ task:", task);
     const [descText, setDescText] = useState();
+    const today = moment().format("DD-MM-YYYY");
+    // console.log("🚀 ~ today:", today);
 
     useEffect(() => {
       let identifier;
@@ -132,6 +135,26 @@ const DefaultTemplateTask = memo(
           </div>
 
           <div className="p-5 pt-3 pb-12">
+            <div className="mb-4">
+              <Title title="Thời gian" />
+              <RangePicker
+                className="mt-2"
+                disabled
+                placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
+                // disabledDate={disabledDate}
+                // onChange={onChangeDate}
+                format="DD-MM-YYYY"
+                allowClear={false}
+                defaultValue={
+                  task?.itemPlannedEndDate && task?.itemPlannedStartDate
+                    ? [
+                        dayjs(task?.itemPlannedStartDate, "YYYY-MM-DD"),
+                        dayjs(task?.itemPlannedEndDate, "YYYY-MM-DD"),
+                      ]
+                    : [dayjs(today, "DD-MM-YYYY"), dayjs(today, "DD-MM-YYYY")]
+                }
+              />
+            </div>
             <div>
               <Title title="Mô tả" />
 
@@ -238,6 +261,7 @@ const EventCreationPage = () => {
   const location = useLocation();
 
   const contactId = location.state?.contactId;
+  // console.log("🚀 ~ contactId:", contactId);
 
   const [fileList, setFileList] = useState();
   const [current, setCurrent] = useState(0);
@@ -291,6 +315,7 @@ const EventCreationPage = () => {
     isError: planningIsError,
   } = useQuery(["planning", contactId], () => getPlanByContact(contactId), {
     select: (data) => {
+      // console.log("🚀 ~ data:", data);
       return data?.plan
         ?.map((category) =>
           category?.items?.map((item, index) => ({
@@ -302,6 +327,8 @@ const EventCreationPage = () => {
             itemPlannedAmount: item?.plannedAmount,
             itemPlannedPrice: item?.plannedPrice,
             itemPercentage: 80,
+            itemPlannedEndDate: item?.plannedEndDate,
+            itemPlannedStartDate: item?.plannedStartDate,
           }))
         )
         .flat();
@@ -341,16 +368,26 @@ const EventCreationPage = () => {
         variables.event = {
           ...variables.event,
           coverUrl: data.downloadUrl,
-          listTask: taskList?.map((item) => ({
-            title: item?.itemName,
-            desc: JSON.stringify(item?.itemDescription?.ops),
-            priority: item?.itemPriority,
-            itemId: item?.itemId,
-            itemPercentage: item?.itemPercentage,
-          })),
+          listTask: taskList?.map((item) => {
+            return {
+              title: item?.itemName,
+              desc: JSON.stringify(item?.itemDescription?.ops),
+              priority: item?.itemPriority,
+              itemId: item?.itemId,
+              itemPercentage: item?.itemPercentage,
+              startDate: moment(
+                item?.itemPlannedStartDate,
+                "YYYY-MM-DD"
+              ).format("YYYY-MM-DD"),
+              endDate: moment(item?.itemPlannedEndDate, "YYYY-MM-DD").format(
+                "YYYY-MM-DD"
+              ),
+            };
+          }),
           listDivision: selectedDivision,
           contactId,
         };
+        console.log("🚀 ~ variables.event :", variables.event);
         createEventMutate(variables.event);
       },
       onError: () => {
@@ -390,6 +427,7 @@ const EventCreationPage = () => {
   };
 
   const onFinish = (values) => {
+    console.log("🚀 ~ onFinish ~ values:", values);
     if (current === 0) {
       setCurrent((prev) => prev + 1);
     } else {
@@ -631,7 +669,7 @@ const EventCreationPage = () => {
           <div className="flex space-x-10 items-center">
             <Form.Item
               className="w-[30%]"
-              label={<Title title="Ngân sách ước lượng" />}
+              label={<Title title="Ngân sách " />}
               name="estBudget"
               rules={[
                 {

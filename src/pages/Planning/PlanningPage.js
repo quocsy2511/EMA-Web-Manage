@@ -23,6 +23,7 @@ import {
 } from "../../apis/planning";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 import { URL } from "../../constants/api";
+import moment from "moment";
 
 const PlanningPage = () => {
   const location = useLocation();
@@ -63,6 +64,7 @@ const PlanningPage = () => {
     isError: planningIsError,
   } = useQuery(["planning", contactId], () => getPlanByContact(contactId), {
     select: (data) => {
+      console.log("🚀 ~ PlanningPage ~ data:", data);
       return data?.plan
         ?.map((category) =>
           category?.items?.map((item, index) => ({
@@ -75,6 +77,8 @@ const PlanningPage = () => {
             itemPlannedUnit: item?.plannedUnit, //
             itemPlannedAmount: item?.plannedAmount,
             itemPlannedPrice: item?.plannedPrice,
+            itemPlannedStartDate: item?.plannedStartDate,
+            itemPlannedEndDate: item?.plannedEndDate,
           }))
         )
         .flat();
@@ -87,17 +91,22 @@ const PlanningPage = () => {
       onSuccess: (data) => {
         const tableData = {
           success: data?.Success?.map((category) =>
-            category?.items?.map((item, index) => ({
-              key: category?.categoryName + index,
+            category?.items?.map((item, index) => {
+              console.log("🚀 ~ category?.items?.map ~ item:", item);
 
-              categoryName: category?.categoryName, //
-              itemName: item?.itemName,
-              itemDescription: item?.description,
-              itemPriority: item?.priority,
-              itemPlannedUnit: item?.plannedUnit, //
-              itemPlannedAmount: item?.plannedAmount,
-              itemPlannedPrice: item?.plannedPrice,
-            }))
+              return {
+                key: category?.categoryName + index,
+                categoryName: category?.categoryName, //
+                itemName: item?.itemName,
+                itemDescription: item?.description,
+                itemPriority: item?.priority,
+                itemPlannedUnit: item?.plannedUnit, //
+                itemPlannedAmount: item?.plannedAmount,
+                itemPlannedPrice: item?.plannedPrice,
+                itemPlannedStartDate: item?.plannedStartDate,
+                itemPlannedEndDate: item?.plannedEndDate,
+              };
+            })
           ).flat(),
           error: data?.Errors,
 
@@ -233,9 +242,25 @@ const PlanningPage = () => {
         contactId,
         hasContract,
         readOnly,
-        totalContract: planningData?.reduce((total, item) => {
-          return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
-        }, 0),
+        // totalContract: planningData?.reduce((total, item) => {
+        //   return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
+        // }, 0),
+        totalContract:
+          planningData?.reduce((total, item) => {
+            return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
+          }, 0) +
+          planningData?.reduce((total, item) => {
+            return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
+          }, 0) *
+            0.05 +
+          (planningData?.reduce((total, item) => {
+            return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
+          }, 0) *
+            0.05 +
+            planningData?.reduce((total, item) => {
+              return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
+            }, 0)) *
+            0.1,
       },
     });
   };
@@ -385,6 +410,28 @@ const PlanningPage = () => {
                     align: "center",
                   },
                   {
+                    title: "Ngày bắt đầu",
+                    width: "10%",
+                    dataIndex: "itemPlannedStartDate",
+                    align: "center",
+                    render: (text) => (
+                      <p className="line-clamp-4">
+                        {moment(text).format("DD/MM/YYYY")}
+                      </p>
+                    ),
+                  },
+                  {
+                    title: "Ngày kết thúc",
+                    width: "10%",
+                    dataIndex: "itemPlannedEndDate",
+                    align: "center",
+                    render: (text) => (
+                      <p className="line-clamp-4">
+                        {moment(text).format("DD/MM/YYYY")}
+                      </p>
+                    ),
+                  },
+                  {
                     title: "Đơn giá",
                     dataIndex: "itemPlannedPrice",
                     render: (text) => (
@@ -415,7 +462,7 @@ const PlanningPage = () => {
 
               <p className="text-right text-lg mt-5">
                 Tổng cộng :{" "}
-                <span className="text-4xl font-semibold">
+                <span className="text-3xl font-semibold">
                   {planningData
                     ?.reduce((total, item) => {
                       return (
@@ -423,6 +470,72 @@ const PlanningPage = () => {
                       );
                     }, 0)
                     .toLocaleString()}{" "}
+                  VNĐ
+                </span>
+              </p>
+              <p className="text-right text-lg mt-5">
+                Dự phòng (5%):{" "}
+                <span className="text-3xl font-semibold">
+                  {(
+                    planningData?.reduce((total, item) => {
+                      return (
+                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
+                      );
+                    }, 0) * 0.05
+                  ).toLocaleString()}{" "}
+                  VNĐ
+                </span>
+              </p>
+              <p className="text-right text-lg mt-5">
+                VAT (10%):{" "}
+                <span className="text-3xl font-semibold">
+                  {(
+                    (planningData?.reduce((total, item) => {
+                      return (
+                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
+                      );
+                    }, 0) *
+                      0.05 +
+                      planningData?.reduce((total, item) => {
+                        return (
+                          total +
+                          item?.itemPlannedAmount * item?.itemPlannedPrice
+                        );
+                      }, 0)) *
+                    0.1
+                  ).toLocaleString()}{" "}
+                  VNĐ
+                </span>
+              </p>
+              <p className="text-right text-lg mt-5">
+                Thành tiền:{" "}
+                <span className="text-3xl font-semibold">
+                  {(
+                    planningData?.reduce((total, item) => {
+                      return (
+                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
+                      );
+                    }, 0) +
+                    planningData?.reduce((total, item) => {
+                      return (
+                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
+                      );
+                    }, 0) *
+                      0.05 +
+                    (planningData?.reduce((total, item) => {
+                      return (
+                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
+                      );
+                    }, 0) *
+                      0.05 +
+                      planningData?.reduce((total, item) => {
+                        return (
+                          total +
+                          item?.itemPlannedAmount * item?.itemPlannedPrice
+                        );
+                      }, 0)) *
+                      0.1
+                  )?.toLocaleString() || 0}{" "}
                   VNĐ
                 </span>
               </p>
@@ -527,6 +640,28 @@ const PlanningPage = () => {
                       align: "center",
                     },
                     {
+                      title: "Ngày bắt đầu",
+                      width: "10%",
+                      dataIndex: "itemPlannedStartDate",
+                      align: "center",
+                      render: (text) => (
+                        <p className="line-clamp-4">
+                          {moment(text).format("DD/MM/YYYY")}
+                        </p>
+                      ),
+                    },
+                    {
+                      title: "Ngày kết thúc",
+                      width: "10%",
+                      dataIndex: "itemPlannedEndDate",
+                      align: "center",
+                      render: (text) => (
+                        <p className="line-clamp-4">
+                          {moment(text).format("DD/MM/YYYY")}
+                        </p>
+                      ),
+                    },
+                    {
                       title: "Đơn giá",
                       dataIndex: "itemPlannedPrice",
                       render: (text) => (
@@ -555,8 +690,8 @@ const PlanningPage = () => {
                   pagination={false}
                 />
                 <p className="text-right text-lg mt-5">
-                  Tổng cộng :{" "}
-                  <span className="text-4xl font-semibold">
+                  Tổng cộng:{" "}
+                  <span className="text-3xl font-semibold">
                     {tableData?.success
                       ?.reduce((total, item) => {
                         return (
@@ -568,6 +703,78 @@ const PlanningPage = () => {
                     VNĐ
                   </span>
                 </p>
+                <p className="text-right text-lg mt-5">
+                  Dự phòng (5%):{" "}
+                  <span className="text-3xl font-semibold">
+                    {(
+                      tableData?.success?.reduce((total, item) => {
+                        return (
+                          total +
+                          item?.itemPlannedAmount * item?.itemPlannedPrice
+                        );
+                      }, 0) * 0.05
+                    )?.toLocaleString() || 0}{" "}
+                    VNĐ
+                  </span>
+                </p>
+                <p className="text-right text-lg mt-5">
+                  VAT (10%):{" "}
+                  <span className="text-3xl font-semibold">
+                    {(
+                      (tableData?.success?.reduce((total, item) => {
+                        return (
+                          total +
+                          item?.itemPlannedAmount * item?.itemPlannedPrice
+                        );
+                      }, 0) *
+                        0.05 +
+                        tableData?.success?.reduce((total, item) => {
+                          return (
+                            total +
+                            item?.itemPlannedAmount * item?.itemPlannedPrice
+                          );
+                        }, 0)) *
+                      0.1
+                    )?.toLocaleString() || 0}{" "}
+                    VNĐ
+                  </span>
+                </p>
+                <p className="text-right text-lg mt-5">
+                  Thành tiền:{" "}
+                  <span className="text-3xl font-semibold">
+                    {(
+                      tableData?.success?.reduce((total, item) => {
+                        return (
+                          total +
+                          item?.itemPlannedAmount * item?.itemPlannedPrice
+                        );
+                      }, 0) +
+                      tableData?.success?.reduce((total, item) => {
+                        return (
+                          total +
+                          item?.itemPlannedAmount * item?.itemPlannedPrice
+                        );
+                      }, 0) *
+                        0.05 +
+                      (tableData?.success?.reduce((total, item) => {
+                        return (
+                          total +
+                          item?.itemPlannedAmount * item?.itemPlannedPrice
+                        );
+                      }, 0) *
+                        0.05 +
+                        tableData?.success?.reduce((total, item) => {
+                          return (
+                            total +
+                            item?.itemPlannedAmount * item?.itemPlannedPrice
+                          );
+                        }, 0)) *
+                        0.1
+                    )?.toLocaleString() || 0}{" "}
+                    VNĐ
+                  </span>
+                </p>
+
                 {tableData?.TotalErrorsRecords !== 0 && (
                   <div className="mx-10 mt-5">
                     <p className="text-xl font-medium">
