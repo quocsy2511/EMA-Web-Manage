@@ -170,33 +170,40 @@ const ManagerPersonnelPage = () => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
+  // Check if the row is editing or not
   const checkEditing = (record) => {
     return record.key === editingRowKey;
   };
 
+  // Submit form
   const onFinish = (values) => {
-    // const userId = form.getFieldValue("id");
-    // const avatar = form.getFieldValue("avatar");
-    // const dataDivisionForm = form.getFieldValue("divisionName");
-    // const divisionId = divisionsData?.filter((item) => {
-    //   if (
-    //     dataDivisionForm === item?.id ||
-    //     dataDivisionForm === item?.divisionName
-    //   ) {
-    //     return item;
-    //   }
-    // })[0].id;
-    // const tranformValues = {
-    //   ...values,
-    //   userId,
-    //   avatar,
-    //   divisionId,
-    //   roleId: values?.roleId,
-    // };
-    // const { divisionName, role, ...payload } = tranformValues;
-    // mutate(payload);
+    const userId = form.getFieldValue("id");
+    const avatar = form.getFieldValue("avatar");
+
+    const dataDivisionForm = form.getFieldValue("divisionName");
+
+    const divisionId = divisionsData?.filter((item) => {
+      if (
+        dataDivisionForm === item?.id ||
+        dataDivisionForm === item?.divisionName
+      ) {
+        return item;
+      }
+    })[0].id;
+
+    const tranformValues = {
+      ...values,
+      userId,
+      avatar,
+      divisionId,
+      roleId: values?.roleId,
+    };
+    const { divisionName, role, ...payload } = tranformValues;
+
+    mutate(payload);
   };
 
+  // Handle delete 1 record
   const handleDeleteAction = (record) => {
     updateUserStatusMutate({ userId: record?.id, status: "INACTIVE" });
   };
@@ -217,6 +224,12 @@ const ManagerPersonnelPage = () => {
       );
       setFilteredData(filterSearchedData);
     }
+  };
+
+  const handleResetTable = () => {
+    setSortedInfo({});
+    setFilteredInfo({});
+    setSearchText("");
   };
 
   //  =========================================================================
@@ -335,6 +348,7 @@ const ManagerPersonnelPage = () => {
       ),
   });
   //  =========================================================================
+  // address - gender - nationalId
 
   const columns = [
     {
@@ -482,12 +496,10 @@ const ManagerPersonnelPage = () => {
       width: 150,
       editTable: true,
       filters:
-        divisionsData
-          ?.filter((division) => division?.status === true)
-          .map((division) => ({
-            text: division?.divisionName,
-            value: division?.id,
-          })) ?? [],
+        divisionsData?.map((division) => ({
+          text: division?.divisionName,
+          value: division?.id,
+        })) ?? [],
       filteredValue: filteredInfo?.divisionName || null,
       onFilter: (value, record) => {
         return record?.divisionId === value;
@@ -641,6 +653,7 @@ const ManagerPersonnelPage = () => {
     children,
     ...restProps
   }) => {
+    // Setup input field type
     const role = roles?.find(
       (role) =>
         role?.value === form.getFieldValue("role") ||

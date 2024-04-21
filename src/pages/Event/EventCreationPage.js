@@ -135,31 +135,52 @@ const DefaultTemplateTask = memo(
           </div>
 
           <div className="p-5 pt-3 pb-12">
-            <div className="mb-4">
-              <Title title="Thời gian" />
-              <RangePicker
-                className="mt-2"
-                disabled
-                placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
-                // disabledDate={disabledDate}
-                // onChange={onChangeDate}
-                format="DD-MM-YYYY"
-                allowClear={false}
-                defaultValue={
-                  task?.itemPlannedEndDate && task?.itemPlannedStartDate
-                    ? [
-                        dayjs(task?.itemPlannedStartDate, "YYYY-MM-DD"),
-                        dayjs(task?.itemPlannedEndDate, "YYYY-MM-DD"),
-                      ]
-                    : [dayjs(today, "DD-MM-YYYY"), dayjs(today, "DD-MM-YYYY")]
-                }
-              />
+            <div className="flex justify-between mb-4">
+              <div className="">
+                <Title title="Thời gian" />
+                <div className="relative">
+                  <RangePicker
+                    className="mt-2"
+                    placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
+                    format="DD-MM-YYYY"
+                    allowClear={false}
+                    defaultValue={
+                      task?.itemPlannedEndDate && task?.itemPlannedStartDate
+                        ? [
+                            dayjs(task?.itemPlannedStartDate, "YYYY-MM-DD"),
+                            dayjs(task?.itemPlannedEndDate, "YYYY-MM-DD"),
+                          ]
+                        : [
+                            dayjs(today, "DD-MM-YYYY"),
+                            dayjs(today, "DD-MM-YYYY"),
+                          ]
+                    }
+                    size="large"
+                  />
+                  <div className="absolute top-0 right-0 bottom-0 left-0" />
+                </div>
+              </div>
+              <div className="">
+                <Title title="Độ ưu tiên" />
+                <p
+                  className={clsx(
+                    "border px-2 py-1 rounded-lg text-sm text-center font-medium mt-2",
+                    {
+                      "border-green-500 text-green-600":
+                        task?.itemPriority === 1,
+                      "border-orange-400 text-orange-500":
+                        task?.itemPriority === 2,
+                      "border-red-400 text-red-500": task?.itemPriority === 3,
+                    }
+                  )}
+                >
+                  {renderPriority}
+                </p>
+              </div>
             </div>
             <div>
               <Title title="Mô tả" />
-
               <ReactQuill
-                // value={descText}
                 defaultValue={task?.itemDescription}
                 className="mt-2 h-20"
                 theme="snow"
@@ -171,47 +192,33 @@ const DefaultTemplateTask = memo(
             </div>
           </div>
 
-          <div className="p-5 pt-3 pb-8 flex justify-between">
-            <div className="flex space-x-4 items-center">
-              <Title title="Độ ưu tiên" />
-              <p
-                className={clsx(
-                  "border px-2 py-0.5 rounded-lg text-sm font-medium",
-                  {
-                    "border-green-500 text-green-600": task?.itemPriority === 1,
-                    "border-orange-400 text-orange-500":
-                      task?.itemPriority === 2,
-                    "border-red-400 text-red-500": task?.itemPriority === 3,
-                  }
-                )}
-              >
-                {renderPriority}
-              </p>
-            </div>
-
-            <div className="w-1/5">
-              <ConfigProvider
-                theme={{
-                  token: {
-                    fontSize: 16,
-                  },
-                }}
-              >
-                <InputNumber
-                  defaultValue={task?.itemPercentage}
-                  placeholder="Outlined"
-                  addonAfter={<LuPercent />}
-                  onChange={(value) => {
-                    handleUpdatePercentage(task?.itemId, value);
+          <div className="p-5 pt-3 pb-8 flex justify-end">
+            <div className="flex items-center gap-x-3 justify-end">
+              <Title title="Phần trăm" />
+              <div className="w-1/4">
+                <ConfigProvider
+                  theme={{
+                    token: {
+                      fontSize: 16,
+                    },
                   }}
-                  min={70}
-                  max={90}
-                  step={5}
-                  onStep={(value) => {
-                    handleUpdatePercentage(task?.itemId, value);
-                  }}
-                />
-              </ConfigProvider>
+                >
+                  <InputNumber
+                    defaultValue={task?.itemPercentage}
+                    placeholder="Outlined"
+                    addonAfter={<LuPercent />}
+                    onChange={(value) => {
+                      handleUpdatePercentage(task?.itemId, value);
+                    }}
+                    min={70}
+                    max={90}
+                    step={5}
+                    onStep={(value) => {
+                      handleUpdatePercentage(task?.itemId, value);
+                    }}
+                  />
+                </ConfigProvider>
+              </div>
             </div>
           </div>
         </div>
@@ -811,7 +818,11 @@ const EventCreationPage = () => {
                   },
                 }}
               >
-                <Button onClick={handleSelectAllDivision}>
+                <Button
+                  disabled={selectedDivision?.length === 0}
+                  type={selectedDivision?.length === 0 ? "default" : "primary"}
+                  onClick={handleSelectAllDivision}
+                >
                   {selectedDivision?.length === divisions?.length
                     ? "Bỏ chọn tất cả"
                     : "Chọn tất cả"}
@@ -851,25 +862,6 @@ const EventCreationPage = () => {
               ))}
             </div>
           </div>
-
-          {/* <div className="mb-10">
-            <Title title="Hạng mục mẫu" />
-            <div className="flex flex-wrap items-center mt-5">
-              {!!selectTemplateTasks?.length &&
-                selectTemplateTasks?.map((item) => (
-                  <DefaultTemplateTask custom />
-                ))}
-
-              <div className="w-[45%] mx-[2.5%] flex justify-center items-center">
-                <div
-                  onClick={() => setIsDrawerOpen(true)}
-                  className="w-28 h-28 flex justify-center items-center border-dashed border-4 rounded-xl cursor-pointer border-slate-200 group hover:border-black/30 transition-colors"
-                >
-                  <FaPlus className="text-2xl text-slate-200 group-hover:text-black/30 transition-colors" />
-                </div>
-              </div>
-            </div>
-          </div> */}
 
           <div className="">
             <Title title="Hạng mục mặc định" />

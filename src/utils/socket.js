@@ -57,7 +57,6 @@ export const socketListener = (dispatch) => {
 
   // Get online / offline user
   socket.on("onlineGroupUsersReceived", (data) => {
-
     dispatch(
       handleUpdateUsers({
         onlineUsers: data.onlineUsers,
@@ -72,7 +71,7 @@ export const displayNotification = (notification, queryClient) => {
   socket.on("notification", (data) => {
     console.log(" -------- displayNotification data:", data);
 
-    queryClient.invalidateQueries(["notifications", "10", 1, "ALL"]);
+    queryClient.invalidateQueries(["notifications", 10, 1, "ALL"]);
 
     notification.open({
       message: <p className="text-base">Đã nhận 1 thông báo</p>,

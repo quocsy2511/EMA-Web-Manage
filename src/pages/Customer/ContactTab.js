@@ -16,7 +16,7 @@ import { motion } from "framer-motion";
 import moment from "moment/moment";
 import React, { Fragment, memo, useEffect, useState } from "react";
 import { BsImages } from "react-icons/bs";
-import { IoRemoveOutline } from "react-icons/io5";
+import { IoRemoveOutline, IoDocumentAttach } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
 import { updateCustomerContacts } from "../../apis/contact";
 import ContactModal from "../../components/Modal/ContactModal";
@@ -232,6 +232,7 @@ const ContactTab = ({
         const hasContract = contracts?.find(
           (item) => item?.customerContactId === record?.id
         );
+        console.log("hasContract > ", hasContract);
 
         if (record?.status === "ACCEPTED") {
           if (hasContract) {
@@ -271,20 +272,13 @@ const ContactTab = ({
           if (hasContract && !!hasContract?.files?.length) {
             return (
               <div className="flex justify-center cursor-pointer">
-                <div className="relative">
-                  <BsImages className="text-blue-500 text-2xl" />
-                </div>
-                <div className="absolute left-0 right-0 opacity-0">
-                  <Image.PreviewGroup>
-                    {hasContract?.files?.map((file, index) => (
-                      <Image
-                        key={file?.id}
-                        width={index === 0 ? "1.5rem" : 0}
-                        src={file?.contractFileUrl}
-                      />
-                    ))}
-                  </Image.PreviewGroup>
-                </div>
+                <a
+                  key={hasContract?.files[0]?.id}
+                  href={hasContract?.files[0]?.contractFileUrl}
+                  target="_blank"
+                >
+                  <IoDocumentAttach className="text-blue-500 text-2xl" />
+                </a>
               </div>
             );
           } else {
