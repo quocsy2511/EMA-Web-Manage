@@ -715,6 +715,7 @@ const ContractPage = () => {
                       >
                         <Form.Item
                           {...restField}
+                          label={key === 0 && <Title title="Tên thời hạn" />}
                           name={[name, "title"]}
                           rules={[
                             {
@@ -726,8 +727,8 @@ const ContractPage = () => {
                           <Input placeholder="Tên thời hạn" size="large" />
                         </Form.Item>
                         <Form.Item
-                          className=""
                           {...restField}
+                          label={key === 0 && <Title title="Thời hạn" />}
                           name={[name, "date"]}
                           rules={[
                             {
@@ -881,6 +882,7 @@ const ContractPage = () => {
                         </Form.Item>
                         <Form.Item
                           {...restField}
+                          label={key === 0 && <Title title="Khoản thanh toán (VNĐ)" />}
                           name={[name, "value"]}
                           rules={[
                             {
@@ -896,11 +898,6 @@ const ContractPage = () => {
                         >
                           <InputNumber
                             size="large"
-                            // value={form.getFieldValue([
-                            //   "payment-rules",
-                            //   key,
-                            //   "value",
-                            // ])}
                             className="w-full"
                             placeholder="Nhập giá trị hợp đồng"
                             min={0}

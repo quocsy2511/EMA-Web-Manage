@@ -147,8 +147,8 @@ const DefaultTemplateTask = memo(
                     defaultValue={
                       task?.itemPlannedEndDate && task?.itemPlannedStartDate
                         ? [
-                            dayjs(task?.itemPlannedStartDate, "YYYY-MM-DD"),
-                            dayjs(task?.itemPlannedEndDate, "YYYY-MM-DD"),
+                            dayjs(task?.itemPlannedStartDate),
+                            dayjs(task?.itemPlannedEndDate),
                           ]
                         : [
                             dayjs(today, "DD-MM-YYYY"),
@@ -194,7 +194,7 @@ const DefaultTemplateTask = memo(
 
           <div className="p-5 pt-3 pb-8 flex justify-end">
             <div className="flex items-center gap-x-3 justify-end">
-              <Title title="Phần trăm" />
+              <Title title="Phần trăm chi tiêu" />
               <div className="w-1/4">
                 <ConfigProvider
                   theme={{
@@ -268,7 +268,6 @@ const EventCreationPage = () => {
   const location = useLocation();
 
   const contactId = location.state?.contactId;
-  // console.log("🚀 ~ contactId:", contactId);
 
   const [fileList, setFileList] = useState();
   const [current, setCurrent] = useState(0);
@@ -292,6 +291,7 @@ const EventCreationPage = () => {
         };
       },
       refetchOnWindowFocus: false,
+      enabled: !!contactId,
     }
   );
 
@@ -382,13 +382,10 @@ const EventCreationPage = () => {
               priority: item?.itemPriority,
               itemId: item?.itemId,
               itemPercentage: item?.itemPercentage,
-              startDate: moment(
-                item?.itemPlannedStartDate,
-                "YYYY-MM-DD"
-              ).format("YYYY-MM-DD"),
-              endDate: moment(item?.itemPlannedEndDate, "YYYY-MM-DD").format(
+              startDate: moment(item?.itemPlannedStartDate).format(
                 "YYYY-MM-DD"
               ),
+              endDate: moment(item?.itemPlannedEndDate).format("YYYY-MM-DD"),
             };
           }),
           listDivision: selectedDivision,
@@ -819,7 +816,6 @@ const EventCreationPage = () => {
                 }}
               >
                 <Button
-                  disabled={selectedDivision?.length === 0}
                   type={selectedDivision?.length === 0 ? "default" : "primary"}
                   onClick={handleSelectAllDivision}
                 >
