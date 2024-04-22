@@ -14,6 +14,7 @@ import defaultBanner from "../../../assets/images/default_banner_images.png";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 
 const EventItem = memo(({ event, gotoEventPage }) => {
+  console.log("🚀 ~ EventItem ~ event:", event);
   const LabelItem = memo(({ icon, text, tooltip }) => (
     <Tooltip title={tooltip} placement="topLeft">
       <motion.div layout className="flex space-x-3">
@@ -86,12 +87,12 @@ const EventItem = memo(({ event, gotoEventPage }) => {
                 icon={<LuCalendarClock className="text-xl text-orange-500" />}
                 text={
                   <p>
-                    {momenttz(event?.processingDate, "YYYY-MM-DD").format(
+                    {momenttz(event?.startDate, "DD/MM/YYYY").format(
                       "DD-MM-YYYY"
                     )}
                   </p>
                 }
-                tooltip="Thời gian tổ chức"
+                tooltip="Thời gian diễn ra sự kiện"
               />
             </div>
             <div className="flex-1">
@@ -104,7 +105,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
                     )}
                   </p>
                 }
-                tooltip="Thời gian kết thúc"
+                tooltip="Thời gian kết thúc sự kiện"
               />
             </div>
           </div>
@@ -112,26 +113,24 @@ const EventItem = memo(({ event, gotoEventPage }) => {
           <div className="flex space-x-10">
             <div className="flex-1">
               <LabelItem
+                icon={<LuCalendarClock className="text-xl text-blue-500" />}
+                text={
+                  <p>
+                    {momenttz(event?.processingDate, "YYYY-MM-DD").format(
+                      "DD-MM-YYYY"
+                    )}
+                  </p>
+                }
+                tooltip="Thời gian bắt đầu dự án"
+              />
+            </div>
+            <div className="flex-1">
+              <LabelItem
                 icon={<GrStatusInfo className="text-xl" />}
                 text={<p>{status}</p>}
                 tooltip="Trạng thái"
               />
             </div>
-            {/* <div className="flex-1">
-              <LabelItem
-                icon={<FaRegClock className="text-xl" />}
-                text={`${
-                  event?.totalTimeRemaining > 0 ? event?.totalTimeRemaining : 0
-                } ${
-                  event?.typeTimeRemaining === 1
-                    ? "ngày"
-                    : event?.typeTimeRemaining === 2
-                    ? "tháng"
-                    : "năm"
-                }`}
-                tooltip="Thời gian còn lại trước khi kết thúc sự kiện"
-              />
-            </div> */}
           </div>
         </div>
 
