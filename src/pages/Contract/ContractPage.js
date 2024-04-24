@@ -31,6 +31,7 @@ import {
 import { getEventType } from "../../apis/events";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
 import { IoClose } from "react-icons/io5";
+import moment from "moment-timezone";
 
 const { RangePicker } = DatePicker;
 
@@ -77,6 +78,7 @@ const ContractPage = () => {
       refetchOnWindowFocus: false,
     }
   );
+  console.log("contactInfo > ", contactInfo);
 
   const { data: eventType, isLoading: eventTypeIsLoading } = useQuery(
     ["event-type"],
@@ -538,7 +540,7 @@ const ContractPage = () => {
 
               <div className="flex space-x-10">
                 <Form.Item
-                  className="w-[40%]"
+                  className="w-[40%] relative cursor-not-allowed"
                   label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
                   name="date"
                   rules={[
@@ -596,6 +598,7 @@ const ContractPage = () => {
                       format={"DD/MM/YYYY"}
                     />
                   </ConfigProvider>
+                  <div className="absolute top-0 right-0 bottom-0 left-0" />
                 </Form.Item>
 
                 <Form.Item
@@ -632,18 +635,18 @@ const ContractPage = () => {
                       }}
                       disabledDate={(current) => {
                         const startDate = form.getFieldValue("date")?.[0];
-                        const endDate = form.getFieldValue("date")?.[1];
 
-                        if (!startDate && !endDate) {
+                        if (!startDate) {
                           return current && current < momenttz().startOf("day");
                         }
 
                         return (
-                          (current && current < momenttz().startOf("day")) ||
-                          current >
-                            momenttz(startDate, "YYYY-MM-DD")
-                              .add(1, "day")
-                              .startOf("day")
+                          current &&
+                          (current < momenttz().startOf("day") ||
+                            current >
+                              momenttz(startDate, "YYYY-MM-DD")
+                                .add(1, "day")
+                                .startOf("day"))
                         );
                       }}
                       format={"DD/MM/YYYY"}
@@ -652,7 +655,7 @@ const ContractPage = () => {
                 </Form.Item>
 
                 <Form.Item
-                  className="w-1/3"
+                  className="w-1/3 relative cursor-not-allowed"
                   label={<Title title="Thể loại sự kiện" />}
                   name="eventTypeId"
                   rules={[
@@ -664,6 +667,11 @@ const ContractPage = () => {
                 >
                   <Select
                     size="large"
+                    value={
+                      eventType.find(
+                        (item) => item?.id === contactInfo?.eventType
+                      )?.id
+                    }
                     options={
                       eventType?.map((item) => ({
                         value: item?.id,
@@ -672,8 +680,9 @@ const ContractPage = () => {
                     }
                     loading={eventTypeIsLoading}
                     placeholder="Chọn 1 thể loại"
-                    disabled
                   />
+
+                  <div className="absolute top-0 right-0 bottom-0 left-0" />
                 </Form.Item>
               </div>
             </div>
@@ -689,12 +698,6 @@ const ContractPage = () => {
             <p className="text-lg mb-4">
               Tổng :{" "}
               <span className="text-2xl font-semibold">
-                {/* {(
-                  (totalContractValue ?? 0) -
-                  (form.getFieldValue(["payment-rules", 0, "value"]) ?? 0) -
-                  (form.getFieldValue(["payment-rules", 1, "value"]) ?? 0) -
-                  (form.getFieldValue(["payment-rules", 2, "value"]) ?? 0)
-                ).toLocaleString()}{" "} */}
                 {(usedTotalContractValue ?? 0).toLocaleString()} /{" "}
                 {(totalContractValue ?? 0).toLocaleString()} VNĐ
               </span>
@@ -831,11 +834,17 @@ const ContractPage = () => {
                                 }
                               }}
                               disabledDate={(current) => {
+                                const endDate = momenttz(
+                                  contactInfo?.endDate,
+                                  "YYYY-MM-DD"
+                                );
                                 switch (key) {
                                   case 0:
                                     return (
                                       current &&
-                                      current < momenttz().subtract(1, "day")
+                                      (current <
+                                        momenttz().subtract(1, "day") ||
+                                        current > endDate)
                                     );
 
                                   case 1:
@@ -846,11 +855,12 @@ const ContractPage = () => {
                                     ]);
                                     return (
                                       current &&
-                                      current <=
+                                      (current <=
                                         momenttz(
                                           endDate1?.[1],
                                           "YYYY-MM-DD"
-                                        ).add(1, "day")
+                                        ).add(1, "day") ||
+                                        current > endDate)
                                     );
 
                                   case 2:
@@ -861,17 +871,20 @@ const ContractPage = () => {
                                     ]);
                                     return (
                                       current &&
-                                      current <=
+                                      (current <=
                                         momenttz(
                                           endDate2?.[1],
                                           "YYYY-MM-DD"
-                                        ).add(1, "day")
+                                        ).add(1, "day") ||
+                                        current > endDate)
                                     );
 
                                   default:
                                     return (
                                       current &&
-                                      current < momenttz().subtract(1, "day")
+                                      (current <
+                                        momenttz().subtract(1, "day") ||
+                                        current > endDate)
                                     );
                                 }
                               }}
@@ -882,7 +895,11 @@ const ContractPage = () => {
                         </Form.Item>
                         <Form.Item
                           {...restField}
-                          label={key === 0 && <Title title="Khoản thanh toán (VNĐ)" />}
+                          label={
+                            key === 0 && (
+                              <Title title="Khoản thanh toán (VNĐ)" />
+                            )
+                          }
                           name={[name, "value"]}
                           rules={[
                             {

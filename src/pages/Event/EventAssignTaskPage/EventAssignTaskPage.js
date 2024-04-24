@@ -174,6 +174,7 @@ const EventAssignTaskPage = () => {
     // Update data : assignee of task -> [idStaff] | assignee of subtask: [{id->leader, id, id, ...}]
     updateData,
   } = location.state;
+  console.log("dateRange > ", dateRange);
 
   const [isSelectDate, setIsSelectDate] = useState(false);
   const [chosenFile, setChosenFile] = useState();

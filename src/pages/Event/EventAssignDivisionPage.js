@@ -1,5 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { App, Avatar, Button, Checkbox, Collapse, message } from "antd";
+import {
+  App,
+  Avatar,
+  Button,
+  Checkbox,
+  Collapse,
+  ConfigProvider,
+  message,
+} from "antd";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import React, { Fragment, memo, useState } from "react";
@@ -140,7 +148,7 @@ const EventAssignDivisionPage = () => {
             <div className="flex justify-between">
               <div className="flex space-x-4">
                 <p className="text-xl font-medium">Chọn bộ phận phù hợp</p>
-                {/* <ConfigProvider
+                <ConfigProvider
                   theme={{
                     token: {
                       colorPrimaryHover:
@@ -155,7 +163,7 @@ const EventAssignDivisionPage = () => {
                       ? "Bỏ chọn tất cả"
                       : "Chọn tất cả"}
                   </Button>
-                </ConfigProvider> */}
+                </ConfigProvider>
               </div>
 
               <Button

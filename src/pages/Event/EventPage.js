@@ -22,7 +22,7 @@ const EventPage = () => {
 
   const [searchText, setSearchText] = useState();
   const [searchDate, setSearchDate] = useState();
-  const [searchStatus, setSearchStatus] = useState("PENDING");
+  const [searchStatus, setSearchStatus] = useState("PREPARING");
   const [sort, setSort] = useState("DESC");
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
@@ -44,12 +44,12 @@ const EventPage = () => {
     }
   );
 
-  useEffect(() => {
-    if (data && searchStatus === "PENDING" && !data?.data?.length)
-      setSearchStatus("PREPARING");
-    else if (data && searchStatus === "PREPARING" && !data?.data?.length)
-      setSearchStatus("PROCESSING");
-  }, [data]);
+  // useEffect(() => {
+  //   if (data && searchStatus === "PENDING" && !data?.data?.length)
+  //     setSearchStatus("PREPARING");
+  //   else if (data && searchStatus === "PREPARING" && !data?.data?.length)
+  //     setSearchStatus("PROCESSING");
+  // }, [data]);
 
   useEffect(() => {
     refetch();

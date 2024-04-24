@@ -37,6 +37,7 @@ import { getPlanByContact } from "../../apis/planning";
 import { BsPiggyBank } from "react-icons/bs";
 import { FaUserFriends } from "react-icons/fa";
 import { LuPercent } from "react-icons/lu";
+import { defaultEventCoverImage } from "../../constants/global";
 
 const { RangePicker } = DatePicker;
 
@@ -435,14 +436,36 @@ const EventCreationPage = () => {
     if (current === 0) {
       setCurrent((prev) => prev + 1);
     } else {
-      const formData = new FormData();
-      formData.append("file", fileList);
-      formData.append("folderName", "event");
-      const eventValues = setupEventValues(values);
-      uploadFileMutate({
-        formData,
-        event: eventValues,
-      });
+      if (!!values.coverUrl) {
+        // Create event without img
+        values.listTask = taskList?.map((item) => {
+          return {
+            title: item?.itemName,
+            desc: JSON.stringify(item?.itemDescription?.ops),
+            priority: item?.itemPriority,
+            itemId: item?.itemId,
+            itemPercentage: item?.itemPercentage,
+            startDate: moment(item?.itemPlannedStartDate).format("YYYY-MM-DD"),
+            endDate: moment(item?.itemPlannedEndDate).format("YYYY-MM-DD"),
+          };
+        });
+        values.listDivision = selectedDivision;
+        values.contactId = contactId;
+
+        console.log("values > ", values);
+
+        createEventMutate(values);
+      } else {
+        // Create event with img
+        const formData = new FormData();
+        formData.append("file", fileList);
+        formData.append("folderName", "event");
+        const eventValues = setupEventValues(values);
+        uploadFileMutate({
+          formData,
+          event: eventValues,
+        });
+      }
     }
   };
 
@@ -672,7 +695,7 @@ const EventCreationPage = () => {
 
           <div className="flex space-x-10 items-center">
             <Form.Item
-              className="w-[30%]"
+              className="w-[30%] relative"
               label={<Title title="Ngân sách " />}
               name="estBudget"
               rules={[
@@ -704,6 +727,7 @@ const EventCreationPage = () => {
                 />
                 <p className="text-base font-medium">VNĐ</p>
               </div>
+              <div className="absolute top-0 right-0 bottom-0 left-0" />
             </Form.Item>
 
             <Form.Item
@@ -950,6 +974,7 @@ const EventCreationPage = () => {
                   estBudget: contactInfo?.contractTotalBudget ?? 0,
                   processingDate: contactInfo?.processingDate,
                   eventTypeId: contactInfo?.eventTypeId,
+                  coverUrl: defaultEventCoverImage,
                 }}
               >
                 <Steps direction="horizontal" current={current} items={steps} />
@@ -1011,7 +1036,7 @@ const EventCreationPage = () => {
                     rules={[
                       {
                         required: true,
-                        message: "Chưa nhập ngân sách!",
+                        message: "Chưa nhập loại sự kiện!",
                       },
                     ]}
                   />

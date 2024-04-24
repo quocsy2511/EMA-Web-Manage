@@ -151,6 +151,7 @@ const EventTaskPage = () => {
       enabled: !!contract?.id,
     }
   );
+  console.log("contractEvidence > ", contractEvidence);
 
   const {
     data: filterTasks,
@@ -299,7 +300,7 @@ const EventTaskPage = () => {
       state: {
         eventId,
         eventName: eventDetail?.eventName,
-        dateRange: [eventDetail?.processingDate, eventDetail?.endDate],
+        dateRange: [eventDetail?.startDate, eventDetail?.endDate],
         isSubTask: false,
 
         updateData,
@@ -730,7 +731,7 @@ const EventTaskPage = () => {
               <div className="flex items-center gap-x-2">
                 <div className="w-5" />
                 <p className="text-xs text-slate-400">
-                  {new Date(eventDetail?.processingDate).toLocaleDateString(
+                  {new Date(eventDetail?.startDate).toLocaleDateString(
                     "vi-VN",
                     {
                       weekday: "long",
@@ -752,7 +753,7 @@ const EventTaskPage = () => {
                 <div className="w-5" />
                 <p className="text-xs text-slate-400">
                   {/* {moment(data.endDate).format("dddd, D [tháng] M, YYYY")} */}
-                  {new Date(eventDetail?.startDate).toLocaleDateString(
+                  {new Date(eventDetail?.processingDate).toLocaleDateString(
                     "vi-VN",
                     {
                       weekday: "long",
@@ -820,11 +821,11 @@ const EventTaskPage = () => {
               <>
                 <div className="flex items-center gap-x-5">
                   <EventTaskSelection
-                    title="Trưởng phòng"
+                    title="Phòng ban"
                     placeholder="Chọn trưởng phòng"
                     options={eventDetail?.listDivision?.map((division) => ({
                       value: division?.userId,
-                      label: division?.fullName,
+                      label: `${division?.fullName} - ${division?.divisionName}`,
                     }))}
                     value={assigneeSelection}
                     updatevalue={setAssigneeSelection}
