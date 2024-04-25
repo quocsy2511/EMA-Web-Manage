@@ -166,10 +166,11 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
     if (fileList?.url) {
       if (staff) {
         values.roleId = roleEmployee?.id;
-        values.divisionId = staff?.divisionId;
+        values.divisionId = staff?.divisionID;
         values.typeEmployee = "PART_TIME";
       }
       values.avatar = fileList?.url;
+      console.log("🚀 ~ onFinish ~ values:", values);
 
       createUserMutate(values);
     } else {
@@ -179,10 +180,11 @@ const CreateUserDrawer = ({ showDrawer, setShowDrawer, page }) => {
 
       if (staff) {
         values.roleId = roleEmployee?.id;
-        values.divisionId = staff?.divisionId;
+        values.divisionId = staff?.divisionID;
         values.typeEmployee = "PART_TIME";
       }
 
+      console.log("🚀 ~ onFinish ~ values:", values);
       uploadFileMutate({ formData, user: values });
     }
   };

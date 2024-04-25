@@ -41,7 +41,7 @@ const DescriptionEvent = ({ selectEvent }) => {
             title="Thời gian diễn ra dự án"
             description={
               <p>
-                {moment(selectEvent?.processingDate).format("DD-MM-YYYY")}{" "}
+                {moment(selectEvent?.startDate).format("DD-MM-YYYY")}{" "}
                 <SwapRightOutlined />{" "}
                 {moment(selectEvent?.endDate).format("DD-MM-YYYY")}
               </p>

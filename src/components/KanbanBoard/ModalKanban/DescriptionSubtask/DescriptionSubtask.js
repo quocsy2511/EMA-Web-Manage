@@ -26,6 +26,8 @@ const DescriptionSubtask = ({
       description?.startsWith(`[{"`) ? description : parseJson(description)
     ),
   });
+  console.log("🚀 ~ descriptionQuill:", descriptionQuill);
+
   const [isOpenQuill, seItsOpenQuill] = useState(false);
   const queryClient = useQueryClient();
 
@@ -147,7 +149,7 @@ const DescriptionSubtask = ({
                     <Form onFinish={onFinish} form={form}>
                       <Form.Item
                         name="desc"
-                        initialValue={descriptionQuill}
+                        initialValue={description ? descriptionQuill : ""}
                         className="mb-0"
                       >
                         <ReactQuill
