@@ -436,9 +436,11 @@ const EventCreationPage = () => {
     if (current === 0) {
       setCurrent((prev) => prev + 1);
     } else {
-      if (!!values.coverUrl) {
+      if (!fileList) {
         // Create event without img
-        values.listTask = taskList?.map((item) => {
+        const eventValues = setupEventValues(values);
+
+        eventValues.listTask = taskList?.map((item) => {
           return {
             title: item?.itemName,
             desc: JSON.stringify(item?.itemDescription?.ops),
@@ -449,12 +451,11 @@ const EventCreationPage = () => {
             endDate: moment(item?.itemPlannedEndDate).format("YYYY-MM-DD"),
           };
         });
-        values.listDivision = selectedDivision;
-        values.contactId = contactId;
+        eventValues.listDivision = selectedDivision;
+        eventValues.contactId = contactId;
+        eventValues.coverUrl = defaultEventCoverImage;
 
-        console.log("values > ", values);
-
-        createEventMutate(values);
+        createEventMutate(eventValues);
       } else {
         // Create event with img
         const formData = new FormData();
@@ -469,7 +470,9 @@ const EventCreationPage = () => {
     }
   };
 
-  const onFinishFailed = (errorInfo) => {};
+  const onFinishFailed = (errorInfo) => {
+    console.log(errorInfo);
+  };
 
   const handleUpdateDesc = (itemId, desc) => {
     setTaskList((prev) =>
@@ -738,10 +741,6 @@ const EventCreationPage = () => {
               getValueFromEvent={(e) => e?.fileList}
               rules={[
                 {
-                  required: true,
-                  message: "Chưa chọn ảnh đại diện",
-                },
-                {
                   validator(_, fileList) {
                     return new Promise((resolve, reject) => {
                       if (fileList && fileList[0]?.size > 10 * 1024 * 1024) {
@@ -974,7 +973,6 @@ const EventCreationPage = () => {
                   estBudget: contactInfo?.contractTotalBudget ?? 0,
                   processingDate: contactInfo?.processingDate,
                   eventTypeId: contactInfo?.eventTypeId,
-                  coverUrl: defaultEventCoverImage,
                 }}
               >
                 <Steps direction="horizontal" current={current} items={steps} />
@@ -1052,10 +1050,10 @@ const EventCreationPage = () => {
                   <Form.Item
                     name="coverUrl"
                     rules={[
-                      {
-                        required: true,
-                        message: "Chưa chọn ảnh đại diện",
-                      },
+                      // {
+                      //   required: true,
+                      //   message: "Chưa chọn ảnh đại diện",
+                      // },
                       {
                         validator(_, fileList) {
                           return new Promise((resolve, reject) => {
