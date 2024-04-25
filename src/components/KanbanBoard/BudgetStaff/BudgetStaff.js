@@ -208,7 +208,7 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
                                   } text-base  h-[265px]`}
                                 />
                               </div>
-                              <Tooltip title="Hạng mục 1 chuẩn bị sân khấu">
+                              <Tooltip title={task?.title}>
                                 <h3
                                   className={`text-lg font-semibold truncate w-full  ${
                                     selectBudget?.id === task?.id
@@ -221,29 +221,33 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
                               </Tooltip>
                             </div>
                             <div className=" w-full overflow-hidden flex flex-row justify-between px-2 items-center ">
-                              <p
-                                className={`text-sm  ${
-                                  selectBudget?.id === task?.id
-                                    ? "text-[#e1e1f9]"
-                                    : " text-blueSecondBudget "
-                                }  font-semibold ml-10`}
-                              >
-                                {calculateBudgetParentTask(
-                                  task?.item
-                                ).toLocaleString()}{" "}
-                                VND
-                              </p>
-                              <span
-                                className={`${
-                                  selectBudget?.id === task?.id
-                                    ? "text-[#e1e1f9]"
-                                    : " text-blueSecondBudget "
-                                }  text-xs font-semibold `}
-                              >
-                                {moment(task?.item?.createdAt).format(
-                                  "DD-MM-YYYY"
-                                )}
-                              </span>
+                              <Tooltip title="Tổng số tiền">
+                                <p
+                                  className={`text-sm  ${
+                                    selectBudget?.id === task?.id
+                                      ? "text-[#e1e1f9]"
+                                      : " text-blueSecondBudget "
+                                  }  font-semibold ml-10`}
+                                >
+                                  {calculateBudgetParentTask(
+                                    task?.item
+                                  ).toLocaleString()}{" "}
+                                  VND
+                                </p>
+                              </Tooltip>
+                              <Tooltip title="Ngày bắt đầu">
+                                <span
+                                  className={`${
+                                    selectBudget?.id === task?.id
+                                      ? "text-[#e1e1f9]"
+                                      : " text-blueSecondBudget "
+                                  }  text-xs font-semibold `}
+                                >
+                                  {moment(task?.item?.createdAt).format(
+                                    "DD-MM-YYYY"
+                                  )}
+                                </span>
+                              </Tooltip>
                             </div>
                           </div>
                         ))}

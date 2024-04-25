@@ -84,10 +84,10 @@ const EventItem = memo(({ event, gotoEventPage }) => {
           <div className="flex space-x-10">
             <div className="flex-1">
               <LabelItem
-                icon={<LuCalendarClock className="text-xl text-orange-500" />}
+                icon={<LuCalendarClock className="text-xl text-blue-500" />}
                 text={
                   <p>
-                    {momenttz(event?.startDate, "DD/MM/YYYY").format(
+                    {momenttz(event?.processingDate, "YYYY-MM-DD").format(
                       "DD-MM-YYYY"
                     )}
                   </p>
@@ -95,6 +95,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
                 tooltip="Thời gian diễn ra sự kiện"
               />
             </div>
+
             <div className="flex-1">
               <LabelItem
                 icon={<LuCalendarX2 className="text-xl text-green-500" />}
@@ -113,10 +114,10 @@ const EventItem = memo(({ event, gotoEventPage }) => {
           <div className="flex space-x-10">
             <div className="flex-1">
               <LabelItem
-                icon={<LuCalendarClock className="text-xl text-blue-500" />}
+                icon={<LuCalendarClock className="text-xl text-orange-500" />}
                 text={
                   <p>
-                    {momenttz(event?.processingDate, "YYYY-MM-DD").format(
+                    {momenttz(event?.startDate, "DD/MM/YYYY").format(
                       "DD-MM-YYYY"
                     )}
                   </p>
@@ -124,6 +125,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
                 tooltip="Thời gian bắt đầu dự án"
               />
             </div>
+
             <div className="flex-1">
               <LabelItem
                 icon={<GrStatusInfo className="text-xl" />}
