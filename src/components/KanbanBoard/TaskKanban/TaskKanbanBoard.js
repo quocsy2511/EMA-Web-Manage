@@ -91,7 +91,7 @@ const TaskKanbanBoard = ({
   });
 
   const formattedDate = (value) => {
-    const date = moment(value).format("DD-MM-YYYY");
+    const date = moment(value).format("DD-MM-YYYY HH:mm");
     return date;
   };
   const getColorStatusPriority = (value) => {
@@ -152,37 +152,39 @@ const TaskKanbanBoard = ({
         {/* Sumary */}
         <div className="flex justify-start items-center gap-x-2 cursor-pointer mt-1 flex-wrap">
           {task?.endDate !== null && (
-            <span
-              className={`px-[6px] py-[2px] w-fit text-xs font-medium flex justify-start items-center gap-x-1 ${
-                task?.status === "CANCEL" || task?.status === "OVERDUE"
-                  ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
-                  : task?.status === "DONE"
-                  ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
-                  : task?.status === "CONFIRM"
-                  ? "bg-purple-300 bg-opacity-20 text-purple-600 rounded-md"
-                  : ""
-              }`}
-            >
-              {task?.status === "CONFIRM" ? (
-                <CheckSquareOutlined className="text-purple-600" />
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              )}
-              {formattedDate(task?.endDate)}
-            </span>
+            <Tooltip title="Thời gian kết thúc công việc">
+              <span
+                className={`px-[6px] py-[2px] w-fit text-xs font-medium flex justify-start items-center gap-x-1 ${
+                  task?.status === "CANCEL" || task?.status === "OVERDUE"
+                    ? "bg-red-300 bg-opacity-20 text-red-600 rounded-md"
+                    : task?.status === "DONE"
+                    ? "bg-green-300 bg-opacity-20 text-green-600 rounded-md"
+                    : task?.status === "CONFIRM"
+                    ? "bg-purple-300 bg-opacity-20 text-purple-600 rounded-md"
+                    : ""
+                }`}
+              >
+                {task?.status === "CONFIRM" ? (
+                  <CheckSquareOutlined className="text-purple-600" />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                )}
+                {formattedDate(task?.endDate)}
+              </span>
+            </Tooltip>
           )}
 
           <AnimatePresence>
@@ -195,40 +197,44 @@ const TaskKanbanBoard = ({
                   exit={{ y: 20, opacity: 0 }}
                   className="flex gap-x-3"
                 >
-                  <span className="flex justify-center items-center gap-x-1 text-xs font-medium">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
-                      />
-                    </svg>
-                    {listComments?.length}
-                  </span>
-                  <span className="flex justify-center items-center gap-x-1 text-xs font-medium">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                      />
-                    </svg>
-                    {totalFiles}
-                  </span>
+                  <Tooltip title="Bình luận">
+                    <span className="flex justify-center items-center gap-x-1 text-xs font-medium">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+                        />
+                      </svg>
+                      {listComments?.length}
+                    </span>
+                  </Tooltip>
+                  <Tooltip title="Tài liệu">
+                    <span className="flex justify-center items-center gap-x-1 text-xs font-medium">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                        />
+                      </svg>
+                      {totalFiles}
+                    </span>
+                  </Tooltip>
                 </motion.div>
               ) : (
                 <AnErrorHasOccured />

@@ -261,11 +261,11 @@ const NewTaskModal = ({
   const onChangeDate = (value, dateString) => {
     if (dateString?.length > 0) {
       // Chuyển đổi thành định dạng ISO 8601
-      const formatStart = moment(dateString?.[0], "DD-MM-YYYY").format(
-        "YYYY-MM-DD"
+      const formatStart = moment(dateString?.[0], "DD-MM-YYYY HH:mm:ss").format(
+        "YYYY-MM-DD HH:mm:ss"
       );
-      const formatEnd = moment(dateString?.[1], "DD-MM-YYYY").format(
-        "YYYY-MM-DD"
+      const formatEnd = moment(dateString?.[1], "DD-MM-YYYY HH:mm:ss").format(
+        "YYYY-MM-DD HH:mm:ss"
       );
       const isoStartDate = moment(formatStart).toISOString();
       const isoEndDate = moment(formatEnd).toISOString();
@@ -282,6 +282,7 @@ const NewTaskModal = ({
 
   //validate pick date
   const today = moment();
+  const hourTodayStart = moment(today).format("HH");
   const disabledDate = (current) => {
     if (current.isBefore(disableStartDate, "day")) {
       return (
@@ -290,6 +291,23 @@ const NewTaskModal = ({
       );
     } else {
       return current.isBefore(today) || current.isAfter(disableEndDate, "day");
+    }
+  };
+
+  //validate pick timess
+  const range = (start, end) => {
+    const result = [];
+    for (let i = start; i < end; i++) {
+      result.push(i);
+    }
+    return result;
+  };
+
+  const disabledRangeTime = (current, type) => {
+    if (current?.isSame(today, "day")) {
+      return {
+        disabledHours: () => range(0, hourTodayStart),
+      };
     }
   };
 
@@ -492,9 +510,14 @@ const NewTaskModal = ({
                   // locale={locale}
                   placeholder={["Ngày bắt đầu  ", "Ngày kết thúc "]}
                   disabledDate={disabledDate}
+                  disabledTime={disabledRangeTime}
                   onChange={onChangeDate}
-                  format="DD-MM-YYYY"
+                  format="DD-MM-YYYY HH:00"
                   className="w-full"
+                  showTime={{
+                    format: "HH",
+                    hideDisabledOptions: true,
+                  }}
                 />
               </Form.Item>
             </div>

@@ -42,11 +42,11 @@ const RangeDateSelected = ({
 
   const onChangeDate = (value, dateString) => {
     if (dateString?.length > 0) {
-      const formatStart = moment(dateString?.[0], "DD-MM-YYYY").format(
-        "YYYY-MM-DD"
+      const formatStart = moment(dateString?.[0], "DD-MM-YYYY HH:mm:ss").format(
+        "YYYY-MM-DD HH:mm:ss"
       );
-      const formatEnd = moment(dateString?.[1], "DD-MM-YYYY").format(
-        "YYYY-MM-DD"
+      const formatEnd = moment(dateString?.[1], "DD-MM-YYYY HH:mm:ss").format(
+        "YYYY-MM-DD HH:mm:ss"
       );
       const isoStartDate = moment(formatStart).toISOString();
       const isoEndDate = moment(formatEnd).toISOString();
@@ -57,7 +57,7 @@ const RangeDateSelected = ({
 
   ///////////////validate Date
   const formattedDate = (value) => {
-    const date = moment(value).format("DD-MM-YYYY");
+    const date = moment(value).format("DD-MM-YYYY HH:mm");
     return date;
   };
 
@@ -73,6 +73,22 @@ const RangeDateSelected = ({
         (current.isBefore(today) && !current.isSame(today, "day")) ||
         current.isAfter(disableEndDate, "day")
       );
+    }
+  };
+
+  const hourTodayStart = moment(today).format("HH");
+  const range = (start, end) => {
+    const result = [];
+    for (let i = start; i < end; i++) {
+      result.push(i);
+    }
+    return result;
+  };
+  const disabledRangeTime = (current, type) => {
+    if (current?.isSame(today, "day")) {
+      return {
+        disabledHours: () => range(0, hourTodayStart),
+      };
     }
   };
 
@@ -152,9 +168,14 @@ const RangeDateSelected = ({
                   placeholder={["ngày bắt đầu  ", "ngày kết thúc "]}
                   disabledDate={disabledDate}
                   onChange={onChangeDate}
-                  format="DD-MM-YYYY"
+                  disabledTime={disabledRangeTime}
+                  format="DD-MM-YYYY HH:00"
                   onFocus={onFocusRangePicker}
                   allowClear={false}
+                  showTime={{
+                    format: "HH",
+                    hideDisabledOptions: true,
+                  }}
                 />
               </Form.Item>
               <div className="flex flex-row gap-x-2">
