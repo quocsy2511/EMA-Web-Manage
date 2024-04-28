@@ -35,7 +35,7 @@ const NotiLabel = ({
   const currentDate = momenttz();
   const targetDate = momenttz(item?.createdAt);
 
-  if (currentDate.diff(targetDate, "minutes") < 5) {
+  if (currentDate.diff(targetDate, "minutes") < 2) {
     time = `bây giờ`;
   } else if (currentDate.diff(targetDate, "hours") < 1) {
     time = `${currentDate.diff(targetDate, "minutes")} phút trước`;

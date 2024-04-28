@@ -146,6 +146,7 @@ const EventSubTaskPage = () => {
       refetchOnWindowFocus: false,
     }
   );
+  console.log("tasks > ", tasks);
 
   useEffect(() => {
     if (subtaskId) {
@@ -269,10 +270,7 @@ const EventSubTaskPage = () => {
     const updateData = {
       id: task?.id,
       title: task?.title,
-      date: [
-        momenttz(task?.startDate).format("YYYY-MM-DD"),
-        momenttz(task?.endDate).format("YYYY-MM-DD"),
-      ],
+      date: [task?.startDate, task?.endDate],
       priority: task?.priority,
       desc: task?.description,
       assignee: sortLeader?.map((user) => user?.user?.id),

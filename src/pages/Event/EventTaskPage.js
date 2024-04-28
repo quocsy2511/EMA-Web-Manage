@@ -821,8 +821,8 @@ const EventTaskPage = () => {
               <>
                 <div className="flex items-center gap-x-5">
                   <EventTaskSelection
-                    title="Phòng ban"
-                    placeholder="Chọn trưởng phòng"
+                    title="Danh sách nhóm"
+                    placeholder="Chọn trưởng nhóm"
                     options={eventDetail?.listDivision?.map((division) => ({
                       value: division?.userId,
                       label: `${division?.fullName} - ${division?.divisionName}`,

@@ -227,13 +227,15 @@ const SubTaskModal = ({
             <p className="text-lg flex items-center gap-x-3">
               <span className="font-medium">
                 {selectedSubTask?.startDate
-                  ? moment(selectedSubTask?.startDate).format("DD-MM-YYYY")
+                  ? moment(selectedSubTask?.startDate).format(
+                      "DD-MM-YYYY HH:ss"
+                    )
                   : "-- : --"}
               </span>{" "}
               <HiMiniArrowLongRight className="text-lg" />
               <span className="font-medium">
                 {selectedSubTask?.endDate
-                  ? moment(selectedSubTask?.endDate).format("DD-MM-YYYY")
+                  ? moment(selectedSubTask?.endDate).format("DD-MM-YYYY HH:ss")
                   : "-- : --"}
               </span>{" "}
             </p>

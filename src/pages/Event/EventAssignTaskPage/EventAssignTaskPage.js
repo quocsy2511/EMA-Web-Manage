@@ -174,7 +174,7 @@ const EventAssignTaskPage = () => {
     // Update data : assignee of task -> [idStaff] | assignee of subtask: [{id->leader, id, id, ...}]
     updateData,
   } = location.state;
-  console.log("dateRange > ", dateRange);
+  console.log("updateData > ", updateData);
 
   const [isSelectDate, setIsSelectDate] = useState(false);
   const [chosenFile, setChosenFile] = useState();
@@ -357,8 +357,12 @@ const EventAssignTaskPage = () => {
       const taskPayload = {
         eventID: eventId,
         title: values?.title,
-        startDate: momenttz(values?.date[0]).format("YYYY-MM-DD"),
-        endDate: momenttz(values?.date[1]).format("YYYY-MM-DD"),
+        startDate: isSubTask
+          ? momenttz(values?.date[0])
+          : momenttz(values?.date[0]).format("YYYY-MM-DD"),
+        endDate: isSubTask
+          ? momenttz(values?.date[0])
+          : momenttz(values?.date[1]).format("YYYY-MM-DD"),
         desc: JSON.stringify(values?.desc?.ops),
         priority: values?.priority,
         assignee: values?.assignee ?? [],
@@ -465,8 +469,12 @@ const EventAssignTaskPage = () => {
         const updatedValue = {
           title: values?.title,
           eventID: eventId,
-          startDate: momenttz(values?.date[0]).format("YYYY-MM-DD"),
-          endDate: momenttz(values?.date[1]).format("YYYY-MM-DD"),
+          startDate: isSubTask
+            ? momenttz(values?.date[0])
+            : momenttz(values?.date[0]).format("YYYY-MM-DD"),
+          endDate: isSubTask
+            ? momenttz(values?.date[1])
+            : momenttz(values?.date[1]).format("YYYY-MM-DD"),
           description: JSON.stringify(values?.desc?.ops),
           priority: values?.priority,
 
@@ -548,19 +556,7 @@ const EventAssignTaskPage = () => {
           ) : (
             <>
               Tạo công việc cho hạng mục [{" "}
-              <Link
-                to={`/manager/event/${eventId}/${taskId}`}
-                state={{
-                  eventName: eventName,
-                  dateRange: dateRange,
-                  subtaskId: taskId,
-                }}
-                relative="path"
-                replace
-              >
-                {taskName ?? "Công việc"}
-              </Link>
-              ]
+              <span>{taskName ?? "Công việc"}</span>]
             </>
           )}
         </p>
@@ -647,8 +643,12 @@ const EventAssignTaskPage = () => {
                   defaultValue={
                     updateData && updateData?.date?.[0] && updateData?.date?.[1]
                       ? [
-                          dayjs(updateData?.date?.[0], "YYYY-MM-DD"),
-                          dayjs(updateData?.date?.[1], "YYYY-MM-DD"),
+                          isSubTask
+                            ? dayjs(updateData?.date?.[0])
+                            : dayjs(updateData?.date?.[0], "YYYY-MM-DD"),
+                          isSubTask
+                            ? dayjs(updateData?.date?.[1])
+                            : dayjs(updateData?.date?.[1], "YYYY-MM-DD"),
                         ]
                       : momenttz(dateRange?.[0]).isBefore(momenttz(), "days")
                       ? [dayjs(), undefined]
@@ -688,7 +688,17 @@ const EventAssignTaskPage = () => {
                           current > endDate)
                       );
                   }}
-                  format={"DD/MM/YYYY"}
+                  showTime={
+                    isSubTask
+                      ? {
+                          defaultValue: [
+                            dayjs("00:00:00", "HH:mm:ss"),
+                            dayjs("00:00:00f", "HH:mm:ss"),
+                          ],
+                        }
+                      : false
+                  }
+                  format={"DD/MM/YYYY HH:mm:ss"}
                   className="w-full"
                 />
               </ConfigProvider>

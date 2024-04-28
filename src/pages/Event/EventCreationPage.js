@@ -511,40 +511,44 @@ const EventCreationPage = () => {
       content: (
         <div className="">
           <div className="flex space-x-10">
-            <Form.Item
-              className="w-[30%]"
-              label={<Title title="Tên sự kiện" />}
-              name="eventName"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập tên sự kiện!",
-                },
-              ]}
-              onChange={(value) => {
-                // Update to specific field
-                form.setFieldsValue({ eventName: value.target.value });
-              }}
-            >
-              <Input placeholder="Nhập tên sự kiện" size="large" />
-            </Form.Item>
-            <Form.Item
-              className="w-[70%]"
-              label={<Title title="Địa điểm" />}
-              name="location"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa nhập địa điểm!",
-                },
-              ]}
-              onChange={(value) => {
-                // Update to specific field
-                form.setFieldsValue({ location: value.target.value });
-              }}
-            >
-              <Input placeholder="Nhập địa điểm" size="large" disabled />
-            </Form.Item>
+            <div className="w-[30%] relative cursor-not-allowed">
+              <Form.Item
+                label={<Title title="Tên sự kiện" />}
+                name="eventName"
+                rules={[
+                  {
+                    required: true,
+                    message: "Chưa nhập tên sự kiện!",
+                  },
+                ]}
+                onChange={(value) => {
+                  // Update to specific field
+                  form.setFieldsValue({ eventName: value.target.value });
+                }}
+              >
+                <Input placeholder="Nhập tên sự kiện" size="large" />
+              </Form.Item>
+              <div className="absolute top-0 bottom-0 left-0 right-0" />
+            </div>
+            <div className="w-[70%] relative cursor-not-allowed">
+              <Form.Item
+                label={<Title title="Địa điểm" />}
+                name="location"
+                rules={[
+                  {
+                    required: true,
+                    message: "Chưa nhập địa điểm!",
+                  },
+                ]}
+                onChange={(value) => {
+                  // Update to specific field
+                  form.setFieldsValue({ location: value.target.value });
+                }}
+              >
+                <Input placeholder="Nhập địa điểm" size="large" />
+              </Form.Item>
+              <div className="absolute top-0 bottom-0 left-0 right-0" />
+            </div>
           </div>
 
           <div>
@@ -571,61 +575,68 @@ const EventCreationPage = () => {
           </div>
 
           <div className="flex space-x-10">
-            <Form.Item
-              className="w-[35%]"
-              label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
-              name="date"
-              rules={[
-                {
-                  validator: (rule, value) => {
-                    if (value && value?.[0] && value?.[1]) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject("Chưa chọn thời gian tổ chức");
+            <div className="w-[35%] relative cursor-not-allowed">
+              <Form.Item
+                label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
+                name="date"
+                rules={[
+                  {
+                    validator: (rule, value) => {
+                      if (value && value?.[0] && value?.[1]) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject("Chưa chọn thời gian tổ chức");
+                    },
                   },
-                },
-              ]}
-            >
-              <ConfigProvider locale={viVN}>
-                <RangePicker
-                  size="large"
-                  className="w-full"
-                  defaultValue={[
-                    dayjs(contactInfo?.startDate, "YYYY-MM-DD"),
-                    dayjs(contactInfo?.endDate, "YYYY-MM-DD"),
-                  ]}
-                  onChange={(value) => {
-                    // Update to specific field
-                    form.setFieldsValue({
-                      date: value?.map((item) =>
-                        moment(item?.$d).format("YYYY-MM-DD")
-                      ),
-                    });
+                ]}
+              >
+                <ConfigProvider locale={viVN}>
+                  <RangePicker
+                    size="large"
+                    className="w-full"
+                    defaultValue={[
+                      dayjs(contactInfo?.processingDate, "YYYY-MM-DD"),
+                      dayjs(contactInfo?.endDate, "YYYY-MM-DD"),
+                    ]}
+                    onChange={(value) => {
+                      // Update to specific field
+                      form.setFieldsValue({
+                        date: value?.map((item) =>
+                          moment(item?.$d).format("YYYY-MM-DD")
+                        ),
+                      });
 
-                    // Get date in range
-                    const startDate = moment(value?.[0]?.$d);
-                    const endDate = moment(value?.[1]?.$d);
+                      // Get date in range
+                      const startDate = moment(value?.[0]?.$d);
+                      const endDate = moment(value?.[1]?.$d);
 
-                    // Get processing date in range
-                    const selectedDate = moment(
-                      form.getFieldValue("processingDate")?.$d
-                    );
+                      // Get processing date in range
+                      const selectedDate = moment(
+                        form.getFieldValue("processingDate")?.$d
+                      );
 
-                    // Check if processing date is not in range  => reset processing date
-                    if (
-                      !selectedDate.isBetween(startDate, endDate, null, "[]") ||
-                      !value
-                    ) {
-                      form.resetFields(["processingDate"]);
-                    }
-                  }}
-                  disabledDate={(current) => {
-                    return current && current < moment().startOf("day");
-                  }}
-                  format={"DD/MM/YYYY"}
-                />
-              </ConfigProvider>
-            </Form.Item>
+                      // Check if processing date is not in range  => reset processing date
+                      if (
+                        !selectedDate.isBetween(
+                          startDate,
+                          endDate,
+                          null,
+                          "[]"
+                        ) ||
+                        !value
+                      ) {
+                        form.resetFields(["processingDate"]);
+                      }
+                    }}
+                    disabledDate={(current) => {
+                      return current && current < moment().startOf("day");
+                    }}
+                    format={"DD/MM/YYYY"}
+                  />
+                </ConfigProvider>
+              </Form.Item>
+              <div className="absolute top-0 bottom-0 left-0 right-0" />
+            </div>
 
             <Form.Item
               className="w-[25%]"
@@ -641,10 +652,7 @@ const EventCreationPage = () => {
               <ConfigProvider locale={viVN}>
                 <DatePicker
                   size="large"
-                  defaultValue={dayjs(
-                    contactInfo?.processingDate,
-                    "YYYY-MM-DD"
-                  )}
+                  defaultValue={dayjs(contactInfo?.startDate, "YYYY-MM-DD")}
                   className="w-full"
                   onChange={(value) => {
                     form.setFieldsValue({
@@ -827,7 +835,7 @@ const EventCreationPage = () => {
 
           <div className="mb-10">
             <div className="flex justify-between items-center">
-              <Title title="Bộ phận tham gia" />
+              <Title title="Nhóm tham gia" />
               <ConfigProvider
                 theme={{
                   token: {

@@ -184,25 +184,47 @@ const TaskItem = ({
           >
             Thời gian bắt đầu
           </p>
-
-          <div
-            className={clsx(
-              "flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-lg space-x-3",
-              {
-                "opacity-50": task?.status === "CONFIRM",
-              }
-            )}
-          >
-            <BsHourglassSplit size={15} />
-            <p
-              className={clsx("text-sm font-medium", {
-                "line-through": task?.status === "CONFIRM",
-              })}
+          <div className="flex items-center gap-x-3">
+            <div
+              className={clsx(
+                "flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-lg space-x-3",
+                {
+                  "opacity-50": task?.status === "CONFIRM",
+                }
+              )}
             >
-              {task?.startDate
-                ? momenttz(task.startDate).format("DD-MM-YYYY")
-                : "-- : --"}
-            </p>
+              <BsHourglassSplit size={15} />
+              <p
+                className={clsx("text-sm font-medium", {
+                  "line-through": task?.status === "CONFIRM",
+                })}
+              >
+                {task?.startDate
+                  ? momenttz(task.startDate).format("DD-MM-YYYY")
+                  : "-- : --"}
+              </p>
+            </div>
+            {isSubtask && (
+              <div
+                className={clsx(
+                  "flex items-center px-3 py-1.5 bg-green-100 text-green-400 rounded-lg space-x-3",
+                  {
+                    "opacity-50": task?.status === "CONFIRM",
+                  }
+                )}
+              >
+                <BsHourglassSplit size={15} />
+                <p
+                  className={clsx("text-sm font-medium", {
+                    "line-through": task?.status === "CONFIRM",
+                  })}
+                >
+                  {task?.startDate
+                    ? momenttz(task.startDate).format("HH:ss")
+                    : "-- : --"}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -215,24 +237,46 @@ const TaskItem = ({
             Thời gian kết thúc
           </p>
 
-          <div
-            className={clsx(
-              "flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-lg space-x-3",
-              {
-                "opacity-70": task?.status === "CONFIRM",
-              }
-            )}
-          >
-            <BsHourglassBottom size={15} />
-            <p
-              className={clsx("text-sm font-medium", {
-                "line-through": task?.status === "CONFIRM",
-              })}
+          <div className="flex items-center gap-x-3">
+            <div
+              className={clsx(
+                "flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-lg space-x-3",
+                {
+                  "opacity-70": task?.status === "CONFIRM",
+                }
+              )}
             >
-              {task?.endDate
-                ? momenttz(task.endDate).format("DD-MM-YYYY")
-                : "-- : --"}
-            </p>
+              <BsHourglassBottom size={15} />
+              <p
+                className={clsx("text-sm font-medium", {
+                  "line-through": task?.status === "CONFIRM",
+                })}
+              >
+                {task?.endDate
+                  ? momenttz(task.endDate).format("DD-MM-YYYY")
+                  : "-- : --"}
+              </p>
+            </div>
+            {isSubtask && (
+              <div
+                className={clsx(
+                  "flex items-center px-3 py-1.5 bg-red-100 text-red-400 rounded-lg space-x-3",
+                  {
+                    "opacity-70": task?.status === "CONFIRM",
+                  }
+                )}
+              >
+                <p
+                  className={clsx("text-sm font-medium", {
+                    "line-through": task?.status === "CONFIRM",
+                  })}
+                >
+                  {task?.endDate
+                    ? momenttz(task.endDate).format("HH:mm")
+                    : "HH : mm"}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
