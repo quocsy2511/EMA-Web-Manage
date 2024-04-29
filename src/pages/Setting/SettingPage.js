@@ -72,7 +72,9 @@ const SettingPage = () => {
       setSelectTemplateEvent(templateEvent);
     }
   }, [templateEvent]);
-
+  useEffect(() => {
+    document.title = "Cài đặt";
+  }, []);
   return (
     <section className="  w-full px-7 py-7 bg-[#f5f5f5]">
       <div className="mb-7 ">

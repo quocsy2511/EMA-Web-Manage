@@ -10,7 +10,7 @@ import {
   Tag,
   message,
 } from "antd";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { MdOutlineCancel, MdOutlineSave } from "react-icons/md";
 import { PiNotePencilBold, PiTrash } from "react-icons/pi";
 import {
@@ -61,7 +61,7 @@ const DivisionPage = () => {
         )
           messageApi.open({
             type: "error",
-            content: "Bộ phận đang được sử dụng, không thể vô hiệu!",
+            content: "các nhóm đang được sử dụng, không thể vô hiệu!",
           });
         else
           messageApi.open({
@@ -94,7 +94,7 @@ const DivisionPage = () => {
       )
         messageApi.open({
           type: "error",
-          content: "Bộ phận đang được sử dụng, không thể vô hiệu!",
+          content: "các nhóm đang được sử dụng, không thể vô hiệu!",
         });
       else
         messageApi.open({
@@ -151,7 +151,7 @@ const DivisionPage = () => {
 
   const columns = [
     {
-      title: "Tên bộ phận",
+      title: "Tên các nhóm",
       dataIndex: "divisionName",
       editTable: true,
       width: "20%",
@@ -299,21 +299,23 @@ const DivisionPage = () => {
       </td>
     );
   };
-
+  useEffect(() => {
+    document.title = "Các nhóm";
+  }, []);
   return (
     <Fragment>
       {contextHolder}
       <div className="w-full min-h-[calc(100vh-64px)] bg-[#F0F6FF] p-10">
         <div className="bg-white min-h rounded-xl p-8">
           <div className="flex mb-8">
-            <p className="text-2xl font-medium">Quản lý bộ phận</p>
+            <p className="text-2xl font-medium">Quản lý các nhóm</p>
             <div className="flex-1 text-end">
               <Button
                 type="primary"
                 className=""
                 onClick={() => setShowDrawer(true)}
               >
-                Thêm bộ phận
+                Thêm các nhóm
               </Button>
               <CreateDivisionDrawer
                 showDrawer={showDrawer}

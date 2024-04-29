@@ -12,7 +12,7 @@ import {
   Tag,
   message,
 } from "antd";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { PiTrash, PiNotePencilBold } from "react-icons/pi";
 import viVN from "antd/locale/vi_VN";
 import dayjs from "dayjs";
@@ -773,6 +773,10 @@ const PersonnelPage = () => {
       </td>
     );
   };
+
+  useEffect(() => {
+    document.title = "Nhân sự";
+  }, []);
 
   return (
     <Fragment>

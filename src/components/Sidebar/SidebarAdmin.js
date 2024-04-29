@@ -48,7 +48,7 @@ const SidebarAdmin = ({ collapsed }) => {
       </p>
     ),
     getItem(
-      <LabelText text="Bộ phận" />,
+      <LabelText text="Các nhóm" />,
       "Bộ phận",
       "/administrator/division",
       <p>
