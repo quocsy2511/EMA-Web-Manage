@@ -16,8 +16,8 @@ const StatusSelected = ({
   disableDoneTaskParent,
   setUpdateProgress,
 }) => {
+  console.log("🚀 ~ disableDoneTaskParent:", disableDoneTaskParent);
   const startDate = moment(updateStartDate);
-  console.log("🚀 ~ updateStartDate:", updateStartDate);
   const today = moment();
   const eventId = taskSelected?.eventDivision?.event?.id;
   const staff = useRouteLoaderData("staff");

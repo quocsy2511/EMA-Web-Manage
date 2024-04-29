@@ -74,7 +74,10 @@ const Column = ({
     if (TaskParent?.status === "CONFIRM") {
       setDisableUpdate(true);
     }
-    if (completed === TaskParent?.subTask?.length) {
+    if (
+      completed === TaskParent?.subTask?.length &&
+      TaskParent?.subTask?.length !== 0
+    ) {
       setDisableDoneTaskParent(false);
     } else {
       setDisableDoneTaskParent(true);
