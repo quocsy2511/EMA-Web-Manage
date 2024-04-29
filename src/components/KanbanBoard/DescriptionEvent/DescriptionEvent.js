@@ -1,15 +1,23 @@
-import { CaretRightOutlined, SwapRightOutlined } from "@ant-design/icons";
-import { Card, Collapse, Tag, Tooltip } from "antd";
+import {
+  BarChartOutlined,
+  CaretRightOutlined,
+  SwapRightOutlined,
+} from "@ant-design/icons";
+import { Button, Card, Collapse, Tag, Tooltip } from "antd";
 import Meta from "antd/es/card/Meta";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
-import React from "react";
+import React, { useState } from "react";
 import { BsCalendarHeart, BsFileEarmarkTextFill } from "react-icons/bs";
 import { FaMoneyBillWave, FaSearchLocation } from "react-icons/fa";
 import { SiFastapi } from "react-icons/si";
 import { motion } from "framer-motion";
 import moment from "moment";
+import EventStatisticModal from "../ModalKanban/Statistic/EventStatisticModal";
 
 const DescriptionEvent = ({ selectEvent }) => {
+  console.log("🚀 ~ selectEvent:", selectEvent);
+  const [openStatisticModal, setOpenStatisticModal] = useState(false);
+
   const getColorStatusPriority = (value) => {
     const colorMapping = {
       DONE: { color: "green", title: "HOÀN THÀNH" },
@@ -25,13 +33,27 @@ const DescriptionEvent = ({ selectEvent }) => {
   };
 
   const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
+
   return (
     <motion.div
       animate={{ opacity: [1, 0.2, 1] }}
       transition={{ duration: 0.5 }}
       className={`min-h-[150px] relative group md:w-[100%] w-[45%] bg-bgG cursor-pointer bg-auto bg-center px-10 pt-3 mt-5`}
     >
-      <h2 className="text-4xl font-semibold mb-3">{selectEvent?.eventName}</h2>
+      <div className="flex flex-row justify-between items-center">
+        <h2 className="text-4xl font-semibold mb-3 w-[80%]">
+          {selectEvent?.eventName}
+        </h2>
+        <div>
+          <Tooltip title="Thông kê sự kiện">
+            <Button
+              onClick={() => setOpenStatisticModal(true)}
+              icon={<BarChartOutlined />}
+            />
+          </Tooltip>
+        </div>
+      </div>
+
       <div className="flex flex-row  items-center gap-x-6 mt-8 justify-between">
         <Card className="w-1/4">
           <Meta
@@ -128,6 +150,13 @@ const DescriptionEvent = ({ selectEvent }) => {
           ]}
         />
       </div>
+      {openStatisticModal && (
+        <EventStatisticModal
+          openStatisticModal={openStatisticModal}
+          setOpenStatisticModal={setOpenStatisticModal}
+          selectEvent={selectEvent}
+        />
+      )}
     </motion.div>
   );
 };

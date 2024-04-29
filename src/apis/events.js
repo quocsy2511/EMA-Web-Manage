@@ -86,6 +86,9 @@ export const getTemplateEvent = () => http({ url: "/event/template-event" });
 export const getStatistic = ({ type }) =>
   http({ url: `/event/statistic?mode=${type}` });
 
+export const getStatisticByEvent = ({ eventId }) =>
+  http({ url: `/event/statistic?eventId=${eventId}` });
+
 export const getEventParticipant = (eventId) =>
   http({ url: `/event?eventId=${eventId}` });
 
