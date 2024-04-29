@@ -229,7 +229,7 @@ const EventStaffPage = () => {
     noti?.type === "TASK" && refetch();
   };
   useEffect(() => {
-    document.title = "Trang quản lí công việc và ngân sách";
+    document.title = "Sự kiện";
   }, []);
 
   useEffect(() => {

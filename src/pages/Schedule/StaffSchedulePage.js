@@ -45,7 +45,7 @@ const ScheduleDrawer = memo(
       }
     });
     useEffect(() => {
-      document.title = "Trang lịch trình công việc";
+      document.title = "Lịch trình";
     }, []);
     return (
       <Drawer

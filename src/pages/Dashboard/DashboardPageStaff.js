@@ -224,7 +224,7 @@ const DashboardPageStaff = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
   useEffect(() => {
-    document.title = "Trang thống kê";
+    document.title = "Trang chủ";
   }, []);
 
   return (

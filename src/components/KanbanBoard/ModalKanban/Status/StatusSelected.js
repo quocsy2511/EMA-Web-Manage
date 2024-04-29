@@ -3,7 +3,7 @@ import { Button, Modal, Select, Tag, message } from "antd";
 import moment from "moment";
 import React, { useState } from "react";
 import { useRouteLoaderData } from "react-router-dom";
-import { updateTaskStatus } from "../../../../apis/tasks";
+import { updateTaskProgress, updateTaskStatus } from "../../../../apis/tasks";
 
 const StatusSelected = ({
   taskSelected,
@@ -13,8 +13,11 @@ const StatusSelected = ({
   classNameStyle,
   setIsOpenTaskModal,
   updateStartDate,
+  disableDoneTaskParent,
+  setUpdateProgress,
 }) => {
   const startDate = moment(updateStartDate);
+  console.log("🚀 ~ updateStartDate:", updateStartDate);
   const today = moment();
   const eventId = taskSelected?.eventDivision?.event?.id;
   const staff = useRouteLoaderData("staff");
@@ -49,10 +52,18 @@ const StatusSelected = ({
       value: "OVERDUE",
       label: "QUÁ HẠN",
       color: "orange",
+      disabled: true,
     },
   ];
 
   const StatusParentTask = statusTask.filter(
+    (task) =>
+      task.value !== "CONFIRM" &&
+      task.value !== "CANCEL" &&
+      task.value !== "OVERDUE" &&
+      task.value !== "DONE"
+  );
+  const StatusParentTaskDone = statusTask.filter(
     (task) =>
       task.value !== "CONFIRM" &&
       task.value !== "CANCEL" &&
@@ -63,14 +74,64 @@ const StatusSelected = ({
   const [isCancel, setIsCancel] = useState(false);
   const taskID = taskSelected?.id;
   const queryClient = useQueryClient();
+  const { mutate: updateProgress } = useMutation(
+    (task) => updateTaskProgress(task),
+    {
+      onSuccess: () => {
+        setUpdateProgress(100);
+        queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
+        queryClient.invalidateQueries(["subtaskDetails", taskID]);
+      },
+      onError: () => {
+        message.open({
+          type: "error",
+          content: "Cập nhật tiến độ công việc mới thất bại",
+        });
+      },
+    }
+  );
+
   const { mutate: UpdateStatusMutate, isSuccess } = useMutation(
     ({ taskID, status }) => updateTaskStatus({ taskID, status }),
     {
       onSuccess: () => {
         setUpdateStatus(uploadStatus);
-        queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
-        queryClient.invalidateQueries(["subtaskDetails", taskID]);
         queryClient.invalidateQueries(["parentTaskDetail", taskID]);
+        if (taskParent === false) {
+          if (uploadStatus === "DONE" || uploadStatus === "CONFIRM") {
+            const {
+              approvedBy,
+              assignTasks,
+              createdAt,
+              createdBy,
+              event,
+              id,
+              modifiedBy,
+              parent,
+              status,
+              subTask,
+              taskFiles,
+              updatedAt,
+              ...rest
+            } = taskSelected;
+            const parentTaskId = taskSelected?.parent?.id;
+            const data = {
+              ...rest,
+              eventID: eventId,
+              parentTask: parentTaskId,
+              taskID: taskID,
+              progress: 100,
+            };
+            updateProgress(data);
+          } else {
+            queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
+            queryClient.invalidateQueries(["subtaskDetails", taskID]);
+          }
+        } else {
+          queryClient.invalidateQueries(["tasks", staff?.id, eventId]);
+          queryClient.invalidateQueries(["subtaskDetails", taskID]);
+        }
+
         message.open({
           type: "success",
           content: "Cập nhật trạng thái thành công",
@@ -86,14 +147,27 @@ const StatusSelected = ({
   );
 
   let filterStatusTaskStatus;
-  if (today?.isBefore(startDate)) {
+  if (today?.isBefore(startDate, "day")) {
     filterStatusTaskStatus = statusTask.filter(
-      (task) => task.value !== "CONFIRM" && task.value !== "DONE"
+      (task) =>
+        task.value !== "CONFIRM" &&
+        task.value !== "DONE" &&
+        task.value !== "OVERDUE"
     );
-  } else if (today?.isSame(startDate)) {
-    filterStatusTaskStatus = statusTask;
+  } else if (today?.isSame(startDate, "day")) {
+    filterStatusTaskStatus = statusTask.filter(
+      (task) => task.value !== "OVERDUE"
+    );
   } else {
-    filterStatusTaskStatus = statusTask;
+    filterStatusTaskStatus = statusTask.filter(
+      (task) => task.value !== "OVERDUE"
+    );
+  }
+
+  if (updateStatus !== "PENDING") {
+    filterStatusTaskStatus = statusTask.filter(
+      (task) => task.value !== "PENDING" && task.value !== "OVERDUE"
+    );
   }
 
   if (isSuccess && isCancel) {
@@ -134,17 +208,35 @@ const StatusSelected = ({
         onChange={(value) => handleChangeStatus(value)}
         popupMatchSelectWidth={false}
       >
-        {taskParent
-          ? StatusParentTask?.map((status) => (
-              <Select.Option key={status.value}>
-                <Tag color={status.color}>{status.label}</Tag>
-              </Select.Option>
-            ))
-          : filterStatusTaskStatus?.map((status) => (
-              <Select.Option key={status.value}>
-                <Tag color={status.color}>{status.label}</Tag>
-              </Select.Option>
-            ))}
+        {taskParent ? (
+          <>
+            {disableDoneTaskParent && updateStatus !== "DONE"
+              ? StatusParentTask?.map((status) => (
+                  <Select.Option key={status.value}>
+                    <Tag color={status.color}>{status.label}</Tag>
+                  </Select.Option>
+                ))
+              : StatusParentTaskDone?.map((status) => (
+                  <Select.Option key={status.value}>
+                    <Tag color={status.color}>{status.label}</Tag>
+                  </Select.Option>
+                ))}
+          </>
+        ) : (
+          <>
+            {updateStatus === "OVERDUE"
+              ? statusTask?.map((status) => (
+                  <Select.Option key={status.value}>
+                    <Tag color={status.color}>{status.label}</Tag>
+                  </Select.Option>
+                ))
+              : filterStatusTaskStatus?.map((status) => (
+                  <Select.Option key={status.value}>
+                    <Tag color={status.color}>{status.label}</Tag>
+                  </Select.Option>
+                ))}
+          </>
+        )}
       </Select>
       <Modal
         title="Xác nhận huỷ công việc"

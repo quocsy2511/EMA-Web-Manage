@@ -283,6 +283,7 @@ const NewTaskModal = ({
   //validate pick date
   const today = moment();
   const hourTodayStart = moment(today).format("HH");
+  const minuteTodayStart = moment(today).format("mm");
   const disabledDate = (current) => {
     if (current.isBefore(disableStartDate, "day")) {
       return (
@@ -305,9 +306,16 @@ const NewTaskModal = ({
 
   const disabledRangeTime = (current, type) => {
     if (current?.isSame(today, "day")) {
-      return {
-        disabledHours: () => range(0, hourTodayStart),
-      };
+      if (current?.isSame(today, "hour")) {
+        return {
+          disabledHours: () => range(0, hourTodayStart),
+          disabledMinutes: () => range(0, minuteTodayStart),
+        };
+      } else {
+        return {
+          disabledHours: () => range(0, hourTodayStart),
+        };
+      }
     }
   };
 
@@ -512,10 +520,10 @@ const NewTaskModal = ({
                   disabledDate={disabledDate}
                   disabledTime={disabledRangeTime}
                   onChange={onChangeDate}
-                  format="DD-MM-YYYY HH:00"
+                  format="DD-MM-YYYY HH:mm"
                   className="w-full"
                   showTime={{
-                    format: "HH",
+                    format: "HH:mm",
                     hideDisabledOptions: true,
                   }}
                 />

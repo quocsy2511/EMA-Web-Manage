@@ -19,7 +19,7 @@ export const createTask = (task) =>
       estimationTime: task.estimationTime,
       assignee: task.assignee,
       leader: task.leader,
-      
+
       itemId: task.itemId,
       // Subtask only
       parentTask: task.parentTask ?? undefined,
@@ -65,6 +65,23 @@ export const updateTask = ({ taskID, ...task }) =>
       parentTask: task.parentTask,
       estimationTime: task.estimationTime,
       effort: task.effort,
+    },
+  });
+export const updateTaskProgress = ({ taskID, ...task }) =>
+  http({
+    url: `/task/updateTask?taskID=${taskID}`,
+    method: "put",
+    data: {
+      title: task.title,
+      eventID: task.eventID,
+      startDate: task.startDate,
+      endDate: task.endDate,
+      description: task.description,
+      priority: task.priority,
+      parentTask: task.parentTask,
+      estimationTime: task.estimationTime,
+      effort: task.effort,
+      progress: task.progress,
     },
   });
 
