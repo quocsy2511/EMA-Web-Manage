@@ -375,7 +375,7 @@ const ContactTab = ({
                 onClick={() => handleSort("ASC")}
                 className="text-lg w-fit h-fit py-4 px-6 font-semibold border-green-700 text-green-700"
               >
-                Liên hệ sớm nhất
+                Liên hệ cũ nhất
               </Button>
             )}
           </div>

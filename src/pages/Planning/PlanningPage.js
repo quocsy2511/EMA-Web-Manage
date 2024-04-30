@@ -38,6 +38,11 @@ const PlanningPage = () => {
 
   const [chosenImportCSV, setChosenImportCSV] = useState();
   const [tableData, setTableData] = useState();
+  console.log("tableData > ", tableData);
+
+  const [totalPriceState, setTotalPriceState] = useState([0, 0, 0, 0]);
+  console.log("totalPriceState > ", totalPriceState);
+  const [importPrice, setImportPrice] = useState([0, 0, 0, 0]);
 
   const mergeValue = new Set();
   const mergeImportValue = new Set();
@@ -48,6 +53,20 @@ const PlanningPage = () => {
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  useEffect(() => {
+    console.log("tableData > ", tableData);
+    if (tableData) {
+      const totalPrice = tableData?.success?.reduce((total, item) => {
+        return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
+      }, 0);
+      const backupPrice = totalPrice * 0.05;
+      const vatPrice = (totalPrice + backupPrice) * 0.1;
+      const grandPrice = totalPrice + backupPrice + vatPrice;
+
+      setImportPrice([totalPrice, backupPrice, vatPrice, grandPrice]);
+    }
+  }, [tableData]);
 
   // Handle import CVS
   useEffect(() => {
@@ -64,7 +83,6 @@ const PlanningPage = () => {
     isError: planningIsError,
   } = useQuery(["planning", contactId], () => getPlanByContact(contactId), {
     select: (data) => {
-      console.log("🚀 ~ PlanningPage ~ data:", data);
       return data?.plan
         ?.map((category) =>
           category?.items?.map((item, index) => ({
@@ -85,6 +103,38 @@ const PlanningPage = () => {
     },
     refetchOnWindowFocus: false,
   });
+  console.log("planningData > ", planningData);
+
+  useEffect(() => {
+    console.log("planningData > ", planningData);
+    if (planningData) {
+      const totalPrice = planningData?.reduce((total, item) => {
+        return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
+      }, 0);
+      const backupPrice = totalPrice * 0.05;
+      const vatPrice = (totalPrice + backupPrice) * 0.1;
+      const grandPrice = totalPrice + backupPrice + vatPrice;
+
+      setTotalPriceState([totalPrice, backupPrice, vatPrice, grandPrice]);
+    }
+  }, [planningData]);
+
+  // let totalPriceExisted = 0;
+  // let backupPriceExisted = 0;
+  // let vatPriceExisted = 0;
+  // let grandPriceExisted = 0;
+  // useEffect(() => {
+  //   console.log(planningData);
+  //   if (planningData) {
+  //     totalPriceExisted = planningData?.reduce((total, item) => {
+  //       return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
+  //     }, 0);
+  //     console.log("totalPriceExisted > ", totalPriceExisted);
+  //     backupPriceExisted = totalPrice * 0.05;
+  //     vatPriceExisted = (totalPrice + backupPrice) * 0.1;
+  //     grandPriceExisted = totalPrice + backupPrice + vatPrice;
+  //   }
+  // }, [planningData]);
 
   const { mutate: importFileMutate, isLoading: importFileIsLoading } =
     useMutation((formData) => importCSV(formData), {
@@ -242,9 +292,6 @@ const PlanningPage = () => {
         contactId,
         hasContract,
         readOnly,
-        // totalContract: planningData?.reduce((total, item) => {
-        //   return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
-        // }, 0),
         totalContract:
           planningData?.reduce((total, item) => {
             return total + item?.itemPlannedAmount * item?.itemPlannedPrice;
@@ -271,7 +318,7 @@ const PlanningPage = () => {
 
       <LockLoadingModal
         isModalOpen={postPlanIsLoading}
-        label="Đang tạo bản kế hoạch và gửi cho khách hàng ..."
+        label="Đang tạo bản kế hoạch ..."
       />
 
       <motion.div
@@ -463,80 +510,25 @@ const PlanningPage = () => {
               <p className="text-right text-lg mt-5">
                 Tổng cộng :{" "}
                 <span className="text-3xl font-semibold">
-                  {planningData
-                    ?.reduce((total, item) => {
-                      return (
-                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
-                      );
-                    }, 0)
-                    .toLocaleString()}{" "}
-                  VNĐ
+                  {(totalPriceState?.[0] || 0)?.toLocaleString()} VNĐ
                 </span>
               </p>
               <p className="text-right text-lg mt-5">
                 Dự phòng (5%):{" "}
                 <span className="text-3xl font-semibold">
-                  {(
-                    planningData?.reduce((total, item) => {
-                      return (
-                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
-                      );
-                    }, 0) * 0.05
-                  ).toLocaleString()}{" "}
-                  VNĐ
+                  {(totalPriceState?.[1] || 0)?.toLocaleString()} VNĐ
                 </span>
               </p>
               <p className="text-right text-lg mt-5">
                 VAT (10%):{" "}
                 <span className="text-3xl font-semibold">
-                  {(
-                    (planningData?.reduce((total, item) => {
-                      return (
-                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
-                      );
-                    }, 0) *
-                      0.05 +
-                      planningData?.reduce((total, item) => {
-                        return (
-                          total +
-                          item?.itemPlannedAmount * item?.itemPlannedPrice
-                        );
-                      }, 0)) *
-                    0.1
-                  ).toLocaleString()}{" "}
-                  VNĐ
+                  {(totalPriceState?.[2] || 0)?.toLocaleString()} VNĐ
                 </span>
               </p>
               <p className="text-right text-lg mt-5">
                 Thành tiền:{" "}
                 <span className="text-3xl font-semibold">
-                  {(
-                    planningData?.reduce((total, item) => {
-                      return (
-                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
-                      );
-                    }, 0) +
-                    planningData?.reduce((total, item) => {
-                      return (
-                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
-                      );
-                    }, 0) *
-                      0.05 +
-                    (planningData?.reduce((total, item) => {
-                      return (
-                        total + item?.itemPlannedAmount * item?.itemPlannedPrice
-                      );
-                    }, 0) *
-                      0.05 +
-                      planningData?.reduce((total, item) => {
-                        return (
-                          total +
-                          item?.itemPlannedAmount * item?.itemPlannedPrice
-                        );
-                      }, 0)) *
-                      0.1
-                  )?.toLocaleString() || 0}{" "}
-                  VNĐ
+                  {(totalPriceState?.[3] || 0)?.toLocaleString()} VNĐ
                 </span>
               </p>
             </div>
@@ -692,86 +684,25 @@ const PlanningPage = () => {
                 <p className="text-right text-lg mt-5">
                   Tổng cộng:{" "}
                   <span className="text-3xl font-semibold">
-                    {tableData?.success
-                      ?.reduce((total, item) => {
-                        return (
-                          total +
-                          item?.itemPlannedAmount * item?.itemPlannedPrice
-                        );
-                      }, 0)
-                      ?.toLocaleString() || 0}{" "}
-                    VNĐ
+                    {(importPrice?.[0] || 0)?.toLocaleString()} VNĐ
                   </span>
                 </p>
                 <p className="text-right text-lg mt-5">
                   Dự phòng (5%):{" "}
                   <span className="text-3xl font-semibold">
-                    {(
-                      tableData?.success?.reduce((total, item) => {
-                        return (
-                          total +
-                          item?.itemPlannedAmount * item?.itemPlannedPrice
-                        );
-                      }, 0) * 0.05
-                    )?.toLocaleString() || 0}{" "}
-                    VNĐ
+                    {(importPrice?.[1] || 0)?.toLocaleString()} VNĐ
                   </span>
                 </p>
                 <p className="text-right text-lg mt-5">
                   VAT (10%):{" "}
                   <span className="text-3xl font-semibold">
-                    {(
-                      (tableData?.success?.reduce((total, item) => {
-                        return (
-                          total +
-                          item?.itemPlannedAmount * item?.itemPlannedPrice
-                        );
-                      }, 0) *
-                        0.05 +
-                        tableData?.success?.reduce((total, item) => {
-                          return (
-                            total +
-                            item?.itemPlannedAmount * item?.itemPlannedPrice
-                          );
-                        }, 0)) *
-                      0.1
-                    )?.toLocaleString() || 0}{" "}
-                    VNĐ
+                    {(importPrice?.[2] || 0)?.toLocaleString()} VNĐ
                   </span>
                 </p>
                 <p className="text-right text-lg mt-5">
                   Thành tiền:{" "}
                   <span className="text-3xl font-semibold">
-                    {(
-                      tableData?.success?.reduce((total, item) => {
-                        return (
-                          total +
-                          item?.itemPlannedAmount * item?.itemPlannedPrice
-                        );
-                      }, 0) +
-                      tableData?.success?.reduce((total, item) => {
-                        return (
-                          total +
-                          item?.itemPlannedAmount * item?.itemPlannedPrice
-                        );
-                      }, 0) *
-                        0.05 +
-                      (tableData?.success?.reduce((total, item) => {
-                        return (
-                          total +
-                          item?.itemPlannedAmount * item?.itemPlannedPrice
-                        );
-                      }, 0) *
-                        0.05 +
-                        tableData?.success?.reduce((total, item) => {
-                          return (
-                            total +
-                            item?.itemPlannedAmount * item?.itemPlannedPrice
-                          );
-                        }, 0)) *
-                        0.1
-                    )?.toLocaleString() || 0}{" "}
-                    VNĐ
+                    {(importPrice?.[3] || 0)?.toLocaleString()} VNĐ
                   </span>
                 </p>
 

@@ -689,14 +689,12 @@ const EventAssignTaskPage = () => {
                       );
                   }}
                   showTime={
-                    isSubTask
-                      ? {
-                          defaultValue: [
-                            dayjs("00:00:00", "HH:mm:ss"),
-                            dayjs("00:00:00f", "HH:mm:ss"),
-                          ],
-                        }
-                      : false
+                    isSubTask && {
+                      defaultValue: [
+                        dayjs("00:00:00", "HH:mm:ss"),
+                        dayjs("00:00:00", "HH:mm:ss"),
+                      ],
+                    }
                   }
                   format={"DD/MM/YYYY HH:mm:ss"}
                   className="w-full"

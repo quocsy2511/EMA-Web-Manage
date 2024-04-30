@@ -764,7 +764,6 @@ const EventTaskPage = () => {
               <div className="flex items-center gap-x-2">
                 <div className="w-5" />
                 <p className="text-xs text-slate-400">
-                  {/* {moment(data.endDate).format("dddd, D [tháng] M, YYYY")} */}
                   {new Date(eventDetail?.processingDate).toLocaleDateString(
                     "vi-VN",
                     {

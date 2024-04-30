@@ -30,8 +30,6 @@ import {
 } from "../../apis/contract";
 import { getEventType } from "../../apis/events";
 import LockLoadingModal from "../../components/Modal/LockLoadingModal";
-import { IoClose } from "react-icons/io5";
-import moment from "moment-timezone";
 
 const { RangePicker } = DatePicker;
 
@@ -43,10 +41,6 @@ const Title = memo(({ title }) => (
 
 const ContractPage = () => {
   const location = useLocation();
-  // const contactId = location.state?.contactId;
-  // const hasContract = location.state?.hasContract;
-  // const readOnly = location.state?.readOnly;
-  // const totalContract = location.state?.totalContract;
   const { contactId, hasContract, readOnly, totalContract } =
     location.state ?? {};
 
@@ -57,12 +51,7 @@ const ContractPage = () => {
   const { message: messageApp } = App.useApp();
   const [totalContractValue] = useState(totalContract ?? 0);
   const [usedTotalContractValue, setUsedTotalContractValue] = useState(0);
-  console.log("usedTotalContractValue > ", usedTotalContractValue);
   const [numOfContractValue, setNumOfContractValue] = useState(0);
-
-  // useEffect(() => {
-  //   window.scrollTo({ top: 0, behavior: "smooth" });
-  // }, []);
 
   const { data: contactInfo, isLoading: contactInfoIsLoading } = useQuery(
     ["contact", contactId],
@@ -80,9 +69,27 @@ const ContractPage = () => {
   );
   console.log("contactInfo > ", contactInfo);
 
+  useEffect(() => {
+    if (contactInfo) {
+      console.log(
+        "contactInfo?.contract?.paymentMilestone > ",
+        contactInfo?.contract?.paymentMilestone
+      );
+      setUsedTotalContractValue(
+        contactInfo?.contract?.paymentMilestone?.reduce(
+          (total, item) => total + item?.amount,
+          0
+        )
+      );
+    }
+  }, [contactInfo]);
+
   const { data: eventType, isLoading: eventTypeIsLoading } = useQuery(
     ["event-type"],
-    getEventType
+    getEventType,
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const { mutate: createContractMutate, isLoading: createContractIsLoading } =
@@ -266,8 +273,16 @@ const ContractPage = () => {
             }
           }}
           initialValues={{
-            eventName: hasContract ? hasContract?.eventName : null,
-            processingDate: hasContract ? hasContract?.processingDate : null,
+            eventName: contactInfo?.contract
+              ? contactInfo?.contract?.eventName
+              : hasContract
+              ? hasContract?.eventName
+              : null,
+            processingDate: contactInfo?.contract
+              ? contactInfo?.contract?.processingDate
+              : hasContract
+              ? hasContract?.processingDate
+              : null,
             location: contactInfo?.address,
             description: contactInfo?.note
               ? {
@@ -291,6 +306,20 @@ const ContractPage = () => {
               customerPhoneNumber: contactInfo?.customerInfo?.phoneNumber,
               paymentMethod: "Chuyển Khoản",
             },
+            "payment-rules": contactInfo?.contract?.paymentMilestone?.map(
+              (item) => ({
+                title: item?.name,
+                date: [
+                  momenttz(item?.startDate, "YYYY-MM-DD HH:mm:ss").format(
+                    "YYYY-MM-DD"
+                  ),
+                  momenttz(item?.endDate, "YYYY-MM-DD HH:mm:ss").format(
+                    "YYYY-MM-DD"
+                  ),
+                ],
+                value: item?.amount,
+              })
+            ),
           }}
         >
           <>
@@ -540,6 +569,62 @@ const ContractPage = () => {
 
               <div className="flex space-x-10">
                 <Form.Item
+                  className="flex-1"
+                  label={<Title title="Ngày bắt đầu dự án" />}
+                  name="processingDate"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Chưa chọn ngày bắt đầu!",
+                    },
+                  ]}
+                >
+                  <ConfigProvider locale={viVN}>
+                    <DatePicker
+                      size="large"
+                      defaultValue={
+                        contactInfo?.contract
+                          ? dayjs(
+                              contactInfo?.contract?.processingDate,
+                              "YYYY-MM-DD"
+                            )
+                          : hasContract
+                          ? dayjs(hasContract?.processingDate, "YYYY-MM-DD")
+                          : form.getFieldValue("processingDate")
+                          ? dayjs(
+                              form.getFieldValue("processingDate"),
+                              "YYYY-MM-DD"
+                            )
+                          : null
+                      }
+                      className="w-full"
+                      onChange={(value) => {
+                        form.setFieldsValue({
+                          processingDate: momenttz(value?.$d).format(
+                            "YYYY-MM-DD"
+                          ),
+                        });
+                      }}
+                      disabledDate={(current) => {
+                        const startDate = form.getFieldValue("date")?.[0];
+
+                        if (!startDate) {
+                          return current && current < momenttz().startOf("day");
+                        }
+
+                        return (
+                          current &&
+                          (current < momenttz().startOf("day") ||
+                            current >=
+                              momenttz(startDate, "YYYY-MM-DD").startOf("day"))
+                        );
+                      }}
+                      format={"DD/MM/YYYY"}
+                    />
+                  </ConfigProvider>
+                </Form.Item>
+
+                <Form.Item
                   className="w-[40%] relative cursor-not-allowed"
                   label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
                   name="date"
@@ -556,6 +641,7 @@ const ContractPage = () => {
                 >
                   <ConfigProvider locale={viVN}>
                     <RangePicker
+                      disabled
                       size="large"
                       className="w-full"
                       defaultValue={[
@@ -599,59 +685,6 @@ const ContractPage = () => {
                     />
                   </ConfigProvider>
                   <div className="absolute top-0 right-0 bottom-0 left-0" />
-                </Form.Item>
-
-                <Form.Item
-                  className="flex-1"
-                  label={<Title title="Ngày bắt đầu dự án" />}
-                  name="processingDate"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Chưa chọn ngày bắt đầu!",
-                    },
-                  ]}
-                >
-                  <ConfigProvider locale={viVN}>
-                    <DatePicker
-                      size="large"
-                      defaultValue={
-                        hasContract
-                          ? dayjs(hasContract?.processingDate, "YYYY-MM-DD")
-                          : form.getFieldValue("processingDate")
-                          ? dayjs(
-                              form.getFieldValue("processingDate"),
-                              "YYYY-MM-DD"
-                            )
-                          : null
-                      }
-                      className="w-full"
-                      onChange={(value) => {
-                        form.setFieldsValue({
-                          processingDate: momenttz(value?.$d).format(
-                            "YYYY-MM-DD"
-                          ),
-                        });
-                      }}
-                      disabledDate={(current) => {
-                        const startDate = form.getFieldValue("date")?.[0];
-
-                        if (!startDate) {
-                          return current && current < momenttz().startOf("day");
-                        }
-
-                        return (
-                          current &&
-                          (current < momenttz().startOf("day") ||
-                            current >
-                              momenttz(startDate, "YYYY-MM-DD")
-                                .add(1, "day")
-                                .startOf("day"))
-                        );
-                      }}
-                      format={"DD/MM/YYYY"}
-                    />
-                  </ConfigProvider>
                 </Form.Item>
 
                 <Form.Item
@@ -726,6 +759,13 @@ const ContractPage = () => {
                               message: "Chưa điền tên thời hạn",
                             },
                           ]}
+                          initialValue={
+                            key === 0
+                              ? "Đặt cọc"
+                              : key === 1
+                              ? "Đợt 1"
+                              : key === 2 && "Đợt 2"
+                          }
                         >
                           <Input placeholder="Tên thời hạn" size="large" />
                         </Form.Item>
@@ -753,6 +793,53 @@ const ContractPage = () => {
                           <ConfigProvider locale={viVN}>
                             <RangePicker
                               size="large"
+                              defaultValue={
+                                contactInfo?.contract?.paymentMilestone &&
+                                key === 0 &&
+                                contactInfo?.contract?.paymentMilestone
+                                  ?.length >= 1
+                                  ? [
+                                      dayjs(
+                                        contactInfo?.contract
+                                          ?.paymentMilestone?.[0]?.startDate,
+                                        "YYYY-MM-DD"
+                                      ),
+                                      dayjs(
+                                        contactInfo?.contract
+                                          ?.paymentMilestone?.[0]?.startDate,
+                                        "YYYY-MM-DD"
+                                      ),
+                                    ]
+                                  : key === 1 &&
+                                    contactInfo?.contract?.paymentMilestone
+                                      ?.length >= 2
+                                  ? [
+                                      dayjs(
+                                        contactInfo?.contract
+                                          ?.paymentMilestone?.[1]?.startDate,
+                                        "YYYY-MM-DD"
+                                      ),
+                                      dayjs(
+                                        contactInfo?.contract
+                                          ?.paymentMilestone?.[1]?.startDate,
+                                        "YYYY-MM-DD"
+                                      ),
+                                    ]
+                                  : key === 2 &&
+                                    contactInfo?.contract?.paymentMilestone
+                                      ?.length >= 3 && [
+                                      dayjs(
+                                        contactInfo?.contract
+                                          ?.paymentMilestone?.[2]?.startDate,
+                                        "YYYY-MM-DD"
+                                      ),
+                                      dayjs(
+                                        contactInfo?.contract
+                                          ?.paymentMilestone?.[2]?.startDate,
+                                        "YYYY-MM-DD"
+                                      ),
+                                    ]
+                              }
                               onChange={(value) => {
                                 const dates =
                                   form.getFieldValue("payment-rules");
@@ -904,7 +991,7 @@ const ContractPage = () => {
                           rules={[
                             {
                               required: true,
-                              message: "Chưa nhập giá trị hợp đồng!",
+                              message: "Bắt buộc",
                             },
                             {
                               type: "number",
@@ -1056,60 +1143,6 @@ const ContractPage = () => {
                             }}
                           />
                         </Form.Item>
-                        {/* <IoClose
-                          className="text-red-500 cursor-pointer"
-                          onClick={() => {
-                            remove(name);
-                            setNumOfContractValue((prev) => prev - 1);
-                            console.log("key > ", key);
-                            console.log(
-                              form.getFieldValue([
-                                "payment-rules",
-                                key,
-                                "value",
-                              ])
-                            );
-                            console.log(
-                              form.getFieldValue(["payment-rules", key, "date"])
-                            );
-                            if (
-                              form.getFieldValue([
-                                "payment-rules",
-                                key,
-                                "value",
-                              ])
-                            ) {
-                              form.resetFields([
-                                ["payment-rules", key, "value"],
-                              ]);
-                            }
-                            if (
-                              form.getFieldValue(["payment-rules", key, "date"])
-                            ) {
-                              form.resetFields([
-                                ["payment-rules", key, "date"],
-                              ]);
-                            }
-
-                            setUsedTotalContractValue(
-                              (form.getFieldValue([
-                                "payment-rules",
-                                0,
-                                "value",
-                              ]) ?? 0) +
-                                (form.getFieldValue([
-                                  "payment-rules",
-                                  1,
-                                  "value",
-                                ]) ?? 0) +
-                                (form.getFieldValue([
-                                  "payment-rules",
-                                  2,
-                                  "value",
-                                ]) ?? 0)
-                            );
-                          }}
-                        /> */}
                       </Space>
                     );
                   })}
@@ -1127,15 +1160,18 @@ const ContractPage = () => {
                             ) {
                               messageApi.open({
                                 type: "error",
-                                content: "Đã sử dụng hết khoản chi !",
+                                content: "Đã sử dụng hết khoản chi",
                               });
                             } else {
                               add();
-                              setNumOfContractValue((prev) => prev + 1);
                               form.setFieldsValue({
                                 [["payment-rules", 0, "value"]]:
                                   totalContractValue,
                               });
+                              form.setFieldsValue({
+                                [["payment-rules", 0, "title"]]: "Đặt cọc",
+                              });
+                              setNumOfContractValue((prev) => prev + 1);
                               setUsedTotalContractValue(totalContractValue);
                             }
                           } else if (numOfContractValue === 1) {
@@ -1155,6 +1191,9 @@ const ContractPage = () => {
                                     0,
                                     "value",
                                   ]),
+                              });
+                              form.setFieldsValue({
+                                [["payment-rules", 0, "title"]]: "Đợt 1",
                               });
                               setUsedTotalContractValue(totalContractValue);
                             } else if (
@@ -1196,6 +1235,9 @@ const ContractPage = () => {
                                     1,
                                     "value",
                                   ]),
+                              });
+                              form.setFieldsValue({
+                                [["payment-rules", 0, "title"]]: "Đợt 2",
                               });
                               setUsedTotalContractValue(totalContractValue);
                             } else if (
@@ -1239,6 +1281,10 @@ const ContractPage = () => {
                 okText="Có"
                 cancelText="Không"
                 placement="top"
+                disabled={
+                  usedTotalContractValue !== totalContractValue ||
+                  numOfContractValue === 0
+                }
               >
                 <Button
                   size="large"

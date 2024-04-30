@@ -27,6 +27,7 @@ const Title = memo(({ title }) => (
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
 
 const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
+  console.log(event);
   const queryClient = useQueryClient();
   const { mutate: updateEventMutate, isLoading: updateEventIsLoading } =
     useMutation((event) => updateDetailEvent(event), {
@@ -74,8 +75,8 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
       eventId: event?.id,
       eventName: values?.eventName,
       description: JSON.stringify(values?.description?.ops),
-      startDate: values?.date[0],
-      processingDate: values?.processingDate,
+      startDate: values?.processingDate,
+      processingDate: values?.date[0],
       endDate: values?.date[1],
       location: values?.location,
       estBudget: +values?.estBudget,
@@ -132,9 +133,9 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
         }}
         initialValues={{
           eventName: event?.eventName,
-          date: [event?.startDate, event?.endDate],
+          date: [event?.processingDate, event?.endDate],
           location: event?.location,
-          processingDate: event?.processingDate,
+          processingDate: event?.startDate,
 
           description: {
             ops: JSON.parse(
@@ -190,13 +191,14 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
                     });
                 }}
                 defaultValue={[
-                  dayjs(event?.startDate, "YYYY-MM-DD"),
+                  dayjs(event?.processingDate, "YYYY-MM-DD"),
                   dayjs(event?.endDate, "YYYY-MM-DD"),
                 ]}
                 format={"DD/MM/YYYY"}
                 disabledDate={(current) => {
                   return current && current < moment().startOf("day");
                 }}
+                disabled
               />
             </ConfigProvider>
           </Form.Item>
@@ -239,10 +241,12 @@ const EventUpdateModal = ({ isModalOpen, setIsModalOpen, event }) => {
                 }}
                 disabledDate={(current) => {
                   return (
-                    current && current > moment(event?.startDate).endOf("day")
+                    current &&
+                    (current < moment().subtract(1, "day") ||
+                      current >= moment(event?.processingDate, "YYYY-MM-DD"))
                   );
                 }}
-                defaultValue={dayjs(event?.processingDate, "YYYY-MM-DD")}
+                defaultValue={dayjs(event?.startDate, "YYYY-MM-DD")}
                 format={"DD/MM/YYYY"}
               />
             </ConfigProvider>

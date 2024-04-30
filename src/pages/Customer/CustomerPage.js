@@ -15,7 +15,7 @@ const CustomerPage = () => {
   const location = useLocation();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [sort, setSort] = useState("DESC");
+  const [sort, setSort] = useState("ASC");
   const [contactStatus, setContactStatus] = useState(
     location.state?.isNavigate
       ? "ALL"
@@ -113,30 +113,6 @@ const CustomerPage = () => {
                 />
               ),
             },
-            // {
-            //   key: "2",
-            //   label: (
-            //     <p className="flex items-center text-xl">
-            //       <FaRegNoteSticky className="mr-2" /> Kế Hoạch
-            //     </p>
-            //   ),
-            //   children: "Content of Tab Pane 2",
-            // },
-            // {
-            //   key: "3",
-            //   label: (
-            //     <p className="flex items-center text-xl">
-            //       <FaRegAddressBook className="mr-2" /> Hợp Đồng
-            //     </p>
-            //   ),
-            //   children: (
-            //     <ContractTab
-            //       contracts={contracts}
-            //       contractsIsLoading={contractsIsLoading}
-            //       contractsIsError={contractsIsError}
-            //     />
-            //   ),
-            // },
           ]}
           onChange={(key) => {}}
         />

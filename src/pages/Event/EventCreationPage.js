@@ -421,8 +421,8 @@ const EventCreationPage = () => {
       eventName: values?.eventName,
       description: JSON.stringify(values?.description.ops),
       // ===========================================
-      startDate: values?.processingDate,
-      processingDate: values?.date?.[0],
+      startDate: values?.date?.[0],
+      processingDate: values?.processingDate,
       endDate: values?.date?.[1],
       // ===========================================
       location: values?.location,
@@ -575,6 +575,46 @@ const EventCreationPage = () => {
           </div>
 
           <div className="flex space-x-10">
+            <Form.Item
+              className="w-[25%]"
+              label={<Title title="Ngày bắt đầu dự án" />}
+              name="processingDate"
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn ngày bắt đầu!",
+                },
+              ]}
+            >
+              <ConfigProvider locale={viVN}>
+                <DatePicker
+                  size="large"
+                  defaultValue={dayjs(contactInfo?.startDate, "YYYY-MM-DD")}
+                  className="w-full"
+                  onChange={(value) => {
+                    form.setFieldsValue({
+                      processingDate: moment(value?.$d).format("YYYY-MM-DD"),
+                    });
+                  }}
+                  disabledDate={(current) => {
+                    const startDate = form.getFieldValue("date")?.[0];
+                    const endDate = form.getFieldValue("date")?.[1];
+
+                    if (!startDate && !endDate) {
+                      return current && current < moment().startOf("day");
+                    }
+
+                    return (
+                      current > moment(startDate, "YYYY-MM-DD")
+
+                      //  || current > moment(endDate, "YYYY-MM-DD").endOf("day")
+                    );
+                  }}
+                  format={"DD/MM/YYYY"}
+                />
+              </ConfigProvider>
+            </Form.Item>
+
             <div className="w-[35%] relative cursor-not-allowed">
               <Form.Item
                 label={<Title title="Ngày bắt đầu - kết thúc sự kiện" />}
@@ -637,46 +677,6 @@ const EventCreationPage = () => {
               </Form.Item>
               <div className="absolute top-0 bottom-0 left-0 right-0" />
             </div>
-
-            <Form.Item
-              className="w-[25%]"
-              label={<Title title="Ngày bắt đầu dự án" />}
-              name="processingDate"
-              rules={[
-                {
-                  required: true,
-                  message: "Chưa chọn ngày bắt đầu!",
-                },
-              ]}
-            >
-              <ConfigProvider locale={viVN}>
-                <DatePicker
-                  size="large"
-                  defaultValue={dayjs(contactInfo?.startDate, "YYYY-MM-DD")}
-                  className="w-full"
-                  onChange={(value) => {
-                    form.setFieldsValue({
-                      processingDate: moment(value?.$d).format("YYYY-MM-DD"),
-                    });
-                  }}
-                  disabledDate={(current) => {
-                    const startDate = form.getFieldValue("date")?.[0];
-                    const endDate = form.getFieldValue("date")?.[1];
-
-                    if (!startDate && !endDate) {
-                      return current && current < moment().startOf("day");
-                    }
-
-                    return (
-                      current > moment(startDate, "YYYY-MM-DD")
-
-                      //  || current > moment(endDate, "YYYY-MM-DD").endOf("day")
-                    );
-                  }}
-                  format={"DD/MM/YYYY"}
-                />
-              </ConfigProvider>
-            </Form.Item>
 
             <Form.Item
               className="flex-1"
