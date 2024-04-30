@@ -127,7 +127,9 @@ const BudgetStaff = ({ selectEvent, setIsBoardTask }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentTaskId, contractId]);
-
+  useEffect(() => {
+    document.title = "Ngân sách";
+  }, []);
   return (
     <>
       <div className="bg-bgG w-full h-[calc(100vh-76px-4rem)] ">
