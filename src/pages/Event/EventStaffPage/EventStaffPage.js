@@ -229,8 +229,12 @@ const EventStaffPage = () => {
     noti?.type === "TASK" && refetch();
   };
   useEffect(() => {
-    document.title = "Sự kiện";
-  }, []);
+    if (isBoardTask) {
+      document.title = "Sự kiện";
+    } else {
+      document.title = "Ngân sách";
+    }
+  }, [isBoardTask]);
 
   useEffect(() => {
     if (isBudget) {

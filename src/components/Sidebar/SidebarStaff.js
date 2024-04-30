@@ -100,7 +100,7 @@ const SidebarStaff = ({ collapsed }) => {
       </p>
     ),
     getItem(
-      <LabelText text="Nhân viên" />,
+      <LabelText text="Nhân sự" />,
       "/staff/department",
       <p>
         <AiOutlineTeam className="text-[#b03c27]" size={24} />
