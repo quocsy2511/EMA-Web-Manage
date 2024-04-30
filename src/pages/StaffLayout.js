@@ -1,6 +1,6 @@
-import { Layout, notification } from "antd";
+import { App, Layout } from "antd";
 import React, { Fragment, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Outlet } from "react-router-dom";
 import Header from "../components/Header/Header";
 import SidebarStaff from "../components/Sidebar/SidebarStaff";
@@ -9,24 +9,26 @@ import { getChatsList } from "../store/chats";
 import {
   cleanUpOnMessage,
   cleanUpOnlineGroupUsersReceived,
+  displayNotification,
   getOnlineGroupUsersSocket,
   socketListener,
 } from "../utils/socket";
+import { useQueryClient } from "@tanstack/react-query";
 
 const { Content } = Layout;
 
 const StaffLayout = () => {
   const dispatch = useDispatch();
-  const { socket } = useSelector((state) => state.socket);
 
   const [collapsed, setCollapsed] = useState(false);
 
-  // const [api, contextHolder] = notification.useNotification();
-  const [notificationAPI, contextHolder] = notification.useNotification();
+  const { notification } = App.useApp();
 
+  const queryClient = useQueryClient();
   useEffect(() => {
     // create socket connection
-    socketListener(dispatch, notificationAPI);
+    socketListener(dispatch);
+    displayNotification(notification, queryClient);
 
     // get online user
     getOnlineGroupUsersSocket();
@@ -41,7 +43,6 @@ const StaffLayout = () => {
 
   return (
     <Fragment>
-      {contextHolder}
       <Layout
         style={{
           minHeight: "100vh",

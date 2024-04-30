@@ -225,7 +225,7 @@ const DashboardPageStaff = () => {
   }, [type]);
   
   useEffect(() => {
-    document.title = "Trang thống kê";
+    document.title = "Trang chủ";
   }, []);
 
   return (

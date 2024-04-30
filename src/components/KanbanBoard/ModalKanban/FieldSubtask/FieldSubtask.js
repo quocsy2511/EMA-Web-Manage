@@ -193,26 +193,16 @@ const FieldSubtask = ({
             ) : (
               <>
                 {taskParent ? (
-                  <>
-                    {/* disableDoneTaskParent check xem cacs task con hoan thanh chua */}
-                    {!disableDoneTaskParent ? (
-                      <StatusSelected
-                        // disableDoneTaskParent={disableDoneTaskParent}
-                        updateStatus={updateStatus}
-                        setUpdateStatus={setUpdateStatus}
-                        taskSelected={taskSelected}
-                        taskParent={taskParent}
-                        classNameStyle="w-[190px] mt-2"
-                        setIsOpenTaskModal={setIsOpenTaskModal}
-                        updateStartDate={updateStartDate}
-                      />
-                    ) : (
-                      <StatusTag
-                        taskSelected={taskSelected}
-                        updateStatus={updateStatus}
-                      />
-                    )}
-                  </>
+                  <StatusSelected
+                    disableDoneTaskParent={disableDoneTaskParent}
+                    updateStatus={updateStatus}
+                    setUpdateStatus={setUpdateStatus}
+                    taskSelected={taskSelected}
+                    taskParent={taskParent}
+                    classNameStyle="w-[190px] mt-2"
+                    setIsOpenTaskModal={setIsOpenTaskModal}
+                    updateStartDate={updateStartDate}
+                  />
                 ) : (
                   <StatusSelected
                     updateStatus={updateStatus}
@@ -222,6 +212,7 @@ const FieldSubtask = ({
                     classNameStyle="w-[190px] mt-2"
                     setIsOpenTaskModal={setIsOpenTaskModal}
                     updateStartDate={updateStartDate}
+                    setUpdateProgress={setUpdateProgress}
                   />
                 )}
               </>

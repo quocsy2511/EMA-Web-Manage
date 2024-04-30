@@ -98,7 +98,7 @@ const ProfilePage = () => {
     }
   );
   useEffect(() => {
-    document.title = "Trang thông tin cá nhân";
+    document.title = "Thông tin cá nhân";
   }, []);
 
   if (isLoading || staffsIsLoading)

@@ -68,7 +68,6 @@ const RangeDateSelected = ({
         current.isAfter(disableEndDate, "day")
       );
     } else {
-      console.log("1: ", current.isBefore(today));
       return (
         (current.isBefore(today) && !current.isSame(today, "day")) ||
         current.isAfter(disableEndDate, "day")
@@ -77,6 +76,7 @@ const RangeDateSelected = ({
   };
 
   const hourTodayStart = moment(today).format("HH");
+  const minuteTodayStart = moment(today).format("mm");
   const range = (start, end) => {
     const result = [];
     for (let i = start; i < end; i++) {
@@ -86,9 +86,16 @@ const RangeDateSelected = ({
   };
   const disabledRangeTime = (current, type) => {
     if (current?.isSame(today, "day")) {
-      return {
-        disabledHours: () => range(0, hourTodayStart),
-      };
+      if (current?.isSame(today, "hour")) {
+        return {
+          disabledHours: () => range(0, hourTodayStart),
+          disabledMinutes: () => range(0, minuteTodayStart),
+        };
+      } else {
+        return {
+          disabledHours: () => range(0, hourTodayStart),
+        };
+      }
     }
   };
 
@@ -169,11 +176,11 @@ const RangeDateSelected = ({
                   disabledDate={disabledDate}
                   onChange={onChangeDate}
                   disabledTime={disabledRangeTime}
-                  format="DD-MM-YYYY HH:00"
+                  format="DD-MM-YYYY HH:mm"
                   onFocus={onFocusRangePicker}
                   allowClear={false}
                   showTime={{
-                    format: "HH",
+                    format: "HH:mm",
                     hideDisabledOptions: true,
                   }}
                 />

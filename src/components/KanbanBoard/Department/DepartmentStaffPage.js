@@ -641,7 +641,7 @@ const DepartmentStaffPage = () => {
   };
 
   useEffect(() => {
-    document.title = "Trang quản lí nhân sự";
+    document.title = "Nhân viên";
   }, []);
 
   return (

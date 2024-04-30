@@ -26,11 +26,8 @@ const DescriptionSubtask = ({
       description?.startsWith(`[{"`) ? description : parseJson(description)
     ),
   });
-  console.log("🚀 ~ descriptionQuill:", descriptionQuill);
-
   const [isOpenQuill, seItsOpenQuill] = useState(false);
   const queryClient = useQueryClient();
-
   const {
     data: subtaskDetails,
     isLoading: isLoadingSubtask,

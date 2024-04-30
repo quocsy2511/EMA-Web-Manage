@@ -54,7 +54,7 @@ const EventItem = memo(({ event, gotoEventPage }) => {
       break;
   }
   useEffect(() => {
-    document.title = "Trang danh sách sự kiện";
+    document.title = "Sự kiện";
   }, []);
   return (
     <motion.div

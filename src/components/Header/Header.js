@@ -430,7 +430,7 @@ const Header = ({ collapsed, setCollapsed }) => {
                   )}
                 </Badge>
               </Dropdown>
-            )}
+            )}›
           </div>
 
           <div className="w-10" />
@@ -459,7 +459,7 @@ const Header = ({ collapsed, setCollapsed }) => {
                     {manager
                       ? manager.role === TEXT.MANAGER && "Quản lý"
                       : staff
-                      ? staff.role === TEXT.STAFF && "Trưởng bộ phận"
+                      ? staff.role === TEXT.STAFF && "Trưởng nhóm"
                       : administrator
                       ? administrator.role === TEXT.ADMINISTRATOR && "Admin"
                       : "Vai trò"}
