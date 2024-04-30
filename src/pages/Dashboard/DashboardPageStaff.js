@@ -223,6 +223,7 @@ const DashboardPageStaff = () => {
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
+  
   useEffect(() => {
     document.title = "Trang thống kê";
   }, []);

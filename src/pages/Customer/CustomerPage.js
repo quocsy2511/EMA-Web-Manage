@@ -30,6 +30,7 @@ const CustomerPage = () => {
 
   useEffect(() => {
     socketOnNotification(handleRefetchContact);
+    document.title = "Trang khách hàng";
   }, []);
 
   const handleRefetchContact = (notification) => {

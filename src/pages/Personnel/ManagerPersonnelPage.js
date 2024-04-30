@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   getAllUser,
   getRoles,
@@ -40,6 +40,10 @@ import LoadingComponentIndicator from "../../components/Indicator/LoadingCompone
 const ManagerPersonnelPage = () => {
   const [page, setPage] = useState(1);
   const [divisionMode, setDivisionMode] = useState(1);
+
+  useEffect(() => {
+    document.title = "Trang nhân sự";
+  }, []);
 
   const { data, isLoading, isError } = useQuery(
     ["users", page],

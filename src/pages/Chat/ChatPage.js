@@ -194,6 +194,10 @@ const ChatPage = () => {
     (state) => state.onlineUser
   );
 
+  useEffect(() => {
+    document.title = "Hệ thống nhắn tin";
+  }, []);
+
   const { email: managerEmail, id: managerId } =
     useRouteLoaderData("manager") || {};
   const { email: staffEmail, id: staffId } = useRouteLoaderData("staff") || {};

@@ -52,6 +52,10 @@ const EventPage = () => {
   // }, [data]);
 
   useEffect(() => {
+    document.title = "Trang sự kiện";
+  }, []);
+
+  useEffect(() => {
     refetch();
   }, [searchDate, searchStatus, sort]);
 

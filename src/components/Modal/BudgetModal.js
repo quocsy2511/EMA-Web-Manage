@@ -14,7 +14,7 @@ const BudgetModal = ({
     <Modal
       title={
         <p className="text-center text-3xl">
-          {/* {evidence ? "Bằng chứng" : "Lý do từ chối"} */}123
+          {isModalOpen?.evidence ? "Bằng chứng" : "Lý do từ chối"}
         </p>
       }
       open={isModalOpen?.isOpen}
