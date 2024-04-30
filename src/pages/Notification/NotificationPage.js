@@ -202,7 +202,9 @@ const NotificationPage = () => {
   //       <LoadingComponentIndicator />
   //     </div>
   //   );
-
+  useEffect(() => {
+    document.title = "Thông báo";
+  }, []);
   if (isError)
     return (
       <div className="w-full min-h-[calc(100vh-64px)]">
@@ -334,7 +336,7 @@ const NotificationPage = () => {
                         <span className="font-semibold">
                           {noti?.content?.split("đã")[0]}{" "}
                         </span>
-                        đã {noti?.content?.split("đã")[1]}
+                        {noti?.content?.split("đã")[1]}
                       </p>
                       <p className="text-blue-400">{time}</p>
                     </div>
