@@ -16,6 +16,7 @@ const BudgetTransactionModal = ({
   setSelectTransactionTask = { setSelectTransactionTask },
 }) => {
   const { transactions } = selectItemTask;
+  console.log("🚀 ~ selectItemTask:", selectItemTask);
   const queryClient = useQueryClient();
   const [isRejectRequest, setIsRejectRequest] = useState(false);
   const [selectRequest, setSelectRequest] = useState("");
@@ -275,6 +276,12 @@ const BudgetTransactionModal = ({
                             onClick={() => handleRequestBudget(transaction)}
                           >
                             Yêu cầu ngân sách
+                          </Button>
+                          <Button
+                            type="default"
+                            onClick={() => handleSelectRequest(transaction)}
+                          >
+                            Từ chối
                           </Button>
                         </div>
                       )}

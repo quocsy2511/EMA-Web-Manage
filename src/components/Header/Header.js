@@ -430,7 +430,7 @@ const Header = ({ collapsed, setCollapsed }) => {
                   )}
                 </Badge>
               </Dropdown>
-            )}
+            )}›
           </div>
 
           <div className="w-10" />

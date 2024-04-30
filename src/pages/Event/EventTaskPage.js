@@ -51,6 +51,7 @@ import {
   FcHighPriority,
   FcLowPriority,
   FcMediumPriority,
+  FcStatistics,
 } from "react-icons/fc";
 import { IoSettingsOutline } from "react-icons/io5";
 import { GrStatusInfo } from "react-icons/gr";
@@ -72,6 +73,7 @@ import { getContract, getContractEvidence } from "../../apis/contract";
 import ContractCreatePage from "../../components/Modal/ContractCreatePage";
 import clsx from "clsx";
 import defaultBanner from "../../assets/images/default_banner_images.png";
+import EventStatisticModal from "../../components/KanbanBoard/ModalKanban/Statistic/EventStatisticModal";
 
 moment.locale("vi"); // Set the locale to Vietnam
 const parseJson = (data) => JSON.stringify([{ insert: data + "\n" }]);
@@ -96,7 +98,7 @@ const EventTaskPage = () => {
   const manager = useRouteLoaderData("manager");
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [openStatisticModal, setOpenStatisticModal] = useState(false);
   const [assigneeSelection, setAssigneeSelection] = useState();
   const [prioritySelection, setPrioritySelection] = useState();
   const [statusSelection, setStatusSelection] = useState();
@@ -662,6 +664,16 @@ const EventTaskPage = () => {
                 <PiPiggyBankFill className="text-xl" />
               </motion.div>
             </Popover>
+
+            <Popover content={<p className="text-base">Thống kê sự kiện</p>}>
+              <motion.div
+                whileHover={{ y: -4 }}
+                className="flex items-center gap-x-2 text-base text-slate-400 border-[1.5px] border-slate-400 p-2 rounded-md cursor-pointer"
+                onClick={() => setOpenStatisticModal(true)}
+              >
+                <FcStatistics className="text-xl" />
+              </motion.div>
+            </Popover>
           </div>
 
           <p
@@ -992,6 +1004,13 @@ const EventTaskPage = () => {
                     </p>
                   </div>
                 </div>
+                {openStatisticModal && (
+                  <EventStatisticModal
+                    openStatisticModal={openStatisticModal}
+                    setOpenStatisticModal={setOpenStatisticModal}
+                    selectEvent={eventDetail}
+                  />
+                )}
               </>
             )
           ) : (
