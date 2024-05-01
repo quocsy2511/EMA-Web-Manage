@@ -70,7 +70,7 @@ const ContractPage = () => {
   console.log("contactInfo > ", contactInfo);
 
   useEffect(() => {
-    if (contactInfo) {
+    if (contactInfo?.contract) {
       console.log(
         "contactInfo?.contract?.paymentMilestone > ",
         contactInfo?.contract?.paymentMilestone
@@ -79,10 +79,11 @@ const ContractPage = () => {
         contactInfo?.contract?.paymentMilestone?.reduce(
           (total, item) => total + item?.amount,
           0
-        )
+        ) || 0
       );
+      setNumOfContractValue(contactInfo?.contract?.paymentMilestone?.length);
     }
-  }, [contactInfo]);
+  }, [contactInfo?.contract]);
 
   const { data: eventType, isLoading: eventTypeIsLoading } = useQuery(
     ["event-type"],
@@ -609,14 +610,13 @@ const ContractPage = () => {
                         const startDate = form.getFieldValue("date")?.[0];
 
                         if (!startDate) {
-                          return current && current < momenttz().startOf("day");
+                          return current && current < momenttz();
                         }
 
                         return (
                           current &&
-                          (current < momenttz().startOf("day") ||
-                            current >=
-                              momenttz(startDate, "YYYY-MM-DD").startOf("day"))
+                          (current < momenttz() ||
+                            current > momenttz(startDate, "YYYY-MM-DD"))
                         );
                       }}
                       format={"DD/MM/YYYY"}
@@ -806,7 +806,7 @@ const ContractPage = () => {
                                       ),
                                       dayjs(
                                         contactInfo?.contract
-                                          ?.paymentMilestone?.[0]?.startDate,
+                                          ?.paymentMilestone?.[0]?.endDate,
                                         "YYYY-MM-DD"
                                       ),
                                     ]
@@ -821,7 +821,7 @@ const ContractPage = () => {
                                       ),
                                       dayjs(
                                         contactInfo?.contract
-                                          ?.paymentMilestone?.[1]?.startDate,
+                                          ?.paymentMilestone?.[1]?.endDate,
                                         "YYYY-MM-DD"
                                       ),
                                     ]
@@ -835,7 +835,7 @@ const ContractPage = () => {
                                       ),
                                       dayjs(
                                         contactInfo?.contract
-                                          ?.paymentMilestone?.[2]?.startDate,
+                                          ?.paymentMilestone?.[2]?.endDate,
                                         "YYYY-MM-DD"
                                       ),
                                     ]

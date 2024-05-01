@@ -205,6 +205,7 @@ const EventTaskPage = () => {
       refetchOnWindowFocus: false,
     }
   );
+  console.log(filterTasks);
 
   const queryClient = useQueryClient();
   const { mutate: updateStatusMutate, isLoading: updateStatusIsLoading } =
@@ -490,17 +491,6 @@ const EventTaskPage = () => {
                     </p>
                   ),
                   children: [
-                    // {
-                    //   key: "PROCESSING",
-                    //   label: (
-                    //     <p
-                    //       className="text-sm text-blue-500"
-                    //       onClick={() => updateStatusMutate("PROCESSING")}
-                    //     >
-                    //       Đang diễn ra
-                    //     </p>
-                    //   ),
-                    // },
                     {
                       key: "DONE",
                       label: (
@@ -514,7 +504,11 @@ const EventTaskPage = () => {
                           Kết thúc
                         </p>
                       ),
-                      disabled: eventDetail?.status === "CANCEL",
+                      disabled:
+                        eventDetail?.status === "CANCEL" ||
+                        !!filterTasks?.filter(
+                          (task) => task?.status !== "CONFIRM"
+                        ).length,
                     },
                     {
                       key: "CANCEL",

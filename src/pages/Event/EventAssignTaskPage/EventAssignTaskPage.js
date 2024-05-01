@@ -696,7 +696,7 @@ const EventAssignTaskPage = () => {
                       ],
                     }
                   }
-                  format={"DD/MM/YYYY HH:mm:ss"}
+                  format={isSubTask ? "DD/MM/YYYY HH:mm:ss" : "DD/MM/YYYY"}
                   className="w-full"
                 />
               </ConfigProvider>
