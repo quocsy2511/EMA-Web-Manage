@@ -597,7 +597,7 @@ const EventCreationPage = () => {
                     });
                   }}
                   disabledDate={(current) => {
-                    const startDate = form.getFieldValue("date")?.[0];
+                    const startDate = form.getFieldValue("processingDate");
                     const endDate = form.getFieldValue("date")?.[1];
 
                     if (!startDate && !endDate) {

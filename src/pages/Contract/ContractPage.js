@@ -57,13 +57,13 @@ const ContractPage = () => {
     ["contact", contactId],
     () => getCustomerContactDetail(contactId),
     {
-      select: (data) => {
-        return {
-          ...data,
-          startDate: momenttz(data?.startDate).format("YYYY-MM-DD"),
-          endDate: momenttz(data?.endDate).format("YYYY-MM-DD"),
-        };
-      },
+      // select: (data) => {
+      //   return {
+      //     ...data,
+      //     startDate: momenttz(data?.startDate).format("YYYY-MM-DD"),
+      //     endDate: momenttz(data?.endDate).format("YYYY-MM-DD"),
+      //   };
+      // },
       refetchOnWindowFocus: false,
     }
   );
@@ -280,7 +280,7 @@ const ContractPage = () => {
               ? hasContract?.eventName
               : null,
             processingDate: contactInfo?.contract
-              ? contactInfo?.contract?.processingDate
+              ? contactInfo?.contract?.startDate
               : hasContract
               ? hasContract?.processingDate
               : null,
@@ -586,7 +586,7 @@ const ContractPage = () => {
                       defaultValue={
                         contactInfo?.contract
                           ? dayjs(
-                              contactInfo?.contract?.processingDate,
+                              contactInfo?.contract?.startDate,
                               "YYYY-MM-DD"
                             )
                           : hasContract
@@ -610,12 +610,14 @@ const ContractPage = () => {
                         const startDate = form.getFieldValue("date")?.[0];
 
                         if (!startDate) {
-                          return current && current < momenttz();
+                          return (
+                            current && current < momenttz().subtract(1, "day")
+                          );
                         }
 
                         return (
                           current &&
-                          (current < momenttz() ||
+                          (current < momenttz().subtract(1, "day") ||
                             current > momenttz(startDate, "YYYY-MM-DD"))
                         );
                       }}
@@ -645,8 +647,8 @@ const ContractPage = () => {
                       size="large"
                       className="w-full"
                       defaultValue={[
-                        dayjs(contactInfo?.startDate, "YYYY-MM-DD"),
-                        dayjs(contactInfo?.endDate, "YYYY-MM-DD"),
+                        dayjs(contactInfo?.startDate),
+                        dayjs(contactInfo?.endDate),
                       ]}
                       onChange={(value) => {
                         // Update to specific field

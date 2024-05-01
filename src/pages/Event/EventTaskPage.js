@@ -315,7 +315,7 @@ const EventTaskPage = () => {
     navigate(`${taskId}`, {
       state: {
         eventName: eventDetail?.eventName,
-        dateRange: [eventDetail?.processingDate, eventDetail?.endDate],
+        dateRange: [eventDetail?.startDate, eventDetail?.endDate],
         subtaskId,
       },
     });
