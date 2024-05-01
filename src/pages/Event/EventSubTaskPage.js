@@ -530,21 +530,21 @@ const EventSubTaskPage = () => {
                           ),
                           disabled: tasks?.status === "CONFIRM",
                         },
-                        {
-                          key: "CANCEL",
-                          label: (
-                            <p
-                              className="text-red-500"
-                              onClick={() =>
-                                tasks?.status !== "CANCEL" &&
-                                handleCheckUpdateStatus("CANCEL")
-                              }
-                            >
-                              Hủy bỏ
-                            </p>
-                          ),
-                          disabled: tasks?.status === "CANCEL",
-                        },
+                        // {
+                        //   key: "CANCEL",
+                        //   label: (
+                        //     <p
+                        //       className="text-red-500"
+                        //       onClick={() =>
+                        //         tasks?.status !== "CANCEL" &&
+                        //         handleCheckUpdateStatus("CANCEL")
+                        //       }
+                        //     >
+                        //       Hủy bỏ
+                        //     </p>
+                        //   ),
+                        //   disabled: tasks?.status === "CANCEL",
+                        // },
                         // {
                         //   key: "OVERDUE",
                         //   label: (

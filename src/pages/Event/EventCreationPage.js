@@ -700,6 +700,7 @@ const EventCreationPage = () => {
                 }
                 loading={eventTypeIsLoading}
                 placeholder="Chọn 1 thể loại"
+                disabled
               />
             </Form.Item>
           </div>

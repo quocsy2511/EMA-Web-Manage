@@ -13,6 +13,8 @@ import {
   IoEllipsisHorizontalCircleSharp,
 } from "react-icons/io5";
 import { FaExclamationCircle } from "react-icons/fa";
+import { FaCircleArrowDown, FaCircleExclamation } from "react-icons/fa6";
+import { PiDotsThreeCircleVerticalFill } from "react-icons/pi";
 
 dayjs.locale("vi");
 
@@ -53,11 +55,39 @@ const ScheduleDrawer = memo(
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
         key={"right"}
-        width={"30%"}
+        width={"35%"}
         title="Chi tiết lịch trình"
       >
         {/* Content */}
         <div className="space-y-10">
+          <div className="space-y-2">
+            <div className="flex space-x-5">
+              <p className="text-base font-medium">Trạng thái :</p>
+              <div className="flex items-center space-x-4">
+                <StatusRender bg="bg-gray-400" text="Đang chuẩn bị" />
+                <StatusRender bg="bg-blue-500" text="Đang thực hiện" />
+                <StatusRender bg="bg-green-500" text="Hoàn thành" />
+              </div>
+            </div>
+
+            <div className="flex space-x-5">
+              <p className="text-base font-medium">Độ ưu tiên :</p>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center gap-x-1">
+                  <FaCircleArrowDown className="text-lg text-green-500" />
+                  <p className="font-semibold">THẤP</p>
+                </div>
+                <div className="flex items-center gap-x-1">
+                  <PiDotsThreeCircleVerticalFill className="text-2xl text-orange-400 rotate-90" />
+                  <p className="font-semibold">VỪA</p>
+                </div>
+                <div className="flex items-center gap-x-1">
+                  <FaCircleExclamation className="text-lg text-red-500" />
+                  <p className="font-semibold">CAO</p>
+                </div>
+              </div>
+            </div>
+          </div>
           {!data?.length ? (
             <div>
               <p className="text-lg text-center">Không có công việc nào !</p>
@@ -132,7 +162,7 @@ const ScheduleDrawer = memo(
 );
 
 const StatusRender = memo(({ bg, text }) => (
-  <div className="flex space-x-2 items-center mr-10">
+  <div className="flex space-x-2 items-center mr-1">
     <div className={`w-2 h-2 ${bg} rounded-full`} />
     <p className="text-sm font-medium">{text}</p>
   </div>
@@ -220,7 +250,6 @@ const StaffSchedulePage = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [checkedDateData, setCheckedDateData] = useState([]);
 
-
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
@@ -297,7 +326,6 @@ const StaffSchedulePage = () => {
           <Spin spinning={tasksIsLoading}>
             <Calendar
               onPanelChange={(value, mode) => {
-
                 const numOfDaysInCurrentMonth = value
                   .clone()
                   .month(value.clone().month() + 1)
