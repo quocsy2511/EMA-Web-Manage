@@ -300,7 +300,7 @@ const BudgetTransactionModal = ({
                       <p className="text-sm text-blueSecondBudget">Ngày tạo</p>
                       <b className="font-bold text-lg text-blueBudget">
                         {moment(transaction?.createdAt).format(
-                          " HH:MM, DD-MM-YYYY"
+                          " HH:mm, DD-MM-YYYY"
                         )}
                       </b>
                     </div>
