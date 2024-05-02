@@ -59,7 +59,7 @@ const EventSubTaskPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { eventName, dateRange, subtaskId } = location.state ?? {};
+  const { eventName, dateRange, subtaskId, eventStatus } = location.state ?? {};
 
   const dispatch = useDispatch();
   const { redirect } = useSelector((state) => state.redirection);
@@ -303,7 +303,9 @@ const EventSubTaskPage = () => {
       });
     } else if (
       status === "CONFIRM" &&
-      !tasks?.subTask?.every((task) => task?.status === "CONFIRM")
+      !tasks?.subTask
+        ?.filter((item) => item.status !== "CANCEL")
+        ?.every((task) => task?.status === "CONFIRM")
     ) {
       messageApi.open({
         type: "warning",
@@ -473,6 +475,7 @@ const EventSubTaskPage = () => {
                 placement="bottom"
                 arrow
                 trigger={["click"]}
+                disabled={eventStatus === "DONE" || eventStatus === "CANCEL"}
                 menu={{
                   items: [
                     {
@@ -649,17 +652,21 @@ const EventSubTaskPage = () => {
             />
           </motion.div>
 
-          <Popover
-            content={<p className="text-sm font-medium">Chỉnh sửa hạng mục</p>}
-          >
-            <motion.div
-              whileHover={{ scale: 1.03 }}
-              className="cursor-pointer"
-              onClick={goToUpdateTask}
+          {(eventStatus !== "DONE" && eventStatus !== "CANCEL") && (
+            <Popover
+              content={
+                <p className="text-sm font-medium">Chỉnh sửa hạng mục</p>
+              }
             >
-              <LuSettings className="text-3xl hover:text-black text-slate-300 transition-colors duration-300" />
-            </motion.div>
-          </Popover>
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                className="cursor-pointer"
+                onClick={goToUpdateTask}
+              >
+                <LuSettings className="text-3xl hover:text-black text-slate-300 transition-colors duration-300" />
+              </motion.div>
+            </Popover>
+          )}
         </div>
 
         {/* Desc */}
@@ -758,7 +765,11 @@ const EventSubTaskPage = () => {
           {!commentsIsLoading || !commentsIsError ? (
             comments ? (
               <div key="comments" className="mt-14">
-                <CommentInTask comments={comments} taskId={taskId} />
+                <CommentInTask
+                  comments={comments}
+                  taskId={taskId}
+                  eventStatus={eventStatus}
+                />
               </div>
             ) : (
               <p key="no-comment" className="text-center mt-10">

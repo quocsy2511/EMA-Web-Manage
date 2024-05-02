@@ -17,7 +17,7 @@ import {
 import { uploadFile } from "../../apis/files";
 import EmptyComment from "../Error/EmptyComment";
 
-const CommentInTask = ({ comments, taskId, isSubtask }) => {
+const CommentInTask = ({ comments, taskId, isSubtask, eventStatus }) => {
   const manager = useRouteLoaderData("manager");
 
   const [fileList, setFileList] = useState();
@@ -150,11 +150,11 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const handleOnClick = () => {
-    form.submit();
+    eventStatus !== "DONE" && eventStatus !== "CANCEL" && form.submit();
   };
 
   const handleUpdateClick = () => {
-    updateForm.submit();
+    eventStatus !== "DONE" && eventStatus !== "CANCEL" && updateForm.submit();
   };
 
   const handleDelete = (id) => {
@@ -236,7 +236,12 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
                 },
               ]}
             >
-              <Input placeholder="Nhập bình luận" size="large" allowClear />
+              <Input
+                placeholder="Nhập bình luận"
+                size="large"
+                allowClear
+                disabled={eventStatus === "DONE" || eventStatus === "CANCEL"}
+              />
             </Form.Item>
 
             <Spin spinning={isLoading}>
@@ -247,58 +252,63 @@ const CommentInTask = ({ comments, taskId, isSubtask }) => {
               />
             </Spin>
           </div>
-          <div className="flex items-center gap-x-3 mt-3 ml-14">
-            <Form.Item
-              className="mb-0"
-              name="fileUrl"
-              valuePropName="fileList"
-              getValueFromEvent={(e) => e?.fileList}
-              rules={[
-                {
-                  validator(_, fileList) {
+          {eventStatus !== "DONE" && eventStatus !== "CANCEL" && (
+            <div className="flex items-center gap-x-3 mt-3 ml-14">
+              <Form.Item
+                className="mb-0"
+                name="fileUrl"
+                valuePropName="fileList"
+                getValueFromEvent={(e) => e?.fileList}
+                rules={[
+                  {
+                    validator(_, fileList) {
+                      return new Promise((resolve, reject) => {
+                        if (
+                          fileList &&
+                          fileList?.[0]?.size > 10 * 1024 * 1024
+                        ) {
+                          reject("File quá lớn ( dung lượng < 10MB )");
+                        } else {
+                          resolve();
+                        }
+                      });
+                    },
+                  },
+                ]}
+              >
+                <Upload
+                  className="flex items-center gap-x-3 "
+                  maxCount={1}
+                  listType="picture"
+                  customRequest={({ file, onSuccess }) => {
+                    setTimeout(() => {
+                      onSuccess("ok");
+                    }, 0);
+                  }}
+                  showUploadList={{
+                    showPreviewIcon: false,
+                  }}
+                  beforeUpload={(file) => {
                     return new Promise((resolve, reject) => {
-                      if (fileList && fileList?.[0]?.size > 10 * 1024 * 1024) {
-                        reject("File quá lớn ( dung lượng < 10MB )");
+                      if (file && file?.size > 10 * 1024 * 1024) {
+                        reject("File quá lớn ( <10MB )");
+                        return false;
                       } else {
+                        setFileList(file);
                         resolve();
+                        return true;
                       }
                     });
-                  },
-                },
-              ]}
-            >
-              <Upload
-                className="flex items-center gap-x-3 "
-                maxCount={1}
-                listType="picture"
-                customRequest={({ file, onSuccess }) => {
-                  setTimeout(() => {
-                    onSuccess("ok");
-                  }, 0);
-                }}
-                showUploadList={{
-                  showPreviewIcon: false,
-                }}
-                beforeUpload={(file) => {
-                  return new Promise((resolve, reject) => {
-                    if (file && file?.size > 10 * 1024 * 1024) {
-                      reject("File quá lớn ( <10MB )");
-                      return false;
-                    } else {
-                      setFileList(file);
-                      resolve();
-                      return true;
-                    }
-                  });
-                }}
-              >
-                <div className="flex items-center">
-                  <IoMdAttach className="cursor-pointer" size={20} />
-                  <p className="text-sm font-medium">Tài liệu đính kèm</p>
-                </div>
-              </Upload>
-            </Form.Item>
-          </div>
+                  }}
+                >
+                  <div className="flex items-center">
+                    <IoMdAttach className="cursor-pointer" size={20} />
+                    <p className="text-sm font-medium">Tài liệu đính kèm</p>
+                  </div>
+                </Upload>
+              </Form.Item>
+            </div>
+          )}
         </Form>
       </div>
 

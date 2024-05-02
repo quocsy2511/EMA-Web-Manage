@@ -454,8 +454,8 @@ const OwnBudgetTab = ({
                                 key: "1",
                                 label: (
                                   <Popconfirm
-                                    title="Xác nhận chấp nhận liên hệ"
-                                    description="Bạn có chắc chắn chấp nhận liên hệ này?"
+                                    title="Xác nhận chấp nhận yêu cầu"
+                                    description="Bạn có chắc chắn chấp nhận yêu cầu này?"
                                     onConfirm={() => {
                                       record?.status === "PENDING" &&
                                         handleUpdatePercentageBudgetMutate(

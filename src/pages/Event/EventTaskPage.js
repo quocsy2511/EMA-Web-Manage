@@ -179,28 +179,44 @@ const EventTaskPage = () => {
           LOW: 3,
         };
         // return data.filter((item) => !item.parent)?.map(task => ({}))
-        return data?.reduce((result, item) => {
-          if (!item?.parent) {
-            item?.subTask?.sort((a, b) => {
-              const formatStartDateA = momenttz(a?.startDate).format(
-                "YYYY-MM-DD"
-              );
-              const formatStartDateB = momenttz(b?.startDate).format(
-                "YYYY-MM-DD"
-              );
+        // return data?.reduce((result, item) => {
+        //   if (!item?.parent) {
+        //     item?.subTask?.sort((a, b) => {
+        //       const formatStartDateA = momenttz(a?.startDate).format(
+        //         "YYYY-MM-DD"
+        //       );
+        //       const formatStartDateB = momenttz(b?.startDate).format(
+        //         "YYYY-MM-DD"
+        //       );
 
-              if (formatStartDateA === formatStartDateB) {
-                return mapPriory[a?.priority] - mapPriory[b?.priority];
-              }
+        //       if (formatStartDateA === formatStartDateB) {
+        //         return mapPriory[a?.priority] - mapPriory[b?.priority];
+        //       }
 
-              return formatStartDateA.localeCompare(formatStartDateB);
-            });
+        //       return formatStartDateA.localeCompare(formatStartDateB);
+        //     });
 
-            result.push(item);
-          }
+        //     result.push(item);
+        //   }
 
-          return result;
-        }, []);
+        //   return result;
+        // }, []);
+        return data
+          .filter((item) => !item?.parent)
+          .sort((a, b) => {
+            const formatStartDateA = momenttz(a?.startDate).format(
+              "YYYY-MM-DD"
+            );
+            const formatStartDateB = momenttz(b?.startDate).format(
+              "YYYY-MM-DD"
+            );
+
+            if (formatStartDateA === formatStartDateB) {
+              return mapPriory[a?.priority] - mapPriory[b?.priority];
+            }
+
+            return formatStartDateA.localeCompare(formatStartDateB);
+          });
       },
       refetchOnWindowFocus: false,
     }
@@ -317,6 +333,7 @@ const EventTaskPage = () => {
         eventName: eventDetail?.eventName,
         dateRange: [eventDetail?.startDate, eventDetail?.endDate],
         subtaskId,
+        eventStatus: eventDetail?.status,
       },
     });
   };
@@ -491,7 +508,7 @@ const EventTaskPage = () => {
                     </p>
                   ),
                   children: [
-                    {
+                    eventDetail?.status !== "DONE" && {
                       key: "DONE",
                       label: (
                         <p
@@ -510,7 +527,7 @@ const EventTaskPage = () => {
                           (task) => task?.status !== "CONFIRM"
                         ).length,
                     },
-                    {
+                    eventDetail?.status !== "CANCEL" && {
                       key: "CANCEL",
                       label: (
                         <p
@@ -951,6 +968,7 @@ const EventTaskPage = () => {
                                   task={task}
                                   isSubtask={false}
                                   eventName={eventDetail?.eventName}
+                                  eventStatus={eventDetail?.status}
                                   // Go to update task
                                   goToUpdateTask={() => goToUpdateTask(task)}
                                   goToSubTask={goToSubTask}

@@ -84,7 +84,7 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
         setIsOpenEditModal(false);
         message.open({
           type: "success",
-          content: "cập nhật chi phí  thành công",
+          content: "Cập nhật thông tin thành công",
         });
       },
       onError: () => {
@@ -111,7 +111,7 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
     onError: () => {
       message.open({
         type: "error",
-        content: "Ko thể tải ảnh căn cước công dân lên! Hãy thử lại sau",
+        content: "Lỗi tải ảnh CCCD, vui lòng thử lại sau",
       });
     },
   });
@@ -137,7 +137,7 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
       onError: () => {
         message.open({
           type: "error",
-          content: "Ko thể tải tệp tin lên! Hãy thử lại sau",
+          content: "Không thể tải tệp tin lên! Hãy thử lại sau",
         });
       },
     });
@@ -321,7 +321,7 @@ const EditProfileModal = ({ isOpenEditModal, setIsOpenEditModal, data }) => {
                 {
                   required: true,
                   type: "number",
-                  message: "Hãy nhập  số điện thoại!",
+                  message: "Hãy nhập số điện thoại!",
                 },
                 {
                   validator: async (rule, value) => {

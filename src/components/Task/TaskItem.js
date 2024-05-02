@@ -23,6 +23,7 @@ const TaskItem = ({
   setIsOpenModal,
   isDropdown,
   eventName,
+  eventStatus,
 
   // Update task
   goToUpdateTask,
@@ -316,11 +317,17 @@ const TaskItem = ({
         ) : (
           <Popover
             content={
-              <p className="text-sm text-center font-medium">
-                Chưa giao việc!
-                <br />
-                Yêu cầu cập nhật công việc
-              </p>
+              eventStatus === "CANCEL" || eventStatus === "DONE" ? (
+                <p className="text-sm text-center font-medium">
+                  Không thể giao việc
+                </p>
+              ) : (
+                <p className="text-sm text-center font-medium">
+                  Chưa giao việc!
+                  <br />
+                  Yêu cầu cập nhật công việc
+                </p>
+              )
             }
           >
             <HiMiniPencilSquare
@@ -328,7 +335,9 @@ const TaskItem = ({
                 e.stopPropagation();
 
                 if (!isSubtask) {
-                  goToUpdateTask();
+                  if (eventStatus !== "CANCEL" && eventStatus !== "DONE") {
+                    goToUpdateTask();
+                  }
                 }
               }}
               size={30}
@@ -341,7 +350,9 @@ const TaskItem = ({
           <Popover
             content={
               <p className="text-sm font-medium">
-                {task?.status === "CONFIRM"
+                {eventStatus === "CANCEL" || eventStatus === "DONE"
+                  ? "Không thể cập nhật"
+                  : task?.status === "CONFIRM"
                   ? "Công việc đã hoàn thành"
                   : "Chỉnh sửa công việc"}
               </p>
@@ -350,9 +361,11 @@ const TaskItem = ({
             <HiMiniPencilSquare
               onClick={(e) => {
                 e.stopPropagation();
-                // setSelectedSubTask(task);
-                // setIsOpenUpdateSubTaskModal(true);
-                if (task?.status !== "CONFIRM") goToUpdateSubtask();
+                if (task?.status !== "CONFIRM") {
+                  if (eventStatus !== "CANCEL" && eventStatus !== "DONE") {
+                    goToUpdateSubtask();
+                  }
+                }
               }}
               className={clsx(
                 "",
