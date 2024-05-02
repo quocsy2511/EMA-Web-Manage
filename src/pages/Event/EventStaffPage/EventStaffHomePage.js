@@ -14,7 +14,7 @@ import defaultBanner from "../../../assets/images/default_banner_images.png";
 import LoadingComponentIndicator from "../../../components/Indicator/LoadingComponentIndicator";
 
 const EventItem = memo(({ event, gotoEventPage }) => {
-  console.log("🚀 ~ EventItem ~ event:", event);
+  // console.log("🚀 ~ EventItem ~ event:", event);
   const LabelItem = memo(({ icon, text, tooltip }) => (
     <Tooltip title={tooltip} placement="topLeft">
       <motion.div layout className="flex space-x-3">
@@ -180,7 +180,8 @@ const EventStaffHomePage = () => {
     isError: listEventIsError,
   } = useQuery(["events"], () => getEventDivisions(), {
     select: (data) => {
-      return data?.map((item) => ({
+      const filterEvent = data.filter((event) => event.status !== "CANCEL");
+      return filterEvent?.map((item) => ({
         ...item,
         startDate: momenttz(item?.startDate).format("DD-MM-YYYY"),
         endDate: momenttz(item?.endDate).format("DD-MM-YYYY"),
