@@ -68,3 +68,69 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+# EMA MANAGE - Event Management & Task Management System 📅
+
+**EMA MANAGE** is a web application designed to streamline the management of human resources and tasks for event organizations. It helps increase productivity by reducing time spent on paperwork, making it easier to manage and track tasks across different departments. The system is user-friendly, accessible from anywhere, and provides clear visibility into task management with ready-to-use templates for efficient work creation.
+
+## Key Features 🚀
+
+### For Team Leaders 🧑‍💼
+- **Task Prioritization**: Assign tasks based on priority levels, making it easy to manage and focus on high-priority work.
+- **Pre-built Task Templates**: Quickly create tasks using ready-to-use templates, saving time and effort in task creation.
+- **Event & Task Tracking**: Easily track ongoing events and monitor tasks assigned to team members.
+- **Team Performance Monitoring**: View the tasks and schedules of team members through a comprehensive calendar.
+- **Budget Approval**: Approve and manage budget requests for tasks and projects from team members.
+
+### For Managers 🧑‍💼
+- **Contract Creation & Approval**: Create and approve contracts between clients and the organization.
+- **Project Initialization**: Manually create projects or use predefined project templates for faster setup.
+- **Progress Tracking**: Monitor the progress of ongoing events and tasks to ensure everything is on track.
+
+### For Employees 👩‍💻
+- **Task Status Updates**: Employees can update the status of their assigned tasks, keeping everyone in the loop.
+- **Budget Requests**: Employees can submit budget requests for task-related expenses.
+
+### For Admin 👩‍💻
+- **Create setting template**: Admin can create or update template event or task.
+- **Manage user**: Manage user in system.
+
+## UI Design 🎨
+EMA MANAGE follows a **Trello-style UI** design, offering a familiar, user-friendly interface. The intuitive drag-and-drop layout and clearly defined boards allow users to easily manage tasks, events, and team activities. This design ensures a seamless and fast onboarding experience for all users.
+
+## Technologies Used 🛠️
+EMA MANAGE is built using the following technologies:
+- **ReactJS**: For building the dynamic and responsive user interface.
+- **React Query**: For managing server-state and API data fetching with ease.
+- **Tailwind CSS**: For creating a sleek, modern, and highly customizable design.
+- **Goong Map**: For event and task location tracking.
+- **Netlify**: For hosting and continuous deployment of the web application.
+- **Socket.io**: For real-time notifications, keeping team members updated on task progress and deadlines.
+- **Firebase**: For Google authentication, providing a secure and easy login method.
+
+## Related Projects 🌐
+Here are some related projects that complement **EMA MANAGE**:
+
+- **Landing Page for EMA**: Check out the [Landing Page](https://github.com/nguyenvu22/landing-page-mea) that introduces EMA MANAGE.
+- **Mobile Application for EMA (Employee)**: Explore the mobile version for employees [here](https://github.com/ngothiep2412/ema-mobile-employee).
+
+- **Mobile Application for EMA (Staff)**: Explore the mobile version for staff [here](https://github.com/ngothiep2412/ema-mobile-staff).
+
+## How to Run the Project 🏃‍♀️
+
+### Prerequisites ⚙️
+- Node.js (v14 or higher)
+- npm or yarn for managing dependencies
+- Firebase account for Google authentication
+
+
+## Demo Video 🎥
+- **For Managers 🧑‍💼**:
+Click [here](https://drive.google.com/file/d/1fP1LymM-dRron8VwItBfpjWCqq90OPDc/view?usp=sharing) to watch the  demo video hosted on Google Drive.
+
+- **For Team Leader and Staff 🧑‍💼**:
+Click [here](https://drive.google.com/file/d/1Wpsa7osa6fUJEdwVp3dzgXM1fmLV9GoA/view?usp=sharing) to watch the  demo video hosted on Google Drive.
+
+- **For Admin 🧑‍💼**:
+Click [here](https://drive.google.com/file/d/1jWplqX55J2J4ZHjVYPdHvOdb-Biyt2SC/view?usp=sharing) to watch the  demo video hosted on Google Drive.
